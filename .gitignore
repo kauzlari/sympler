@@ -9,9 +9,16 @@
 
 ### autotools ###
 
+# created by libtool
+
+ltmain.sh
+m4
+
 # http://www.gnu.org/software/automake
 
 Makefile.in
+config.guess
+config.sub
 
 # http://www.gnu.org/software/autoconf
 
