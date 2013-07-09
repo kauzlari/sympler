@@ -1,0 +1,3 @@
+CXX="icc" CC="icc" CFLAGS="-tpp6 -xK -O3 -openmp" CXXFLAGS="-tpp6 -xK -O3 -openmp" ./configure
+
+###CXX="icc" CC="icc" CFLAGS="-g -openmp" CXXFLAGS="-gall -openmp" ./configure

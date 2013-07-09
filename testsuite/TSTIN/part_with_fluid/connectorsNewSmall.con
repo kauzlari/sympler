@@ -1,0 +1,354 @@
+pair springa solida solida
+pair springb solidb solidb
+pair springab solida solidb
+pair springda solida solida
+pair springdb solidb solidb
+pair springdab solida solidb
+triplet thspringa
+triplet thspringb
+!!!
+pair springa 0 free 1 free
+pair springa 0 free 5 free
+pair springa 5 free 6 free
+pair springa 5 free 10 free
+pair springa 10 free 11 free
+pair springa 10 free 15 free
+pair springa 15 free 16 free
+pair springa 15 free 20 free
+pair springa 1 free 2 free
+pair springa 1 free 6 free
+pair springa 6 free 7 free
+pair springa 6 free 11 free
+pair springa 11 free 12 free
+pair springa 11 free 16 free
+pair springa 16 free 17 free
+pair springa 16 free 21 free
+pair springa 2 free 3 free
+pair springa 2 free 7 free
+pair springa 7 free 8 free
+pair springa 7 free 12 free
+pair springa 12 free 13 free
+pair springa 12 free 17 free
+pair springa 17 free 18 free
+pair springa 17 free 22 free
+pair springa 3 free 4 free
+pair springa 3 free 8 free
+pair springa 8 free 9 free
+pair springa 8 free 13 free
+pair springa 13 free 14 free
+pair springa 13 free 18 free
+pair springa 18 free 19 free
+pair springa 18 free 23 free
+pair springa 20 free 21 free
+pair springa 21 free 22 free
+pair springa 22 free 23 free
+pair springa 23 free 24 free
+pair springa 4 free 9 free
+pair springa 9 free 14 free
+pair springa 14 free 19 free
+pair springa 19 free 24 free
+pair springb 25 free 26 free
+pair springb 25 free 30 free
+pair springb 30 free 31 free
+pair springb 30 free 35 free
+pair springb 35 free 36 free
+pair springb 35 free 40 free
+pair springb 40 free 41 free
+pair springb 40 free 45 free
+pair springb 26 free 27 free
+pair springb 26 free 31 free
+pair springb 31 free 32 free
+pair springb 31 free 36 free
+pair springb 36 free 37 free
+pair springb 36 free 41 free
+pair springb 41 free 42 free
+pair springb 41 free 46 free
+pair springb 27 free 28 free
+pair springb 27 free 32 free
+pair springb 32 free 33 free
+pair springb 32 free 37 free
+pair springb 37 free 38 free
+pair springb 37 free 42 free
+pair springb 42 free 43 free
+pair springb 42 free 47 free
+pair springb 28 free 29 free
+pair springb 28 free 33 free
+pair springb 33 free 34 free
+pair springb 33 free 38 free
+pair springb 38 free 39 free
+pair springb 38 free 43 free
+pair springb 43 free 44 free
+pair springb 43 free 48 free
+pair springb 45 free 46 free
+pair springb 46 free 47 free
+pair springb 47 free 48 free
+pair springb 48 free 49 free
+pair springb 29 free 34 free
+pair springb 34 free 39 free
+pair springb 39 free 44 free
+pair springb 44 free 49 free
+pair springab 0 free 25 free
+pair springab 5 free 30 free
+pair springab 10 free 35 free
+pair springab 15 free 40 free
+pair springab 20 free 45 free
+pair springab 1 free 26 free
+pair springab 6 free 31 free
+pair springab 11 free 36 free
+pair springab 16 free 41 free
+pair springab 21 free 46 free
+pair springab 2 free 27 free
+pair springab 7 free 32 free
+pair springab 12 free 37 free
+pair springab 17 free 42 free
+pair springab 22 free 47 free
+pair springab 3 free 28 free
+pair springab 8 free 33 free
+pair springab 13 free 38 free
+pair springab 18 free 43 free
+pair springab 23 free 48 free
+pair springab 4 free 29 free
+pair springab 9 free 34 free
+pair springab 14 free 39 free
+pair springab 19 free 44 free
+pair springab 24 free 49 free
+pair springda 0 free 6 free
+pair springda 1 free 5 free
+pair springda 5 free 11 free
+pair springda 6 free 10 free
+pair springda 10 free 16 free
+pair springda 11 free 15 free
+pair springda 15 free 21 free
+pair springda 16 free 20 free
+pair springda 1 free 7 free
+pair springda 2 free 6 free
+pair springda 6 free 12 free
+pair springda 7 free 11 free
+pair springda 11 free 17 free
+pair springda 12 free 16 free
+pair springda 16 free 22 free
+pair springda 17 free 21 free
+pair springda 2 free 8 free
+pair springda 3 free 7 free
+pair springda 7 free 13 free
+pair springda 8 free 12 free
+pair springda 12 free 18 free
+pair springda 13 free 17 free
+pair springda 17 free 23 free
+pair springda 18 free 22 free
+pair springda 3 free 9 free
+pair springda 4 free 8 free
+pair springda 8 free 14 free
+pair springda 9 free 13 free
+pair springda 13 free 19 free
+pair springda 14 free 18 free
+pair springda 18 free 24 free
+pair springda 19 free 23 free
+pair springdb 25 free 31 free
+pair springdb 26 free 30 free
+pair springdb 30 free 36 free
+pair springdb 31 free 35 free
+pair springdb 35 free 41 free
+pair springdb 36 free 40 free
+pair springdb 40 free 46 free
+pair springdb 41 free 45 free
+pair springdb 26 free 32 free
+pair springdb 27 free 31 free
+pair springdb 31 free 37 free
+pair springdb 32 free 36 free
+pair springdb 36 free 42 free
+pair springdb 37 free 41 free
+pair springdb 41 free 47 free
+pair springdb 42 free 46 free
+pair springdb 27 free 33 free
+pair springdb 28 free 32 free
+pair springdb 32 free 38 free
+pair springdb 33 free 37 free
+pair springdb 37 free 43 free
+pair springdb 38 free 42 free
+pair springdb 42 free 48 free
+pair springdb 43 free 47 free
+pair springdb 28 free 34 free
+pair springdb 29 free 33 free
+pair springdb 33 free 39 free
+pair springdb 34 free 38 free
+pair springdb 38 free 44 free
+pair springdb 39 free 43 free
+pair springdb 43 free 49 free
+pair springdb 44 free 48 free
+pair springdab 0 free 26 free
+pair springdab 1 free 25 free
+pair springdab 5 free 31 free
+pair springdab 6 free 30 free
+pair springdab 10 free 36 free
+pair springdab 11 free 35 free
+pair springdab 15 free 41 free
+pair springdab 16 free 40 free
+pair springdab 20 free 46 free
+pair springdab 21 free 45 free
+pair springdab 1 free 27 free
+pair springdab 2 free 26 free
+pair springdab 6 free 32 free
+pair springdab 7 free 31 free
+pair springdab 11 free 37 free
+pair springdab 12 free 36 free
+pair springdab 16 free 42 free
+pair springdab 17 free 41 free
+pair springdab 21 free 47 free
+pair springdab 22 free 46 free
+pair springdab 2 free 28 free
+pair springdab 3 free 27 free
+pair springdab 7 free 33 free
+pair springdab 8 free 32 free
+pair springdab 12 free 38 free
+pair springdab 13 free 37 free
+pair springdab 17 free 43 free
+pair springdab 18 free 42 free
+pair springdab 22 free 48 free
+pair springdab 23 free 47 free
+pair springdab 3 free 29 free
+pair springdab 4 free 28 free
+pair springdab 8 free 34 free
+pair springdab 9 free 33 free
+pair springdab 13 free 39 free
+pair springdab 14 free 38 free
+pair springdab 18 free 44 free
+pair springdab 19 free 43 free
+pair springdab 23 free 49 free
+pair springdab 24 free 48 free
+pair springdab 0 free 30 free
+pair springdab 5 free 25 free
+pair springdab 1 free 31 free
+pair springdab 6 free 26 free
+pair springdab 2 free 32 free
+pair springdab 7 free 27 free
+pair springdab 3 free 33 free
+pair springdab 8 free 28 free
+pair springdab 4 free 34 free
+pair springdab 9 free 29 free
+pair springdab 5 free 35 free
+pair springdab 10 free 30 free
+pair springdab 6 free 36 free
+pair springdab 11 free 31 free
+pair springdab 7 free 37 free
+pair springdab 12 free 32 free
+pair springdab 8 free 38 free
+pair springdab 13 free 33 free
+pair springdab 9 free 39 free
+pair springdab 14 free 34 free
+pair springdab 10 free 40 free
+pair springdab 15 free 35 free
+pair springdab 11 free 41 free
+pair springdab 16 free 36 free
+pair springdab 12 free 42 free
+pair springdab 17 free 37 free
+pair springdab 13 free 43 free
+pair springdab 18 free 38 free
+pair springdab 14 free 44 free
+pair springdab 19 free 39 free
+pair springdab 15 free 45 free
+pair springdab 20 free 40 free
+pair springdab 16 free 46 free
+pair springdab 21 free 41 free
+pair springdab 17 free 47 free
+pair springdab 22 free 42 free
+pair springdab 18 free 48 free
+pair springdab 23 free 43 free
+pair springdab 19 free 49 free
+pair springdab 24 free 44 free
+triplet thspringa 0 free 1 free 2 free
+triplet thspringa 5 free 6 free 7 free
+triplet thspringa 10 free 11 free 12 free
+triplet thspringa 15 free 16 free 17 free
+triplet thspringa 20 free 21 free 22 free
+triplet thspringa 1 free 2 free 3 free
+triplet thspringa 6 free 7 free 8 free
+triplet thspringa 11 free 12 free 13 free
+triplet thspringa 16 free 17 free 18 free
+triplet thspringa 21 free 22 free 23 free
+triplet thspringa 2 free 3 free 4 free
+triplet thspringa 7 free 8 free 9 free
+triplet thspringa 12 free 13 free 14 free
+triplet thspringa 17 free 18 free 19 free
+triplet thspringa 22 free 23 free 24 free
+triplet thspringa 0 free 5 free 10 free
+triplet thspringa 5 free 10 free 15 free
+triplet thspringa 10 free 15 free 20 free
+triplet thspringa 1 free 6 free 11 free
+triplet thspringa 6 free 11 free 16 free
+triplet thspringa 11 free 16 free 21 free
+triplet thspringa 2 free 7 free 12 free
+triplet thspringa 7 free 12 free 17 free
+triplet thspringa 12 free 17 free 22 free
+triplet thspringa 3 free 8 free 13 free
+triplet thspringa 8 free 13 free 18 free
+triplet thspringa 13 free 18 free 23 free
+triplet thspringa 4 free 9 free 14 free
+triplet thspringa 9 free 14 free 19 free
+triplet thspringa 14 free 19 free 24 free
+triplet thspringa 0 free 6 free 12 free
+triplet thspringa 5 free 11 free 17 free
+triplet thspringa 10 free 16 free 22 free
+triplet thspringa 1 free 7 free 13 free
+triplet thspringa 6 free 12 free 18 free
+triplet thspringa 11 free 17 free 23 free
+triplet thspringa 2 free 8 free 14 free
+triplet thspringa 7 free 13 free 19 free
+triplet thspringa 12 free 18 free 24 free
+triplet thspringa 2 free 6 free 10 free
+triplet thspringa 7 free 11 free 15 free
+triplet thspringa 12 free 16 free 20 free
+triplet thspringa 3 free 7 free 11 free
+triplet thspringa 8 free 12 free 16 free
+triplet thspringa 13 free 17 free 21 free
+triplet thspringa 4 free 8 free 12 free
+triplet thspringa 9 free 13 free 17 free
+triplet thspringa 14 free 18 free 22 free
+triplet thspringb 25 free 26 free 27 free
+triplet thspringb 30 free 31 free 32 free
+triplet thspringb 35 free 36 free 37 free
+triplet thspringb 40 free 41 free 42 free
+triplet thspringb 45 free 46 free 47 free
+triplet thspringb 26 free 27 free 28 free
+triplet thspringb 31 free 32 free 33 free
+triplet thspringb 36 free 37 free 38 free
+triplet thspringb 41 free 42 free 43 free
+triplet thspringb 46 free 47 free 48 free
+triplet thspringb 27 free 28 free 29 free
+triplet thspringb 32 free 33 free 34 free
+triplet thspringb 37 free 38 free 39 free
+triplet thspringb 42 free 43 free 44 free
+triplet thspringb 47 free 48 free 49 free
+triplet thspringb 25 free 30 free 35 free
+triplet thspringb 30 free 35 free 40 free
+triplet thspringb 35 free 40 free 45 free
+triplet thspringb 26 free 31 free 36 free
+triplet thspringb 31 free 36 free 41 free
+triplet thspringb 36 free 41 free 46 free
+triplet thspringb 27 free 32 free 37 free
+triplet thspringb 32 free 37 free 42 free
+triplet thspringb 37 free 42 free 47 free
+triplet thspringb 28 free 33 free 38 free
+triplet thspringb 33 free 38 free 43 free
+triplet thspringb 38 free 43 free 48 free
+triplet thspringb 29 free 34 free 39 free
+triplet thspringb 34 free 39 free 44 free
+triplet thspringb 39 free 44 free 49 free
+triplet thspringb 25 free 31 free 37 free
+triplet thspringb 30 free 36 free 42 free
+triplet thspringb 35 free 41 free 47 free
+triplet thspringb 26 free 32 free 38 free
+triplet thspringb 31 free 37 free 43 free
+triplet thspringb 36 free 42 free 48 free
+triplet thspringb 27 free 33 free 39 free
+triplet thspringb 32 free 38 free 44 free
+triplet thspringb 37 free 43 free 49 free
+triplet thspringb 27 free 31 free 35 free
+triplet thspringb 32 free 36 free 40 free
+triplet thspringb 37 free 41 free 45 free
+triplet thspringb 28 free 32 free 36 free
+triplet thspringb 33 free 37 free 41 free
+triplet thspringb 38 free 42 free 46 free
+triplet thspringb 29 free 33 free 37 free
+triplet thspringb 34 free 38 free 42 free
+triplet thspringb 39 free 43 free 47 free

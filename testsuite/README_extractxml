@@ -1,0 +1,18 @@
+This script creates a spread sheet by extracting the tags from xml input files of sympler. These tags are nothing but the modules which are tested.  
+
+Some tips and constraints:
+1.This script should be placed in some direct sub directory of code directory(for eg: ../sympler/some SUB_DIRECTORY/extractxml.pl). 
+2.Perl modules called "Spreadsheet::WriteExcel" and "Spreadsheet::ParseExcel" should be installed on your system. To install Spreadsheet::WriteExcel type "perl -MCPAN -e 'install Spreadsheet::WriteExcel'" on terminal. 
+And to install Spreadsheet::ParseExcel type "perl -MCPAN -e 'install Spreadsheet::ParseExcel'" on terminal. 
+
+Running the script:
+
+>Normal way: It chooses default directory (where the script is located)
+ Type "perl extractxml.pl" or "./extractxml.xml" to run this script. 
+
+>With option: It chooses your desired direcory
+ Type "perl extractxml.pl --sheetdir PATH_TO_THE_DIRECTORY_WHERE_YOU_WANT_TO_SAVE_SPREADSHEET"
+ or
+ Type "./extractxml.pl --sheetdir PATH_TO_THE_DIRECTORY_WHERE_YOU_WANT_TO_SAVE_SPREADSHEET" 
+
+Here you can also give a relative path!

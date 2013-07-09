@@ -1,0 +1,7 @@
+#!/bin/bash
+export LD_LIBRARY_PATH=/simstorage/software/intel/cpp11/lib/intel64
+export LANG=C
+script_path=${BASH_SOURCE-$0}
+abs_path="$(cd "${script_path%/*}" 2>/dev/null; echo "$PWD"/"${0##*/}")"
+path_only="`dirname $abs_path`"
+exec $path_only/configure CXX=/simstorage/software/intel/cpp11/bin/intel64/icc CC=/simstorage/software/intel/cpp11/bin/intel64/icc LDFLAGS='-lstdc++ -lz' CXXFLAGS="-O3 -ip -parallel -funroll-loops -complex-limited-range -IPF-fma -IPF-fltacc -IPF-fp-relaxed -fp-model=fast -no-debug -xSSE4.1 -mcmodel=medium -falign-functions -opt-calloc -unroll-aggressive" LD_LIBRARY_PATH=/simstorage/software/intel/cpp11/lib/intel64 LANG=C "$@"

@@ -1,0 +1,1165 @@
+(************** Content-type: application/mathematica **************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[     29933,       1077]*)
+(*NotebookOutlinePosition[     30590,       1100]*)
+(*  CellTagsIndexPosition[     30546,       1096]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Graphical Output", "Title"],
+
+Cell["\<\
+Taken from MolecularDynamics01.nb available at \
+http://www.imtek.de/simulation/ and adapted to plot 3D-trajectories. The \
+options were not adapted. So no guarantee for their behaviour. For copy and \
+distribution rights see the original file.\
+\>", "Text",
+  TextJustification->1],
+
+Cell[CellGroupData[{
+
+Cell["Path and simulation name", "Section"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    RowBox[{
+      StyleBox[\( (*write\ your\ simulation\ name\ here\ \((the\ name\ of\ \
+the\ head\ in\ the\ input\ file)\)\ with\ the\ complete\ path*) \),
+        FontColor->RGBColor[0, 0, 1]], 
+      "\[IndentingNewLine]", \(filename = \
+"\</usr/groups/simulation/sniff2002/projects/moldyn/pwe_linux_kauzlari/moldyn/\
+ex1\>";\)}], "\[IndentingNewLine]", \(filename2 = \
+"\</usr/groups/simulation/simstaff/user/kauzlari/results/DPDtests/NEPD/\
+profiles/step/simpler/ex1\>"\)}], "Input"],
+
+Cell[BoxData[
+    \("/usr/groups/simulation/simstaff/user/kauzlari/results/DPDtests/NEPD/\
+profiles/step/simpler/ex1"\)], "Output"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["code", "Section"],
+
+Cell["Change it only if you know what you do.", "Text"],
+
+Cell[BoxData[
+    RowBox[{
+      RowBox[{\(plotCurrentState[regionDimensions_List, initialUnitCell_List, 
+          position_List, velocity_List, opts___]\), ":=", 
+        RowBox[{"Block", "[", 
+          
+          RowBox[{\({mdPlotState, mdShowVelocityVectors, mdShowCutOffRadius, 
+              mdPlotMirrored, mdPlotRange, mdplotNow}\), ",", 
+            "\[IndentingNewLine]", 
+            
+            StyleBox[\( (*\ 
+                Extract\ the\ plotting\ options\ from\ the\ argument\ list, \
+\[IndentingNewLine]\ \ unspecified\ are\ set\ to\ default\ values\ *) \),
+              FontColor->RGBColor[1, 0, 0]], "\[IndentingNewLine]", 
+            
+            RowBox[{\({mdPlotState, mdShowVelocityVectors, 
+                  mdShowCutOffRadius, mdPlotMirrored, 
+                  mdplotNow} = \({plotState, showVelocityVectors, 
+                      showCutOffRadius, plotMirrored, plotNow} /. 
+                    Flatten[{opts}]\) /. Options[plotCurrentState]\), ";", 
+              "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              StyleBox[\( (*\ Decide\ the\ plot\ clipping\ range\ *) \),
+                FontColor->RGBColor[1, 0, 0]], 
+              "\[IndentingNewLine]", \(If[\((Length[
+                      regionDimensions] \[Equal] 2)\), 
+                If[mdPlotMirrored, \[IndentingNewLine]mdPlotRange = \
+{{\(-1.2\), 3.2}*regionDimensions/2, {\(-1.2\), 3.2}*
+                        regionDimensions/2}, \[IndentingNewLine]mdPlotRange = 
+                    1.2*{{\(-1\), 1}*regionDimensions/2, {\(-1\), 1}*
+                          regionDimensions/2}\[IndentingNewLine]]]\), ";", 
+              "\[IndentingNewLine]", \(If[\((Length[
+                      regionDimensions] \[Equal] 3)\), 
+                If[mdPlotMirrored, \[IndentingNewLine]mdPlotRange = \
+{{\(-1.2\), 3.2}*regionDimensions[\([1]\)]/2, {\(-1.2\), 3.2}*
+                        regionDimensions[\([2]\)]/2, {\(-1.2\), 3.2}*
+                        regionDimensions[\([3]\)]/
+                          2}, \[IndentingNewLine]mdPlotRange = 
+                    1.2*{{\(-1\), 1}*regionDimensions[\([1]\)]/2, {\(-1\), 1}*
+                          regionDimensions[\([2]\)]/2, {\(-1\), 1}*
+                          regionDimensions[\([3]\)]/2}\[IndentingNewLine]]]\),
+               ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              StyleBox[\( (*\ Plot\ the\ picture\ if\ requested\ *) \),
+                FontColor->RGBColor[1, 0, 0]], "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+                
+                RowBox[{\(mdplotNow && mdPlotState\), ",", 
+                  "\[IndentingNewLine]", 
+                  RowBox[{
+                    RowBox[{"If", "[", 
+                      RowBox[{\(Length[regionDimensions] \[Equal] 2\), ",", 
+                        RowBox[{"Show", "[", "\[IndentingNewLine]", 
+                          RowBox[{
+                            RowBox[{"Graphics", "[", "\[IndentingNewLine]", 
+                              RowBox[{"Join", "[", "\[IndentingNewLine]", 
+                                StyleBox[\( (*\ The\ outline\ box\ *) \),
+                                  FontColor->RGBColor[1, 0, 0]], 
+                                "\[IndentingNewLine]", 
+                                
+                                RowBox[{\({{RGBColor[0, 0, 1], 
+                                      Line[1.0*{{\(-1\), \(-1\)}*
+                                        regionDimensions/2, {1, \(-1\)}*
+                                        regionDimensions/2, {1, 1}*
+                                        regionDimensions/2, {\(-1\), 1}*
+                                        regionDimensions/2, {\(-1\), \(-1\)}*
+                                        regionDimensions/2}]}}\), ",", 
+                                  "\[IndentingNewLine]", 
+                                  RowBox[{"If", "[", 
+                                    RowBox[{
+                                    "mdPlotMirrored", ",", 
+                                      "\[IndentingNewLine]", 
+                                      
+                                      StyleBox[\( (*\ 
+                                        The\ same\ plot\ UDLR\ to\ show\ the\ \
+effect\ of\ the\ toroid\ *) \),
+                                        FontColor->RGBColor[1, 0, 0]], 
+                                      "\[IndentingNewLine]", \({GrayLevel[ \
+.7], \[IndentingNewLine]\(Disk[# + {1, 0}*regionDimensions, 
+                                        Min[regionDimensions/initialUnitCell]/
+                                        5] &\) /@ 
+                                        position, \[IndentingNewLine]\(Disk[# \
++ {0, 1}*regionDimensions, Min[regionDimensions/initialUnitCell]/5] &\) /@ 
+                                        position, \[IndentingNewLine]\(Disk[# \
++ {1, 1}*regionDimensions, Min[regionDimensions/initialUnitCell]/5] &\) /@ 
+                                        position}\), "\[IndentingNewLine]", 
+                                      ",", \({}\)}], "\[IndentingNewLine]", 
+                                    "]"}], ",", 
+                                  "\[IndentingNewLine]", \(If[
+                                    mdShowCutOffRadius, \
+\[IndentingNewLine]{Dashing[{0.01, 0.02}], 
+                                      RGBColor[0, 1, 
+                                        0], \(Circle[#, 
+                                        mdCutOffDistance[]] &\) /@ position, 
+                                      Dashing[{}]}, \[IndentingNewLine]{}\
+\[IndentingNewLine]]\), ",", "\[IndentingNewLine]", 
+                                  RowBox[{"If", "[", 
+                                    RowBox[{
+                                    "mdShowVelocityVectors", ",", 
+                                      "\[IndentingNewLine]", 
+                                      
+                                      StyleBox[\( (*\ 
+                                        The\ velocity\ vectors\ *) \),
+                                        FontColor->RGBColor[1, 0, 0]], 
+                                      "\[IndentingNewLine]", \({RGBColor[1, 
+                                        0, 0], 
+                                        MapThread[
+                                        Line[{#1, #1 + #2}] &, {position, 
+                                        velocity}]}\), ",", \({}\)}], "]"}], 
+                                  ",", "\[IndentingNewLine]", 
+                                  
+                                  StyleBox[\( (*\ 
+                                      The\ atoms\ are\ plotted\ last\ to\ \
+always\ be\ visible\ *) \),
+                                    FontColor->RGBColor[1, 0, 0]], 
+                                  "\[IndentingNewLine]", \({GrayLevel[
+                                      0], \(Disk[#, 
+                                        Min[regionDimensions/initialUnitCell]/
+                                        5] &\) /@ position}\)}], 
+                                "\[IndentingNewLine]", "]"}], 
+                              "\[IndentingNewLine]", "]"}], ",", 
+                            "\[IndentingNewLine]", \({AspectRatio \[Rule] 
+                                Automatic, PlotRange \[Rule] mdPlotRange}\)}],
+                           "\[IndentingNewLine]", "]"}]}], 
+                      "\[IndentingNewLine]", "]"}], ";", 
+                    RowBox[{"If", "[", 
+                      RowBox[{\(Length[regionDimensions] \[Equal] 3\), ",", 
+                        RowBox[{"Show", "[", "\[IndentingNewLine]", 
+                          RowBox[{
+                            RowBox[{
+                            "Graphics3D", "[", "\[IndentingNewLine]", 
+                              RowBox[{
+                                RowBox[{"Join", "[", "\[IndentingNewLine]", 
+                                  StyleBox[\( (*\ The\ outline\ box\ *) \),
+                                    FontColor->RGBColor[1, 0, 0]], 
+                                  "\[IndentingNewLine]", 
+                                  
+                                  RowBox[{\({{RGBColor[0, 0, 1], 
+                                        Line[
+                                        1.0*{\[IndentingNewLine]{\(-1\), \(-1\
+\), \(-1\)}*regionDimensions/2, \[IndentingNewLine]{1, \(-1\), \(-1\)}*
+                                        regionDimensions/
+                                        2, \[IndentingNewLine]{1, 1, \(-1\)}*
+                                        regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), 
+                                        1, \(-1\)}*
+                                        regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), \
+\(-1\), \(-1\)}*regionDimensions/2, \[IndentingNewLine]{\(-1\), \(-1\), 1}*
+                                        regionDimensions/
+                                        2, \[IndentingNewLine]{1, \(-1\), 1}*
+                                        regionDimensions/
+                                        2, \[IndentingNewLine]{1, 1, 1}*
+                                        regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), 1, 1}*
+                                        regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), \
+\(-1\), 1}*regionDimensions/2\[IndentingNewLine]}], 
+                                        Line[{{\(-1\), 1, \(-1\)}*
+                                        regionDimensions/2, {\(-1\), 1, 1}*
+                                        regionDimensions/2}], 
+                                        Line[{{1, \(-1\), \(-1\)}*
+                                        regionDimensions/2, {1, \(-1\), 1}*
+                                        regionDimensions/2}], 
+                                        Line[{{1, 1, \(-1\)}*
+                                        regionDimensions/2, {1, 1, 1}*
+                                        regionDimensions/2}]}}\), ",", 
+                                    "\[IndentingNewLine]", 
+                                    RowBox[{"If", "[", 
+                                      RowBox[{
+                                      "mdPlotMirrored", ",", 
+                                        "\[IndentingNewLine]", 
+                                        
+                                        StyleBox[\( (*\ 
+                                        The\ same\ plot\ UDLR\ to\ show\ the\ \
+effect\ of\ the\ toroid\ *) \),
+                                        FontColor->RGBColor[1, 0, 0]], 
+                                        "\[IndentingNewLine]", \({GrayLevel[ \
+.7], PointSize[Min[1/initialUnitCell]/10], \[IndentingNewLine]\(Point[# + {1, 
+                                        0, 0}*regionDimensions] &\) /@ 
+                                        position, \
+\[IndentingNewLine]\(Point[# + {0, 1, 0}*regionDimensions] &\) /@ 
+                                        position, \
+\[IndentingNewLine]\(Point[# + {1, 1, 0}*regionDimensions] &\) /@ position}\),
+                                         "\[IndentingNewLine]", ",", \({}\)}],
+                                       "\[IndentingNewLine]", "]"}], ",", 
+                                    "\[IndentingNewLine]", 
+                                    RowBox[{"If", "[", 
+                                      RowBox[{
+                                      "mdShowVelocityVectors", ",", 
+                                        "\[IndentingNewLine]", 
+                                        
+                                        StyleBox[\( (*\ 
+                                        The\ velocity\ vectors\ *) \),
+                                        FontColor->RGBColor[1, 0, 0]], 
+                                        "\[IndentingNewLine]", \({RGBColor[1, 
+                                        0, 0], 
+                                        MapThread[
+                                        Line[{#1, #1 + #2/10}] &, {position, 
+                                        velocity}]}\), ",", \({}\)}], "]"}], 
+                                    ",", "\[IndentingNewLine]", 
+                                    
+                                    StyleBox[\( (*\ 
+                                        The\ atoms\ are\ plotted\ last\ to\ \
+always\ be\ visible\ *) \),
+                                      FontColor->RGBColor[1, 0, 0]], 
+                                    "\[IndentingNewLine]", \({GrayLevel[0], 
+                                      PointSize[
+                                        Min[1/initialUnitCell]/
+                                        8], \(Point[#] &\) /@ position}\)}], 
+                                  "\[IndentingNewLine]", "]"}], ",", 
+                                "\[IndentingNewLine]", \(ViewPoint -> {0. , \ 
+                                    0. , \ 2.300}\), ",", 
+                                "\[IndentingNewLine]", 
+                                
+                                StyleBox[\( (*no\ box\ around\ the\ plot*) \),
+                                  
+                                  FontColor->RGBColor[1, 0, 0]], 
+                                "\[IndentingNewLine]", \(Boxed \[Rule] 
+                                  False\)}], "\[IndentingNewLine]", "]"}], 
+                            ",", "\[IndentingNewLine]", \({AspectRatio \
+\[Rule] Automatic, PlotRange \[Rule] mdPlotRange}\)}], "\[IndentingNewLine]", 
+                          "]"}]}], "\[IndentingNewLine]", "]"}]}]}], 
+                "]"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}]], "Input",
+  InitializationCell->True],
+
+Cell[CellGroupData[{
+
+Cell["Test", "Subsection"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(plotCurrentState[{3, 3, 3}, {5, 5, 5}, 
+      Flatten[Table[{ .6  i -  .3,  .6  j -  .3,  .6  k -  .3} - {3, 3, 3}/
+              2, {i, 1, 5}, {j, 1, 5}, {k, 1, 5}], 2], 
+      Table[{Random[], Random[], Random[]}, {125}], {plotState \[Rule] True, 
+        showVelocityVectors \[Rule] True, showCutOffRadius \[Rule] True, 
+        plotMirrored \[Rule] False, plotNow \[Rule] True}]\)], "Input"],
+
+Cell[GraphicsData["PostScript", "\<\
+%!
+%%Creator: Mathematica
+%%AspectRatio: 1 
+MathPictureStart
+/Mabs {
+Mgmatrix idtransform
+Mtmatrix dtransform
+} bind def
+/Mabsadd { Mabs
+3 -1 roll add
+3 1 roll add
+exch } bind def
+%% Graphics3D
+%%IncludeResource: font Courier
+%%IncludeFont: Courier
+/Courier findfont 10  scalefont  setfont
+% Scaling calculations
+0 1 0 1 [
+[ 0 0 0 0 ]
+[ 1 1 0 0 ]
+] MathScale
+% Start of Graphics
+1 setlinecap
+1 setlinejoin
+newpath
+0 0 m
+1 0 L
+1 1 L
+0 1 L
+closepath
+clip
+newpath
+0 0 1 r
+.5 Mabswid
+[ ] 0 setdash
+.77607 .77607 m
+.89823 .89823 L
+s
+.77607 .22393 m
+.89823 .10177 L
+s
+.22393 .77607 m
+.10177 .89823 L
+s
+.22393 .22393 m
+.10177 .10177 L
+s
+.22393 .77607 m
+.22393 .22393 L
+s
+.77607 .77607 m
+.22393 .77607 L
+s
+.77607 .22393 m
+.77607 .77607 L
+s
+.22393 .22393 m
+.77607 .22393 L
+s
+0 g
+.025 w
+.72785 .72785 Mdot
+.72785 .61392 Mdot
+.72785 .5 Mdot
+.72785 .38608 Mdot
+.72785 .27215 Mdot
+.61392 .72785 Mdot
+.61392 .61392 Mdot
+.61392 .5 Mdot
+.61392 .38608 Mdot
+.61392 .27215 Mdot
+.5 .72785 Mdot
+.5 .61392 Mdot
+.5 .5 Mdot
+.5 .38608 Mdot
+.5 .27215 Mdot
+.38608 .72785 Mdot
+.38608 .61392 Mdot
+.38608 .5 Mdot
+.38608 .38608 Mdot
+.38608 .27215 Mdot
+.27215 .72785 Mdot
+.27215 .61392 Mdot
+.27215 .5 Mdot
+.27215 .38608 Mdot
+.27215 .27215 Mdot
+1 0 0 r
+.5 Mabswid
+.72785 .72785 m
+.73131 .74182 L
+s
+.72785 .61392 m
+.74648 .62352 L
+s
+.72785 .5 m
+.73461 .50166 L
+s
+.72785 .38608 m
+.74013 .39699 L
+s
+.72785 .27215 m
+.74112 .27985 L
+s
+.61392 .72785 m
+.62896 .74659 L
+s
+.61392 .61392 m
+.62344 .63245 L
+s
+.61392 .5 m
+.61573 .51834 L
+s
+.61392 .38608 m
+.61438 .39382 L
+s
+.61392 .27215 m
+.61777 .27467 L
+s
+.5 .72785 m
+.50216 .74608 L
+s
+.5 .61392 m
+.50232 .62891 L
+s
+.5 .5 m
+.50648 .50999 L
+s
+.5 .38608 m
+.50998 .39752 L
+s
+.5 .27215 m
+.51763 .28823 L
+s
+.38608 .72785 m
+.39302 .74744 L
+s
+.38608 .61392 m
+.38569 .62466 L
+s
+.38608 .5 m
+.39194 .51171 L
+s
+.38608 .38608 m
+.39669 .39709 L
+s
+.38608 .27215 m
+.3908 .28813 L
+s
+.27215 .72785 m
+.27212 .73672 L
+s
+.27215 .61392 m
+.28367 .62127 L
+s
+.27215 .5 m
+.27976 .51207 L
+s
+.27215 .38608 m
+.28033 .39963 L
+s
+.27215 .27215 m
+.27902 .27405 L
+s
+0 g
+.025 w
+.74324 .74324 Mdot
+.74324 .62162 Mdot
+.74324 .5 Mdot
+.74324 .37838 Mdot
+.74324 .25676 Mdot
+.62162 .74324 Mdot
+.62162 .62162 Mdot
+.62162 .5 Mdot
+.62162 .37838 Mdot
+.62162 .25676 Mdot
+.5 .74324 Mdot
+.5 .62162 Mdot
+.5 .5 Mdot
+.5 .37838 Mdot
+.5 .25676 Mdot
+.37838 .74324 Mdot
+.37838 .62162 Mdot
+.37838 .5 Mdot
+.37838 .37838 Mdot
+.37838 .25676 Mdot
+.25676 .74324 Mdot
+.25676 .62162 Mdot
+.25676 .5 Mdot
+.25676 .37838 Mdot
+.25676 .25676 Mdot
+1 0 0 r
+.5 Mabswid
+.74324 .74324 m
+.76146 .76226 L
+s
+.74324 .62162 m
+.75245 .62404 L
+s
+.74324 .5 m
+.75371 .50118 L
+s
+.74324 .37838 m
+.74987 .38749 L
+s
+.74324 .25676 m
+.76338 .26286 L
+s
+.62162 .74324 m
+.62948 .74625 L
+s
+.62162 .62162 m
+.62351 .64097 L
+s
+.62162 .5 m
+.63476 .51387 L
+s
+.62162 .37838 m
+.62559 .39284 L
+s
+.62162 .25676 m
+.63935 .26404 L
+s
+.5 .74324 m
+.51479 .74878 L
+s
+.5 .62162 m
+.511 .62887 L
+s
+.5 .5 m
+.51875 .50648 L
+s
+.5 .37838 m
+.50908 .39443 L
+s
+.5 .25676 m
+.50181 .26631 L
+s
+.37838 .74324 m
+.38178 .75702 L
+s
+.37838 .62162 m
+.39141 .62742 L
+s
+.37838 .5 m
+.39642 .5008 L
+s
+.37838 .37838 m
+.39386 .38464 L
+s
+.37838 .25676 m
+.3814 .27106 L
+s
+.25676 .74324 m
+.27364 .75396 L
+s
+.25676 .62162 m
+.27145 .62674 L
+s
+.25676 .5 m
+.27538 .50338 L
+s
+.25676 .37838 m
+.2571 .39042 L
+s
+.25676 .25676 m
+.26143 .25978 L
+s
+0 g
+.025 w
+.76087 .76087 Mdot
+.76087 .63043 Mdot
+.76087 .5 Mdot
+.76087 .36957 Mdot
+.76087 .23913 Mdot
+.63043 .76087 Mdot
+.63043 .63043 Mdot
+.63043 .5 Mdot
+.63043 .36957 Mdot
+.63043 .23913 Mdot
+.5 .76087 Mdot
+.5 .63043 Mdot
+.5 .5 Mdot
+.5 .36957 Mdot
+.5 .23913 Mdot
+.36957 .76087 Mdot
+.36957 .63043 Mdot
+.36957 .5 Mdot
+.36957 .36957 Mdot
+.36957 .23913 Mdot
+.23913 .76087 Mdot
+.23913 .63043 Mdot
+.23913 .5 Mdot
+.23913 .36957 Mdot
+.23913 .23913 Mdot
+1 0 0 r
+.5 Mabswid
+.76087 .76087 m
+.77925 .77139 L
+s
+.76087 .63043 m
+.76937 .64747 L
+s
+.76087 .5 m
+.78244 .51527 L
+s
+.76087 .36957 m
+.76696 .38859 L
+s
+.76087 .23913 m
+.7643 .23932 L
+s
+.63043 .76087 m
+.63172 .76488 L
+s
+.63043 .63043 m
+.63668 .64834 L
+s
+.63043 .5 m
+.63414 .50833 L
+s
+.63043 .36957 m
+.64758 .37704 L
+s
+.63043 .23913 m
+.63785 .24015 L
+s
+.5 .76087 m
+.52118 .76744 L
+s
+.5 .63043 m
+.50632 .63872 L
+s
+.5 .5 m
+.51029 .51768 L
+s
+.5 .36957 m
+.51413 .37778 L
+s
+.5 .23913 m
+.50038 .23773 L
+s
+.36957 .76087 m
+.37413 .7757 L
+s
+.36957 .63043 m
+.36915 .64388 L
+s
+.36957 .5 m
+.37583 .50113 L
+s
+.36957 .36957 m
+.383 .37992 L
+s
+.36957 .23913 m
+.38383 .23881 L
+s
+.23913 .76087 m
+.251 .78149 L
+s
+.23913 .63043 m
+.23995 .64884 L
+s
+.23913 .5 m
+.24501 .51009 L
+s
+.23913 .36957 m
+.25046 .38759 L
+s
+.23913 .23913 m
+.24027 .25161 L
+s
+0 g
+.025 w
+.78125 .78125 Mdot
+.78125 .64063 Mdot
+.78125 .5 Mdot
+.78125 .35937 Mdot
+.78125 .21875 Mdot
+.64063 .78125 Mdot
+.64063 .64063 Mdot
+.64063 .5 Mdot
+.64063 .35937 Mdot
+.64063 .21875 Mdot
+.5 .78125 Mdot
+.5 .64063 Mdot
+.5 .5 Mdot
+.5 .35937 Mdot
+.5 .21875 Mdot
+.35937 .78125 Mdot
+.35937 .64063 Mdot
+.35937 .5 Mdot
+.35937 .35937 Mdot
+.35937 .21875 Mdot
+.21875 .78125 Mdot
+.21875 .64063 Mdot
+.21875 .5 Mdot
+.21875 .35937 Mdot
+.21875 .21875 Mdot
+1 0 0 r
+.5 Mabswid
+.78125 .78125 m
+.79502 .78894 L
+s
+.78125 .64063 m
+.80005 .64484 L
+s
+.78125 .5 m
+.80279 .50701 L
+s
+.78125 .35937 m
+.78532 .37783 L
+s
+.78125 .21875 m
+.80247 .2215 L
+s
+.64063 .78125 m
+.64824 .78644 L
+s
+.64063 .64063 m
+.65573 .64851 L
+s
+.64063 .5 m
+.66349 .51682 L
+s
+.64063 .35937 m
+.65852 .37227 L
+s
+.64063 .21875 m
+.65297 .22372 L
+s
+.5 .78125 m
+.50132 .78879 L
+s
+.5 .64063 m
+.50087 .6598 L
+s
+.5 .5 m
+.50607 .52048 L
+s
+.5 .35937 m
+.51645 .37734 L
+s
+.5 .21875 m
+.51766 .21653 L
+s
+.35937 .78125 m
+.36413 .80143 L
+s
+.35937 .64063 m
+.36099 .65237 L
+s
+.35937 .5 m
+.37787 .51761 L
+s
+.35937 .35937 m
+.38034 .37741 L
+s
+.35937 .21875 m
+.36787 .22553 L
+s
+.21875 .78125 m
+.22761 .78892 L
+s
+.21875 .64063 m
+.22466 .65347 L
+s
+.21875 .5 m
+.23205 .51386 L
+s
+.21875 .35937 m
+.22096 .36917 L
+s
+.21875 .21875 m
+.22906 .22323 L
+s
+0 g
+.025 w
+.80508 .80508 Mdot
+.80508 .65254 Mdot
+.80508 .5 Mdot
+.80508 .34746 Mdot
+.80508 .19492 Mdot
+.65254 .80508 Mdot
+.65254 .65254 Mdot
+.65254 .5 Mdot
+.65254 .34746 Mdot
+.65254 .19492 Mdot
+.5 .80508 Mdot
+.5 .65254 Mdot
+.5 .5 Mdot
+.5 .34746 Mdot
+.5 .19492 Mdot
+.34746 .80508 Mdot
+.34746 .65254 Mdot
+.34746 .5 Mdot
+.34746 .34746 Mdot
+.34746 .19492 Mdot
+.19492 .80508 Mdot
+.19492 .65254 Mdot
+.19492 .5 Mdot
+.19492 .34746 Mdot
+.19492 .19492 Mdot
+1 0 0 r
+.5 Mabswid
+.80508 .80508 m
+.82828 .81796 L
+s
+.80508 .65254 m
+.81878 .67292 L
+s
+.80508 .5 m
+.81662 .50994 L
+s
+.80508 .34746 m
+.80892 .3656 L
+s
+.80508 .19492 m
+.82631 .21212 L
+s
+.65254 .80508 m
+.65901 .81605 L
+s
+.65254 .65254 m
+.66117 .6759 L
+s
+.65254 .5 m
+.6635 .50485 L
+s
+.65254 .34746 m
+.65433 .35506 L
+s
+.65254 .19492 m
+.67127 .19906 L
+s
+.5 .80508 m
+.51209 .82754 L
+s
+.5 .65254 m
+.51936 .67326 L
+s
+.5 .5 m
+.50384 .51091 L
+s
+.5 .34746 m
+.51348 .35142 L
+s
+.5 .19492 m
+.5071 .19458 L
+s
+.34746 .80508 m
+.3571 .80665 L
+s
+.34746 .65254 m
+.3486 .65478 L
+s
+.34746 .5 m
+.34747 .51323 L
+s
+.34746 .34746 m
+.36322 .35016 L
+s
+.34746 .19492 m
+.35897 .21598 L
+s
+.19492 .80508 m
+.21029 .81347 L
+s
+.19492 .65254 m
+.21394 .65735 L
+s
+.19492 .5 m
+.20045 .52482 L
+s
+.19492 .34746 m
+.20061 .34741 L
+s
+.19492 .19492 m
+.1925 .20314 L
+s
+0 0 1 r
+.10177 .89823 m
+.10177 .10177 L
+s
+.89823 .89823 m
+.10177 .89823 L
+s
+.89823 .10177 m
+.89823 .89823 L
+s
+.10177 .10177 m
+.89823 .10177 L
+s
+% End of Graphics
+MathPictureEnd
+\
+\>"], "Graphics",
+  ImageSize->{256.312, 256.312},
+  ImageMargins->{{43, 0}, {0, 0}},
+  ImageRegion->{{0, 1}, {0, 1}},
+  ImageCacheValid->False],
+
+Cell[BoxData[
+    TagBox[\(\[SkeletonIndicator]  Graphics3D  \[SkeletonIndicator]\),
+      False,
+      Editable->False]], "Output"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["read trajectory", "Section"],
+
+Cell[BoxData[{
+    \(\(positions = 
+        Get[StringJoin[
+            filename2, "\<_positions.m\>"]];\)\), "\[IndentingNewLine]", 
+    \(\(velocities = 
+        Get[StringJoin[filename2, "\<_velocities.m\>"]];\)\)}], "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["plot trajectory", "Section"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    RowBox[{
+      RowBox[{
+        RowBox[{"For", "[", 
+          RowBox[{\(i = 1\), ",", \(i <= Length[positions]\), ",", 
+            RowBox[{
+              RowBox[{"cluster", "=", 
+                RowBox[{"plotCurrentState", "[", 
+                  RowBox[{
+                    StyleBox["(*",
+                      FontColor->RGBColor[0, 0, 1]], 
+                    
+                    StyleBox[\(The\ following\ list\ defines\ the\ box\ size \
+. \ Has\ to\ be\ done\ manually, \ \(\(sorry\)\(.\)\)\),
+                      FontColor->RGBColor[0, 0, 1]], 
+                    StyleBox["*)",
+                      FontColor->RGBColor[0, 0, 1]]}], 
+                  RowBox[{
+                    RowBox[{"{", 
+                      RowBox[{"9.70706", ",", "4.16017", ",", 
+                        FormBox["2.77345",
+                          "InputForm"]}], "}"}], ",", 
+                    
+                    StyleBox[\( (*Edit\ the\ following\ list\ if\ you\ want\ \
+to\ see\ bigger\ or\ smaller\ spheres . \ 
+                            Only\ the\ biggest\ number\ is\ \(\(relevant\)\(.\
+\)\)*) \),
+                      FontColor->RGBColor[0, 0, 1]], \({1, 1, 8}\), 
+                    ",", \(positions[\([i]\)]\), ",", \(velocities[\([i]\)]\),
+                     ",", \({plotState \[Rule] True, 
+                      showVelocityVectors \[Rule] True, 
+                      showCutOffRadius \[Rule] True, 
+                      plotMirrored \[Rule] False, plotNow \[Rule] True}\)}], 
+                  "]"}]}], ";", \(i++\)}]}], "]"}], ";"}], 
+      "\[IndentingNewLine]"}]], "Input"],
+
+Cell[BoxData[
+    \(Syntax::"sntxi" \(\(:\)\(\ \)\) 
+      "Incomplete expression; more input is needed.\!\(\"\"\)"\)], "Message"],
+
+Cell[BoxData[
+    StyleBox[
+      RowBox[{
+        RowBox[{
+          RowBox[{
+          "For", "[", \(i = 1\), ",", \(i <= Length[positions]\), ",", 
+            RowBox[{
+              RowBox[{"cluster", "=", 
+                RowBox[{"plotCurrentState", "[", 
+                  RowBox[{"{", "9.70706", ",", "4.16017", ",", 
+                    FormBox["2.77345",
+                      "InputForm"], "}"}], ",", \({1, 1, 8}\), 
+                  ",", \(positions[\([\)\(i\)\(]\)]\), 
+                  ",", \(velocities[\([\)\(i\)\(]\)]\), 
+                  ",", \({plotState \[Rule] True, 
+                    showVelocityVectors \[Rule] True, 
+                    showCutOffRadius \[Rule] True, 
+                    plotMirrored \[Rule] False, plotNow \[Rule] True}\), 
+                  "]"}]}], ";", \(i++\)}], "]"}], ";"}], 
+        "\[IndentingNewLine]"}],
+      ShowStringCharacters->True]], "Message"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    RowBox[{"For", "[", 
+      RowBox[{\(i = 1\), ",", \(i \[LessEqual] Length[positions]\), ",", 
+        RowBox[{
+          RowBox[{"cluster", "=", 
+            RowBox[{"plotCurrentState", "[", 
+              RowBox[{
+                RowBox[{"{", 
+                  RowBox[{"9.70706", ",", 
+                    FormBox["4.16017",
+                      "InputForm"], ",", 
+                    FormBox[
+                      FormBox[
+                        FormBox["2.77345",
+                          "InputForm"],
+                        "InputForm"],
+                      "InputForm"]}], "}"}], ",", \({1, 1, 8}\), 
+                ",", \(positions[\([i]\)]\), ",", \(velocities[\([i]\)]\), 
+                ",", \({plotState \[Rule] True, 
+                  showVelocityVectors \[Rule] True, 
+                  showCutOffRadius \[Rule] True, plotMirrored \[Rule] False, 
+                  plotNow \[Rule] True}\)}], "]"}]}], ";", \(++i\)}]}], 
+      "]"}]], "Input"],
+
+Cell[BoxData[
+    \(Syntax::"sntxi" \(\(:\)\(\ \)\) 
+      "Incomplete expression; more input is needed.\!\(\"\"\)"\)], "Message"],
+
+Cell[BoxData[
+    StyleBox[
+      RowBox[{
+      "For", "[", \(i = 1\), ",", \(i \[LessEqual] Length[positions]\), ",", 
+        RowBox[{
+          RowBox[{"cluster", "=", 
+            RowBox[{"plotCurrentState", "[", 
+              RowBox[{"{", "9.70706", ",", 
+                FormBox["4.16017",
+                  "InputForm"], ",", 
+                FormBox[
+                  FormBox[
+                    FormBox["2.77345",
+                      "InputForm"],
+                    "InputForm"],
+                  "InputForm"], "}"}], ",", \({1, 1, 8}\), 
+              ",", \(positions[\([\)\(i\)\(]\)]\), 
+              ",", \(velocities[\([\)\(i\)\(]\)]\), 
+              ",", \({plotState \[Rule] True, 
+                showVelocityVectors \[Rule] True, 
+                showCutOffRadius \[Rule] True, plotMirrored \[Rule] False, 
+                plotNow \[Rule] True}\), "]"}]}], ";", \(++i\)}], "]"}],
+      ShowStringCharacters->True]], "Message"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+FrontEndVersion->"4.1 for X",
+ScreenRectangle->{{0, 1024}, {0, 768}},
+AutoGeneratedPackage->None,
+WindowSize->{580, 692},
+WindowMargins->{{129, Automatic}, {Automatic, 0}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[1727, 52, 33, 0, 118, "Title"],
+Cell[1763, 54, 292, 6, 68, "Text"],
+
+Cell[CellGroupData[{
+Cell[2080, 64, 43, 0, 60, "Section"],
+
+Cell[CellGroupData[{
+Cell[2148, 68, 504, 9, 155, "Input"],
+Cell[2655, 79, 131, 2, 43, "Output"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2835, 87, 23, 0, 60, "Section"],
+Cell[2861, 89, 55, 0, 32, "Text"],
+Cell[2919, 91, 13670, 222, 1819, "Input",
+  InitializationCell->True],
+
+Cell[CellGroupData[{
+Cell[16614, 317, 26, 0, 45, "Subsection"],
+
+Cell[CellGroupData[{
+Cell[16665, 321, 415, 6, 107, "Input"],
+Cell[17083, 329, 7480, 600, 70, 7353, 596, "GraphicsData", "PostScript", \
+"Graphics",
+  ImageCacheValid->False],
+Cell[24566, 931, 132, 3, 70, "Output"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[24759, 941, 34, 0, 60, "Section"],
+Cell[24796, 943, 228, 5, 43, "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[25061, 953, 34, 0, 60, "Section"],
+
+Cell[CellGroupData[{
+Cell[25120, 957, 1613, 34, 187, "Input"],
+Cell[26736, 993, 130, 2, 22, "Message"],
+Cell[26869, 997, 910, 20, 97, "Message"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[27816, 1022, 986, 22, 107, "Input"],
+Cell[28805, 1046, 130, 2, 22, "Message"],
+Cell[28938, 1050, 955, 22, 82, "Message"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+

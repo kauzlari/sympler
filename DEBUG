@@ -1,0 +1,64 @@
+
+
+- The "degrees-symbol", at least if used in the help-text, is not displayed correctly in some terminals (e.g. mine from Ubuntu 12.04LTS)
+
+- Remove the callback stuff like FunctionPairCallback from the runtime compiled functions! It isn't necessary anymore, right? It checks by hand for symbols such as "ni" and then it creates a ValCalculatorRho. I think we don't need this feature anymore and just complicates things a lot.
+
+- After {ParticleCreatorFile::createParticles} start moldyn stalls if in the input file we have
+...
+     <ParticleCreatorFile
+        species = "H2O"
+        nameInputFile = "Water1.pos"
+        />
+...
+  and in Water1.pos there is a different species name, like e.g.
+     ONE q0 q1 q2 q3 !!!
+     !!!
+     ONE free 3.615 5.000 5.000 0 0 0 1 0 0 0
+     !!!
+
+- testsuite: If configuration fails, this is not reportes in test_sympler.pl. You can check this, e.g., by changing to a wrong directory.
+
+- Using an arbitrary quantity computed by a PairCalculator or ParticleCalculator, but no Integrator changing positions leads to zero after the first timestep (probably because the symbol is not persistent). This is stupid behaviour! Find a consistent behaviour! How about including a check whether the positions change? Then make it possible that the symbols are computed only once.
+
+- If using OutputFile in a MeterPosVel it does not seem to be possible to pass s.th. like a scalar "n" to the OutputFile
+
+- If using OutputMathematica in a MeterPosVel it produces a segmentation fault
+
+- GridMeter VelocityMoment does not seem to work
+
+- currently, the following is not possible due to a message that the symbol is undefined for species B: One ValCalculator with species1=species2=A; one ValCalculator with all the same but species2=B and overwrite=yes. This is stupid! Change this, e.g., so that if the symbol is already defined for one of the species, then it works. Of course, then, we have to add the attribute for the species where the symbol is still missing.
+
+- if no module is introduced that needs a cutoff, the global cutoff remains at -1 which causes an error message. -> maybe skip the cell generation completely in this case?
+
+- strange error message "...unknown attribute __data_format..." when using an OutputVTK in a MeterAverage. Shouldn't we simply exlude this case?
+
+- FunctionParser: let's say we have a function T() and a function unitT() -> This won't work, because, if we use unitT(), it will find T() in the expression. -> Make the parsing more clever. Probably the function findWithoutParantheses(..) must be modified. Same if we have a symbol "Bstepterm". Then it will find the Factory "step()".
+
+- FNPower::toC(): If the second argument of the "^"-operator contains an expression with  variables like, e.g., [rij]:[rij], the function will usually boil out with a seg.-fault, and, if not, the results will be bullshit, because, in any case it reads not correctly initialised memory. That's because of the line "Variant vValB = m_b->value();" which we need to check whether the argument is an integer. Is there a way to catch this case and to use the pow()-function like in the case when it is a floating-point number? 
+Currently, we have at least a MSG_DEBUG, which says that it could boil out after the next line of code.
+
+- old question: currently, it is forbidden, to have box-dimensions < 3* cutoff in a periodic direction and < 2*cutoff in a non-periodic direction. Isn't it (Wasn't it once?) possible to have the old rule of > 1*cutoff, i.e., the possibility of having one cell in a direction?
+
+- let OS throw exception if nans occur -> catch that and write s.th. like "Does the initial setup of your simulation parameters make sense? If you don't know, feel free to ask the programmers."
+
+- if one does not define, e.g., an internal_energy value in a ParticleCreatorFree, then, 'nan' are produced and the simulation runs without throwing an exception; additionally, these attributes (which are known at runtime) are nowhere mentioned in the help-system -> throw at least an exception, if 'nans' are occuring 
+
+- inputFromResults-bugs:
+"IntegratorPosition(speciesName)";
+MeterPosVel: repetition of "measureEvery", "fromStepOn"; 
+fromStepOn redefined in MeterPosVel
+
+- ManagerCell::createDistances loops over Cells. Should it better loop over CellLinks???
+
+- if BoundarySTL uses inlet all non-ParticleCreatorInlet must be placed behind ParticleCreatorInlet -> generalise that
+
+- the bug is in fact fixed but we should have a look if the fix is OK in all cases:
+WallContainer::isInside(point_t) crashes because of ODD(c_up) != ODD(c_down) in the following case (and presumably similar cases):
++BoundaryStepStoch
++periodic in x- and z-direction
++step in y-direction
++step at x-position xPos
++initial particle x-position at xPos
+
+-> fix with side normals

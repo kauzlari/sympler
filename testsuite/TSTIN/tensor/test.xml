@@ -1,0 +1,334 @@
+<Simulation
+simName = "testfparticletensor"   
+rsDispEps = "1e-10"
+wtDistEps = "-1e-10"
+inputFromResults = "yes"
+randomize = "yes"
+>
+<!--Name of simulation,-->
+
+<Lucy
+cutoff = "1.0"
+name = "Lucy"
+/>
+<!--weightingFunction and smoothelength-->
+
+
+<Controller
+timesteps = "20"
+         dt = "1e-5"
+>
+<!--timesteps and time increment-->
+
+<IntegratorVelocityVerlet
+species = "BAR"
+/>
+<!--integrate the position and momentum-->
+
+<IntegratorScalarLambda
+species = "BAR"
+scalar = "E"
+symbol = "E"
+/>
+
+<IntegratorScalarLambda
+species = "WALL"
+scalar = "E"
+symbol = "E"
+/>
+
+<IntegratorTensorLambda
+species="BAR"
+tensor ="S"
+symbol="S"
+/>
+
+<IntegratorTensorLambda
+species="WALL"
+tensor ="S"
+symbol="S"
+/>
+
+</Controller>
+
+<ValCalculatorNegDKernelDivr
+symbol = "F"
+weightingFunction = "Lucy"
+species1 = "BAR"
+species2 = "WALL"
+/>
+
+<ValCalculatorNegDKernelDivr
+symbol = "F"
+weightingFunction = "Lucy"
+species1 = "BAR"
+species2 = "BAR"
+/>
+
+<ParticleScalar
+species = "BAR"
+expression = "100*(E-32.768)"
+symbol = "P"
+/>
+<!--calculate the pressure p=(Ei-E0)*c^2-->
+
+<ParticleScalar
+species="WALL"
+expression = "100*(E-32.768)"
+symbol = "P"
+/>
+<!--
+<FPairTensor
+species1 = "BAR"
+species2 = "BAR"
+forceName="default"
+pairFactor ="10*((([vi]-[vj])@[rij]+[rij]@([vi]-[vj]))-(2/3)*idMat((([vj]-[vi]):[rij])))"
+tensor="S"
+weightingFunction = "Lucy"
+/>
+-->
+
+<!--calculate the density derivative-->
+<FPairScalar
+species1 = "BAR"
+species2 = "BAR"   
+particleFactor_i = "Ei/Ej"
+particleFactor_j ="Ej/Ei"                                                     
+pairFactor ="-32.768*([vi]-[vj]):[rij]"  
+scalar = "E"
+symmetry = "1"
+weightingFunction = "Lucy"
+/>
+
+<FPairScalar
+species1 = "BAR"
+species2 = "WALL"   
+particleFactor_i = "Ei/Ej"
+particleFactor_j ="Ej/Ei"                                                     
+pairFactor ="-32.768*([vi]-[vj]):[rij]"  
+scalar = "E"
+symmetry = "1"
+weightingFunction = "Lucy"
+/>
+
+<!--
+<FPairTensor
+species1 = "BAR"
+species2 = "WALL"
+pairFactor ="10*((([vi]-[vj])@[rij]+[rij]@([vi]-[vj]))-(2/3)*idMat((([vi]-[vj]):[rij])))"
+tensor="S"
+weightingFunction = "Lucy"
+/>
+-->
+
+<!-- completed stress representation, no stress coefficient-->
+<!-- Sdot for BAR-WALL-->
+<PairParticleTensor
+species1 = "BAR"
+species2 = "WALL"
+expression ="25000*32.768*((([vi]-[vj])@[rij]+[rij]@([vi]-[vj]))-(2/3)*idMat((([vi]-[vj]):[rij])))*Fij"
+particleFactor_i = "unitMat(1/Ej)"
+particleFactor_j = "unitMat(1/Ei)"
+symbol="Sdot"
+cutoff = "1.0"
+symmetry = "1"
+/>
+
+<!-- W for BAR-WALL-->
+<PairParticleTensor
+species1 = "BAR"
+species2 = "WALL"
+expression ="0.5*32.768*(([vi]-[vj])@[rij]-[rij]@([vi]-[vj]))*Fij"
+particleFactor_i = "unitMat(1/Ej)"
+particleFactor_j = "unitMat(1/Ei)"
+symbol="W"
+cutoff = "1.0"
+symmetry = "1"
+/>
+
+<!-- Sdot for BAR-BAR-->
+<PairParticleTensor
+species1 = "BAR"
+species2 = "BAR"
+expression ="25000*32.768*((([vi]-[vj])@[rij]+[rij]@([vi]-[vj]))-(2/3)*idMat((([vi]-[vj]):[rij])))*Fij"
+particleFactor_i = "unitMat(1/Ej)"
+particleFactor_j = "unitMat(1/Ei)"
+symbol="Sdot"
+cutoff = "1.0"
+overwrite = "yes"
+symmetry = "1"
+/>
+
+<!-- W for BAR-BAR-->
+<PairParticleTensor
+species1 = "BAR"
+species2 = "BAR"
+expression ="0.5*32.768*(([vi]-[vj])@[rij]-[rij]@([vi]-[vj]))*Fij"
+particleFactor_i = "unitMat(1/Ej)"
+particleFactor_j = "unitMat(1/Ei)"
+symbol="W"
+cutoff = "1.0"
+overwrite = "yes"
+symmetry = "1"
+/>
+
+<ParticleTensor
+species = "BAR"
+expression = "{Sdot}+{W}°{Sdot}-{Sdot}°{W}"
+symbol = "SdotNew"
+/>
+
+<ParticleTensor
+species = "WALL"
+expression = "{Sdot}+{W}°{Sdot}-{Sdot}°{W}"
+symbol = "SdotNew"
+/>
+
+<FParticleTensor
+species = "BAR"
+expression ="{SdotNew}"
+tensor="S"
+/>
+
+<FParticleTensor
+species = "WALL"
+expression ="{SdotNew}"
+tensor="S"
+/>
+
+<FParticleVels
+species = "BAR"
+expression="-1*idVec(10)"
+/>
+<!--expression="-1*uVecY(98*step(xCoord[r]-8.80))"-->
+
+<FPairVelsWF
+species1 = "BAR"
+species2 = "BAR"
+pairFactor = "-1*(({Sj}-(idMat(Pj)))/(Ej^2)+({Si}-(idMat(Pi)))/(Ei^2)):[rij]"
+weightingFunction = "Lucy"
+particleFactor_i="idVec(1)"
+particleFactor_j="idVec(1)"
+symmetry="-1"
+/>
+
+<FPairVelsWF
+species1 = "BAR"
+species2 = "WALL"
+pairFactor = "-1*(({Sj}-(idMat(Pj)))/(Ej^2)+({Si}-(idMat(Pi)))/(Ei^2)):[rij]"
+weightingFunction = "Lucy"
+particleFactor_i="idVec(1)"
+particleFactor_j="idVec(1)"
+symmetry="-1"
+/>
+
+<Phase>
+
+<BoundaryCuboid
+                       boxX = "15.0"
+                       boxY = "5.0"
+                       boxZ = "5.0"
+                       periodicX = "no"
+                       periodicY = "no"
+                       periodicZ = "no"
+>
+
+<ReflectorStochastic/>
+
+<ParticleCreatorStatic
+temperature = "1"
+density = "32.768"
+species = "BAR"
+posX = "posX"
+velX = "0"
+posY ="posY"
+velY="0"
+posZ="posZ"
+velZ="0"
+corner1 = "(5.0,1.5,1.5)"
+corner2 = "(13.0,3.5,3.5)"
+E = "32.768"
+/>
+
+<ParticleCreatorStatic
+temperature = "1"
+density = "32.768"
+species = "WALL"
+posX = "posX"
+velX = "0"
+posY ="posY"
+velY="0"
+posZ="posZ"
+velZ="0"
+corner1 = "(3.875,0.0,0.0)"
+corner2 = "(5.0,5.0,5.0)"
+E = "32.768"
+/>
+
+</BoundaryCuboid>
+
+<LinkedListCreator
+/>
+
+</Phase>
+
+<MeterPosVel
+measureEvery = "30"
+species = "BAR"
+>
+
+ <OutputFile
+       nameOutputFile="fparticletensor.dat"
+       columns = "force1|position|velocity"
+       multipleFiles="yes"/>
+  
+</MeterPosVel>
+
+<!--
+  <GridAveragerStructured
+     measureEvery = "5"
+     nX = "15"
+     nY = "1"
+     nZ = "1"
+   >
+   
+  <VelocityMoment species = "BAR"  order = "1"/>    
+  <Velocity species = "BAR"/>
+  <Scalar symbol = "E" species = "BAR"/>  
+  <OutputFile fileName="fparticletensor.dat" multipleFiles="yes" 
+  columns ="BAR_velocity_mean|BAR_abs_velocity_mean|BAR_E^1"/>
+  </GridAveragerStructured>
+   -->
+<!--
+<GridAveragerStructured
+nZ = "1"
+nX = "28"
+nY = "1"
+avgOver = "1"
+measureEvery = "10"
+>
+
+<Velocity
+species = "WALL"
+/>
+<OutputFile
+multipleFiles = "no"
+fileName = "fparticletensor.dat"
+columns = "WALL_velocity_mean"
+writeHead = "no"
+</GridAveragerStructured>
+/>
+-->
+<!--
+   <MeterAverage avgOver="1" fromStepOn="1" measureEvery="1">
+                <Temperature species="BAR"/>
+		<Velocity species="BAR"/>
+		<Scalar symbol = "E" species = "BAR"/>
+		<Scalar symbol = "P" species = "BAR"/>
+                <OutputFile
+                fileName="fparticletensor2nd.dat"
+                multipleFiles="no"/>
+        </MeterAverage>
+-->
+
+</Simulation>

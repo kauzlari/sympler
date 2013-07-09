@@ -1,0 +1,47 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+dnl AC_PREREQ(2.57)
+AC_INIT(sympler, 0.1, david.kauzlaric@frias.uni-freiburg.de)
+AM_INIT_AUTOMAKE
+AC_CONFIG_SRCDIR([main.cpp])
+dnl AC_CONFIG_HEADER([config.h])
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AM_PROG_LIBTOOL
+dnl AC_PROG_RANLIB
+
+# Checks for libraries.
+AM_PATH_GSL
+#AM_PATH_SDL(, AM_CPPFLAGS="$AM_CPPFLAGS -DHAVE_SDL=1", )
+#AC_SUBST(AM_CPPFLAGS)
+SDL_CFLAGS=""
+AC_SUBST(SDL_CFLAGS)
+SDL_LIBS=""
+AC_SUBST(SDL_LIBS)
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([float.h stdlib.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+dnl AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([floor gethostname memset pow sqrt])
+
+AC_CONFIG_FILES([Makefile
+                 source/Makefile
+		 calculator/Makefile
+		 calculator/source/Makefile])
+AC_OUTPUT

@@ -1,0 +1,30 @@
+This is an automated test script for the "molecular dynamics simulator". This script compiles the code, runs each input file(here inputs are stored in 'TSTIN' directory).
+It creates a directory for compilation and one for simulation. While simulation is on progress, it runs an inputfile and compares it's output with old ouputs(stored in 'RESULTS' directory).   
+Finally, this script deletes directories created for compilation and simulation.
+
+Some tips and constraints:
+1.This script should be placed in some direct sub directory of code directory(for eg: ../sympler/some SUB_DIRECTORY/test_sympler.pl). 
+2.Please make sure that you are in the directory "testsuite/" in order to run this script successfully. 
+3.New input files should be added as "testsuite/TSTIN/SOME_NEW_DIRECTORY/test.xml". Here input file name should always be "test.xml". If you want to add a brand new input file, please run it manually first time and make a copy of the output file (for eg: sim.dat or acf.dat) in "RESULTS/" directory. So that it can be used for debugging, when you run the script after.  
+4.Output file names should differ.
+
+
+RUNNING THE SCRIPT:
+
+- Normal way: It chooses default directory (/tmp/BUILDDIR)
+  Type "perl test_sympler.pl" or "./test_sympler.py" to run this script. 
+
+- With option: It chooses your desired directory
+  Type "perl test_sympler.pl --builddir PATH_TO_THE_DIRECTORY_WHERE_YOU_WANT_TO_BUILD_THE_CODE"
+  or
+  Type "./test_sympler.pl --builddir PATH_TO_THE_DIRECTORY_WHERE_YOU_WANT_TO_BUILD_THE_CODE" 
+
+Here you can also give a relative path.
+
+
+HOW TO DEAL WITH THE SCRIPT'S OUTPUT:
+
+- An Error message is an error messages, i.e., s.th. went wrong. Fix it before committing your changes
+- For a "RESULTS CHANGED FOR" message you should check the differences in the results and judge carefully whether they are due to a bug in your changes or due to numerical precision issues you can not influence. For example:
+  + If you get 1.534678 instead of 1.489561, this is a BUG!
+  + If you get -1.40545e-20 instead of 1.30506e-19, this may be fine. But THINK about it! 

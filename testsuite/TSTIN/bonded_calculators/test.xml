@@ -1,0 +1,219 @@
+
+<Simulation
+	simName="blobs"
+	inputFromResults="1"
+	wtDistEps="-1e-10"
+>							
+  <!-- Controller and Integrators -->
+<!--        <Square
+		cutoff="1"
+		name="L1" />
+	<Square
+		cutoff="0.75"
+		name="L075" />
+-->
+  <Controller
+  	timesteps="600"
+	statusEvery="100"
+	dt="0.005">
+    <IntegratorVelocityVerlet
+    	species = "blobTF"
+	lambda = "0.5"
+        mass = "24"
+    />
+    <IntegratorVelocityVerlet
+    	species = "blobNS"
+	lambda = "0.5"
+        mass = "96"
+    />
+
+  </Controller>
+
+<!-- in correct 2D-sense, we set T=0.002; it's just, that sympler calculates 3D -->
+<!-- We do DPD! So no need for an additional thermostat (unless it could speed up equilibration).-->
+<!--
+  <ThermostatVels
+    temperature = "0.0013333333333333"
+    activateAt = "0"
+    deactivateAt = "4000"
+    interval = "40"
+    species = "blobTF"
+  />
+
+  <ThermostatVels
+    temperature = "0.0013333333333333"
+    activateAt = "0"
+    deactivateAt = "4000"
+    interval = "40"
+    species = "blobNS"
+  />
+-->
+  <WriteRestartFile
+    writeEvery = "10000000"
+  />
+
+  <ParticleVector
+    species = "blobTF"
+    symbol = "velTF"
+    expression = "[v]"
+  />
+
+  <ParticleVector
+    species = "blobNS"
+    symbol = "velNS"
+    expression = "[v]"
+  />
+<!-- angular springs; mass multiplied below-->
+  <TripletCalcAngularF
+        species1 = "blobTF"
+        species2 = "blobTF"
+        species3 = "blobTF"
+  	listName = "angularDPDTF"
+	K = "0"
+	thetaEq = "60"
+        symbol = "FDPDangularTF"
+  />
+
+
+  <TripletCalcAngularF
+        species1 = "blobNS"
+        species2 = "blobNS"
+        species3 = "blobNS"
+  	listName = "angularDPDNS"
+	K = "0"
+	thetaEq = "60"
+        symbol = "FDPDangularNS"
+  />
+
+  <!-- friction; mass multiplied below -->
+  <BondedPairParticleVector
+    species1 = "blobTF" 
+    species2 = "blobTF"
+    listName = "springDPDTF"
+    symbol = "FDPDspringTF" 
+    expression = "-0.52*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+    symmetry = "-1"
+    overwrite = "no"
+  />
+
+  <BondedPairParticleVector
+    species1 = "blobNS" 
+    species2 = "blobNS"
+    listName = "springDPDNS"
+    symbol = "FDPDfrictionNS" 
+    expression = "-0.26*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+    symmetry = "-1"
+    overwrite = "no"
+  />
+
+  <!-- noise; mass multiplied below -->
+  <!-- noise = sqrt(2*k_B*T*gamma*m) but since we want to have here F/M, we have to use sqrt(2*k_B*T*gamma/m) !!! -->
+  <!-- k_B*T=0.002, gamma=as in friction, m=24-->
+  <BondedPairParticleOneNoiseVector
+    species1 = "blobTF" 
+    species2 = "blobTF"
+    listName = "springDPDTF"
+    symbol = "FDPDnoiseTF" 
+    symmetry = "-1"
+    overwrite = "no"
+    noise = "0.0093094933625"
+  />
+
+  <!-- k_B*T=0.002, gamma=as in friction, m=96-->
+  <!-- noise24=noise96*sqrt(8); this is what we currently get; a bit strange; but for the TRUE force we would get noise24=noise96/sqrt(2)! Nonetheless, maybe I have to think about normalisation of my constant weighting functions W=1-->
+  <BondedPairParticleOneNoiseVector
+    species1 = "blobNS" 
+    species2 = "blobNS"
+    listName = "springDPDNS"
+    symbol = "FDPDnoiseNS" 
+    symmetry = "-1"
+    overwrite = "no"
+    noise = "0.003291402943"
+  />
+
+  <!-- linear springs; mass multiplied below -->
+  <BondedPairParticleVector
+    species1 = "blobTF" 
+    species2 = "blobTF"
+    listName = "springDPDTF"
+    symbol = "FDPDfrictionTF" 
+    expression = "1*(6-rij)*[rij]/rij"
+    symmetry = "-1"
+    overwrite = "no"
+  />
+
+  <BondedPairParticleVector
+    species1 = "blobNS" 
+    species2 = "blobNS"
+    listName = "springDPDNS"
+    symbol = "FDPDspringNS" 
+    expression = "1*(12-rij)*[rij]/rij"
+    symmetry = "-1"
+    overwrite = "no"
+  />
+
+  <!-- the total, now multiplied with mass; the unit-vectors should remove small numerical errors in z-direction (where all should be zero !!!) -->
+  <ParticleVector
+    expression = "24*([FDPDspringTF]+[FDPDangularTF]+[FDPDfrictionTF]+[FDPDnoiseTF])*(uVecX(1)+uVecY(1))"
+    species = "blobTF"
+    symbol = "FDPDtotTF"
+  />
+  <ParticleVector
+    expression = "96*([FDPDspringNS]+[FDPDangularNS]+[FDPDfrictionNS]+[FDPDnoiseNS])*(uVecX(1)+uVecY(1))"
+    species = "blobNS"
+    symbol = "FDPDtotNS"
+  />
+
+  <!-- make a force out of it-->  
+  <FParticleVels
+    expression = "[FDPDtotTF]"
+    species = "blobTF"
+  />
+  <FParticleVels
+    expression = "[FDPDtotNS]"
+    species = "blobNS"
+  />
+  
+   <!-- Phase -->
+   <Phase>
+   <LinkedListCreator/>
+     <!-- Boundary -->
+<!-- boxY=72*sqrt(3)-->
+<!-- is the next relevant?-->
+<!-- number density for NCG=24:0.032075014954-->
+<!-- number density for NCG=96:0.0080187537385-->
+    <BoundaryCuboid
+    	boxX = "108"
+	boxY = "124.70765814495915"
+	boxZ = "2.6"
+	periodicX = "yes"
+	periodicY = "yes"
+	periodicZ = "no"
+    ><!-- number density for NCG=24=0.032075014954-->
+
+      <ReflectorMirror/>
+      <ParticleCreatorFile
+      nameInputFile="blobsT0.002N432TF_0001.pos"
+      />
+      <ParticleCreatorFile
+      nameInputFile="blobsT0.002N432NS_0001.pos"
+      />
+      <ParticleConnectorFile
+      species = "blobTF"
+      nameInputFile = "DPDconnectors432TF.con"
+      />
+      <ParticleConnectorFile
+      species = "blobNS"
+      nameInputFile = "DPDconnectors108NS.con"
+      />
+    </BoundaryCuboid>
+  </Phase>
+  
+  <!-- Meters -->
+  <MeterAverage measureEvery = "10">
+    <Temperature species = "blobTF"/>
+    <Temperature species = "blobNS"/>
+    <OutputFile nameOutputFile = "bonded_calculators.dat" multipleFiles = "no"/>
+  </MeterAverage>
+
+ </Simulation>

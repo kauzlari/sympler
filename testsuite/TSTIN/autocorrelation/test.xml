@@ -1,0 +1,79 @@
+<Simulation
+simName = "testAutocorr"
+>
+
+<Controller
+  dt = "0.005"
+  timesteps = "1800"
+>
+
+<IntegratorVelocityVerlet species = "LJ"/>
+
+</Controller>
+
+<ThermostatVels
+  temperature = "0.5"
+  activateAt = "0"
+  deactivateAt = "1600"
+  interval = "10"
+  species = "LJ"
+/>
+
+
+<ParticleVector
+  expression = "[v]"
+  symbol = "vel"
+  species = "LJ"
+  stage = "0"
+/>
+
+
+<LJ
+  cutoff = "1.12246204830937298143"
+  sigma = "1"
+  epsilon = "1"
+  species1 = "LJ"
+  species2 = "LJ"
+/>
+
+<Phase>
+<LinkedListCreator/>
+<BoundaryCuboid
+  boxX = "1"
+  boxY = "1"
+  boxZ = "1"
+>
+
+<ReflectorMirror/>
+
+<ParticleCreatorLatticeBCC
+  species = "LJ"
+  density = "1.0"
+  temperature = "0.5"
+  nLatticePX = "7"
+  nLatticePY = "7"
+  nLatticePZ = "7"
+/>
+
+</BoundaryCuboid>
+</Phase>
+
+<MeterAutocorrelationVector
+  measureEvery = "1"
+  fromStepOn = "1500"
+  nOfACFs = "2"
+  nBuffs = "2"
+  nValACF = "200"
+  species = "LJ"
+  symbol = "vel"
+>
+<OutputFile multipleFiles = "no" nameOutputFile = "autocorrelation.dat"/>
+</MeterAutocorrelationVector>
+
+</Simulation>
+
+
+
+
+
+

@@ -1,0 +1,75 @@
+<Simulation
+	simName = "sim"
+	inputFromResults = "yes"
+	rsDispEps = "1e-10"
+	wtDistEps = "-1e-10"
+	randomize = "yes"
+>
+	<Controller
+		dt = "0.02"
+		fixTstart = "1"
+		freeTstart = "111111111"
+		fixTfreq = "1"
+		timesteps = "2000"
+	>
+		<IntegratorPosition
+			species = "fluid"
+		>
+		</IntegratorPosition>
+	</Controller>
+	<ThermostatPeters
+		cutoff = "1"
+		dissipation = "%(dissipation)f"
+		temperature = "1"
+		species1 = "fluid"
+		species2 = "fluid"
+	>
+	</ThermostatPeters>
+	<Phase
+		arraySize = "1.8"
+	>
+		<BoundaryCuboid
+                        boxX = "10"
+                        boxY = "10"
+                        boxZ = "10"
+                        periodicX = "yes"
+                        periodicY = "yes"
+                        periodicZ = "yes"
+		>
+			<ReflectorThermalize
+				temperature = "1"
+ 			>
+			</ReflectorThermalize>
+			<ParticleCreatorRandom
+				nParticles = "100000"
+			  	density = "%(density)i"	
+				species = "fluid"
+				velZ = "velZ+5*sin(2*pi*posX/boxX)"
+			>
+			</ParticleCreatorRandom>
+		</BoundaryCuboid>
+	</Phase>
+	<GridAveragerStructured
+		nX = "50"
+		nY = "1"
+		nZ = "1"
+		avgOver = "1"
+	>
+		<Velocity
+			species = "fluid"
+		></Velocity>
+		<OutputVTK
+			fileName = "results/grid/gas_grid.vtk"
+		>
+		</OutputVTK>
+	</GridAveragerStructured>
+	<MeterEtotal
+		species = "fluid"
+	>
+		<OutputFile
+			fileName = "energy.out"
+			multipleFiles = "no"
+		>
+		</OutputFile>
+	</MeterEtotal>
+</Simulation>

@@ -1,0 +1,4 @@
+#time H_pressure_mean UNDEF_density_mean UNDEF_density_variance H_temperature H_vCM H_n_mean H_n_variance H_vely^1 
+0  0   15.9782   0   0    0 0 0    35.152   -1853.49   0  
+1e-05  -2.00117e-20   15.9782   0   6.30657e-20    0 6.11481e-09 0    35.152   -1853.49   0.000611722  
+2e-05  -8.93148e-20   15.9782   0   6.48486e-19    0 1.1746e-08 0    35.152   -1853.49   0.00117479  

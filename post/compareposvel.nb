@@ -1,0 +1,204 @@
+(************** Content-type: application/mathematica **************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      7582,        152]*)
+(*NotebookOutlinePosition[      8213,        174]*)
+(*  CellTagsIndexPosition[      8169,        170]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+    \(0.085/0.005\)], "Input"],
+
+Cell[BoxData[
+    \(17.`\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["for 16", "Section"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(<< /usr/groups/simulation/sniff/MST_SSWS/moldyn/pwe/positions.m\  - \ \
+\(\(<<\)\(/usr/groups/simulation/sniff/MST_SSWS/moldyn/pwe/positionsc.m\)\(\ \
+\)\)\)], "Input"],
+
+Cell[BoxData[
+    \({{{0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {\(-0.00012999999999996348`\), 0.000010000000000065512`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.00012999999999996348`, 0.`, 0.`}}}\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(<< /usr/groups/simulation/sniff/MST_SSWS/moldyn/pwe/velocities.m\  - \ \
+\(\(<<\)\(/usr/groups/simulation/sniff/MST_SSWS/moldyn/pwe/velocitiesc.m\)\(\ \
+\)\)\)], "Input"],
+
+Cell[BoxData[
+    \({{{0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {\(-0.013621999999999967`\), 0.0006967999999999992`, 
+          0.00003800000000001025`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 0.`, 0.`}, {0.`, 
+          0.`, 0.`}, {0.`, 0.`, 
+          0.`}, {0.013621999999999912`, \(-0.0006969999999999477`\), \
+\(-0.00003799999999998249`\)}}}\)], "Output"]
+}, Open  ]]
+}, Open  ]]
+},
+FrontEndVersion->"4.1 for X",
+ScreenRectangle->{{0, 1280}, {0, 1024}},
+WindowSize->{520, 600},
+WindowMargins->{{Automatic, 46}, {131, Automatic}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[1727, 52, 44, 1, 27, "Input"],
+Cell[1774, 55, 38, 1, 27, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[1849, 61, 25, 0, 63, "Section"],
+
+Cell[CellGroupData[{
+Cell[1899, 65, 188, 3, 107, "Input"],
+Cell[2090, 70, 2579, 33, 523, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[4706, 108, 190, 3, 107, "Input"],
+Cell[4899, 113, 2655, 35, 539, "Output"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+

@@ -1,0 +1,394 @@
+(************** Content-type: application/mathematica **************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[     13389,        313]*)
+(*NotebookOutlinePosition[     14045,        336]*)
+(*  CellTagsIndexPosition[     14001,        332]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Graphical Output", "Title"],
+
+Cell["\<\
+Taken from MolecularDynamics01.nb available at \
+http://www.imtek.de/simulation/ and adapted to plot 3D-trajectories.The \
+options were not adapted. So no guarantee for their behaviour. For copy and \
+distribution rights see the original file.\
+\>", "Text",
+  TextJustification->1],
+
+Cell[CellGroupData[{
+
+Cell["Path and simulation name", "Section"],
+
+Cell[BoxData[{
+    RowBox[{
+      StyleBox[\( (*write\ your\ simulation\ name\ here\ \((the\ name\ of\ \
+the\ head\ in\ the\ input\ file)\)\ with\ the\ complete\ path*) \),
+        FontColor->RGBColor[0, 0, 1]], 
+      "\[IndentingNewLine]", \(filename = \
+"\</usr/groups/simulation/sniff2002/projects/moldyn/pwe_linux_kauzlari/moldyn/\
+ex1\>";\)}], "\[IndentingNewLine]", \(filename2 = \
+"\</usr/groups/simulation/simstaff/user/kauzlari/results/DPDtests/NEPD/\
+\
+profiles/step/simpler/ex1\>";\)}], "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["code", "Section"],
+
+Cell["Change it only if you know what you do.", "Text"],
+
+Cell[BoxData[
+    RowBox[{
+      RowBox[{\(plotCurrentState[regionDimensions_List, initialUnitCell_List, 
+          position_List, velocity_List, opts___]\), ":=", 
+        RowBox[{"Block", "[", 
+          
+          RowBox[{\({mdPlotState, mdShowVelocityVectors, mdShowCutOffRadius, 
+              mdPlotMirrored, mdPlotRange, mdplotNow}\), ",", 
+            "\[IndentingNewLine]", 
+            
+            StyleBox[\( (*\ 
+                Extract\ the\ plotting\ options\ from\ the\ argument\ list, \
+\[IndentingNewLine]\ \ unspecified\ are\ set\ to\ default\ values\ *) \),
+              FontColor->RGBColor[1, 0, 0]], "\[IndentingNewLine]", 
+            
+            RowBox[{\({mdPlotState, mdShowVelocityVectors, 
+                  mdShowCutOffRadius, mdPlotMirrored, 
+                  mdplotNow} = \({plotState, showVelocityVectors, 
+                      showCutOffRadius, plotMirrored, plotNow} /. 
+                    Flatten[{opts}]\) /. Options[plotCurrentState]\), ";", 
+              "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              StyleBox[\( (*\ Decide\ the\ plot\ clipping\ range\ *) \),
+                FontColor->RGBColor[1, 0, 0]], 
+              "\[IndentingNewLine]", \(If[\((Length[
+                      regionDimensions] \[Equal] 2)\), 
+                If[mdPlotMirrored, \[IndentingNewLine]mdPlotRange = \
+{{\(-1.2\), 3.2}*regionDimensions/2, {\(-1.2\), 3.2}*
+                        regionDimensions/2}, \[IndentingNewLine]mdPlotRange = 
+                    1.2*{{\(-1\), 1}*regionDimensions/2, {\(-1\), 1}*
+                          regionDimensions/2}\[IndentingNewLine]]]\), ";", 
+              "\[IndentingNewLine]", \(If[\((Length[
+                      regionDimensions] \[Equal] 3)\), 
+                If[mdPlotMirrored, \[IndentingNewLine]mdPlotRange = \
+{{\(-1.2\), 3.2}*regionDimensions[\([1]\)]/2, {\(-1.2\), 3.2}*
+                        regionDimensions[\([2]\)]/2, {\(-1.2\), 3.2}*
+                        regionDimensions[\([3]\)]/
+                          2}, \[IndentingNewLine]mdPlotRange = 
+                    1.2*{{\(-1\), 1}*regionDimensions[\([1]\)]/2, {\(-1\), 1}*
+                          regionDimensions[\([2]\)]/2, {\(-1\), 1}*
+                          regionDimensions[\([3]\)]/2}\[IndentingNewLine]]]\),
+               ";", "\[IndentingNewLine]", "\[IndentingNewLine]", 
+              StyleBox[\( (*\ Plot\ the\ picture\ if\ requested\ *) \),
+                FontColor->RGBColor[1, 0, 0]], "\[IndentingNewLine]", 
+              "\[IndentingNewLine]", 
+              RowBox[{"If", "[", 
+                
+                RowBox[{\(mdplotNow && mdPlotState\), ",", 
+                  "\[IndentingNewLine]", 
+                  RowBox[{"Graphics3D", "[", "\[IndentingNewLine]", 
+                    RowBox[{
+                      RowBox[{"Join", "[", "\[IndentingNewLine]", 
+                        StyleBox[\( (*\ The\ outline\ box\ *) \),
+                          FontColor->RGBColor[1, 0, 0]], 
+                        "\[IndentingNewLine]", 
+                        
+                        RowBox[{\({{RGBColor[0, 0, 1], 
+                              Line[1.0*{\[IndentingNewLine]{\(-1\), \(-1\), \
+\(-1\)}*regionDimensions/2, \[IndentingNewLine]{1, \(-1\), \(-1\)}*
+                                      regionDimensions/
+                                        2, \[IndentingNewLine]{1, 1, \(-1\)}*
+                                      regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), 
+                                        1, \(-1\)}*
+                                      regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), \
+\(-1\), \(-1\)}*regionDimensions/2, \[IndentingNewLine]{\(-1\), \(-1\), 1}*
+                                      regionDimensions/
+                                        2, \[IndentingNewLine]{1, \(-1\), 1}*
+                                      regionDimensions/
+                                        2, \[IndentingNewLine]{1, 1, 1}*
+                                      regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), 1, 1}*
+                                      regionDimensions/
+                                        2, \[IndentingNewLine]{\(-1\), \
+\(-1\), 1}*regionDimensions/2\[IndentingNewLine]}], 
+                              Line[{{\(-1\), 1, \(-1\)}*
+                                    regionDimensions/2, {\(-1\), 1, 1}*
+                                    regionDimensions/2}], 
+                              Line[{{1, \(-1\), \(-1\)}*
+                                    regionDimensions/2, {1, \(-1\), 1}*
+                                    regionDimensions/2}], 
+                              Line[{{1, 1, \(-1\)}*
+                                    regionDimensions/2, {1, 1, 1}*
+                                    regionDimensions/2}]}}\), ",", 
+                          "\[IndentingNewLine]", 
+                          RowBox[{"If", "[", 
+                            RowBox[{
+                            "mdPlotMirrored", ",", "\[IndentingNewLine]", 
+                              
+                              StyleBox[\( (*\ 
+                                  The\ same\ plot\ UDLR\ to\ show\ the\ \
+effect\ of\ the\ toroid\ *) \),
+                                FontColor->RGBColor[1, 0, 0]], 
+                              "\[IndentingNewLine]", \({GrayLevel[ .7], 
+                                PointSize[
+                                  Min[1/initialUnitCell]/
+                                    10], \[IndentingNewLine]\(Point[# + {1, 
+                                        0, 0}*regionDimensions] &\) /@ 
+                                  
+                                  position, \[IndentingNewLine]\(Point[# + \
+{0, 1, 0}*regionDimensions] &\) /@ 
+                                  position, \[IndentingNewLine]\(Point[# + \
+{1, 1, 0}*regionDimensions] &\) /@ position}\), "\[IndentingNewLine]", 
+                              ",", \({}\)}], "\[IndentingNewLine]", "]"}], 
+                          ",", "\[IndentingNewLine]", 
+                          RowBox[{"If", "[", 
+                            RowBox[{
+                            "mdShowVelocityVectors", ",", 
+                              "\[IndentingNewLine]", 
+                              StyleBox[\( (*\ The\ velocity\ vectors\ *) \),
+                                FontColor->RGBColor[1, 0, 0]], 
+                              "\[IndentingNewLine]", \({RGBColor[1, 0, 0], 
+                                MapThread[
+                                  Line[{#1, #1 + #2}] &, {position, 
+                                    velocity}]}\), ",", \({}\)}], "]"}], ",", 
+                          "\[IndentingNewLine]", 
+                          
+                          StyleBox[\( (*\ 
+                              The\ atoms\ are\ plotted\ last\ to\ always\ be\ \
+visible\ *) \),
+                            FontColor->RGBColor[1, 0, 0]], 
+                          "\[IndentingNewLine]", \({GrayLevel[0], 
+                            PointSize[
+                              Min[1/initialUnitCell]/8], \(Point[#] &\) /@ 
+                              position}\)}], "\[IndentingNewLine]", "]"}], 
+                      ",", "\[IndentingNewLine]", \(ViewPoint -> {0. , 0. , 
+                          2.300}\), ",", \(AspectRatio \[Rule] Automatic\), 
+                      ",", \(PlotRange \[Rule] mdPlotRange\)}], 
+                    "\[IndentingNewLine]", "]"}]}], "\[IndentingNewLine]", 
+                "]"}]}]}], "\[IndentingNewLine]", "]"}]}], ";"}]], "Input",
+  InitializationCell->True],
+
+Cell[CellGroupData[{
+
+Cell["Test", "Subsection"],
+
+Cell[BoxData[
+    \(\(i = 1;\)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(plotCurrentState[{3, 3, 3}, {5, 5, 5}, 
+      Flatten[Table[{ .6  i -  .3,  .6  j -  .3,  .6  k -  .3} - {3, 3, 3}/
+              2, {i, 1, 5}, {j, 1, 5}, {k, 1, 5}], 2], 
+      Table[{Random[], Random[], Random[]}, {125}], {plotState \[Rule] True, 
+        showVelocityVectors \[Rule] True, showCutOffRadius \[Rule] True, 
+        plotMirrored \[Rule] False, plotNow \[Rule] True}]\)], "Input"],
+
+Cell[BoxData[
+    TagBox[\(\[SkeletonIndicator]  Graphics3D  \[SkeletonIndicator]\),
+      False,
+      Editable->False]], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(Clear[i];\)\)], "Input"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["read trajectory", "Section"],
+
+Cell[BoxData[{
+    \(\(positions = 
+        Get[StringJoin[
+            filename2, "\<_positions.m\>"]];\)\), "\[IndentingNewLine]", 
+    \(\(velocities = 
+        Get[StringJoin[filename2, "\<_velocities.m\>"]];\)\)}], "Input"],
+
+Cell[BoxData[
+    RowBox[{
+      RowBox[{"anim2", "=", 
+        RowBox[{"Table", "[", 
+          RowBox[{
+            RowBox[{"einzelbild", "=", 
+              RowBox[{"plotCurrentState", "[", "\[IndentingNewLine]", 
+                RowBox[{
+                  StyleBox["(*",
+                    FontColor->RGBColor[0, 0, 1]], 
+                  
+                  StyleBox[\(The\ following\ list\ defines\ the\ box\ size . \
+\ Has\ to\ be\ done\ manually, \ \(\(sorry\)\(.\)\)\),
+                    FontColor->RGBColor[0, 0, 1]], 
+                  StyleBox["*)",
+                    FontColor->RGBColor[0, 0, 1]]}], "\[IndentingNewLine]", 
+                
+                RowBox[{\({9.70706, 4.16017, 2.77345}\), ",", 
+                  "\[IndentingNewLine]", 
+                  
+                  StyleBox[\( (*Edit\ the\ following\ list\ if\ you\ want\ to\
+\ see\ bigger\ or\ smaller\ spheres . \ 
+                          Only\ the\ biggest\ number\ is\ \(\(relevant\)\(.\)\
+\)*) \),
+                    FontColor->RGBColor[0, 0, 1]], 
+                  StyleBox["\[IndentingNewLine]",
+                    FontColor->RGBColor[0, 0, 1]], \({1, 1, 8}\), 
+                  ",", \(positions[\([i]\)]\), ",", \(velocities[\([i]\)]\), 
+                  ",", \({plotState \[Rule] True, 
+                    showVelocityVectors \[Rule] True, 
+                    showCutOffRadius \[Rule] True, 
+                    plotMirrored \[Rule] False, plotNow \[Rule] True}\)}], 
+                "]"}]}], ",", \({i, Length[positions]}\)}], "]"}]}], 
+      ";"}]], "Input"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["EPS", "Title"],
+
+Cell[CellGroupData[{
+
+Cell["plot trajectory", "Section"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(Export["\</home/kauzlari/job/polytronic2003/ex1.gif\>", 
+      anim2]\)], "Input"],
+
+Cell[BoxData[
+    \("/home/kauzlari/job/polytronic2003/ex1.gif"\)], "Output"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+FrontEndVersion->"4.1 for X",
+ScreenRectangle->{{0, 1024}, {0, 768}},
+AutoGeneratedPackage->None,
+WindowSize->{560, 692},
+WindowMargins->{{Automatic, 91}, {Automatic, 0}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[1727, 52, 33, 0, 118, "Title"],
+Cell[1763, 54, 291, 6, 68, "Text"],
+
+Cell[CellGroupData[{
+Cell[2079, 64, 43, 0, 60, "Section"],
+Cell[2125, 66, 507, 10, 155, "Input"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2669, 81, 23, 0, 60, "Section"],
+Cell[2695, 83, 55, 0, 32, "Text"],
+Cell[2753, 85, 7647, 130, 1243, "Input",
+  InitializationCell->True],
+
+Cell[CellGroupData[{
+Cell[10425, 219, 26, 0, 45, "Subsection"],
+Cell[10454, 221, 43, 1, 27, "Input"],
+
+Cell[CellGroupData[{
+Cell[10522, 226, 415, 6, 107, "Input"],
+Cell[10940, 234, 132, 3, 27, "Output"]
+}, Open  ]],
+Cell[11087, 240, 46, 1, 27, "Input"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[11182, 247, 34, 0, 60, "Section"],
+Cell[11219, 249, 228, 5, 43, "Input"],
+Cell[11450, 256, 1564, 33, 187, "Input"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[13063, 295, 20, 0, 118, "Title"],
+
+Cell[CellGroupData[{
+Cell[13108, 299, 34, 0, 60, "Section"],
+
+Cell[CellGroupData[{
+Cell[13167, 303, 102, 2, 43, "Input"],
+Cell[13272, 307, 77, 1, 27, "Output"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+

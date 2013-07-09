@@ -1,0 +1,370 @@
+<Simulation
+  simName = "Biegeprobe"
+  inputFromResults = "1"
+  wtDistEps = "-1e-10"
+ >
+
+  <Lucy cutoff = "1" name = "bla"/>
+
+      <InputWF
+        cutoff = "1"
+        interpolation = "(step(r)-step(r-0.2))*(1-(150/23)*r^2+(375/23)*r^4)+(step(r-0.2)-step(r-0.6))*(2/23)*(11-5*r*(-2+5*r*(6+5*r*(r-2))))+step(r-0.6)*(125/46)*(r-1)^4"
+        selfContribution = "2875/(256*pi)"
+        weight = "(15625/(1024*pi))*((step(r)-step(r-0.2))*48*(0.2-r^2)+(step(r-0.2)-step(r-0.6))*(19.2-0.64/r-48*r+32*r^2)+step(r-0.6)*(-8*(r-1)^3)/r)"
+        name = "Lucy1"
+      />
+
+  <Controller
+    timesteps = "20"
+        dt = "0.000001"
+    statusEvery = "100"
+  >
+        <IntegratorScalarLambda
+            species = "wall"
+            lambda = "1"
+            scalar = "n"
+            symbol = "n"
+        />
+         
+        <IntegratorVelocityVerlet
+            species="H"
+            lambda = "1"
+         />
+
+        <IntegratorScalarLambda
+            species = "H"
+            lambda = "1"
+            scalar = "n"
+            symbol = "n"
+        />
+         
+
+  </Controller>
+<!--
+  <ValCalculatorRho
+    species1="H"
+    species2="H"
+    symbol="n"
+    weightingFunction="Lucy1"
+    allPairs="yes"
+  />
+-->
+  <ValCalculatorNegDKernelDivr
+    allPairs = "yes"
+    symbol = "F"
+    weightingFunction="Lucy1"
+  />
+
+  <ValCalculatorNegDKernelDivr
+     symbol="F1" 
+     species1="H"
+     species2="H"
+     weightingFunction="Lucy1"     
+  />
+
+  <ValCalculatorNegDKernelDivr
+     symbol="F2" 
+     species1="H"
+     species2="wall"
+     weightingFunction="Lucy1"     
+  />
+
+  <ValCalculatorKernel
+    species1 = "H"
+    species2 = "wall"
+    symbol = "W"
+    weightingFunction="Lucy1"
+  />
+
+  <PairParticleTensor
+    species1="H"
+    species2="H"
+    symbol = "D"
+    expression = "Fij*(([vi]-[vj])@[rij]+[rij]@([vi]-[vj]))"
+    particleFactor_i = "unitMat(1/nj)"
+    particleFactor_j = "unitMat(1/ni)"
+    cutoff = "1"
+  />
+  <ParticleTensor
+    species = "wall"
+    expression = "idMat(0)"
+    symbol = "D"
+  />
+
+  <PairParticleTensor
+    species1="H"
+    species2="wall"
+    symbol = "D"
+    particleFactor_j = "Fij*(([vBCij]-[vj])@[rij]+[rij]@([vBCij]-[vj]))/ni"
+    particleFactor_i = "unitMat(0)"
+    cutoff = "1"
+    overwrite = "yes"
+  />
+
+  <ParticleScalar
+    species = "H"
+    expression = "sqrt(0.5*({D}:{D}))"
+    symbol = "g"
+  />
+<!--
+tau_y=(c-1)*eta_l*gammadot_c
+step is to avoid division by 0
+gammadot_creal=0.14564814814814805 s^-1
+tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
+-->
+  <ParticleScalar
+    species = "H"
+    expression = "step(g-0.00000025)*(100+0.024975/(g+1-step(g)))+(1-step(g-0.00000025))*100000"
+    symbol = "eta"
+  />
+
+<!-- It follows a special shear tensor by summation over H-wall pairs only, including normalisation-->
+
+<!-- We try whether B may be used to correct for boundary deficiencies as claimed by Comput. Meth. Appl. Mech. Eng. 190, 225 (There it is not called "B" but in Randles & Libersky Comput. Meth. Appl. Mech. Eng. 139, 375)-->
+
+  <PairParticleTensor
+    symbol = "Binv"
+    expression = "[rij]@[rij]*Fij"
+    particleFactor_i = "unitMat(1/nj)"
+    particleFactor_j = "unitMat(1/ni)"
+    cutoff = "1"
+    species1 = "H"
+    species2 = "wall"
+  />
+
+  <!-- detect the singular zero matrices in the interior and replace them by unit-matrix-->
+  <ParticleTensor
+    symbol = "Binv"
+    expression = "(1-step(abs(det({Binv}))))*idMat(1)+step(abs(det({Binv})))*{Binv}"
+    species = "H"
+    overwrite = "yes"
+  />
+
+  <MatrixInverse
+    symbol = "B"
+    tensor = "Binv"
+    species = "H"
+  />
+
+
+  <PairParticleScalar
+    species1 = "H"
+    species2 = "wall"
+    symbol = "norm"
+    expression = "Wij"
+    particleFactor_i = "1/nj"
+    particleFactor_j = "1/ni"
+    cutoff = "1"
+  />
+
+  <!-- NO self contribution !!!-->
+
+  <!-- the corrected "left" part of the shear tensor-->
+  <PairParticleTensor
+    species1="H"
+    species2="wall"
+    symbol = "Dwall"
+    particleFactor_j = "Fij*(([vBCij]-[vj])@[rij])°{Bj}/(ni)"
+    particleFactor_i = "unitMat(0)"
+    cutoff = "1"
+  />
+
+<!-- needed for the non-stress version -->
+  <PairParticleTensor
+    species1="H"
+    species2="H"
+    expression="[rij]@((-4*etai*etaj*([vi]-[vj])/(ni*nj*(etai+etaj)))+((9.042556731554133*17.576/7)*(((ni/17.576)^7-1)/(ni*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]))*F1ij"
+    symbol = "stress"
+    cutoff="1"
+  /> 
+
+<ParticleTensor
+   species="wall"
+   symbol="stress"
+   expression="idMat(0)"
+/>
+
+  <PairParticleTensor
+     species1="H"
+     species2="wall"
+     expression="[rij]@((-(9.042556731554133*17.576/7)*(((nj/17.576)^7-1)/(nj*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij])+(-2*etawallj*([vj]-[vBCij])/(nj*nj)))*F2ij"
+     symbol = "stress"
+     cutoff="1"
+     overwrite="yes"
+  />
+
+  <!-- left + right part-->
+  <ParticleTensor
+    species = "H"
+    symbol = "Dwall"
+    overwrite = "yes"
+    expression = "{Dwall}+T({Dwall})"
+  />
+
+  <ParticleScalar
+    species = "H"
+    expression = "sqrt(0.5*({Dwall}:{Dwall}))"
+    symbol = "gwall"
+  />
+
+  <ParticleScalar
+    species = "H"
+    expression = "step(gwall-0.00000025)*(100+0.024975/(gwall+1-step(gwall)))+(1-step(gwall-0.00000025))*100000"
+    symbol = "etawall"
+  />
+
+  <DirichletBCVels
+    wallSpecies = "wall"
+    species1 = "H"
+    species2 = "wall"
+  />
+
+  <ParticleScalar
+    species = "H"
+    expression = "100000*yCoord([v])"
+    symbol = "vely"
+  />
+
+  <FPairScalar
+    species1 = "H"
+    species2 = "H"
+    pairFactor = "-([vi]-[vj]):[rij]"
+    weightingFunction = "Lucy1"
+    symmetry = "1"
+    scalar = "n"
+  />
+
+  <FPairVelsWF
+    species1 = "H"
+    species2 = "H"
+    pairFactor = "-4*etai*etaj*([vi]-[vj])/(ni*nj*(etai+etaj))"
+    weightingFunction = "Lucy1"
+    symmetry = "-1"
+  /> 
+
+  <FParticleVels
+    species = "H"
+    expression = "uVecY(0.0006411994773283841)"
+  />
+
+  <FPairVelsWF 
+    species1 = "H"
+    species2 = "H"
+    pairFactor = "(9.042556731554133*17.576/7)*(((ni/17.576)^7-1)/(ni*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
+    weightingFunction = "Lucy1"
+  />
+
+  <FPairVelsWF
+    species1 = "H"
+    species2 = "wall"
+    pairFactor = "(9.042556731554133*17.576/7)*(((nj/17.576)^7-1)/(nj*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
+    weightingFunction = "Lucy1"
+  />
+
+  <FPairVelsWF
+    species1 = "H"
+    species2 = "wall"
+    particleFactor_j = "-2*etawallj*([vj]-[vBCij])/(nj*nj)"
+    particleFactor_i = "idVec(0)"
+    weightingFunction = "Lucy1"
+    symmetry = "1"
+   />
+
+  <FPairScalar
+    species1 = "H"
+    species2 = "wall"
+    particleFactor_j = "-([vj]-[vBCij]):[rij]"
+    particleFactor_i = "0"
+    weightingFunction = "Lucy1"
+    symmetry = "1"
+    scalar = "n"
+  />
+
+  <Phase
+    smartCells = "0"
+  >
+        <LinkedListCreator/>
+<!-- We try 8 particles -->
+        <BoundaryCuboid
+           boxX = "3.3846153846153837"
+           boxY = "3.076923077"
+           boxZ = "2.3076923077"
+           periodicX = "no"
+           periodicY = "yes"
+           periodicZ = "yes"
+        >
+
+        <ReflectorMirror/>
+
+        <ParticleCreatorWall
+          density = "17.576"
+          species = "wall"
+          n = "17.576"
+        />
+
+                <ParticleCreatorLattice
+                   species = "H"
+                   density = "17.576"
+                   n = "17.576"
+                   u = "0*u"
+                   v = "0"
+                   w = "0*w"
+                   temperature = "10000"
+                />
+
+   </BoundaryCuboid>
+
+   </Phase>
+
+   <MeterAverage
+     measureEvery = "10"
+   >
+
+        <Pressure species ="H"/>
+        <Density/>
+        <Temperature species = "H"/>
+        <LocalDensity
+                species = "H"
+                densitySymbol="n"
+        />
+        <LocalDensity
+                species = "H"
+                densitySymbol="n"
+        />
+        <Scalar species = "H" symbol = "vely"/>
+        <OutputFile nameOutputFile = "bivisco.dat" multipleFiles = "no"/>
+
+   </MeterAverage>
+
+   <GridAveragerStructured
+     nX = "14"
+     nY = "1"
+     nZ = "1"
+     measureEvery = "20"
+   >
+     <Velocity species = "H"/>
+     <Scalar symbol = "n" species = "H"/>
+     <Scalar species = "H" symbol = "g"/>
+     <Scalar species = "H" symbol = "eta"/>
+     <Scalar species = "H" symbol = "gwall"/>
+     <Scalar species = "H" symbol = "etawall"/>
+     <Scalar species = "H" symbol = "norm"/>
+     <Scalar species = "H" symbol = "vely"/>
+
+     <OutputFile nameOutputFile = "grid/vels.dat" multipleFiles = "yes"  columns = "H_velocity_mean|H_n^1|H_g^1|H_gwall^1|H_eta^1|H_etawall^1|H_norm^1|H_vely^1"/>
+
+   </GridAveragerStructured>
+
+   <MeterPosVel measureEvery = "1" species = "H" withFrozen = "no">
+
+        <OutputVTK nameOutputFile = "pos/pos.vtk" format = "ascii"/>
+
+   </MeterPosVel>
+
+   <MeterPosVel measureEvery = "1" species = "wall" withFrozen = "yes">
+
+        <OutputVTK nameOutputFile = "posFrozen/pos.vtk" format = "ascii"/>
+
+   </MeterPosVel>
+
+</Simulation>

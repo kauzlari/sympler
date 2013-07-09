@@ -1,0 +1,235 @@
+
+<Simulation
+	simName="part_with_fluid"
+	inputFromResults="1"
+	wtDistEps="-1e-10"
+        
+>							
+	<Square
+		cutoff="1"
+		name="L1" />
+	<Square
+		cutoff="0.75"
+		name="L075" />
+  <Controller
+  	timesteps="1000"
+	statusEvery="10"
+	dt="0.001">
+    <IntegratorVelocityVerletDisp
+    	species = "fluid"
+        displacement = "d"
+        symbol = "d"        
+	lambda = "0.5"
+    />
+    <IntegratorVelocityVerletDisp
+    	species = "solida"
+	lambda = "0.5"
+        displacement = "d"
+        symbol = "d"        
+    />
+    <IntegratorVelocityVerletDisp
+    	species = "solidb"
+	lambda = "0.5"
+        displacement = "d"
+        symbol = "d"        
+    />
+    <IntegratorScalar
+    	species = "wall"
+    />
+  </Controller>
+	<ValCalculatorRho
+		symbol="n"
+		weightingFunction="L1"
+		species1="fluid"
+		species2="fluid"
+		selfContribution="false"/>
+
+	<FPairVelsWF
+		species1="fluid"
+		species2="fluid"
+		pairFactor="-1/4.7746*[rij]/rij*750"
+		weightingFunction="L1" />
+	<FPairVelsWF
+		species1="fluid"
+		species2="fluid"
+		pairFactor="3.14159265*0.75^4/15*(ni+nj)*[rij]/rij*40"
+		weightingFunction="L075" />
+        <FPairVelsWF
+                pairFactor="-1/4.7746*[rij]/rij*500"
+                species1="fluid"
+                species2="wall"
+                weightingFunction="L1"/>
+        <FPairVelsWF
+                pairFactor="3.14159265*0.75^4/15*2*ni*[rij]/rij*40"
+                species1="fluid"
+                species2="wall"
+                weightingFunction="L075"/>
+        <FPairVelsWF
+                pairFactor="-1/4.7746*[rij]/rij*800"
+                species1="fluid"
+                species2="solida"
+                weightingFunction="L1"/>
+        <FPairVelsWF
+                pairFactor="3.14159265*0.75^4/15*2*ni*[rij]/rij*40"
+                species1="fluid"
+                species2="solida"
+                weightingFunction="L075"/>
+        <FPairVelsWF
+                pairFactor="-1/4.7746*[rij]/rij*800"
+                species1="fluid"
+                species2="solidb"
+                weightingFunction="L1"/>
+        <FPairVelsWF
+                pairFactor="3.14159265*0.75^4/15*2*ni*[rij]/rij*400"
+                species1="fluid"
+                species2="solidb"
+                weightingFunction="L075"/>
+  <FParticleVels
+  	species ="solida"
+        expression = "uVecZ(-0.1)"
+  />  
+  <FParticleVels
+  	species ="solidb"
+        expression = "uVecZ(-0.1)"
+  /> 
+  <ConnectBasic
+  	forceName = "springa"
+	pairFactor = "5000*(0.333-rij)*[rij]/rij"
+	species1 = "solida"
+	species2 = "solida"
+  />
+  <ConnectBasic
+  	forceName = "springda"
+	pairFactor = "5000*(0.333*1.4142-rij)*[rij]/rij"
+	species1 = "solida"
+	species2 = "solida"
+  />
+  <ConnectBasic
+  	forceName = "springb"
+	pairFactor = "5000*(0.333-rij)*[rij]/rij"
+	species1 = "solidb"
+	species2 = "solidb"
+  />
+  <ConnectBasic
+  	forceName = "springdb"
+	pairFactor = "5000*(0.333*1.4142-rij)*[rij]/rij"
+	species1 = "solidb"
+	species2 = "solidb"
+  />
+  <ConnectBasic
+  	forceName = "springab"
+	pairFactor = "5000*(0.333-rij)*[rij]/rij"
+	species1 = "solida"
+	species2 = "solidb"
+  />
+  <ConnectBasic
+  	forceName = "springdab"
+	pairFactor = "5000*(0.333*1.4142-rij)*[rij]/rij"
+	species1 = "solida"
+	species2 = "solidb"
+  />
+  <FAngular
+  	forceName = "thspringa"
+	K = "6000"
+	thetaEq = "180"
+  />
+  <FAngular
+  	forceName = "thspringb"
+	K = "6000"
+	thetaEq = "180"
+  />
+
+	<ThermostatPetersIso
+		temperature = "5"
+		dissipation = "20"
+		species1 = "fluid"
+		species2 = "fluid"
+		weightingFunction = "L1" />
+	<ThermostatPetersIso
+		temperature = "0.00000000001"
+		dissipation = "3000"
+		species1 = "solida"
+		species2 = "solida"
+		weightingFunction = "L1" />
+	<ThermostatPetersIso
+		temperature = "0.00000000001"
+		dissipation = "3000"
+		species1 = "solida"
+		species2 = "solidb"
+		weightingFunction = "L1" />
+	<ThermostatPetersIso
+		temperature = "0.00000000001"
+		dissipation = "3000"
+		species1 = "solidb"
+		species2 = "solidb"
+		weightingFunction = "L1" />
+
+   <Phase
+  	smartCells = "1"
+   >
+   <VerletCreator
+      skinSize = "0.2"
+      displacement = "d"
+   />
+    <BoundaryCuboid
+    	boxX = "4"
+	boxY = "4"
+	boxZ = "4"
+	periodicX = "yes"
+	periodicY = "yes"
+	periodicZ = "no"
+    >
+      <ReflectorThermalize oneHit="true" temperature="5"/>
+      <ParticleCreatorFile
+      nameInputFile="particlesNewSmall.pos"
+      />
+      <ParticleConnectorFile
+      species = "solida solidb"
+      nameInputFile = "connectorsNewSmall.con"
+      />
+       <ParticleCreatorStatic
+           density="20"
+           species="fluid"
+           corner1 = "(1.25,1.25,-0.5)"
+           corner2 = "(2.75,2.75,1.0)"
+           temperature = "5"
+	   ellipsoid = "true"
+	/>
+	<ParticleCreatorWall
+		density="20"
+		species="wall" />
+    </BoundaryCuboid>
+  </Phase>
+        <MeterAverage avgOver="1" measureEvery="1">
+                <Temperature species="fluid"/>
+                <OutputFile
+                nameOutputFile="part_with_fluid.dat"
+                multipleFiles="no"/>
+        </MeterAverage>
+<!--
+  <MeterPosVel
+    species = "fluid"
+  >
+    <OutputVTK nameOutputFile="pos/fluid.vtk" format="ascii"/>
+  </MeterPosVel>
+
+  <MeterPosVel
+    species = "solida"
+  >
+    <OutputVTK nameOutputFile="pos/solida.vtk" format="ascii"/>
+  </MeterPosVel>
+
+  <MeterPosVel
+    species = "solidb"
+  >
+    <OutputVTK nameOutputFile="pos/solidb.vtk" format="ascii"/>
+  </MeterPosVel>
+
+  <MeterPosVel
+    species = "wall" withFrozen = "yes"
+  >
+    <OutputVTK nameOutputFile="pos/wall.vtk" format="ascii"/>
+  </MeterPosVel>
+-->
+  
+ </Simulation>

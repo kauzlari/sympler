@@ -1,0 +1,83 @@
+
+The latin numbers stand for the complexity of the implementation.
+PRIMARY and SECONDARY tells you how important this new feature is. The features at the top are those, which were missed most recently.
+
+PRIMARY:
+
+(II) Implement Cell-subdivision with cell-sizes >= 0.5*cutoff. Implement the choice of the factor (0.5 or 1) either as option in current ManagerCell, or in new class. In the latter case you maybe do not have to make the choice between two modules in the XML, but a parent class can decide based on an attribute, which ManagerCell it creates
+
+(II) VerletCreator (and VLYaoCreator if already efficient, which it currently 2013-05-16 is not, but in a few days maybe): If we have many species, we could restrict the update of PairLists to those colour-pairs containing the colour that has provoked the update
+
+(III) Allow for cache-coherence: Store all particle-DOFs (and pair-DOFs) in separate continuous-memory arrays, probably using SmartLists as now for the particles and pairs.
+
+(II) We urgently need to implement the stability condition dt < const*min_i(sqrt(h/F_i)), where "dt" is the timestep, "const" is a constant which seems to be 0.25 for leapfrog- and predictor-corrector-like time integrators, "h" is a smoothing length that we should probably set equal to the average particle spacing and "F_i" is the absolute value of the total force acting on particle "i". This should be implemented in the integrators integrating positions and velocities in such a way that we get an adaptive time-step based on this criterion. Maybe, this is then extendible to include additional criteria, e.g., based on locally varying transport parameters such as a viscosity. 
+
+(II) testsuite/test_sympler.pl: A solution for the problem of (hopefully) false difference detection because of numerical precision would be to compare the result files numerically and not string based. This would allow to define an epsilon of say 1e-17 below which the differences are considered to be negligible
+
+(II) Can't we add the force-member of the particle to the known runtime-compiled expressions? Probably we have to find a way to deal with the fact that there is usually more than one force (due to the time-integration and the indexing) and that the "newest" force is not always in the same storage place.  
+
+(II) create a SpeciesCreator which just creates species but no DOFs like Integrators
+
+(II) In order not to recalculate constant quantities: 
+Create for each data-type a Particle*Constant. For this, create also a parent-class ParticleCacheConstant. Do we need some additional parent-class for ParticleCacheConstant and ParticleCacheArbitrary or is ParticleCache enough?
+
+(III) why are pair interactions with a tensor so slow (e.g. strain rate) ?
+
+(II) make it possible to define the density in inlets EXACTLY, by computing the volume of the inlet ((cross-sectional area)*length ) for scaling of a grid or randomized set of particles with known density. The cross-sectional area can be computed by summing up the areas of the triangles it is made of
+
+(II) the distances of free particles without IntegratorPosition do not change -> can we save some computational time by skipping some loops over pairs concerning dependencies on distances?
+
+(I)   Create header file containing ALL string identifiers
+
+(I)   make isInside use Cells (CellManager::isInside???)
+
+(I)   ValCalculatorRho reserves memory in Pairdist although it does not need it
+
+(III) make adding of inlets more flexible with respect to
+	- more than one inlet with more than one flow-direction
+	- periodic surface not necessarily at rim of the simulation box
+	- periodicity may be shifted in directions which lie in periodic plane
+
+------------------------------------------------------------------------
+SECONDARY:
+
+(II) Do we really need to compute Pairdist:m_distance.abs or can we save some computational time here? 
+
+(II) Currently, the creation of particles at desired positions in a geometry which was imported from an STL-file depends on the coordinates used in the STL-file. They might be stupid, e.g., the centre having a large offset from zero. -> Centre the geometry when reading it in so that for each coordinate alpha alpha_max+alpha_min=0. Maybe add an option to BoundarySTL where one can specify the centre manually (default = (0,0,0)).
+
+(I) do we still need the function link_all_properly() in main.cpp ?
+
+(II) Improve the use of .pos-files for restart:
+- save Controller:m_force_index and write it into the Controller at restart
+- save position-forces and read them at restart
+- same for additional-DOF-forces
+ 
+(II) currently, (at least) for GridAveragerStructured, it may happen that the centre of a cell lies behind the wall but measures, e.g., a velocity >0 because of the cell region lying in the flow domain. How to improve that? Special cells at the walls, with complicated structure, which lie completely in the flow domain?
+
+other:
+
+(III) How about transfering the particle administration completely into the cells; this would remove, e.g., the problem of the slow Phase::removeParticle(int index)
+
+(II) a global list of strings for all used output-file names for checking if some module tries to create an already existing file.
+
+(II) Inlet-Outlet Problem:
+     - THINKABOUTANDFIX: currently, a front does not behave correctly at an outflow, since particles simply killed
+     - Feedback loop for constant volumeflow
+
+(II) check, how the GSL that we use is compiled. If it is not optimized, compare optimized GSL functions with the ones from random.* (only what we need) and decide, what is faster. Currently, the random.* routines are faster (because optimized?)
+
+(II)  Fix all the hacks marked by "fixme!"
+
+(II) For the case that once, frozenP without walls will become necessary: give atribute frozen = 0/1 to every ParticleCreator (for PCWall it is always 1, i.e., has no effect). Each PC with frozen=1 will write ITSELF in the output-file and NOT a PCFile.
+
+(II)  Look at MeterVisco. Probably doesn't work anymore.
+
+(III)  Adaptive cell subdivision. Would be really nice regarding parallelization: The number of particles per cell could be kept constant so the load can be distributed uniformely across the machines
+
+(III) implement a function freezeParticle() (and maybe unfreeze...) and test if we can use that for solidification; e.g. if(p.Ekin<limit) freezeParticle(p) -> size of frozen Arrays would also become variable !!!
+
+(III) randomly arranged frozen particles: taken from coordinates of a previous simple simulation; we could
+	- run this sim directly before
+	- or take the coords from an other available output file
+	- repeat the coordinates periodically, if the input system is too small for the desired simulation
+

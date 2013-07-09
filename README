@@ -1,0 +1,321 @@
+
+/*
+ * This file is part of the SYMPLER package.
+ * https://github.com/kauzlari/sympler
+ *
+ * Copyright 2002-2013, 
+ * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * and others authors stated in the AUTHORS file in the top-level 
+ * source directory.
+ *
+ * SYMPLER is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SYMPLER is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with SYMPLER.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Please cite the research papers on SYMPLER in your own publications. 
+ * Check out the PUBLICATIONS file in the top-level source directory.
+ *
+ * You are very welcome to contribute extensions to the code. Please do 
+ * so by making a pull request on https://github.com/kauzlari/sympler
+ * 
+ */
+
+
+SYMPLER: SYMbolic PaerticLE simulatoR
+
+
+______________________________________________________________________
+Field of application:
+
+The need for a unified flexible and modular simulation tool allowing for the investigation of structural, thermodynamic, and dynamical properties of fluids and solids from microscopic over mesoscopic up to macroscopic time and length scales with suitable particle based simulation methods such as molecular dynamics, dissipative particle dynamics or smoothed particle hydrodynamics. The user should be enabled to define her/his own physical models without the need for recoding or code extensions.
+
+
+______________________________________________________________________
+Main features of SYMPLER:
+
++ Modular object oriented structure that is passed to the user level and allows to easily switch among different integration algorithms, particle interaction forces, boundary conditions, etc. 
++ Arbitrary number of particle-species for the simulation of complex multi-component systems 
++ Arbitrary number of additional user-defined degrees of freedom per particle-species 
++ Symbolic definition of runtime compiled mathematical expressions for particle interactions 
++ Import of CAD-geometries in the STL-format
+
+
+______________________________________________________________________
+Compiling SYMPLER:
+
++ Required tools for configuration and compilation: 
+
+++ the GNU autotools (aclocal, libtool, autoconf, automake, etc.)
+++ a C++ compiler such as GNU g++
+++ a C compiler such as GNU gcc
+
+
++ Required libraries: GNU scientific library (GSL), libxml2
+
++ Optional libraries: 
+
+++ libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.
+++ OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during configuration (CXXFLAGS="... -fopenmp").
+++ libtnt, libjama, libsuperlu: Use the options --with-tnt --with-superlu during configuration. This allows for: 
++++ coupling of particles to a linear system of equations solver with module IntegratorLSE
++++ the module for velocity constraints VelConstraints
++++ the integrator IntegratorVelocityVerletPressure
+
+
++ Configuration and Compilation:
+
+All the commands invoked in the following have there own documentation. Please refer to it for more information. It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special instructions for MacOS.
+
+++ Configuration and Compilation for standard Linux-systems:
+
+Assuming your source-code directory is $SOURCE-DIR, the series of commands that usually works is:
+
+$ cd $SOURCE-DIR
+$ libtoolize --force
+$ aclocal
+$ autoconf
+$ automake --add-missing
+
+Then, assuming your build-directory is $BUILD-DIR (it might be the same or different to $SOURCE-DIR):
+
+$ cd $BUILD-DIR
+$ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
+$ make -j[1 to roughly the number of available cores]
+
+After successful compilation the executable "sympler" will be created in the directory src/ 
+Useful [cxxflags] are (for more see the g++ documentation):
+
+-O3: for optimised compilation with g++
+-fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)
+
+and useful [options] are:
+
+--with-tnt: use tnt library and jama libraries
+--with-superlu: use superlu 
+--enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries (except the runtime compiled expressions of course). Unfortunately this option currently causes SYMPLER to crash very often. We have this bug on our list. Further bug reports on this issue are welcome. A bug-fix is even more welcome. 
+
+
+++ Configuration and Compilation for MacOS
+
+The following instructions were last succesfully tested with Mac OS 10.6.8 and have been provided by Oliver Gruenert and Andreas Greiner.  
+
+The libxml2 library comes already preinstalled by Apple. The easiest way to get the two remaining ones is to use one of the packaging-systems for Mac OS.
+
+One of the best packaging-systems is homebrew. You can grab it and get a how-to install from http://github.com/mxcl/homebrew. Two nice properties of homebrew are, that it is easy to install and very easy to UNINSTALL, meaning that your operating system will be the same as before, without any old header or binary files lying around. The best way (also mentioned on http://github.com/mxcl/homebrew) is to install it in /usr/local and then 
+
+$ sudo chown -R `whoami` /usr/local
+
+After homebrew is installed, you are ready to install the GSL and the SDL library. To install GSL type
+
+$ brew install gsl 
+
+into your terminal. 
+Then, to install SDL type
+ 
+$ brew install sdl 
+
+into your terminal. 
+
+Try first to skip this paragraph because the next step is only necessary if you run into trouble with your already preinstalled command-line tool gm4 (a macro processor used by aclocal). Then you need to replace it with a newer version, since the old version which came from Apple was broken. This was the case for example in MacOS 10.6.2. You can grab the most recent version from http://ftp.gnu.org/gnu/m4/. Now drag the old gm4 tool in /usr/bin to a backup folder (for example your Desktop) and replace it with the newer version (you will be asked to enter your root password).
+
+Now you are ready to compile sympler! So grab the moldyn source code into a code directory (called $CODE-DIR here) and create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal:
+
+$ cd $CODE-DIR
+$ aclocal -I /usr/local/Cellar/gsl/1.13/share/aclocal -I /usr/local/Cellar/sdl/1.2.14/share/aclocal
+$ autoconf
+$ glibtoolize --force. 
+$ automake --add-missing
+
+$ cd $BUILD-DIR
+$ $CODE-DIR/configure CXXFLAGS="-O3" --disable-shared
+$ make -j[1 to roughly the number of available cores]
+
+After successful compilation the executable "sympler" will be created in the directory src/ 
+
+
+++ SYMPLER and Intel compilers:
+
+A few hints when using icc (the Intel C++ compiler) for SYMPLER:
+
+++ Set the environment variable LANG=C
+++ If using autoparallelization, set LD_LIBRARY_PATH to the lib directory of icc
+++ -ipo gave problems with linking
+
+Otherwise, compilation worked fine. A good configure invocation might look like (adapt the paths to your needs):
+
+export LANG=C;
+export LD_LIBRARY_PATH=/simstorage/software/intel/cpp11/lib/intel64;
+../sympler/configure CXX=/simstorage/software/intel/cpp11/bin/intel64/icc \
+CC=/simstorage/software/intel/cpp11/bin/intel64/icc LDFLAGS='-lstdc++ -lz' \
+CXXFLAGS="-O3 -ip -parallel -funroll-loops -complex-limited-range \
+-IPF-fma -IPF-fltacc -IPF-fp-relaxed -fp-model=fast -no-debug -xSSE4.1 \
+-mcmodel=medium -falign-functions -opt-calloc -unroll-aggressive" 
+
+
+______________________________________________________________________
+Running SYMPLER
+
+A static executable will work, if your glibc is roughly the same as the one, which was used for compilation. Additionally executables are specific to 32 and 64 bit platforms, respectively. The modules MeterLive and MeterLiveColoured are not activated in a static version. Alternatively you can use a dynamically linked version.
+
+A dynamic executable needs at least the following libraries installed:
+
+    gsl (GNU scientific library)
+    libxml2 (for parsing the input files)
+
++ Starting the executables
+
+Assuming you have an executable with name sympler in the directory $BUILD-DIR, just type
+
+$ $BUILD-DIR/sympler
+
+and you will be told the further options you may try in order to really get s.th. useful out of the code. For example
+
+$ $BUILD-DIR/sympler --help 
+
+gives a general help text.
+
+$ $BUILD-DIR/sympler --help all
+
+lists the help text for all available modules
+
+$ $BUILD-DIR/sympler --help [UNKNOWN]
+
+gives you a list of all groups of modules you may request help for if [UNKNOWN] is an argument that sympler does not understand. For example you may get help for the Integrators with 
+
+$ $BUILD-DIR/sympler --help Integrators
+
+To really start a simulation type
+
+$ $BUILD-DIR/sympler [INPUT-FILE]
+
+where [INPUT-FILE] is an input file in xml-format.
+
+
++ Input files
+
+The code has a modular structure. This is reflected in the input files by using the XML-format (for further information on XML see: http://www.w3schools.com/xml/default.asp). A quick glance at the input files and the online-help text of the executable should be enough to understand how it works. All modules and their attributes are described in the online-help. A bit of definition: The XML-expression <ModuleName attributeName = "value" /> shows you the difference between a module name, an attribute name and the value assigned to the latter. Compare this with the example given below. If you play around with parameters, be aware of possible simulation instabilities due to a timestep being to large for your chosen parameters. In this case you will obtain some message that a particle flew to far. The timestep can be modified in the module <Controller> with the attribute dt. The number of timesteps can be changed with the attribute timesteps. All quantities have to be given in units of your choice for instance in such a way that the Boltzmann constant may be set to 1. All simulations are 3D. Quasi-2D-simulations can be performed by applying periodic boundary conditions. Real 2D simulations can be performed by enforcing interactions to happen only in 2D.  
+
+Here is a small example. The newest version of SYMPLER might complain because some modules or attributes are out-dated, but the general idea should become clear:
+
+<?xml version="1.0"?>
+<!DOCTYPE Simulation SYSTEM "/home/lieneman/Projekte/NanoSAVE/Moldyn/moldyn.dtd">
+<Simulation
+        simName="MDPD simulation"
+        inputFromResults="yes">
+        <Square
+                cutoff="1"
+                name="L1" />
+        <Square
+                cutoff="0.75"
+                name="L075" />
+        <Controller
+                timesteps="100000"
+                statusEvery="10"
+                dt="0.001">
+                <IntegratorVelocityVerlet
+                        species="H" />
+        </Controller>
+        <ValCalculatorRho
+                symbol="n"
+                weightingFunction="L1"
+                species1="H"
+                species2="H"
+                selfContribution="false"/>
+    <!-- Fluid-fluid, attractive -->
+        <FPairVels
+                species1="H"
+                species2="H"
+                pairFactor="-1/4.7746*[rij]/rij*750"
+                weightingFunction="L1" />
+    <!-- Fluid-fluid, repulsive -->
+        <FPairVels
+                species1="H"
+                species2="H"
+                pairFactor="3.14159265*0.75^4/15*(ni+nj)*[rij]/rij*40"
+                weightingFunction="L075" />
+        <ThermostatPetersIso
+                temperature = "15"
+                dissipation = "5"
+                species1 = "H"
+                species2 = "H"
+                weightingFunction = "L1" />
+        <Phase>
+                <LinkedListCreator/>
+                <BoundaryCuboid
+                        boxX="32"
+                        boxY="32"
+                        boxZ="32"
+                        periodicX="yes"
+                        periodicY="yes"
+                        periodicZ="no">
+                        <ReflectorThermalize
+                                temperature="15"
+                                oneHit="true"/>
+                        <ParticleCreatorStatic
+                                density="20"
+                                species="H"
+                                corner1 = "(10,10,18)"
+                                corner2 = "(22,22,6)"
+                                temperature = "5"
+                                ellipsoid = "true" />
+                </BoundaryCuboid>
+        </Phase>
+        <MeterPosVel
+                measureEvery="1000"
+                species="H">
+                <OutputVTK
+                fileName="results/posvel_prepare.vtk"
+                format="ascii"></OutputVTK>
+        </MeterPosVel>
+        <GridAveragerStructured
+                avgOver="50"
+                measureEvery="1000"
+                nX="16" nY="16" nZ="16">
+                <Pressure species="H"/>
+                <OutputFile
+                        fileName="results/gas_pressure.dat"
+                        multipleFiles="yes"
+                        columns = "H_pressure_mean" />
+        </GridAveragerStructured>
+</Simulation>
+
+Besides reading the help text, another way to quickly find out which attributes are allowed for a specific module, is to type some non-sense which most likely does not correspond to any attribute.
+
+
++ Runtime compiled expressions
+
+In the example file you see some of them. For example "...(ni+nj)*[rij]/rij*40 where 'n' is a user defined scalar symbol, [rij] is the distance vector [ri]-[rj] for particle pair (i,j) and 'rij' is its absolute value. Single indices 'i', 'j' denote a particle property while double indices 'ij' denote the property of the pair of particles. Type
+
+$ $BUILD-DIR/sympler --help expressions
+
+for a complete overview of possible elements of runtime compiled expressions. Help for the two module-groups Forces and Symbols that use runtime-compiled expressions the most you can get with
+
+$ $BUILD-DIR/sympler --help Forces
+$ $BUILD-DIR/sympler --help Symbols
+
+Further check the PUBLICATIONS file for publications explaining further details.
+
+
+______________________________________________________________________
+Postprocessing
+
+SYMPLER produces output in various ASCII and binary formats, for example VTK, simple column data, or binary arrays of data. First of all you need Meters in your input file. Check
+
+$ $BUILD-DIR/sympler --help Meters
+
+In the above example we have two Meters, namely MeterPosVel and GridAveragerStructured. The thing is that a Meter itself usually does not create any output. It just collects data. GridAveragerStructured is even lazier and lets GridMeters do the work. Check
+
+$ $BUILD-DIR/sympler --help GridMeters
+
+GridMeters are also Meters. Hence they also collect data and nothing else. For output you have to attach PostProcessors to the Meters. In the aexample above you can find two of them: OutputVTK and OutputFile. Check
+
+$ $BUILD-DIR/sympler --help Postprocessors

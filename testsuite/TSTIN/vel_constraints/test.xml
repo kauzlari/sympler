@@ -1,0 +1,229 @@
+<!--Simulating a slit flow with a volumetric flow rate constraint-->
+<Simulation
+	   simName = "vel_constraints"
+	   inputFromResults = "1"
+	   wtDistEps = "-1e-10"
+	   >
+	
+	<Lucy cutoff = "1" name = "bla"/>
+	
+	<InputWF
+		cutoff = "1"
+		interpolation = "(step(r)-step(r-0.2))*(1-(150/23)*r^2+(375/23)*r^4)+(step(r-0.2)-step(r-0.6))*(2/23)*(11-5*r*(-2+5*r*(6+5*r*(r-2))))+step(r-0.6)*(125/46)*(r-1)^4"
+		selfContribution = "2875/(256*pi)"
+		weight = "(15625/(1024*pi))*((step(r)-step(r-0.2))*48*(0.2-r^2)+(step(r-0.2)-step(r-0.6))*(19.2-0.64/r-48*r+32*r^2)+step(r-0.6)*(-8*(r-1)^3)/r)"
+		name = "Lucy1"
+		/>
+	<Controller
+		   timesteps = "400"
+		   dt = "0.1"
+		   >
+
+		<!--adds an additional degree of freedom, n is the particle density for the wall particles-->
+		<IntegratorScalarLambda
+				       species = "wall"
+				       lambda = "1"
+				       scalar = "n"
+				       symbol = "n"
+				       />
+		<IntegratorVelocityVerletDisp
+					 species="H"
+					 lambda = "1"
+                                         displacement = "d"
+                                         symbol = "d"
+					 />
+		<!--adds an additional degree of freedom, n is the particle density for the wall particles-->
+		<IntegratorScalarLambda
+				       species = "H"
+				       lambda = "1"
+				       scalar = "n"
+				       symbol = "n"
+				       />
+
+
+		
+  </Controller>
+  <!--needed because Fij should be muliplied with the experssion for particle-pair, in FPairVels it is automatically-->
+  <ValCalculatorNegDKernelDivr
+			      allPairs = "yes"
+			      symbol = "F"
+			      weightingFunction="Lucy1"
+    />
+ 
+  <!--Saves a pair specific values of the velocity of the boundary particle so that the Dirichler BC are satisfied-->
+
+  <DirichletBCVels
+			       wallSpecies = "wall"
+			       species1 = "H"
+			       species2 = "wall"
+					     />
+
+  <!--contiunity or computation of density-->
+  <FPairScalar
+	      species1 = "H"
+	      species2 = "H"
+	      pairFactor = "-([vi]-[vj]):[rij]"
+	      weightingFunction = "Lucy1"
+	      symmetry = "1"
+	      scalar = "n"
+	      />
+  
+
+  <!--viscosity forces -->
+  <FPairVelsWF
+	    species1 = "H"
+	    species2 = "H"
+	    pairFactor = "-2*1*([vi]-[vj])/(ni*nj)"
+	    weightingFunction = "Lucy1"
+			  />
+  <PairParticleVector
+    species1 = "H"
+    species2 = "H"
+    expression = "-2*1*([vi]-[vj])/(ni*nj)"
+    symbol = "FEta"
+    cutoff = "1"
+    symmetry="-1"
+  />
+<!--pressure forces-->
+		
+<FPairVelsWF
+			  species1 = "H"
+			  species2 = "H"
+			  pairFactor = "(0.000002843771238760281*17.576/7)*(((ni/17.576)^7-1)/(ni*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
+			  weightingFunction = "Lucy1"
+			  />
+		  <PairParticleVector
+			  species1 = "H"
+			  species2 = "H"
+			  expression = "(0.000002843771238760281*17.576/7)*(((ni/17.576)^7-1)/(ni*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
+			  symbol = "FP"
+			  cutoff = "1"
+			  symmetry="-1"
+			  />
+
+		<!--Boundary conditions for pressure forces; here i is the wall, j is the fluid-->
+		<FPairVelsWF
+			  species1 = "H"
+			  species2 = "wall"
+			  pairFactor = "(0.000002843771238760281*17.576/7)*(((nj/17.576)^7-1)/(nj*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
+			  weightingFunction = "Lucy1"
+			  />
+		  <PairParticleVector
+		    species1 = "H"
+		    species2 = "wall"
+		    expression = "(0.000002843771238760281*17.576/7)*(((nj/17.576)^7-1)/(nj*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
+		    symbol = "FPWall"
+		    cutoff = "1"
+		    symmetry="-1"
+		  />
+		<!--Boundary conditions viscous forces-->
+ 
+		<FPairVelsWF
+			  species1 = "H"
+			  species2 = "wall"
+			  particleFactor_j = "-2*1*([vj]-[vBCij])/(nj*nj)"
+			  particleFactor_i = "idVec(0)"
+			  weightingFunction = "Lucy1"
+			  symmetry = "1"
+			  />
+		<PairParticleVector
+		  species1 = "H"
+		  species2 = "wall"
+		  particleFactor_j = "-2*1*([vj]-[vBCij])/(nj*nj)"
+		  particleFactor_i = "idVec(0)"
+		  symbol = "FEtaWall"
+		  cutoff = "1"
+		  symmetry="1"
+		/>
+		<!--Boundary conditions computation of density-->
+		<FPairScalar
+			    species1 = "H"
+			    species2 = "wall"
+			    particleFactor_j = "-(-[vj]):[rij]"
+			    particleFactor_i = "0"
+			    weightingFunction = "Lucy1"
+			    symmetry = "1"
+			    scalar = "n"
+			    />
+
+<VelConstraints
+		species="H"
+		vels_expression="uVecZ(0.0000010477021997840626)"
+		symbol="CorImpulse"
+		velcorr="CorImpulse"
+/>
+
+		<ParticleScalar
+			       species = "H"
+			       symbol = "CorImpulse_Z"
+			       expression ="zCoord([CorImpulse])*1e8"
+  />
+		
+
+<ParticleVector
+			     species = "H"
+			     expression = "([FEta]+[FP]+[FEtaWall]+[FPWall])*1e6"
+			     symbol = "Fsum"
+					  />
+	
+	<Phase
+		 smartCells = "0"
+  	>
+		<VerletCreator
+                  skinSize = "0.15"
+                  displacement = "d"
+                />
+
+		<BoundaryCuboid
+			       boxX = "8.384615384615383"
+			       boxZ = "2.3076923076923075"
+			       boxY = "2.3076923076923075"
+			       periodicX = "no"
+			       periodicY = "yes"
+			       periodicZ = "yes"
+        			>
+			
+			<ReflectorMirror/>
+			
+			<ParticleCreatorWall
+					    density = "17.576"
+					    species = "wall"
+					    n = "17.576"
+					    />
+		
+<ParticleCreatorLattice
+					       species = "H"
+					       density = "17.576"
+					       n = "17.576"
+					       u = "0"
+					       v = "0"
+					       w =  "0"
+
+                			    />
+
+
+			
+		</BoundaryCuboid>
+		
+	</Phase>
+	<MeterAverage
+		     measureEvery = "100"
+		     >
+		<Velocity species = "H"/>
+		<LocalDensity
+			     species = "H"
+			     densitySymbol="n"
+			     />
+
+<!--normal velocity scaled-->
+		<Scalar species="H"
+			symbol="CorImpulse_Z"
+					/>
+
+
+		<OutputFile nameOutputFile = "vel_constraints.dat" multipleFiles = "no"/>
+		
+   </MeterAverage>
+
+	
+</Simulation>
