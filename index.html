@@ -1,0 +1,344 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Sympler by kauzlari</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Sympler</h1>
+        <p class="header">SYMPLER: SYMbolic ParticLE simulatoR</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/kauzlari/sympler/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/kauzlari/sympler/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/kauzlari/sympler">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/kauzlari">kauzlari</a></p>
+
+
+      </header>
+      <section>
+        <p>Copyright 2002-2013, David Kauzlaric and other authors listed in the <a href="https://github.com/kauzlari/sympler/blob/master/AUTHORS">AUTHORS</a> file.<br>
+This program comes with ABSOLUTELY NO WARRANTY; for details see the <a href="https://github.com/kauzlari/sympler/blob/master/LICENSE">LICENSE</a> file.<br>
+This is free software, and you are welcome to redistribute it under certain conditions; for details see the <a href="https://github.com/kauzlari/sympler/blob/master/LICENSE">LICENSE</a> file.</p>
+
+<hr><h1>
+<a name="field-of-application" class="anchor" href="#field-of-application"><span class="octicon octicon-link"></span></a>Field of application:</h1>
+
+<p>The need for a unified flexible and modular simulation tool allowing for the investigation of structural, thermodynamic, and dynamical properties of fluids and solids from microscopic over mesoscopic up to macroscopic time and length scales with suitable particle based simulation methods such as molecular dynamics, dissipative particle dynamics or smoothed particle hydrodynamics. The user should be enabled to define her/his own physical models without the need for recoding or code extensions.</p>
+
+<hr><h1>
+<a name="main-features-of-sympler" class="anchor" href="#main-features-of-sympler"><span class="octicon octicon-link"></span></a>Main features of SYMPLER:</h1>
+
+<ul>
+<li>Modular object oriented structure that is passed to the user level and allows to easily switch among different integration algorithms, particle interaction forces, boundary conditions, etc. </li>
+<li>Arbitrary number of particle-species for the simulation of complex multi-component systems </li>
+<li>Arbitrary number of additional user-defined degrees of freedom per particle-species </li>
+<li>Symbolic definition of runtime compiled mathematical expressions for particle interactions </li>
+<li>Import of CAD-geometries in the STL-format</li>
+</ul><hr><h1>
+<a name="compiling-sympler" class="anchor" href="#compiling-sympler"><span class="octicon octicon-link"></span></a>Compiling SYMPLER:</h1>
+
+<h2>
+<a name="required-tools-for-configuration-and-compilation" class="anchor" href="#required-tools-for-configuration-and-compilation"><span class="octicon octicon-link"></span></a>Required tools for configuration and compilation:</h2>
+
+<ul>
+<li>the GNU autotools (aclocal, libtool, autoconf, automake, etc.)</li>
+<li>a C++ compiler such as GNU g++</li>
+<li>a C compiler such as GNU gcc</li>
+</ul><h2>
+<a name="required-libraries" class="anchor" href="#required-libraries"><span class="octicon octicon-link"></span></a>Required libraries:</h2>
+
+<p>GNU scientific library (GSL), libxml2</p>
+
+<h2>
+<a name="optional-libraries" class="anchor" href="#optional-libraries"><span class="octicon octicon-link"></span></a>Optional libraries:</h2>
+
+<ul>
+<li>libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.</li>
+<li>OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during configuration (CXXFLAGS="... -fopenmp").</li>
+<li>libtnt, libjama, libsuperlu: Use the options --with-tnt --with-superlu during configuration. This allows for: </li>
+<li>coupling of particles to a linear system of equations solver with module IntegratorLSE</li>
+<li>the module for velocity constraints VelConstraints</li>
+<li>the integrator IntegratorVelocityVerletPressure</li>
+</ul><h2>
+<a name="configuration-and-compilation" class="anchor" href="#configuration-and-compilation"><span class="octicon octicon-link"></span></a>Configuration and Compilation:</h2>
+
+<p>All the commands invoked in the following have there own documentation. Please refer to it for more information. It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special instructions for MacOS.</p>
+
+<h3>
+<a name="configuration-and-compilation-for-standard-linux-systems" class="anchor" href="#configuration-and-compilation-for-standard-linux-systems"><span class="octicon octicon-link"></span></a>Configuration and Compilation for standard Linux-systems:</h3>
+
+<p>Assuming your source-code directory is $SOURCE-DIR, the series of commands that usually works is:</p>
+
+<p>$ cd $SOURCE-DIR
+$ libtoolize --force
+$ aclocal
+$ autoconf
+$ automake --add-missing</p>
+
+<p>Then, assuming your build-directory is $BUILD-DIR (it might be the same or different to $SOURCE-DIR):</p>
+
+<p>$ cd $BUILD-DIR
+$ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
+$ make -j[1 to roughly the number of available cores]</p>
+
+<p>After successful compilation the executable "sympler" will be created in the directory src/ 
+Useful [cxxflags] are (for more see the g++ documentation):</p>
+
+<p>-O3: for optimised compilation with g++
+-fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)</p>
+
+<p>and useful [options] are:</p>
+
+<p>--with-tnt: use tnt library and jama libraries
+--with-superlu: use superlu 
+--enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries (except the runtime compiled expressions of course). Unfortunately this option currently causes SYMPLER to crash very often. We have this bug on our list. Further bug reports on this issue are welcome. A bug-fix is even more welcome. </p>
+
+<h3>
+<a name="configuration-and-compilation-for-macos" class="anchor" href="#configuration-and-compilation-for-macos"><span class="octicon octicon-link"></span></a>Configuration and Compilation for MacOS</h3>
+
+<p>The following instructions were last successfully tested with Mac OS 10.6.8 and have been provided by Oliver Gruenert and Andreas Greiner.  </p>
+
+<p>The libxml2 library comes already preinstalled by Apple. The easiest way to get the two remaining ones is to use one of the packaging-systems for Mac OS.</p>
+
+<p>One of the best packaging-systems is homebrew. You can grab it and get a how-to install from <a href="http://github.com/mxcl/homebrew">http://github.com/mxcl/homebrew</a>. Two nice properties of homebrew are, that it is easy to install and very easy to UNINSTALL, meaning that your operating system will be the same as before, without any old header or binary files lying around. The best way (also mentioned on <a href="http://github.com/mxcl/homebrew">http://github.com/mxcl/homebrew</a>) is to install it in /usr/local and then </p>
+
+<p>$ sudo chown -R <code>whoami</code> /usr/local</p>
+
+<p>After homebrew is installed, you are ready to install the GSL and the SDL library. To install GSL type</p>
+
+<p>$ brew install gsl </p>
+
+<p>into your terminal. 
+Then, to install SDL type</p>
+
+<p>$ brew install sdl </p>
+
+<p>into your terminal. </p>
+
+<p>Try first to skip this paragraph because the next step is only necessary if you run into trouble with your already preinstalled command-line tool gm4 (a macro processor used by aclocal). Then you need to replace it with a newer version, since the old version which came from Apple was broken. This was the case for example in MacOS 10.6.2. You can grab the most recent version from <a href="http://ftp.gnu.org/gnu/m4/">http://ftp.gnu.org/gnu/m4/</a>. Now drag the old gm4 tool in /usr/bin to a backup folder (for example your Desktop) and replace it with the newer version (you will be asked to enter your root password).</p>
+
+<p>Now you are ready to compile sympler! So grab the moldyn source code into a code directory (called $CODE-DIR here) and create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal:</p>
+
+<p>$ cd $CODE-DIR
+$ aclocal -I /usr/local/Cellar/gsl/1.13/share/aclocal -I /usr/local/Cellar/sdl/1.2.14/share/aclocal
+$ autoconf
+$ glibtoolize --force. 
+$ automake --add-missing</p>
+
+<p>$ cd $BUILD-DIR
+$ $CODE-DIR/configure CXXFLAGS="-O3" --disable-shared
+$ make -j[1 to roughly the number of available cores]</p>
+
+<p>After successful compilation the executable "sympler" will be created in the directory src/ </p>
+
+<h3>
+<a name="sympler-and-intel-compilers" class="anchor" href="#sympler-and-intel-compilers"><span class="octicon octicon-link"></span></a>SYMPLER and Intel compilers:</h3>
+
+<p>A few hints when using icc (the Intel C++ compiler) for SYMPLER:</p>
+
+<ul>
+<li>Set the environment variable LANG=C</li>
+<li>If using autoparallelization, set LD_LIBRARY_PATH to the lib directory of icc</li>
+<li>-ipo gave problems with linking</li>
+</ul><p>Otherwise, compilation worked fine. A good configure invocation might look like (adapt the paths to your needs):</p>
+
+<p>export LANG=C;
+export LD_LIBRARY_PATH=/simstorage/software/intel/cpp11/lib/intel64;
+../sympler/configure CXX=/simstorage/software/intel/cpp11/bin/intel64/icc \
+CC=/simstorage/software/intel/cpp11/bin/intel64/icc LDFLAGS='-lstdc++ -lz' \
+CXXFLAGS="-O3 -ip -parallel -funroll-loops -complex-limited-range \
+-IPF-fma -IPF-fltacc -IPF-fp-relaxed -fp-model=fast -no-debug -xSSE4.1 \
+-mcmodel=medium -falign-functions -opt-calloc -unroll-aggressive" </p>
+
+<hr><h1>
+<a name="running-sympler" class="anchor" href="#running-sympler"><span class="octicon octicon-link"></span></a>Running SYMPLER</h1>
+
+<p>A static executable will work, if your glibc is roughly the same as the one, which was used for compilation. Additionally executables are specific to 32 and 64 bit platforms, respectively. The modules MeterLive and MeterLiveColoured are not activated in a static version. Alternatively you can use a dynamically linked version.</p>
+
+<p>A dynamic executable needs at least the following libraries installed:</p>
+
+<ul>
+<li>gsl (GNU scientific library)</li>
+<li>libxml2 (for parsing the input files)</li>
+</ul><h2>
+<a name="starting-the-executables" class="anchor" href="#starting-the-executables"><span class="octicon octicon-link"></span></a>Starting the executables</h2>
+
+<p>Assuming you have an executable with name sympler in the directory $BUILD-DIR, just type</p>
+
+<p>$ $BUILD-DIR/sympler</p>
+
+<p>and you will be told the further options you may try in order to really get s.th. useful out of the code. For example</p>
+
+<p>$ $BUILD-DIR/sympler --help </p>
+
+<p>gives a general help text.</p>
+
+<p>$ $BUILD-DIR/sympler --help all</p>
+
+<p>lists the help text for all available modules</p>
+
+<p>$ $BUILD-DIR/sympler --help [UNKNOWN]</p>
+
+<p>gives you a list of all groups of modules you may request help for if [UNKNOWN] is an argument that sympler does not understand. For example you may get help for the Integrators with </p>
+
+<p>$ $BUILD-DIR/sympler --help Integrators</p>
+
+<p>To really start a simulation type</p>
+
+<p>$ $BUILD-DIR/sympler [INPUT-FILE]</p>
+
+<p>where [INPUT-FILE] is an input file in xml-format.</p>
+
+<h2>
+<a name="input-files" class="anchor" href="#input-files"><span class="octicon octicon-link"></span></a>Input files</h2>
+
+<p>The code has a modular structure. This is reflected in the input files by using the XML-format (for further information on XML see: <a href="http://www.w3schools.com/xml/default.asp">http://www.w3schools.com/xml/default.asp</a>). A quick glance at the input files and the online-help text of the executable should be enough to understand how it works. All modules and their attributes are described in the online-help. A bit of definition: The XML-expression  shows you the difference between a module name, an attribute name and the value assigned to the latter. Compare this with the example given below. If you play around with parameters, be aware of possible simulation instabilities due to a timestep being to large for your chosen parameters. In this case you will obtain some message that a particle flew to far. The timestep can be modified in the module  with the attribute dt. The number of timesteps can be changed with the attribute timesteps. All quantities have to be given in units of your choice for instance in such a way that the Boltzmann constant may be set to 1. All simulations are 3D. Quasi-2D-simulations can be performed by applying periodic boundary conditions. Real 2D simulations can be performed by enforcing interactions to happen only in 2D.  </p>
+
+<p>Here is a small example. The newest version of SYMPLER might complain because some modules or attributes are out-dated, but the general idea should become clear:</p>
+
+<pre><code>&lt;?xml version="1.0"?&gt;  
+&lt;!DOCTYPE Simulation SYSTEM "/home/lieneman/Projekte/NanoSAVE/Moldyn/moldyn.dtd"&gt;  
+&lt;Simulation  
+    simName="MDPD simulation"  
+    inputFromResults="yes"&gt;  
+    &lt;Square
+            cutoff="1"
+            name="L1" /&gt;
+    &lt;Square
+            cutoff="0.75"
+            name="L075" /&gt;
+    &lt;Controller
+            timesteps="100000"
+            statusEvery="10"
+            dt="0.001"&gt;
+            &lt;IntegratorVelocityVerlet
+                    species="H" /&gt;
+    &lt;/Controller&gt;
+    &lt;ValCalculatorRho
+            symbol="n"
+            weightingFunction="L1"
+            species1="H"
+            species2="H"
+            selfContribution="false"/&gt;
+&lt;!-- Fluid-fluid, attractive --&gt;
+    &lt;FPairVels
+            species1="H"
+            species2="H"
+            pairFactor="-1/4.7746*[rij]/rij*750"
+            weightingFunction="L1" /&gt;
+&lt;!-- Fluid-fluid, repulsive --&gt;
+    &lt;FPairVels
+            species1="H"
+            species2="H"
+            pairFactor="3.14159265*0.75^4/15*(ni+nj)*[rij]/rij*40"
+            weightingFunction="L075" /&gt;
+    &lt;ThermostatPetersIso
+            temperature = "15"
+            dissipation = "5"
+            species1 = "H"
+            species2 = "H"
+            weightingFunction = "L1" /&gt;
+    &lt;Phase&gt;
+            &lt;LinkedListCreator/&gt;
+            &lt;BoundaryCuboid
+                    boxX="32"
+                    boxY="32"
+                    boxZ="32"
+                    periodicX="yes"
+                    periodicY="yes"
+                    periodicZ="no"&gt;
+                    &lt;ReflectorThermalize
+                            temperature="15"
+                            oneHit="true"/&gt;
+                    &lt;ParticleCreatorStatic
+                            density="20"
+                            species="H"
+                            corner1 = "(10,10,18)"
+                            corner2 = "(22,22,6)"
+                            temperature = "5"
+                            ellipsoid = "true" /&gt;
+            &lt;/BoundaryCuboid&gt;
+    &lt;/Phase&gt;
+    &lt;MeterPosVel
+            measureEvery="1000"
+            species="H"&gt;
+            &lt;OutputVTK
+            fileName="results/posvel_prepare.vtk"
+            format="ascii"&gt;&lt;/OutputVTK&gt;
+    &lt;/MeterPosVel&gt;
+    &lt;GridAveragerStructured
+            avgOver="50"
+            measureEvery="1000"
+            nX="16" nY="16" nZ="16"&gt;
+            &lt;Pressure species="H"/&gt;
+            &lt;OutputFile
+                    fileName="results/gas_pressure.dat"
+                    multipleFiles="yes"
+                    columns = "H_pressure_mean" /&gt;
+    &lt;/GridAveragerStructured&gt;
+&lt;/Simulation&gt;
+</code></pre>
+
+<p>Besides reading the help text, another way to quickly find out which attributes are allowed for a specific module, is to type some non-sense which most likely does not correspond to any attribute.</p>
+
+<h2>
+<a name="runtime-compiled-expressions" class="anchor" href="#runtime-compiled-expressions"><span class="octicon octicon-link"></span></a>Runtime compiled expressions</h2>
+
+<p>In the example file you see some of them. For example "...(ni+nj)*[rij]/rij*40 where 'n' is a user defined scalar symbol, [rij] is the distance vector [ri]-[rj] for particle pair (i,j) and 'rij' is its absolute value. Single indices 'i', 'j' denote a particle property while double indices 'ij' denote the property of the pair of particles. Type</p>
+
+<p>$ $BUILD-DIR/sympler --help expressions</p>
+
+<p>for a complete overview of possible elements of runtime compiled expressions. Help for the two module-groups Forces and Symbols that use runtime-compiled expressions the most you can get with</p>
+
+<p>$ $BUILD-DIR/sympler --help Forces
+$ $BUILD-DIR/sympler --help Symbols</p>
+
+<p>Further check the PUBLICATIONS file for publications explaining further details.</p>
+
+<hr><h1>
+<a name="postprocessing" class="anchor" href="#postprocessing"><span class="octicon octicon-link"></span></a>Postprocessing</h1>
+
+<p>SYMPLER produces output in various ASCII and binary formats, for example VTK, simple column data, or binary arrays of data. First of all you need Meters in your input file. Check</p>
+
+<p>$ $BUILD-DIR/sympler --help Meters</p>
+
+<p>In the above example we have two Meters, namely MeterPosVel and GridAveragerStructured. The thing is that a Meter itself usually does not create any output. It just collects data. GridAveragerStructured is even lazier and lets GridMeters do the work. Check</p>
+
+<p>$ $BUILD-DIR/sympler --help GridMeters</p>
+
+<p>GridMeters are also Meters. Hence they also collect data and nothing else. For output you have to attach PostProcessors to the Meters. In the aexample above you can find two of them: OutputVTK and OutputFile. Check</p>
+
+<p>$ $BUILD-DIR/sympler --help Postprocessors</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		          <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("sympler");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
