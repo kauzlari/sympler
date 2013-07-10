@@ -76,10 +76,14 @@ by the DFG (Deutsche Forschungsgemeinschaft) in the framework of </p>
 <ul>
 <li>libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.</li>
 <li>OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during configuration (CXXFLAGS="... -fopenmp").</li>
-<li>libtnt, libjama, libsuperlu: Use the options --with-tnt --with-superlu during configuration. This allows for: </li>
+<li>libtnt, libjama, libsuperlu: Use the options --with-tnt --with-superlu during configuration. This allows for: 
+
+<ul>
 <li>coupling of particles to a linear system of equations solver with module IntegratorLSE</li>
 <li>the module for velocity constraints VelConstraints</li>
 <li>the integrator IntegratorVelocityVerletPressure</li>
+</ul>
+</li>
 </ul><h2>
 <a name="configuration-and-compilation" class="anchor" href="#configuration-and-compilation"><span class="octicon octicon-link"></span></a>Configuration and Compilation:</h2>
 
