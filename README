@@ -27,6 +27,12 @@
  * You are very welcome to contribute extensions to the code. Please do 
  * so by making a pull request on https://github.com/kauzlari/sympler
  * 
+ * Funding: 
+ *   DFG (Deutsche Forschungsgemeinschaft) in the framework of 
+ *     SFB499 TPA4
+ *     Project KA 3482/2
+ *     Projects LI 1831/1-1,2
+ *
  */
 
 
@@ -106,7 +112,7 @@ and useful [options] are:
 
 ++ Configuration and Compilation for MacOS
 
-The following instructions were last succesfully tested with Mac OS 10.6.8 and have been provided by Oliver Gruenert and Andreas Greiner.  
+The following instructions were last successfully tested with Mac OS 10.6.8 and have been provided by Oliver Gruenert and Andreas Greiner.  
 
 The libxml2 library comes already preinstalled by Apple. The easiest way to get the two remaining ones is to use one of the packaging-systems for Mac OS.
 
