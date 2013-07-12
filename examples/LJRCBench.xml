@@ -1,0 +1,80 @@
+<Simulation
+   simName = "sim"
+   inputFromResults = "yes"
+>
+<!--
+  <InputWF
+     name = "default"
+     cutoff = "2.5"
+     interpolation = "1"
+     selfContribution = "1"
+     weight = "1"
+     />
+-->
+  <Controller
+     dt = "0.005"
+     timesteps = "5000"
+     statusEvery = "10000"
+     >
+    <IntegratorVelocityVerletDisp
+       species = "fluid"
+       displacement = "d"
+       symbol = "d"
+       >
+    </IntegratorVelocityVerletDisp>
+  </Controller>
+
+  <FPairVels
+     forceName = "LJ"
+     species1="fluid"
+     species2="fluid"
+     pairFactor = "((48/(rij^6)-24)/(rij^8))*[rij]"
+     cutoff = "2.5" 
+  />
+<!--     weightingFunction="dummy" -->
+
+  <Phase>
+<!--    <LinkedListCreator/> -->
+    <VerletCreator
+      skinSize = "0.3"
+      displacement = "d"
+    />
+    <BoundaryCuboid
+	boxX = "1"
+	boxY = "1"
+	boxZ = "1"
+	periodicX="yes"
+	periodicY="yes"
+	periodicZ="yes"
+       >
+      <ReflectorStochastic
+         />
+      <ParticleCreatorLattice
+ 	species = "fluid"
+	density = "0.8442"
+	nLatticePX="10"
+	nLatticePY="10"
+	nLatticePZ="10"
+	temperature = "1"
+      />
+    </BoundaryCuboid>
+  </Phase>
+<!--
+<MeterAverage
+measureEvery="1"
+>
+<Temperature species="fluid"/>
+<KineticEnergy species="fluid"/>
+<OutputFile
+multipleFiles="no"
+columns="fluid_temperature"
+nameOutputFile="results/temp.dat"
+/>
+<OutputFile
+multipleFiles="no"
+columns="fluid_kinetic_energy"
+nameOutputFile="results/ekin.dat"
+/>
+</MeterAverage>
+-->
+</Simulation>

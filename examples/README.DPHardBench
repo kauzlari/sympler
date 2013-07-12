@@ -1,0 +1,3 @@
+Short simulation of a DPD fluid without conservative forces. The dissipative 
+and random forces are implemented with the hard-coded module FDPD.
+This file can be used for benchmarking tests.

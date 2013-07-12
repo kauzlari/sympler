@@ -1,0 +1,15 @@
+This directory contains example input for SYMPLER.
+
+Check the specific READMEs for individual input files.
+
+Note that there are further examples in the testsuite directory.
+
+Note that in contrast to the testsuite directory the examples in this directory 
+might require minor changes to be compatible with the newest version of SYMPLER. 
+In such a case, a first run with SYMPLER usually produces error messages that 
+help fixing the problem. 
+
+Feel free to contribute updated versions of the input files or new examples to 
+the code-repository at https://github.com/kauzlari/sympler
+
+

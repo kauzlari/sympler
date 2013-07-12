@@ -1,0 +1,111 @@
+<Simulation
+   simName = "sim"
+   inputFromResults = "yes"
+>
+  <InputWF
+     name = "default"
+     cutoff = "1"
+     interpolation = "1"
+     selfContribution = "1"
+     weight = "1"
+     />
+  <Controller
+     dt = "0.01"
+     timesteps = "5000"
+     statusEvery = "30000"
+     >
+    <IntegratorVelocityVerletDisp
+       species = "fluid"
+       displacement = "d"       
+       symbol = "d"       
+       >
+    </IntegratorVelocityVerletDisp>
+  </Controller>
+
+  <!-- naive -->
+<!--
+  <FPairVels
+     weightingFunction="default"
+     species1="fluid"
+     species2="fluid"
+     pairFactor = "-15*((1-rij)^2)*20*(([vi]-[vj]):[rij])*[rij]/(2*pi*rij*rij)"
+  />
+-->
+
+  <!-- collect constants -->
+
+  <FPairVels
+     cutoff="1"
+     species1="fluid"
+     species2="fluid"
+     pairFactor = "-47.47648293*((1-rij)^2)*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+  />
+
+  <!-- alternative modules -->
+<!--
+  <PairParticleVector
+     species1="fluid"
+     species2="fluid"
+     expression = "47.47648293*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
+     symmetry = "-1"
+     symbol = "FD"
+     cutoff = "1"
+  />
+
+  <FParticleVels
+    species = "fluid"
+    expression = "[FD]"
+  />
+-->
+  <Frand
+    weightingFunction = "default"
+     species1="fluid"
+     species2="fluid"
+     noise = "9.7720500238"
+  />
+
+  <Phase>
+    <VerletCreator
+      displacement = "d"
+      skinSize = "0.2"
+      every = "0"
+    />
+    <BoundaryCuboid
+	boxX = "1"
+	boxY = "1"
+	boxZ = "1"
+	periodicX="yes"
+	periodicY="yes"
+	periodicZ="yes"
+       >
+      <ReflectorStochastic
+         />
+      <ParticleCreatorLattice
+ 	species = "fluid"
+	density = "3"
+	nLatticePX="10"
+	nLatticePY="10"
+	nLatticePZ="10"
+	temperature = "1"
+      />
+    </BoundaryCuboid>
+  </Phase>
+<!--
+<MeterAverage
+measureEvery="1"
+>
+<Temperature species="fluid"/>
+<KineticEnergy species="fluid"/>
+<OutputFile
+multipleFiles="no"
+columns="fluid_temperature"
+nameOutputFile="results/temp.dat"
+/>
+<OutputFile
+multipleFiles="no"
+columns="fluid_kinetic_energy"
+nameOutputFile="results/ekin.dat"
+/>
+</MeterAverage>
+-->
+</Simulation>
