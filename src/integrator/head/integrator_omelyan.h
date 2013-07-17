@@ -133,7 +133,7 @@ protected:
   size_t m_omega_force_offset[FORCE_HIST_SIZE];
   size_t m_omega_fAttr_index[FORCE_HIST_SIZE];
   /*!
-   *
+   * The name of the rotation matrix
    */
   string m_rotmat_name;
   /*! 
@@ -144,6 +144,18 @@ protected:
    * The tag offset of the rotation matrix
    */
   size_t m_rotmat_offset;
+  /*!
+   * The name of the transpose of the rotation matrix
+   */
+  string m_rotmatT_name;
+  /*! 
+   * The symbol (short name) of the transpose of the rotation matrix
+   */
+  string m_rotmatT_symbol;
+  /*!
+   * The tag offset of the transpose of the rotation matrix
+   */
+  size_t m_rotmatT_offset;
   /*!
   /*!
    * Time step
