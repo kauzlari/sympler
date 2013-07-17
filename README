@@ -86,7 +86,7 @@ All the commands invoked in the following have there own documentation. Please r
 
 ++ Configuration and Compilation for standard Linux-systems:
 
-Assuming your source-code directory is $SOURCE-DIR, the series of commands that usually works is:
+Assuming the directory where you downloaded the SYMPLER source-code is $SOURCE-DIR, then the series of commands that usually works is:
 
 $ cd $SOURCE-DIR
 $ libtoolize --force
@@ -94,7 +94,7 @@ $ aclocal
 $ autoconf
 $ automake --add-missing
 
-Then, assuming your build-directory is $BUILD-DIR (it might be the same or different to $SOURCE-DIR):
+Then, assuming the directory where you want to compile SYMPLER is $BUILD-DIR (it might be the same as or different from $SOURCE-DIR):
 
 $ cd $BUILD-DIR
 $ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
@@ -141,7 +141,7 @@ Now you are ready to compile sympler! So grab the moldyn source code into a code
 $ cd $CODE-DIR
 $ aclocal -I /usr/local/Cellar/gsl/1.13/share/aclocal -I /usr/local/Cellar/sdl/1.2.14/share/aclocal
 $ autoconf
-$ glibtoolize --force. 
+$ glibtoolize --force
 $ automake --add-missing
 
 $ cd $BUILD-DIR
