@@ -1,4 +1,3 @@
-
 /*
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
@@ -79,7 +78,7 @@ Compiling SYMPLER:
 
 + Configuration and Compilation:
 
-All the commands invoked in the following have there own documentation. Please refer to it for more information. It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special instructions for MacOS.
+All the commands invoked in the following have there own documentation. Please refer to it for more information. It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special instructions for MacOS and Intel compilers.
 
 ++ Configuration and Compilation for standard Linux-systems:
 
