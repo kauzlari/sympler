@@ -176,7 +176,7 @@ table {
 }
 
 table {
-  border: 0px solid #ccc;
+  border: 1px solid #ccc;
   margin-bottom: 32px;
   text-align: left;
  }
