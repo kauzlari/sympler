@@ -64,7 +64,11 @@ Compiling SYMPLER:
 ++ a C compiler such as GNU gcc
 
 
-+ Required libraries: GNU scientific library (GSL), libxml2
++ Required libraries: 
+
+++ GNU scientific library (GSL)
+++ libxml2
+
 
 + Optional libraries: 
 
