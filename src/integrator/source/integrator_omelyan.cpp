@@ -103,6 +103,15 @@ void IntegratorOmelyan::init()
   m_rotmat_symbol = "rotmat";
 
   STRINGPC
+      (tensrotmatT, m_rotmatT_name,
+       "Full name of the rotation matrix usable as attribute in other modules");
+  STRINGPC
+      (syrotmatT, m_rotmatT_symbol,
+       "Symbol assigned to the rotation matrix, usable in algebraic expressions");
+  m_rotmatT_name = "rotmatT";
+  m_rotmatT_symbol = "rotmatT";
+
+  STRINGPC
     (scq0, m_q0_name,
           "Full name of q0, usable as attribute in other modules. Default q0.");
   STRINGPC
@@ -192,6 +201,15 @@ void IntegratorOmelyan::setup()
        true,
        m_rotmat_symbol).offset;
 /*!
+ * Setup the transpose of rotation matrix
+ */
+  m_rotmatT_offset =
+      Particle::s_tag_format[m_colour].addAttribute
+      (m_rotmatT_name,
+       DataFormat::TENSOR,
+       true,
+       m_rotmatT_symbol).offset;
+/*!
  * Setup the angular velocity components
  */
   m_omega_offset = 
@@ -247,19 +265,30 @@ void IntegratorOmelyan::setupAfterParticleCreation()
 // 7. We define the rotation matrix here
 //
 #define R (i->tag.tensorByOffset(m_rotmat_offset))
+#define RT (i->tag.tensorByOffset(m_rotmatT_offset))
 //
   Phase *phase = M_PHASE;
   FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
       R(0,0) = Q0*Q0+Q1*Q1-Q2*Q2-Q3*Q3;
-      R(0,1) = 2*(Q1*Q2+Q0*Q3);
-      R(0,2) = 2*(Q1*Q3-Q0*Q2);
-      R(1,0) = 2*(Q1*Q2-Q0*Q3);
+      R(0,1) = 2*(Q1*Q2-Q0*Q3);
+      R(0,2) = 2*(Q1*Q3+Q0*Q2);
+      R(1,0) = 2*(Q1*Q2+Q0*Q3);
       R(1,1) = Q0*Q0-Q1*Q1+Q2*Q2-Q3*Q3;
-      R(1,2) = 2*(Q2*Q3+Q0*Q1);
-      R(2,0) = 2*(Q1*Q3+Q0*Q2);
-      R(2,1) = 2*(Q2*Q3-Q0*Q1);
+      R(1,2) = 2*(Q2*Q3-Q0*Q1);
+      R(2,0) = 2*(Q1*Q3-Q0*Q2);
+      R(2,1) = 2*(Q2*Q3+Q0*Q1);
       R(2,2) = Q0*Q0-Q1*Q1-Q2*Q2+Q3*Q3;
-MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "Rotation matrix: " << R);
+// Here we define the transpose of R(i,j)
+      RT(0,0) = R(0,0);
+      RT(1,0) = R(0,1);
+      RT(2,0) = R(0,2);
+      RT(0,1) = R(1,0);
+      RT(1,1) = R(1,1);
+      RT(2,1) = R(1,2);
+      RT(0,2) = R(2,0);
+      RT(1,2) = R(2,1);
+      RT(2,2) = R(2,2);
+
       );
   } 
 /*!
@@ -309,19 +338,19 @@ void IntegratorOmelyan::integrateStep1(){
 //
 // 5. then we define \dot{q} according to equation (3) in Omelyan
 //
-#define Q0dot  (-0.5*(Q1*Omega.x+Q2*Omega.y+Q3*Omega.z))
-#define Q1dot  (0.5*(Q0*Omega.x-Q3*Omega.y+Q2*Omega.z))
-#define Q2dot  (0.5*(Q3*Omega.x+Q0*Omega.y-Q1*Omega.z))
-#define Q3dot  (0.5*(-Q2*Omega.x+Q1*Omega.y+Q0*Omega.z))
+#define Q0dot  (-0.5*( Q1*Omega.x+Q2*Omega.y+Q3*Omega.z))
+#define Q1dot  ( 0.5*( Q0*Omega.x-Q3*Omega.y+Q2*Omega.z))
+#define Q2dot  ( 0.5*( Q3*Omega.x+Q0*Omega.y-Q1*Omega.z))
+#define Q3dot  ( 0.5*(-Q2*Omega.x+Q1*Omega.y+Q0*Omega.z))
 #define QdotSQ (Q0dot*Q0dot+Q1dot*Q1dot+Q2dot*Q2dot+Q3dot*Q3dot)
 // 
 //
 // 6. then we define \ddot{q} according to equation (4) in Omelyan
 //
-#define Q0ddot  (-0.5*((Q1dot*Omega.x+Q2dot*Omega.y+Q3dot*Omega.z)+(Q1*Oxdot+Q2*Oydot+Q3*Ozdot)))
-#define Q1ddot  (0.5*((Q0dot*Omega.x-Q3dot*Omega.y+Q2dot*Omega.z)+(Q0*Oxdot-Q3*Oydot+Q2*Ozdot)))
-#define Q2ddot  (0.5*((Q3dot*Omega.x+Q0dot*Omega.y-Q1dot*Omega.z)+(Q3*Oxdot+Q0*Oydot-Q1*Ozdot)))
-#define Q3ddot  (0.5*((-Q2dot*Omega.x+Q1dot*Omega.y+Q0dot*Omega.z)+(-Q2*Oxdot+Q1*Oydot+Q0*Ozdot)))
+#define Q0ddot  (-0.5*(( Q1dot*Omega.x+Q2dot*Omega.y+Q3dot*Omega.z)+(Q1*Oxdot+Q2*Oydot+Q3*Ozdot)))
+#define Q1ddot  ( 0.5*(( Q0dot*Omega.x-Q3dot*Omega.y+Q2dot*Omega.z)+(Q0*Oxdot-Q3*Oydot+Q2*Ozdot)))
+#define Q2ddot  ( 0.5*(( Q3dot*Omega.x+Q0dot*Omega.y-Q1dot*Omega.z)+(Q3*Oxdot+Q0*Oydot-Q1*Ozdot)))
+#define Q3ddot  ( 0.5*((-Q2dot*Omega.x+Q1dot*Omega.y+Q0dot*Omega.z)+(-Q2*Oxdot+Q1*Oydot+Q0*Ozdot)))
 #define QddotSQ (Q0ddot*Q0ddot+Q1ddot*Q1ddot+Q2ddot*Q2ddot+Q3ddot*Q3ddot)
 // 
 //
@@ -340,7 +369,7 @@ void IntegratorOmelyan::integrateStep1(){
 //
   if(m_first_sweep == true){
     FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
-      Tbff = R*TauNew;
+      Tbff = RT*TauNew;
       );
     m_first_sweep = false;
   }
@@ -352,17 +381,34 @@ void IntegratorOmelyan::integrateStep1(){
       Q3 = Q3 + Q3dot*DT + Q3ddot*DT*DT/2.0 - LAMBDA*Q3;
 //      if(i->mySlot == 13) MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "NormQ " << sqrt(Q0*Q0+Q1*Q1+Q2*Q2+Q3*Q3));
       R(0,0) = Q0*Q0+Q1*Q1-Q2*Q2-Q3*Q3;
-      R(0,1) = 2*(Q1*Q2+Q0*Q3);
-      R(0,2) = 2*(Q1*Q3-Q0*Q2);
-      R(1,0) = 2*(Q1*Q2-Q0*Q3);
+      R(0,1) = 2*(Q1*Q2-Q0*Q3);
+      R(0,2) = 2*(Q1*Q3+Q0*Q2);
+      R(1,0) = 2*(Q1*Q2+Q0*Q3);
       R(1,1) = Q0*Q0-Q1*Q1+Q2*Q2-Q3*Q3;
-      R(1,2) = 2*(Q2*Q3+Q0*Q1);
-      R(2,0) = 2*(Q1*Q3+Q0*Q2);
-      R(2,1) = 2*(Q2*Q3-Q0*Q1);
+      R(1,2) = 2*(Q2*Q3-Q0*Q1);
+      R(2,0) = 2*(Q1*Q3-Q0*Q2);
+      R(2,1) = 2*(Q2*Q3+Q0*Q1);
       R(2,2) = Q0*Q0-Q1*Q1-Q2*Q2+Q3*Q3;
-      Tbff = R*TauNew;
+// Here we define the transpose of R(i,j)
+      RT(0,0) = R(0,0);
+      RT(1,0) = R(0,1);
+      RT(2,0) = R(0,2);
+      RT(0,1) = R(1,0);
+      RT(1,1) = R(1,1);
+      RT(2,1) = R(1,2);
+      RT(0,2) = R(2,0);
+      RT(1,2) = R(2,1);
+      RT(2,2) = R(2,2);
+      Tbff = RT*TauNew;
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "Colour = " << c);
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "[q0,q1,q2,q3] = [" << Q0 << ", " << Q1 << ", " << Q2 << ", " << Q3 <<"]");
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "omega = " << Omega);
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "rotmat  = " << R);
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "rotmatT = " << RT);
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "Tbff = " << Tbff);
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "TauOld = " << TauOld);
+//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "TauNew = " << TauNew);
       );
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "other_force_index " << other_force_index << " force_index " << force_index);
 }
 
 
@@ -397,9 +443,7 @@ void IntegratorOmelyan::integrateStep2(){
         PreFacX = DT*(m_J2-m_J3)/m_J1/2.0;
         PreFacY = DT*(m_J3-m_J1)/m_J2/2.0;
         PreFacZ = DT*(m_J1-m_J2)/m_J3/2.0;
-	TauNewPrime=R*TauNew;
-//	TauOldPrime=R*TauOld;
-//	TauNewPrime=R*TauNew;
+	TauNewPrime=RT*TauNew;
 //
 // We have to solve the system of equations of second order that looks like rhis
 //
@@ -440,7 +484,7 @@ void IntegratorOmelyan::integrateStep2(){
 	 << "TauNew.x = " << TauNew.x << ", " << "TauyNew = " << TauyNew << ", " << "TauzNew = " << TauzNew << endl);
 */
    }
-   while(residue > 1.e-3 && relaerr > 1.e-3);
+   while(residue > 1.e-12 && relaerr > 1.e-12);
 //  MSG_DEBUG("IntegratorOmelyan::integrateStep(2)", "exit do-while loop");      
 //
 //
