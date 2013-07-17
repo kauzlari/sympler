@@ -321,6 +321,6 @@ In the above example we have two Meters, namely MeterPosVel and GridAveragerStru
 
 $ $BUILD-DIR/sympler --help GridMeters
 
-GridMeters are also Meters. Hence they also collect data and nothing else. For output you have to attach PostProcessors to the Meters. In the aexample above you can find two of them: OutputVTK and OutputFile. Check
+GridMeters are also Meters. Hence they also collect data and nothing else. For output you have to attach PostProcessors to the Meters. In the example above you can find two of them: OutputVTK and OutputFile. Check
 
 $ $BUILD-DIR/sympler --help Postprocessors
