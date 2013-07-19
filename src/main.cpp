@@ -223,6 +223,7 @@ void sayHello() {
 #include "integrator_energy.h"
 #include "integrator_lse.h"
 #include "integrator_omelyan.h"
+#include "integrator_omelyan_NR.h"
 #include "integrator_position.h"
 #include "integrator_scalar.h"
 #include "integrator_scalar_lambda.h"
@@ -437,6 +438,7 @@ void link_all_properly()
   // Integrators
   new IntegratorEnergy(NULL);
   new IntegratorOmelyan(NULL);
+  new IntegratorOmelyanNR(NULL);
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H
   new IntegratorLSE(NULL);
