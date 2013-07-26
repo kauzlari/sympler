@@ -83,15 +83,15 @@ void IntegratorOmelyanNR::init()
   m_properties.setDescription("Integrates the orientation and angular velocity of each rigid body attached to a particle according to the algorithm described by Omelyan");
   DOUBLEPC
   	    (J1, m_J1,0,
-  	     "1st principle component of the inertial tensor of the species this integrator is intended for. Default J1 = 1.");
+  	     "1st principle component of the inertial tensor of the species this integrator is intended for.");
   m_J1 = 1;
   DOUBLEPC
   	    (J2, m_J2,0,
-  	     "2nd principle component of the inertial tensor of the species this integrator is intended for. Default J2 = 1.");
+  	     "2nd principle component of the inertial tensor of the species this integrator is intended for.");
   m_J2 = 1;
   DOUBLEPC
   	    (J3, m_J3,0,
-  	     "3rd principle component of the inertial tensor of the species this integrator is intended for. Default J3 = 1.");
+  	     "3rd principle component of the inertial tensor of the species this integrator is intended for.");
   m_J3 = 1;
 
   STRINGPC
@@ -114,48 +114,52 @@ void IntegratorOmelyanNR::init()
 
   STRINGPC
     (scq0, m_q0_name,
-          "Full name of q0, usable as attribute in other modules. Default q0.");
+          "Full name of q0, usable as attribute in other modules.");
   STRINGPC
       (syq0, m_q0_symbol,
-              "Symbol assigned to q0, usable in algebraic expressions. Default q0.");
+              "Symbol assigned to q0, usable in algebraic expressions.");
   m_q0_name = "q0";
   m_q0_symbol = "q0";
 
   STRINGPC
     (scq1, m_q1_name,
-          "Full name of q1, usable as attribute in other modules. Default q1.");
+          "Full name of q1, usable as attribute in other modules.");
   STRINGPC
       (syq1, m_q1_symbol,
-              "Symbol assigned to q1, usable in algebraic expressions. Default q1.");
+              "Symbol assigned to q1, usable in algebraic expressions.");
   m_q1_name = "q1";
   m_q1_symbol = "q1";
 
   STRINGPC
     (scq2, m_q2_name,
-          "Full name of q2, usable as attribute in other modules. Default q2.");
+          "Full name of q2, usable as attribute in other modules.");
   STRINGPC
       (syq2, m_q2_symbol,
-              "Symbol assigned to q2, usable in algebraic expressions. Default q2.");
+              "Symbol assigned to q2, usable in algebraic expressions.");
   m_q2_name = "q2";
   m_q2_symbol = "q2";
 
   STRINGPC
     (scq3, m_q3_name,
-          "Full name of q3, usable as attribute in other modules. Default q3.");
+          "Full name of q3, usable as attribute in other modules.");
   STRINGPC
       (syq3, m_q3_symbol,
-              "Symbol assigned to q3, usable in algebraic expressions. Default q3.");
+              "Symbol assigned to q3, usable in algebraic expressions.");
   m_q3_name = "q3";
   m_q3_symbol = "q3";
 
   STRINGPC
     (scomega, m_omega_name,
-     "Full name of omega, usable as attribute in other modules. Defaults omega.");
+     "Full name of omega, usable as attribute in other modules.");
   STRINGPC
     (syomega, m_omega_symbol,
-     "Symbol assigned to omega, usable in algebraic expressions. Defaults omega.");
+     "Symbol assigned to omega, usable in algebraic expressions.");
   m_omega_name = "omega";
   m_omega_symbol = "omega";
+  BOOLPC
+        (normalizeQuaternion, m_normalize,
+	      "Normalize quaternions at the end of Step2.");
+  m_normalize = false;
 }
 
 void IntegratorOmelyanNR::setup()
@@ -423,7 +427,7 @@ void IntegratorOmelyanNR::integrateStep2(){
   double A, B, C, D, F, G, DETF;
   double GXX, GXY, GXZ, GYX, GYY, GYZ, GZX, GZY, GZZ;
   double PFX, PFY, PFZ;
-  double relaerr = 1.0, residue = 1.0;
+  double relaerr = 1.0, residue = 1.0, norm=1.0;
   int iter, imax=1;
   point_t TauOldPrime, TauNewPrime;
 //
@@ -512,6 +516,14 @@ void IntegratorOmelyanNR::integrateStep2(){
    Omega.x = X;
    Omega.y = Y;
    Omega.z = Z;
+   Tbff = TauNewPrime;
+   if(m_normalize){
+     norm = sqrt(Q0*Q0+Q1*Q1+Q2*Q2+Q3*Q3);
+     Q0 = Q0/norm;
+     Q1 = Q1/norm;
+     Q2 = Q2/norm;
+     Q3 = Q3/norm;
+   }
    if(iter > imax) imax=iter;
       );
 }
