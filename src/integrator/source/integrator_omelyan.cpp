@@ -11,7 +11,6 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
  * SYMPLER is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -155,6 +154,10 @@ void IntegratorOmelyan::init()
      "Symbol assigned to omega, usable in algebraic expressions. Defaults omega.");
   m_omega_name = "omega";
   m_omega_symbol = "omega";
+  BOOLPC
+        (normalizeQuaternion, m_normalize,
+	      "Normalize quaternions at the end of Step2. Default: false");
+  m_normalize = false;
 }
 
 void IntegratorOmelyan::setup()
@@ -419,7 +422,7 @@ void IntegratorOmelyan::integrateStep2(){
   double OzIter=0.0, OzSav=0.0;
   double INHOMX, INHOMY, INHOMZ;
   double PreFacX, PreFacY, PreFacZ;
-  double relaerr = 1.0, residue = 1.0;
+  double relaerr = 1.0, residue = 1.0, norm = 1.0;
   int iter, imax=1;
   point_t TauOldPrime, TauNewPrime;
 //
@@ -492,6 +495,13 @@ void IntegratorOmelyan::integrateStep2(){
    Omega.y = OyIter;
    Omega.z = OzIter;
    Tbff = TauNewPrime;
+   if(m_normalize){
+     norm = sqrt(Q0*Q0+Q1*Q1+Q2*Q2+Q3*Q3);
+     Q0 = Q0/norm;
+     Q1 = Q1/norm;
+     Q2 = Q2/norm;
+     Q3 = Q3/norm;
+   }
 //  MSG_DEBUG("IntegratorOmelyan::integrateStep(2)", "Omega = " << Omega);      
    if(iter > imax) imax=iter;
       );
