@@ -77,6 +77,11 @@ protected:
    */
   bool m_first_sweep;
   /*!
+   *  normalize quaternions after timestep?
+   */
+    bool m_normalize;
+
+  /*!
    * components of the inertial tensor for the species this integrator works for.
    */
   double m_J1;
