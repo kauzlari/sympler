@@ -7,6 +7,7 @@ Some tips and constraints:
 2. Please make sure that you are in the directory "testsuite/" in order to run this script successfully. 
 3. New input files should be added as "testsuite/TSTIN/SOME_NEW_DIRECTORY/test.xml". Here, the input file name should always be "test.xml". If you want to add a brand new input file, please run it manually first time and make a copy of the output file (for eg: sim.dat or acf.dat) into "RESULTS/" directory. So that it can be used for debugging, when you run the script afterwards.  
 4. Output file names should differ.
+5. For a successful passing of all test-runs you also have to install the optional libraries libtnt, libjama, libsuperlu (including development-packages if separately available).
 
 
 RUNNING THE SCRIPT:
