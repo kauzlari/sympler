@@ -37,6 +37,15 @@
 
 SYMPLER: SYMbolic PaerticLE simulatoR
 
+______________________________________________________________________
+Contents of this file:
+
+- Field of application
+- Main features of SYMPLER
+- Compiling SYMPLER
+- Running SYMPLER
+- Postprocessing
+- Contributing to SYMPLER
 
 ______________________________________________________________________
 Field of application:
@@ -87,6 +96,7 @@ configuration (CXXFLAGS="... -fopenmp").
 +++ coupling of particles to a linear system of equations solver with module IntegratorLSE
 +++ the module for velocity constraints VelConstraints
 +++ the integrator IntegratorVelocityVerletPressure
++++ running successfully the testsuite (see also section "Contributing to SYMPLER" below)
 
 
 + Configuration and Compilation:
@@ -374,3 +384,13 @@ GridMeters are also Meters. Hence they also collect data and nothing else. For o
 to the Meters. In the example above you can find two of them: OutputVTK and OutputFile. Check
 
 $ $BUILD-DIR/sympler --help Postprocessors
+
+
+______________________________________________________________________
+Contributing to SYMPLER
+
+Feel free to contribute code-extensions by making a pull request on https://github.com/kauzlari/sympler
+
+You should follow these rules before making a pull request:
+- At the very least, run the test-script in the testsuite directory.
+- Think about adding an own test of your new features to the testsuite
