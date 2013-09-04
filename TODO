@@ -1,4 +1,3 @@
-
 The latin numbers stand for the complexity of the implementation.
 PRIMARY and SECONDARY tells you how important this new feature is. The features at the top are those, which were missed most recently.
 
@@ -6,9 +5,11 @@ PRIMARY:
 
 (II) Implement Cell-subdivision with cell-sizes >= 0.5*cutoff. Implement the choice of the factor (0.5 or 1) either as option in current ManagerCell, or in new class. In the latter case you maybe do not have to make the choice between two modules in the XML, but a parent class can decide based on an attribute, which ManagerCell it creates
 
-(II) VerletCreator (and VLYaoCreator if already efficient, which it currently 2013-05-16 is not, but in a few days maybe): If we have many species, we could restrict the update of PairLists to those colour-pairs containing the colour that has provoked the update
-
 (III) Allow for cache-coherence: Store all particle-DOFs (and pair-DOFs) in separate continuous-memory arrays, probably using SmartLists as now for the particles and pairs.
+
+(I) The importance of this is connected to the importance of implementing models such as TIP*P-water using runtime-compiled expressions: Implement a Symbol-module (e.g., "DistVecBC") producing as output the shortest vectorial distance vector between two points in the simulation-domain under consideration of the given boundary conditions (e.g., periodic) and store it in the tag of the particle-pair. The input to that module could be s.th. like two runtime-compiled expressions (RCEs) giving the two points. RCEs instead of just vector-Symbols could be necessary if the points are not explicitly stored in the particles.
+
+(II) VerletCreator (and VLYaoCreator if already efficient, which it currently 2013-09-04 is not): If we have many species, we could restrict the update of PairLists to those colour-pairs containing the colour that has provoked the update
 
 (II) We urgently need to implement the stability condition dt < const*min_i(sqrt(h/F_i)), where "dt" is the timestep, "const" is a constant which seems to be 0.25 for leapfrog- and predictor-corrector-like time integrators, "h" is a smoothing length that we should probably set equal to the average particle spacing and "F_i" is the absolute value of the total force acting on particle "i". This should be implemented in the integrators integrating positions and velocities in such a way that we get an adaptive time-step based on this criterion. Maybe, this is then extendible to include additional criteria, e.g., based on locally varying transport parameters such as a viscosity. 
 
