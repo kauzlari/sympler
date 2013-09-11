@@ -364,6 +364,8 @@ void help(string keyword)
           ++i;
         }
         cout << endl;
+	cout << "Or one of \"all\", \"workflow\", \"expressions\"."
+        cout << endl;
     }
 }
 

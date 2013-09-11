@@ -434,7 +434,6 @@ void VerletCreator::createDistances()
 	 
 	 for (int t = 0; t < global::n_threads; ++t) {
 	   
-	   int t = PairCreator::counterTN;
 	   // free pairs
 	   size_t listSize = cp->freePairs()[t].size();
 	   if(listSize)
