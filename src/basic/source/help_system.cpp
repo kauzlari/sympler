@@ -224,11 +224,11 @@ string expr_help_str
      "        * Vector@Vector = Tensor (inner product), e.g. \"[ai]@[bj]\"\n"
      "   * \"^\" = exponentiation, e.g., \"a^b\"\n"
      "   * \"*\" = multiplication, component wise on Matrix and Vector, e.g., \"a*b\" or also \"{ai}*{bj}\"\n"
-     "   * \"°\"\n"
-     "       * Matrix°Matrix = Matrix (standard matrix product), e.g. \"{a}°{b}\"\n"
+     "   * \"ï¿½\"\n"
+     "       * Matrixï¿½Matrix = Matrix (standard matrix product), e.g. \"{a}ï¿½{b}\"\n"
      "         Clarification in case the operator does not display correctly\n"
      "         in your editor or console: The operator corresponds do the\n"
-     "         \"degrees\" symbol, i.e., 90° = \"90 degrees\".\n"
+     "         \"degrees\" symbol, i.e., 90ï¿½ = \"90 degrees\".\n"
      "\n"
      " * Functions of a scalar (or scalar-components):\n"
      "   * abs(Scalar): self-explanatory, component-wise for non-scalars\n"
@@ -364,7 +364,7 @@ void help(string keyword)
           ++i;
         }
         cout << endl;
-	cout << "Or one of \"all\", \"workflow\", \"expressions\"."
+	cout << "Or one of \"all\", \"workflow\", \"expressions\".";
         cout << endl;
     }
 }
