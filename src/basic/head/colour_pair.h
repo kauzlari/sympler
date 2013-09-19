@@ -358,7 +358,7 @@ class ColourPair
   /*!
    * return the \a maxStage 
    */
-  const size_t maxStage() const
+  size_t maxStage() const
   { 
     return m_maxStage;
   }
@@ -366,7 +366,7 @@ class ColourPair
   /*!
    * return the \a maxStage 
    */
-  const size_t maxStage_0() const
+  size_t maxStage_0() const
   { 
     return m_maxStage_0;
   }
@@ -374,7 +374,7 @@ class ColourPair
   /*!
    * return the \a m_maxBondedStage[icl] 
    */
-  const size_t maxBondedStage(size_t icl) const
+  size_t maxBondedStage(size_t icl) const
   { 
     return m_maxBondedStage[icl];
   }
@@ -382,7 +382,7 @@ class ColourPair
   /*!
    * return the \a m_maxBondedStage_0[icl] 
    */
-  const size_t maxBondedStage_0(size_t icl) const
+  size_t maxBondedStage_0(size_t icl) const
   { 
     return m_maxBondedStage_0[icl];
   }

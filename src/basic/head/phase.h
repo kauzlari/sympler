@@ -766,7 +766,7 @@ public:
   /*!
    * return the \a m_maxBondedStage[icl] 
    */
-  const size_t maxBondedStage(size_t icl) const
+  size_t maxBondedStage(size_t icl) const
   { 
     return m_maxBondedStage[icl];
   }
@@ -774,7 +774,7 @@ public:
   /*!
    * return the \a m_maxBondedStage_0[icl] 
    */
-  const size_t maxBondedStage_0(size_t icl) const
+  size_t maxBondedStage_0(size_t icl) const
   { 
     return m_maxBondedStage_0[icl];
   }
