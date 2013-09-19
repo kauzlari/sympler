@@ -165,7 +165,7 @@ void IntegratorStatic::solveHitTimeEquation(WallTriangle* wallTriangle, const Pa
 }
 
 
-void IntegratorStatic::hitPos(WallTriangle* wallTriangle, double dt, const Particle* p, point_t &hit_pos,
+void IntegratorStatic::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos,
 const point_t &force)
 {
 }

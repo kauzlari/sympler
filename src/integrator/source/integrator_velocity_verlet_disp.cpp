@@ -129,7 +129,7 @@ void IntegratorVelocityVerletDisp::integratePosition(Particle* p, Cell* cell)
 }
 
 
-void IntegratorVelocityVerletDisp::hitPos(WallTriangle* wallTriangle, double dt, const Particle* p, point_t &hit_pos, const point_t &force)
+void IntegratorVelocityVerletDisp::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
   hit_pos = p->r + dt*(p->v + dt/2*force/m_mass);
 
