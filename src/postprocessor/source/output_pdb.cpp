@@ -98,7 +98,7 @@ void OutputPDB::describeInput(DataFormat *input_format)
 {
     m_input_format = input_format;
 	
-    m_idx_positions = m_input_format->indexOf("positions", DataFormat::VECTOR_POINT);
+    m_idx_positions = m_input_format->indexOf("position", DataFormat::VECTOR_POINT);
 }
 
 
