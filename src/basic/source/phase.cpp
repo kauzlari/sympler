@@ -222,9 +222,9 @@ void Phase::setup()
   NodeManyChildren::setup();
 
   if(!m_boundary)
-    throw gError("Phase::read", "No boundary defined.");
+    throw gError("Phase::setup", "No boundary defined.");
   if(!m_pairCreator)
-    throw gError("Phase::read", "No pair creator defined.");
+    throw gError("Phase::setup", "No pair creator defined.");
 
   if (((Simulation*) m_parent)->randomize())
     m_rng.setSeed(getpid());
