@@ -150,7 +150,7 @@ void Boundary::setup()
   if(m_reflectors.empty())
     throw gError("Boundary::setup", "No Reflector defined.");
 
-  if (!M_PHASE->pairCreator()) {
+  if (!M_PHASE->pairCreator())
     throw gError("Boundary::setup", "No PairCreator defined.");
 
   m_thickness = M_PHASE->pairCreator()->interactionCutoff();
