@@ -106,7 +106,7 @@ public:
    * Checks which of the times (in the time vector) is the actual hit position. The function will 
 be used in WallTriangle
    */
-  virtual void hitPos(WallTriangle* wallTriangle, double dt, const Particle* p, point_t &hit_pos, 
+  virtual void hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, 
 const point_t &force);
 
 #ifdef _OPENMP
