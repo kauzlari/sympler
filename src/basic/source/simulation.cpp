@@ -526,7 +526,7 @@ void Simulation::writeWhenDone()
 
   NodeManyChildren::write(outFile);
 
-  cout << "Simulation results written to file " << fileName << endl;
+  cout << "Input for new simulation written to file " << fileName << endl;
   outFile.close();
   //	return outFile;
 }
