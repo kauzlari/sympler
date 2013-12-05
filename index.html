@@ -80,6 +80,7 @@
 </ul>
 </li>
 <li><a href="#Postprocessing">Postprocessing</a></li>
+<li><a href="#Projects">Projects with SYMPLER</a></li>
 <li><a href="#Publications">Publications</a></li>
 <li><a href="#Contributing">Contributing to SYMPLER</a></li>
 <li><a href="#Funding">Funding</a></li>
@@ -387,7 +388,7 @@ CXXFLAGS="-O3 -ip -parallel -funroll-loops -complex-limited-range \
 <h2>
 <a name="-runtime-compiled-expressions-" class="anchor" href="#-runtime-compiled-expressions-"><span class="octicon octicon-link"></span></a> Runtime compiled expressions </h2>
 
-<p>In the example file you see some of them. For example "...(ni+nj)*[rij]/rij*40 where 'n' is a user defined scalar symbol, [rij] is the distance vector [ri]-[rj] for particle pair (i,j) and 'rij' is its absolute value. Single indices 'i', 'j' denote a particle property while double indices 'ij' denote the property of the pair of particles. Type</p>
+<p>In the example file you see some of them. For example "...(ni+nj)<em>[rij]/rij</em>40 where 'n' is a user defined scalar symbol, [rij] is the distance vector [ri]-[rj] for particle pair (i,j) and 'rij' is its absolute value. Single indices 'i', 'j' denote a particle property while double indices 'ij' denote the property of the pair of particles. Type</p>
 
 <pre><code>$ $BUILD-DIR/sympler --help expressions
 </code></pre>
@@ -432,6 +433,18 @@ $ $BUILD-DIR/sympler --help Symbols
 <ul>
 <li>At the very least, run the test-script in the testsuite directory.</li>
 <li>Think about adding an own test of your new features to the testsuite</li>
+</ul><hr><p><a name="Projects"></a></p>
+
+<h1>
+<a name="-projects-with-sympler-" class="anchor" href="#-projects-with-sympler-"><span class="octicon octicon-link"></span></a> Projects with SYMPLER </h1>
+
+<p>The following pages describe research projects where SYMPLER has been used:</p>
+
+<ul>
+<li><a href="http://simulation.uni-freiburg.de/research/simulation/cgcnt/cgcnt">Coarse graining of carbon nanotubes</a></li>
+<li><a href="http://simulation.uni-freiburg.de/research/simulation/electrowettingsimulation/electrowettingsimulation">Electrowetting simulation for micro device assembly</a></li>
+<li><a href="http://simulation.uni-freiburg.de/research/simulation/simulationmicrocasting/simulationmicrocasting">Simulation of micro casting</a></li>
+<li><a href="http://simulation.uni-freiburg.de/research/simulation/simmicropim/simmicropim">Simulation of micro powder injection moulding</a></li>
 </ul><hr><p><a name="Publications"></a></p>
 
 <h1>
@@ -444,8 +457,7 @@ $ $BUILD-DIR/sympler --help Symbols
 <h1>
 <a name="-funding-" class="anchor" href="#-funding-"><span class="octicon octicon-link"></span></a> Funding </h1>
 
-<p>Funding:<br>
-by the DFG (Deutsche Forschungsgemeinschaft) in the framework of </p>
+<p>Funding by the DFG (Deutsche Forschungsgemeinschaft) in the framework of </p>
 
 <ul>
 <li>SFB499 TPA4</li>
