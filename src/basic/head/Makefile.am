@@ -46,8 +46,11 @@ include_HEADERS = \
 	particle.h \
 	particle_cache.h \
 	particle_cache_arbitrary.h \
+	particle_cache_arb_rng.h \
 	particle_creator.h \
 	particle_list.h \
+	particle_rand_norm_scalar.h \
+	particle_rand_norm_vector.h \
 	particle_scalar.h \
 	particle_tensor.h \
 	particle_vector.h \
