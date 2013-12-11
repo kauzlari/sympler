@@ -229,6 +229,7 @@ void sayHello() {
 #include "integrator_static.h"
 #include "integrator_tensor.h"
 #include "integrator_velocity_verlet_disp.h"
+#include "integrator_velocity_verlet_disp_x.h"
 #include "integrator_tensor_lambda.h"
 #include "integrator_vector.h"
 #include "integrator_vector_lambda.h"
@@ -457,6 +458,7 @@ void link_all_properly()
   new IntegratorVectorLambda(NULL);
   new IntegratorTensor(NULL);
   new IntegratorVelocityVerletDisp(NULL);
+  new IntegratorVelocityVerletDispX(NULL);
   new IntegratorTensorLambda(NULL);
   new IntegratorVelocityVerlet(NULL);
 #ifdef HAVE_JAMA_JAMA_LU_H
