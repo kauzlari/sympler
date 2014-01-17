@@ -38,7 +38,7 @@
      cutoff="1"
      species1="fluid"
      species2="fluid"
-     pairFactor = "-47.74648083382479*((1-rij)^2)*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+     pairFactor = "-47.74648292756861*((1-rij)^2)*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
   />
 
   <!-- alternative modules -->
@@ -46,7 +46,7 @@
   <PairParticleVector
      species1="fluid"
      species2="fluid"
-     expression = "47.74648083382479*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
+     expression = "47.74648292756861*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
      symmetry = "-1"
      symbol = "FD"
      cutoff = "1"
@@ -64,7 +64,7 @@
     weightingFunction = "default"
      species1="fluid"
      species2="fluid"
-     noise = "9.7720500238"
+     noise = "9.7720502380584"
   />
 
   <Phase>
