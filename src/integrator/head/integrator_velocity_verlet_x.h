@@ -81,11 +81,11 @@ class IntegratorVelocityVerletX: public IntegratorVelocityVerlet
    */
     virtual void integratePosition(Particle* p, Cell* cell);
 
-  /*!
+    /*!
      * Solves the equation that checks for hits
-   */
+     */
     virtual void solveHitTimeEquation(WallTriangle* wallTriangle, const Particle* p, const point_t 
-        &force, vector<double>* results);
+				      &force, vector<double>* results);
 
   /*!
      * Checks which of the times (in the time vector) is the actual hit position. The function will 
