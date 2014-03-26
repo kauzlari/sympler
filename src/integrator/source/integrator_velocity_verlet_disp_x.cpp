@@ -29,12 +29,13 @@
  */
 
 
+
 #include "gen_f.h"
 #include "phase.h"
 #include "threads.h"
 #include "controller.h"
 #include "simulation.h"
-#include "integrator_velocity_verlet_x.h"
+#include "integrator_velocity_verlet_disp_x.h"
 #include "cell.h"
 
 using namespace std;
@@ -45,59 +46,113 @@ using namespace std;
 #define M_PHASE M_SIMULATION->phase()
 
 
-const Integrator_Register<IntegratorVelocityVerletX> integrator_velocity_verlet_x("IntegratorVelocityVerletX");
+const Integrator_Register<IntegratorVelocityVerletDispX> integrator_velocity_verlet_disp_x("IntegratorVelocityVerletDispX");
 
 //---- Constructors/Destructor ----
 
-IntegratorVelocityVerletX::IntegratorVelocityVerletX(Controller *controller):IntegratorVelocityVerlet(controller)
+IntegratorVelocityVerletDispX::IntegratorVelocityVerletDispX(Controller *controller):IntegratorVelocityVerlet(controller)
 {
+  m_disp.assign(0);
   init();
 }
 
 
-IntegratorVelocityVerletX::~IntegratorVelocityVerletX()
+IntegratorVelocityVerletDispX::~IntegratorVelocityVerletDispX()
 {
 }
 
 
 //---- Methods ----
 
-void IntegratorVelocityVerletX::init()
+/*!
+ * 
+ */
+void IntegratorVelocityVerletDispX::init()
 {
   // some modules need to know whether there is an Integrator, 
   // which changes positions, that's why the following
   m_properties.setClassName("IntegratorPosition");
-  m_properties.setName("IntegratorVelocityVerletX");
+  m_properties.setName("IntegratorVelocityVerletDispX");
 
-  m_properties.setDescription("Integrates the position and velocity coordinates of each particle according to the Velocity-Verlet Algorithm. The position is integrated by using a user-defined velocity");
+  m_properties.setDescription("Integrates the position and momentum coordinates of each particle according to the Velocity-Verlet Algorithm and calculates the displacement for each particle. The velocity used for position and displacement integration is a user-defined symbol, instead of the usual integrated velocity.");
+
+
+  STRINGPC
+    (displacement, m_displacement_name,
+     "Full name of the displacement, usable as attribute in other modules");
+  
+  STRINGPC
+    (symbol, m_displacement_symbol,
+     "Symbol assigned to the displacement, usable in algebraic expressions");
+
+  m_displacement_name = "displacement";
+  m_displacement_symbol = "ds";
 
   STRINGPC(velocity, m_vSymbol, "The symbol of the velocity used for integration of the positions.");
       
   m_vSymbol = "undefined";
+
+
 }
 
-void IntegratorVelocityVerletX::integratePosition(Particle* p, Cell* cell)
+
+void IntegratorVelocityVerletDispX::setup()
 {
-  int force_index; 
+  Integrator::setup();
+
+  if(m_vSymbol == "undefined")
+    throw gError("IntegratorVelocityVerletDispX::setup", "Attribute 'velocity' has value \"undefined\".");
+  
+  // the Integrator adds the symbol, because it is created before the other symbols;
+  // the rest is the job of calculators and caches. If there are none, the velocity 
+  // should be always zero
+  if(!Particle::s_tag_format[m_colour].attrExists(m_vSymbol))
+    m_v_offset = 
+      Particle::s_tag_format[m_colour].addAttribute(m_vSymbol, DataFormat::POINT,
+      false /*it's not an integrated quantity, so not persistent !!!*/).offset;
+  else
+    throw gError("IntegratorVelocityVerletDispX::setup", "Cannot add symbol " + m_vSymbol + " to species " + m_species + " because it is already used.");
+  
+  m_displacement_offset = 
+    Particle::s_tag_format[m_colour].addAttribute
+      (m_displacement_name,
+       DataFormat::POINT,
+       true,
+       m_displacement_symbol).offset;
+}
+
+
+void IntegratorVelocityVerletDispX::integratePosition(Particle* p, Cell* cell)
+{
+  size_t force_index; 
   force_index = ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
   
   point_t& vel = p->tag.pointByOffset(m_v_offset);
   point_t oldVel = vel;
-      
+
   const point_t& a = p->force[force_index]/m_mass;
 
   cell->doCollision(p, p->r, vel, a, (IntegratorPosition*) this); 
-  
+
   // Collision happened! So we have to change p->v! Currently we change it 
   // to vel, i.e., the user-defined velocity
   if(!(vel == oldVel))
     p->v = vel;
-  
-  // FIXME: FORCES !!!! DOES THIS MAKE SENSE ????
+
+  p->tag.pointByOffset(this->m_displacement_offset) += m_disp - p->r;
+
   p->r += p->dt * (p->tag.pointByOffset(m_v_offset) + 0.5 * p->dt * a);  
+
+  p->tag.pointByOffset(this->m_displacement_offset) += p->r;
+  // for next usage
+  m_disp.assign(0);
+
+  // inconsistency due to periodic BCs between the displacement and 
+  // the position can not occur because the PBCs are only checked afterwards
+
 }
 
-void IntegratorVelocityVerletX::solveHitTimeEquation(WallTriangle* wallTriangle, const Particle* p, const point_t &force, vector<double>* results)
+void IntegratorVelocityVerletDispX::solveHitTimeEquation(WallTriangle* wallTriangle, const Particle* p, const point_t &force, vector<double>* results)
 {
   double a, b, c;
   double t0, t1;
@@ -144,26 +199,20 @@ void IntegratorVelocityVerletX::solveHitTimeEquation(WallTriangle* wallTriangle,
   }
 }
 
-void IntegratorVelocityVerletX::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, const point_t &force)
+
+void IntegratorVelocityVerletDispX::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
-  hit_pos = p->r + dt*p->tag.pointByOffset(m_v_offset) + dt*dt/2*force;
+  hit_pos = p->r + dt*(p->tag.pointByOffset(m_v_offset) + (dt/2)*(force/m_mass));
+
+  m_disp = hit_pos - p->r;
 }
 
-void IntegratorVelocityVerletX::setup()
-{
-  Integrator::setup();
 
-  if(m_vSymbol == "undefined")
-    throw gError("IntegratorVelocityVerletX::setup", "Attribute 'velocity' has value \"undefined\".");
-  
-  // the Integrator adds the symbol, because it is created before the other symbols;
-  // the rest is the job of calculators and caches. If there are none, the velocity 
-  // should be always zero
-  if(!Particle::s_tag_format[m_colour].attrExists(m_vSymbol))
-    m_v_offset = 
-      Particle::s_tag_format[m_colour].addAttribute(m_vSymbol, DataFormat::POINT,
-      false /*it's not an integrated quantity, so not persistent !!!*/).offset;
-  else
-    throw gError("IntegratorVelocityVerletX::setup", "Cannot add symbol " + m_vSymbol + " to species " + m_species + " because it is already used.");
-  
+#ifdef _OPENMP
+string IntegratorVelocityVerletDispX::dofIntegr() {
+  return "vel_pos";
 }
+
+
+#endif
+

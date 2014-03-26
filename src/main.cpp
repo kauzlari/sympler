@@ -229,6 +229,7 @@ void sayHello() {
 #include "integrator_static.h"
 #include "integrator_tensor.h"
 #include "integrator_velocity_verlet_disp.h"
+#include "integrator_velocity_verlet_disp_x.h"
 #include "integrator_tensor_lambda.h"
 #include "integrator_vector.h"
 #include "integrator_vector_lambda.h"
@@ -285,6 +286,8 @@ void sayHello() {
 #include "pca_eigensystem.h"
 #include "pca_density_0oc.h"
 #include "pca_matrix_inverse.h"
+#include "particle_rand_norm_scalar.h"
+#include "particle_rand_norm_vector.h"
 #include "particle_scalar.h"
 #include "particle_tensor.h"
 #include "particle_vector.h"
@@ -455,6 +458,7 @@ void link_all_properly()
   new IntegratorVectorLambda(NULL);
   new IntegratorTensor(NULL);
   new IntegratorVelocityVerletDisp(NULL);
+  new IntegratorVelocityVerletDispX(NULL);
   new IntegratorTensorLambda(NULL);
   new IntegratorVelocityVerlet(NULL);
 #ifdef HAVE_JAMA_JAMA_LU_H
@@ -493,6 +497,8 @@ void link_all_properly()
   new ParticleCacheDensitySelfContribution(NULL);
 //   new ParticleCacheShearSelfContribution(NULL);
   new ParticleCacheVolumeSelfContribution(NULL);
+  new ParticleRandNormScalar(NULL);
+  new ParticleRandNormVector(NULL);
   new ParticleScalar(NULL);
   new ParticleTensor(NULL);
   new ParticleVector(NULL);

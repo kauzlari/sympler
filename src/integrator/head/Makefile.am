@@ -9,6 +9,7 @@ include_HEADERS = \
 	integrator_static_lse.h \
 	integrator_tensor.h \
 	integrator_velocity_verlet_disp.h \
+	integrator_velocity_verlet_disp_x.h \
 	integrator_tensor_lambda.h \
 	integrator_vector.h \
 	integrator_vector_lambda.h \
