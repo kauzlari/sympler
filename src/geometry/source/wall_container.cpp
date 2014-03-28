@@ -355,6 +355,8 @@ int WallContainer::intersectionsGeneral(const line_t &l)
     (list<Wall*>,
      m_walls,
      if ((*__iFE)->intersects(l, hit_pos)) {
+       /*The next avoids to count the same hit_point twice, which might 
+	 happen due to triangle overlap when using small error-epsilons*/
        if (!hasCloseP(pos, hit_pos)) {
          pos.push_back(hit_pos);
          n++;
