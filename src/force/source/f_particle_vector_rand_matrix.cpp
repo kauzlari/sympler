@@ -88,7 +88,7 @@ void FParticleVectorRandMatrix::computeForces(Particle* part, int force_index)
   size_t p1Contrib = p1*SPACE_DIMS*m_nOfParts*SPACE_DIMS;
 
   // the force to be modified
-  point_t force = {0,0,0};
+  point_t force = {{{0,0,0}}};
 
   // outer (slow) cartesian loop
   for(size_t d1 = 0; d1 < SPACE_DIMS; ++d1) {
@@ -235,5 +235,10 @@ void FParticleVectorRandMatrix::setupAfterParticleCreation()
     throw gError("FParticleVectorRandMatrix::computeForces","Particle with slot 0 is not the first particle. Not supported by this forces! Aborting.");
 
   if(m_matSize != m_nOfParts*m_nOfParts*SPACE_DIMS*SPACE_DIMS)
-    throw gError("FParticleVectorRandMatrix::setupAfterParticleCreation", "Matrix does not seem to have size corresponding to number of particles and dimensions. Aborting.");
+    throw gError("FParticleVectorRandMatrix::setupAfterParticleCreation", "Matrix does not seem to have size corresponding to number of particles and dimensions. This is what I have: \n"
+		 "Sqrt(matrixSize)/SPACE_DIMS = " + ObjToString(sqrt(m_matSize)/SPACE_DIMS) + "\n"
+		 "number of particles = " + ObjToString(m_nOfParts) + "\n"
+		 "Aborting."
+		 );
+
 }
