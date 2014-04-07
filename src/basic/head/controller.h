@@ -97,6 +97,16 @@ protected:
   list<Node*> m_toSetupAfterParticleCreation;
   
   /*!
+  * A list where \a Node s may register for being called for some precomputation operation before the s\a Symbol ("stage 1") and \a Force computations
+  */
+  list<Node*> m_precomputers;
+  
+  /*!
+  * A list where \a Node s may register for being called for some precomputation operation before the s\a Symbol computations in "stage 0".
+  */
+  list<Node*> m_precomputers_0;
+  
+  /*!
    * Register additional properties with the property list
    */
   void init();
@@ -191,6 +201,16 @@ static /*double*/int time_for_parallel2;
   int forceIndex() const {
     return m_force_index;
   }
+  
+  /*!
+  * Adds the \a Node to a list for being called before \a Symbol ("stage 1") and \a Force computations
+  */
+  void registerForPrecomputation (Node* callable);
+  
+  /*!
+  * Adds the \a Node to a list for being called before the \a Symbol computations of "stage 0"
+  */
+  void registerForPrecomputation_0 (Node* callable);
   
   /*!
   * Adds the argument to a list for being called after particle creation

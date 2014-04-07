@@ -34,6 +34,7 @@
 
 #include "particle_cache_arbitrary.h"
 #include "random.h"
+#include "phase.h"
 
 /*!
  * User-defined random normaly distributed scalar symbol for a particle multiplied by 
@@ -47,7 +48,17 @@ class ParticleCacheArbRNG : public ParticleCacheArbitrary
    * a random number generator
    */
    RandomNumberGenerator m_rng;
-  
+
+   /*!
+    * pointer to the \a Phase object
+    */
+   Phase* m_phasePointer;
+
+   /*!
+    * Holds user-specified minimum number of particles for which the average of the random numbers will be shifted to zero (by preserving the original variance). Otherwise the average will only be zero over an infinite number of time steps.
+    */
+   int m_plimit;
+
     /*!
      * Initialise the PropertyList.
      */

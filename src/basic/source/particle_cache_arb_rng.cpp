@@ -48,11 +48,24 @@ ParticleCacheArbRNG::~ParticleCacheArbRNG()
 void ParticleCacheArbRNG::init()
 {
 
+  INTPC(pLimit, m_plimit, INT_MIN, "Specifies the minimum number of particles for which the average of the random numbers of each time step will be shifted to zero while preserving the original variance.");
+
+  m_plimit = 2;
+
 }
 
 void ParticleCacheArbRNG::setup()
 {
+
   ParticleCacheArbitrary::setup();
+
+  if(m_plimit < 1)
+    throw gError("ParticleCacheArbRNG::setup", "For module " + m_properties.className() + ": Attribute 'pLimit' must have integer value > 0");
+
+  m_phasePointer = M_SIMULATION->phase();
+
+  // If this fails, we have to assign the phase in a setupAfterParticleCreation();
+  assert(m_phasePointer);
 
   if (M_SIMULATION->randomize())
     m_rng.setSeed(getpid());
