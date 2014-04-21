@@ -147,7 +147,7 @@
 <h1>
 <a name="-configuration-and-compilation-" class="anchor" href="#-configuration-and-compilation-"><span class="octicon octicon-link"></span></a> Configuration and Compilation </h1>
 
-<p>All the commands invoked in the following have there own documentation. Please refer to it for more information. It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special instructions for MacOS.</p>
+<p>All the commands invoked in the following have their own documentation. Please refer to it for more information. It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special instructions for MacOS.</p>
 
 <h3>
 <a name="configuration-and-compilation-for-standard-linux-systems" class="anchor" href="#configuration-and-compilation-for-standard-linux-systems"><span class="octicon octicon-link"></span></a>Configuration and Compilation for standard Linux-systems:</h3>
@@ -388,7 +388,7 @@ CXXFLAGS="-O3 -ip -parallel -funroll-loops -complex-limited-range \
 <h2>
 <a name="-runtime-compiled-expressions-" class="anchor" href="#-runtime-compiled-expressions-"><span class="octicon octicon-link"></span></a> Runtime compiled expressions </h2>
 
-<p>In the example file you see some of them. For example "...(ni+nj)<em>[rij]/rij</em>40 where 'n' is a user defined scalar symbol, [rij] is the distance vector [ri]-[rj] for particle pair (i,j) and 'rij' is its absolute value. Single indices 'i', 'j' denote a particle property while double indices 'ij' denote the property of the pair of particles. Type</p>
+<p>In the example file you see some of them. For example "...(ni+nj)*[rij]/rij*40 where 'n' is a user defined scalar symbol, [rij] is the distance vector [ri]-[rj] for particle pair (i,j) and 'rij' is its absolute value. Single indices 'i', 'j' denote a particle property while double indices 'ij' denote the property of the pair of particles. Type</p>
 
 <pre><code>$ $BUILD-DIR/sympler --help expressions
 </code></pre>
