@@ -101,7 +101,7 @@ configuration (CXXFLAGS="... -fopenmp").
 
 + Configuration and Compilation:
 
-All the commands invoked in the following have there own documentation. Please refer to it for more information.
+All the commands invoked in the following have their own documentation. Please refer to it for more information.
 It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special
 instructions for MacOS and Intel compilers.
 
