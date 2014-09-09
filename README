@@ -169,7 +169,7 @@ since the old version which came from Apple was broken. This was the case for ex
 most recent version from http://ftp.gnu.org/gnu/m4/. Now drag the old gm4 tool in /usr/bin to a backup folder (for
 example your Desktop) and replace it with the newer version (you will be asked to enter your root password).
 
-Now you are ready to compile sympler! So grab the moldyn source code into a code directory (called $CODE-DIR here) and
+Now you are ready to compile sympler! So grab the SYMPLER source code into a code directory (called $CODE-DIR here) and
 create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal:
 
 $ cd $CODE-DIR
