@@ -53,12 +53,4 @@ fromStepOn redefined in MeterPosVel
 
 - if BoundarySTL uses inlet all non-ParticleCreatorInlet must be placed behind ParticleCreatorInlet -> generalise that
 
-- the bug is in fact fixed but we should have a look if the fix is OK in all cases:
-WallContainer::isInside(point_t) crashes because of ODD(c_up) != ODD(c_down) in the following case (and presumably similar cases):
-+BoundaryStepStoch
-+periodic in x- and z-direction
-+step in y-direction
-+step at x-position xPos
-+initial particle x-position at xPos
 
--> fix with side normals
