@@ -68,6 +68,66 @@ class ParticleRandNormVector : public ParticleCacheArbRNG
    */
     virtual ~ParticleRandNormVector();
 
+    /*!
+     * Precompute the random numbers for each particle with zero mean and unit variance
+     */
+    virtual void precompute()
+    {
+      point_t average = {{{0,0,0}}};
+      point_t sumOfSquares = {{{0,0,0}}};
+      point_t sumOfSquaresCentred = {{{0,0,0}}};
+      point_t* thisPoint;
+
+      // draw random numbers
+      FOR_EACH_FREE_PARTICLE_C
+	(m_phasePointer, m_colour,
+	 thisPoint = &(__iSLFE->tag.pointByOffset(m_offset));
+	 for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	   (*thisPoint)[i] = m_rng.normal(1);
+	   average[i] += (*thisPoint)[i];
+	   sumOfSquares[i] += ((*thisPoint)[i])*((*thisPoint)[i]);
+	 }
+	 );
+
+      // shifting the average to zero and rescaling the variance 
+      // is only done if the number of particles is at least 
+      // the user-specified limit (default=2)
+      size_t nOfP = m_phasePointer->returnNofPartC(m_colour);
+
+      // size_t cast is safe because m_plimit was checked before
+      if(nOfP >= size_t(m_plimit)) {
+	// compute average
+	for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	  average[i] /= nOfP;
+	}
+
+	// subtract average
+	FOR_EACH_FREE_PARTICLE_C
+	  (m_phasePointer, m_colour,
+	   thisPoint = &(__iSLFE->tag.pointByOffset(m_offset));
+	   for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	     (*thisPoint)[i] -= average[i];
+	     sumOfSquaresCentred[i] += ((*thisPoint)[i])*((*thisPoint)[i]);
+	   }
+	   );
+	
+	point_t scaling;
+	for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	  scaling[i] = sqrt(sumOfSquares[i]/sumOfSquaresCentred[i]);
+	}
+
+	// rescale to original variance
+	FOR_EACH_FREE_PARTICLE_C
+	  (m_phasePointer, m_colour,
+	   thisPoint = &(__iSLFE->tag.pointByOffset(m_offset));
+	   for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	     (*thisPoint)[i] *= scaling[i];
+	   }
+	   );	
+      }
+
+    }
+
       /*!
      * Compute the cache for particle \a p
      * @param p The particle to compute values for
@@ -75,10 +135,14 @@ class ParticleRandNormVector : public ParticleCacheArbRNG
     virtual void computeCacheFor(Particle* p)
     {
       
+      // new style: random number (zero mean, unit variance) was already precomputed in the corresponding tag-slot
       point_t* vec = &(p->tag.pointByOffset(m_offset));
-      m_function(vec, p);
+/*       m_function(vec, p); */
+      point_t temp;
+      m_function(&temp, p);
       for(size_t i = 0; i < SPACE_DIMS; ++i)
-	(*vec)[i] *= m_rng.normal(1);
+	(*vec)[i] *= temp[i];
+/* 	(*vec)[i] *= m_rng.normal(1); */
 
     }
 

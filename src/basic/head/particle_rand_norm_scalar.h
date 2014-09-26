@@ -68,6 +68,55 @@ class ParticleRandNormScalar : public ParticleCacheArbRNG
    */
     virtual ~ParticleRandNormScalar();
 
+    /*!
+     * Precompute the random numbers for each particle with zero mean and unit variance
+     */
+    virtual void precompute()
+    {
+      double average = 0;
+      double sumOfSquares = 0;
+      double sumOfSquaresCentred = 0;
+      double* thisNum;
+
+      // draw random numbers
+      FOR_EACH_FREE_PARTICLE_C
+	(m_phasePointer, m_colour,
+	 thisNum = &(__iSLFE->tag.doubleByOffset(m_offset));
+	 *thisNum = m_rng.normal(1);
+	 average += *thisNum;
+	 sumOfSquares += (*thisNum)*(*thisNum);
+	 );
+
+      // shifting the average to zero and rescaling the variance 
+      // is only done if the number of particles is at least 
+      // the user-specified limit (default=2)
+      size_t nOfP = m_phasePointer->returnNofPartC(m_colour);
+
+      // size_t cast is safe because m_plimit was checked before
+      if(nOfP >= size_t(m_plimit)) {
+	// compute average
+	average /= nOfP;
+	
+	// subtract average
+	FOR_EACH_FREE_PARTICLE_C
+	  (m_phasePointer, m_colour,
+	   thisNum = &(__iSLFE->tag.doubleByOffset(m_offset));
+	   *thisNum -= average;
+	   sumOfSquaresCentred += (*thisNum)*(*thisNum);
+	   );
+	
+	double scaling = sqrt(sumOfSquares/sumOfSquaresCentred);
+	
+	// rescale to original variance
+	FOR_EACH_FREE_PARTICLE_C
+	  (m_phasePointer, m_colour,
+	   __iSLFE->tag.doubleByOffset(m_offset) *= scaling;
+	   );
+	
+      }
+    }
+
+
       /*!
      * Compute the cache for particle \a p
      * @param p The particle to compute values for
@@ -78,7 +127,9 @@ class ParticleRandNormScalar : public ParticleCacheArbRNG
       double temp;
       m_function(&temp, p);
 
-      p->tag.doubleByOffset(m_offset) = m_rng.normal(1)*temp;
+      // new style: random number (zero mean, unit variance) was already precomputed in the corresponding tag-slot
+      p->tag.doubleByOffset(m_offset) *= temp;
+/*       p->tag.doubleByOffset(m_offset) = m_rng.normal(1)*temp; */
     }
 
   /*!

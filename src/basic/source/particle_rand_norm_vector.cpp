@@ -33,6 +33,7 @@
 #include "simulation.h"
 
 #define M_SIMULATION ((Simulation *) m_parent)
+#define M_CONTROLLER (M_SIMULATION->controller())
 
 const SymbolRegister<ParticleRandNormVector> particle_rand_norm_vector("ParticleRandNormVector");
 
@@ -52,7 +53,7 @@ ParticleRandNormVector::~ParticleRandNormVector()
 void ParticleRandNormVector::init()
 {
   m_properties.setClassName("ParticleRandNormVector");
-  m_properties.setDescription("User-defined symbol for a particle computing a vector of 3 statisticaly independent random normaly distributed scalars with unit variance multiplied by previously computed particle properties (symbols). The latter may be defined by the attribute 'expression'. The 'expression' can also be used to modify the variance of the random number (by including the square root of the desired variance). This module's seed is randomised by the attribute 'randomize' of module 'Simulation'");
+  m_properties.setDescription("User-defined symbol for a particle computing a vector of 3 statisticaly independent random normaly distributed scalars with unit variance multiplied by previously computed particle properties (symbols). The latter may be defined by the attribute 'expression'. The 'expression' can also be used to modify the variance of the random number (by including the square root of the desired variance). This module's seed is randomised by the attribute 'randomize' of module 'Simulation'. The average of the ramdom numbers will be shifted to exactly zero for each individual time step, unless this is explicitly switched off by setting the attribute 'pLimit' larger than the number of particles. In the latter case, the average over an infinite number of time steps is still zero.");
 
   m_expression = "idVec(1)";
 
@@ -61,5 +62,12 @@ void ParticleRandNormVector::init()
 void ParticleRandNormVector::setup()
 {
   ParticleCacheArbRNG::setup();
+
+  if(m_phase == 0) M_CONTROLLER->registerForPrecomputation_0(this);
+  if(m_phase == 1) M_CONTROLLER->registerForPrecomputation(this);
+  if(m_phase == 2) {
+    M_CONTROLLER->registerForPrecomputation(this);
+    M_CONTROLLER->registerForPrecomputation_0(this);
+  }
 }
 
