@@ -154,9 +154,9 @@ s << pTemp << "/" << C_FC_PREFIX << s_function_counter;
 
     throw gError
       ("FunctionCompiler::compile",
-       "Type mismatch in return value. Expression: '" + m_parser->expression() + "', "
-       "expected return type of size (entries) " + ObjToString(m_result_vars.size()) + ", "
-       "but got " + ObjToString(v.strings().size()) + " entries.");
+       "Type mismatch in return value. Expression: '" + m_parser->expression() + "'. "
+       "I expected a return type of size (entries) " + ObjToString(m_result_vars.size()) + ", "
+       "but got " + ObjToString(v.strings().size()) + " entrie(s).");
   }
 
   f << "{" << endl;
