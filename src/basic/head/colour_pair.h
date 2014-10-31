@@ -237,7 +237,7 @@ class ColourPair
   vector<vector<ValCalculator*> > m_valCalculators;
 
   /*!
-   * See documentation for \a m_valCalculators. This Calculators are for 
+   * See documentation for \a m_valCalculators. These Calculators are for 
    * bonded pairs. An additional vector-layer is used for distinguishing 
    * between the different bonded lists available for one \a ColourPair
    */
