@@ -85,13 +85,23 @@
         symbol = "FDPDangularNS"
   />
 
+  <!-- test of BondedPairVector-->
+
+  <BondedPairVector
+    species1 = "blobTF" 
+    species2 = "blobTF"
+    symbol = "v"
+    expression = "[vi]-[vj]"  
+    listName = "springDPDTF"
+  />
+
   <!-- friction; mass multiplied below -->
   <BondedPairParticleVector
     species1 = "blobTF" 
     species2 = "blobTF"
     listName = "springDPDTF"
     symbol = "FDPDspringTF" 
-    expression = "-0.52*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+    expression = "-0.52*(([vij]):[rij])*[rij]/(rij*rij)"
     symmetry = "-1"
     overwrite = "no"
   />

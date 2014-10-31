@@ -1,12 +1,15 @@
 
 
 include_HEADERS = \
+	bonded_pair_arbitrary.h \
 	bonded_pair_particle_arbitrary.h \
 	bonded_pair_particle_calc.h \
 	bonded_pair_particle_one_noise_vector.h \
 	bonded_pair_particle_scalar.h \
 	bonded_pair_particle_tensor_noise_vector.h \
 	bonded_pair_particle_vector.h \
+	bonded_pair_scalar.h \
+	bonded_pair_vector.h \
 	boundary.h \
 	callable.h \
 	cell.h \

@@ -41,115 +41,115 @@ using namespace std;
 /* Module for calculation of pair forces; the result is saved as a pair attribute*/
 
 class PairScalar : public ValCalculatorPair {
-protected:
-	/*!
-	 * Cut-off radius for the pair summation
-	 */
-	double m_cutoff;
-	/*!
-	 * A string for m_function;
-	 */
-	string m_expression_string;
 
-	/*!
-	 * The function pair computing the user defined pair factor
-	 */
+ protected:
+  /*!
+   * Cut-off radius for the pair summation
+   */
+  double m_cutoff;
+  /*!
+   * A string for m_function;
+   */
+  string m_expression_string;
+  
+  /*!
+   * The function pair computing the user defined pair factor
+   */
+  
+  FunctionPair m_function;
+  
+  /*!
+   * This string holds the symbols, which are not waited for to be computed beforehand
+   */
+  string m_oldSymbols;
+  
+  virtual ValCalculatorPair* copyMySelf() {
+    return new PairScalar(*this);
+  }
+  /*!
+   * Initialise the property list
+   */
+  virtual void init();
 
-	FunctionPair m_function;
+ public:
+  
+  PairScalar(string symbol);
 
-	/*!
-	 * This string holds the symbols, which are not waited for to be computed beforehand
-	 */
-	string m_oldSymbols;
-
-	virtual ValCalculatorPair* copyMySelf() {
-		return new PairScalar(*this);
-	}
-	/*!
-	 * Initialise the property list
-	 */
-	virtual void init();
-
-/* 	bool m_overwrite; */
-
-public:
-
-	PairScalar(/*WeightingFunction *wf,*/string symbol);
-	/*!
-	 * Constructor for Node hierarchy//
-	 */
-	PairScalar(/*Node*/Simulation* parent);
-
-	/*!
-	 * Destructor//
-	 */
-	virtual ~PairScalar();
-
-	/*!
-	 * Setup this Calculator
-	 */
-	virtual void setup();
-
-	/*!
-	 * Returns the symbol name as defined in the input file.
-	 */
-	virtual string myName() {
-		return m_symbolName;
-	}
-	//
-	//set the slots for the pairs
-	virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp);
-
-	//Slots for each particle,we need a slot per pair,so this should not be called
-	virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots,
+  /*!
+   * Constructor for Node hierarchy//
+   */
+  PairScalar(/*Node*/Simulation* parent);
+  
+  /*!
+   * Destructor//
+   */
+  virtual ~PairScalar();
+  
+  /*!
+   * Setup this Calculator
+   */
+  virtual void setup();
+  
+  /*!
+   * Returns the symbol name as defined in the input file.
+   */
+  virtual string myName() {
+    return m_symbolName;
+  }
+  
+  //set the slots for the pairs
+  virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp);
+  
+  //Slots for each particle,we need a slot per pair,so this should not be called
+  virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots,
 			bool oneProp) {
-		throw gError
-		("PairScalar::setSlots", "(ColourPair*, "
-				"pair<size_t, size_t>&, bool ) should not be called! Contact the programmers.");
-	}
-
-	void mySlot(size_t& slot) const {
-		slot = m_slot;
-	}
-
-	virtual void mySlots(pair<size_t, size_t> &theSlots) {
-		throw gError("PairScalar::mySlots(pair<size_t, size_t>*) should "
-				"not be called!");
-	}
-
-	/*Compute the user defined expression for pair pD*/
+    throw gError
+      ("PairScalar::setSlots", "(ColourPair*, "
+       "pair<size_t, size_t>&, bool ) should not be called! Contact the programmers.");
+  }
+  
+  void mySlot(size_t& slot) const {
+    slot = m_slot;
+  }
+  
+  virtual void mySlots(pair<size_t, size_t> &theSlots) {
+    throw gError("PairScalar::mySlots(pair<size_t, size_t>*) should "
+		 "not be called!");
+  }
+  
+  /*Compute the user defined expression for pair pD*/
 #ifdef _OPENMP
-	virtual void compute(Pairdist* dis, int threadNum) {
-	  // does the same as in serial mode at the moment; 
-	  // it writes into pairs, so should work
-	  compute(dis);
-	}
+  virtual void compute(Pairdist* dis, int threadNum) {
+    // does the same as in serial mode at the moment; 
+    // it writes into pairs, so should work
+    compute(dis);
+  }
 #endif
-	virtual void compute(Pairdist* dis) {
-		if (dis->abs() < m_cutoff) {
-
-			double temp=0;
-
-			// compute the expression for the pair function
-			m_function(&temp, dis);
-			dis->tag.doubleByOffset(m_slot)=temp;
-
-			//MSG_DEBUG("PairScalar::compute", "  In pair " << temp);
-		}
-
-	}
-
-	/*!
-	 * Diffenrently to the function in \a Symbol, this class really has
-	 * to determine its stage during run-time
-	 */
-	virtual bool findStage();
-
-	/*!
-	 * Diffenrently to the function in \a Symbol, this class really has
-	 * to determine its stage during run-time
-	 */
-	virtual bool findStage_0();
+  virtual void compute(Pairdist* dis) {
+    if (dis->abs() < m_cutoff) {
+      
+      double temp;
+      
+      // compute the expression for the pair function
+      m_function(&temp, dis);
+      dis->tag.doubleByOffset(m_slot)=temp;
+      
+      //MSG_DEBUG("PairScalar::compute", "  In pair with value " << temp);
+    }
+    
+  }
+  
+  /*!
+   * Diffenrently to the function in \a Symbol, this class really has
+   * to determine its stage during run-time
+   */
+  virtual bool findStage();
+  
+  /*!
+   * Diffenrently to the function in \a Symbol, this class really has
+   * to determine its stage during run-time
+   */
+  virtual bool findStage_0();
 };
 
 #endif /*PAIR_SCALAR_H_*/

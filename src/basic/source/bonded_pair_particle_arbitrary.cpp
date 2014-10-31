@@ -59,12 +59,6 @@ void BondedPairParticleArbitrary::init()
   m_properties.setClassName("ValCalculatorPart");
   m_properties.setName("BondedPairParticleArbitrary");
 
-//   STRINGPC(listName, m_listName, "Identifier of the list of bonded pairs, this Calculator should belong to.");
-
-//   STRINGPC
-//       (symbol, m_symbolName,
-//        "Name of the symbol for the calculated property.");
-
   STRINGPC
       (expression, m_expression,
        "The mathematical expression to be computed for the pairFactor."
@@ -85,17 +79,6 @@ void BondedPairParticleArbitrary::init()
        "Here, you can list the used symbols, which should be treated as \"old\", i.e., this calculator will not wait for those symbols to be computed beforehand, but it will take what it finds. Separate the symbols by the \"|\"- (\"pipe\"-) symbol."
       );
     
-
-  m_1stPExpression = "idVec(1)";
-  m_2ndPExpression = "idVec(1)";
-
-// #ifdef _OPENMP
-//   m_particleCalculator = true;
-// #endif
-  m_expression = "idVec(1)";
-
-//   m_listName = "undefined";
-
   m_oldSymbols = "---";
 
 }
@@ -559,7 +542,7 @@ bool BondedPairParticleArbitrary::findStage_0()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("BondedPairParticleArbitrary::findStage", "symbols of VC: ");
+		 //             MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -573,7 +556,7 @@ bool BondedPairParticleArbitrary::findStage_0()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
