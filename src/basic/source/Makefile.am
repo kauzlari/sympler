@@ -45,8 +45,11 @@ libbasic_la_SOURCES = \
 	particle.cpp \
 	particle_cache.cpp \
 	particle_cache_arbitrary.cpp \
+	particle_cache_arb_rng.cpp \
 	particle_creator.cpp \
 	particle_list.cpp \
+	particle_rand_norm_scalar.cpp \
+	particle_rand_norm_vector.cpp \
 	particle_scalar.cpp \
 	particle_tensor.cpp \
 	particle_vector.cpp \

@@ -228,7 +228,7 @@ bool WallTriangle::intersects(const point_t& from, const point_t& dir, /*point_t
 // FIXME: inline again?
 bool WallTriangle::reallyInPlane(const point_t &s) const {
   /* If the normal product of the side normal with the intersection point
-  becomes smaller than zero the point is outside. */
+  minus a side-point becomes smaller than zero the point is outside. */
   for (int i = 0; i < 3; i++)
     if (m_side_normals[i] * (s - m_corners[i]) < c_wt_dist_eps)
   {

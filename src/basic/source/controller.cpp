@@ -747,6 +747,14 @@ void Controller::runSymbols() {
 //   time_t tInitStart;
 //   time_t tInitEnd;
 
+
+// precomputations
+  FOR_EACH
+    (list<Node*>,
+     m_precomputers,
+     (*__iFE)->precompute();
+     );
+
   Phase* phase = M_PHASE;
   size_t stage = 0;
   bool cpsFinished = false;
@@ -1018,6 +1026,13 @@ void Controller::runSymbols_0() {
 //   time_t tInitStart;
 //   time_t tInitEnd;
 
+// precomputations
+  FOR_EACH
+    (list<Node*>,
+     m_precomputers_0,
+     (*__iFE)->precompute();
+     );
+
   Phase* phase = M_PHASE;
   size_t stage = 0;
   bool cpsFinished = false;
@@ -1287,9 +1302,17 @@ void Controller::setup() {
 }
 
 
+void Controller::registerForPrecomputation (Node* callable)
+{
+  m_precomputers.push_back(callable); 
+}
+
+void Controller::registerForPrecomputation_0 (Node* callable)
+{
+  m_precomputers_0.push_back(callable); 
+}
+
 void Controller::registerForSetupAfterParticleCreation (Node* callable)
 {
-
   m_toSetupAfterParticleCreation.push_back(callable); 
-
 }

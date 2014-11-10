@@ -117,8 +117,10 @@ void GridMeterTemperature::measure(data_sp data)
 	// here we do <v> 
 	for (int i = 0; i < SPACE_DIMS; i++)
 	  (m_vCM)[cell][i] /= N;
-	// now the difference <v^2>-<v>^2, where <v>^2/3 is done on the fly
-	(m_temperatures)[cell] -= (m_vCM)[cell].absSquare()/3;
+	// now the difference <v^2>-<v>^2, where <v>^2/3 is done on the fly;
+        // BUT ONLY IF N > 1. OTHERWISE WE MEASURE JUST THE THERMAL ENERGY OF ONE PARTICLE AND SHOULDN'T SUBTRACT!
+	if(N>1) 
+	  (m_temperatures)[cell] -= (m_vCM)[cell].absSquare()/3;
 	// transfer the results to the grid_averager
 	(*temperatures)[cell] += (m_temperatures)[cell];
 	(*vCM)[cell] += m_vCM[cell]; 

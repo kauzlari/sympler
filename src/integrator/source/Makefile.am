@@ -13,6 +13,7 @@ libintegrator_la_SOURCES = \
 	integrator_static_lse.cpp \
 	integrator_tensor.cpp \
 	integrator_velocity_verlet_disp.cpp \
+	integrator_velocity_verlet_disp_x.cpp \
 	integrator_tensor_lambda.cpp \
 	integrator_vector.cpp \
 	integrator_vector_lambda.cpp \

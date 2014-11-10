@@ -213,7 +213,7 @@ void ThermostatLA::thermalize(Phase* phase)
 		 newAbsRelVel -= (pair -> firstPart() -> v[i] - pair -> secondPart() -> 
 				  v[i]) * (*pair)[i];
 	       }
-	     // after next we have the scalar 
+	     // after next we have the scalar (because division by absSquare()!!!) 
 	     // (0.5/pair->abs())*((v_new_ij dot e_ij) - (v_ij dot e_ij))
 	     // i.e., only multiplication with vector r_ij is missing
 	     newAbsRelVel *= 0.5 / pair -> absSquare();
@@ -248,7 +248,7 @@ void ThermostatLA::thermalize(Phase* phase)
 		 point_t temp3;
 		 m_firstFac(&temp3, &(*pair));
 		 for(size_t i = 0; i < SPACE_DIMS; ++i)
-		   temp3[i]*=temp[i];
+		   temp3[i]*=temp2[i];
 		 pair->firstPart()->v += temp3;
 	       }
 	     if (pair->actsOnSecond())
@@ -257,7 +257,7 @@ void ThermostatLA::thermalize(Phase* phase)
 		 m_secondAdd(&temp2, &(*pair));
                  // now temp may be modified itself
 		 for(size_t i = 0; i < SPACE_DIMS; ++i)
-		   temp[i]*=temp2[i];
+		   temp[i]+=temp2[i];
 		 m_secondFac(&temp2, &(*pair));
 		 for(size_t i = 0; i < SPACE_DIMS; ++i)
 		   temp[i]*=temp2[i];

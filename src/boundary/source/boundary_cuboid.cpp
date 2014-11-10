@@ -60,7 +60,11 @@ void BoundaryCuboid::init()
 {
   m_properties.setClassName("BoundaryCuboid");
 
-  m_properties.setDescription("Defines a simple cuboid simulation region.");
+  m_properties.setDescription
+    ("Defines a simple cuboid simulation region.\n"
+     "PERIODICITY:\n"
+     "Note that setting one of the periodicX/Y/Z attributes to \"no\" will create solid walls in the respective directions. This may also affect the discarding of particles. E.g., particles may sit exactly on a periodic domain boundary, but they may not sit exactly on a wall. "
+     );
 
   for (int i = 0; i < 3; i++) {
     /* Register all properties */

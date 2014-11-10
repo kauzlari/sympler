@@ -152,6 +152,14 @@ public:
   }
   
   /*!
+   * Possibility for the Node to precompute stuff before \a Symbol s and \a Force s start computing
+   */
+  virtual void precompute()
+  {
+    
+  }
+  
+  /*!
    * Returns a help tree
    */
   virtual void help(HelpNode *node) {

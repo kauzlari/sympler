@@ -63,7 +63,7 @@ void MeterAutocorrelationVector::init()
   m_properties.setClassName("MeterAutocorrelationVector");
 
   m_properties.setDescription
-    ("This meter computes the autocorrelation funtion (ACF) for an arbitrary vector-property stored in the Particle 's tag. Note that the autocorrelation of an average vector quantity of the WHOLE SYSTEM CANNOT be computed by this Meter.");
+    ("This meter computes the autocorrelation funtion (ACF) for an arbitrary vector-property V stored in the Particle 's tag, i.e. <V.V(t)>, where the dot denotes the scalar product. Note that the autocorrelation of an average vector quantity of the WHOLE SYSTEM CANNOT be computed by this Meter.");
 
   STRINGPC
     (species,

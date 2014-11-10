@@ -125,55 +125,55 @@ bool WallContainer::isInside(const point_t &pos)
 
   // currently (02/04/05), it does not matter, for which periodicity we check
   bool oddIsIn = true;
-	if(m_periodicFront.x || m_periodicBack.x) {
-		if(m_periodicFront.y || m_periodicBack.y) {
-			if(m_periodicFront.z || m_periodicBack.z) {
+  if(m_periodicFront.x || m_periodicBack.x) {
+    if(m_periodicFront.y || m_periodicBack.y) {
+      if(m_periodicFront.z || m_periodicBack.z) {
         // we are in the case of an interior obstacle combined with PBC in all directions
         oddIsIn = false;
         direction = 0;
       } else direction = 2;
-		} else direction = 1;
-	} else direction = 0;
-			
-	
-	tester.to[direction] = m_bounding_box.corner2[direction] + 10;
-
-	c_up = intersectionsGeneral(tester);
-	
-	tester.to[direction] = m_bounding_box.corner1[direction] - 10;
-	c_down = intersectionsGeneral(tester);
-
-	// fixme!!! this is a preliminary fix for the case that the ray travels in a plane,
-	// which is bound to two other planes so that the ray intersects with these two planes;
-	// the fix solves the problem for, e.g.,  BoundaryStepStoch but it could fail for more 
-	// complicated geometries, e.g., if the ray suddenly goes through a periodic area that 
-	// it did not touch before
-	// fixme!!! is the increment of 2*c_wt_dist_eps appropriate?
-	// the fix tilts the ray iteratively
-/*
-	while (ODD(c_up) != ODD(c_down))
-	{
- 	  MSG_DEBUG("WallContainer::isInside", "in loop: c_wt_dist_eps=" << c_wt_dist_eps << endl << ", pos = "  << pos << ", direction = " << direction << endl << "up=" << c_up << ", down=" << c_down << endl << "tester.to=" << tester.to[direction] << "tester.from=" << tester.from[direction]);
-		for(size_t i = 1; i < SPACE_DIMS; ++i) 
-			tester.to[(direction+i)%SPACE_DIMS] += 2*c_wt_dist_eps;
-		
-		tester.to[direction] = m_bounding_box.corner2[direction] + 10;
-		c_up = intersectionsGeneral(tester);
-		
-		tester.to[direction] = m_bounding_box.corner1[direction] - 10;
-		c_down = intersectionsGeneral(tester);
-		//if(ODD(c_up) == ODD(c_down)) MSG_DEBUG("WallContainer::isInside", "in loop: done");
-
-	}
-*/
-	
+    } else direction = 1;
+  } else direction = 0;
+  
+  
+  tester.to[direction] = m_bounding_box.corner2[direction] + 10;
+  
+  c_up = intersectionsGeneral(tester);
+  
+  tester.to[direction] = m_bounding_box.corner1[direction] - 10;
+  c_down = intersectionsGeneral(tester);
+  
+  // fixme!!! this is a preliminary fix for the case that the ray travels in a plane,
+  // which is bound to two other planes so that the ray intersects with these two planes;
+  // the fix solves the problem for, e.g.,  BoundaryStepStoch but it could fail for more 
+  // complicated geometries, e.g., if the ray suddenly goes through a periodic area that 
+  // it did not touch before
+  // fixme!!! is the increment of 2*c_wt_dist_eps appropriate?
+  // the fix tilts the ray iteratively
+  /*
+    while (ODD(c_up) != ODD(c_down))
+    {
+    MSG_DEBUG("WallContainer::isInside", "in loop: c_wt_dist_eps=" << c_wt_dist_eps << endl << ", pos = "  << pos << ", direction = " << direction << endl << "up=" << c_up << ", down=" << c_down << endl << "tester.to=" << tester.to[direction] << "tester.from=" << tester.from[direction]);
+    for(size_t i = 1; i < SPACE_DIMS; ++i) 
+    tester.to[(direction+i)%SPACE_DIMS] += 2*c_wt_dist_eps;
+    
+    tester.to[direction] = m_bounding_box.corner2[direction] + 10;
+    c_up = intersectionsGeneral(tester);
+    
+    tester.to[direction] = m_bounding_box.corner1[direction] - 10;
+    c_down = intersectionsGeneral(tester);
+    //if(ODD(c_up) == ODD(c_down)) MSG_DEBUG("WallContainer::isInside", "in loop: done");
+    
+    }
+  */
+  
   /* Note: The assertion fails when the point sits on a surface,
      so we're just checking if one of the test got a positive
      result. fixme!!! */
   //    assert(ODD(c_up/*+add*/) == ODD(c_down/*+add*/));
-	
-	if ((ODD(c_up) && oddIsIn) || !(ODD(c_up) || oddIsIn))
-		return true;
+  
+  if ((ODD(c_up) && oddIsIn) || !(ODD(c_up) || oddIsIn))
+    return true;
 
   return false;
 }
@@ -355,6 +355,8 @@ int WallContainer::intersectionsGeneral(const line_t &l)
     (list<Wall*>,
      m_walls,
      if ((*__iFE)->intersects(l, hit_pos)) {
+       /*The next avoids to count the same hit_point twice, which might 
+	 happen due to triangle overlap when using small error-epsilons*/
        if (!hasCloseP(pos, hit_pos)) {
          pos.push_back(hit_pos);
          n++;

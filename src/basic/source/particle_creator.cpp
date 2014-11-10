@@ -48,8 +48,9 @@ bool ParticleCreator::s_createFrozenParts;
 
 REGISTER_SMART_ENUM
 (ParticleCreator_Factory,
- "ParticleCreators are in charge of placing particles into the simulation box before the simulation "
- "starts. Most ParticleCreators create so called \"free\" particles, in the sense that all the particles' degrees of freedom are allowed to change. Some ParticleCreators can also create \"frozen\" particles. For frozen particles, all particle properties are \"frozen\" to the initial values and will never change. Frozen particles may be useful for setting certain kinds of boundary conditions."
+ "ParticleCreators are in charge of placing particles into the simulation box before the simulation starts. Most ParticleCreators create so called \"free\" particles, in the sense that all the particles' degrees of freedom are allowed to change. Some ParticleCreators can also create \"frozen\" particles. For frozen particles, all particle properties are \"frozen\" to the initial values and will never change. Frozen particles may be useful for setting certain kinds of boundary conditions.\n"
+"POSITION-CHECKS:\n"
+"Most ParticleCreators will check if the particles, which the user wants to create, lie within the simulation domain or not. In the latter case, most ParticleCreators will skip the creation of these particles. Therefore, it is a good idea to check, whether the number of particles that is eventually simulated is the desired one. The check is delegated to the Boundary object where the ParticleCreator belongs to. Therefore this check may consist of a simple check if the particle lies within a specified (e.g., periodic) simulation domain or of a stricter check if the particle is within a geometry enclosed by non-penetrable walls. Note that a particle is allowed to sit exactly on a periodic domain boundary, but it is not allowed to sit exactly on a wall segment."
 );
 
 

@@ -63,7 +63,11 @@ void MeterAutocorrelationVectorT::init()
   m_properties.setClassName("MeterAutocorrelationVectorT");
 
   m_properties.setDescription
-    ("This meter computes the autocorrelation funtion (ACF) for two arbitrary vector-properties V1(t=0) and V2(t) stored in the Particle's tag. Note that the autocorrelation of an average vector quantity of the WHOLE SYSTEM CANNOT be computed by this Meter.");
+    ("This meter computes the tensorial autocorrelation funtion (ACF) for two arbitrary vector-properties V1(t=0) and V2(t) stored in the Particle's tag, i.e. the matrix\n"
+"((<V1xV2x(t)>, <V1xV2y(t)>, <V1xV2z(t)>)\n"
+" (<V1yV2x(t)>, <V1yV2y(t)>, <V1yV2z(t)>)\n"
+" (<V1zV2x(t)>, <V1zV2y(t)>, <V1zV2z(t)>)).\n" 
+"Note that the autocorrelation of an average vector quantity of the WHOLE SYSTEM CANNOT be computed by this Meter.");
 
   STRINGPC
     (species,

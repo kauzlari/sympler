@@ -38,7 +38,7 @@
      cutoff="1"
      species1="fluid"
      species2="fluid"
-     pairFactor = "-47.47648293*((1-rij)^2)*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+     pairFactor = "-47.74648292756861*((1-rij)^2)*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
   />
 
   <!-- alternative modules -->
@@ -46,7 +46,7 @@
   <PairParticleVector
      species1="fluid"
      species2="fluid"
-     expression = "47.47648293*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
+     expression = "47.74648292756861*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
      symmetry = "-1"
      symbol = "FD"
      cutoff = "1"
@@ -57,11 +57,14 @@
     expression = "[FD]"
   />
 -->
+  <!-- with the above friction, this gives a temperature of 1 -->
+  <!-- Note: Currently, Frand already multiplies internally with 
+       a weighting function (1-rij/rc) as mention in the help -->
   <Frand
     weightingFunction = "default"
      species1="fluid"
      species2="fluid"
-     noise = "9.7720500238"
+     noise = "9.7720502380584"
   />
 
   <Phase>

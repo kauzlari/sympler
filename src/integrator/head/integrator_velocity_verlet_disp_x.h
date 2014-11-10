@@ -29,26 +29,54 @@
  */
 
 
-#ifndef __INTEGRATOR_VELOCITY_VERLET_X_H
-#define __INTEGRATOR_VELOCITY_VERLET_X_H
+
+
+#ifndef __INTEGRATOR_VELOCITY_VERLET_DISP_X_H
+#define __INTEGRATOR_VELOCITY_VERLET_DISP_X_H
 
 #include "integrator_velocity_verlet.h"
 
 using namespace std;
 
-//----IntegratorVelocityVerletX ----
+class GenF;
+class Phase;
+class Controller;
+class WallTriangle;
+class Cell;
+
+//----IntegratorVelocityVerletDispX ----
 
 /*!
- * Modified Velocity-Verlet integrator for the positions and velocities
- * See: R. D. Groot and P. B. Warren, J. Chem. Phys. 107, 4423-4435 (1997).
- * For the integration of the positions, this Integrator uses a 
- * user-defined velocity.
+ * Modified Velocity-Verlet integrator for the positions velocities and particle displacement
+ * The velocity used for position and displacement integration is a user-defined symbol, 
+ * instead of the usual integrated velocity.
+ * See: R. D. Groot and P. B. Warren, J. Chem. Phys. 107, 4423-4435 (1997)
  */
 
-class IntegratorVelocityVerletX: public IntegratorVelocityVerlet
+class IntegratorVelocityVerletDispX: public IntegratorVelocityVerlet
 {
-  protected:
-  
+protected:
+
+  /*!
+   * The name of the integrator displacement
+   */
+  string m_displacement_name;
+
+  /*!
+   * The symbol (short name) of the integrator displacement
+   */
+  string m_displacement_symbol;
+
+  /*!
+   * The tag offset of the integrator displacement 
+   */
+  size_t m_displacement_offset;
+
+  /*! 
+   * The current displacement for a particle. Used to calculate the absolute displacement of this particle in a timestep 
+   */
+  point_t m_disp;
+
     /*!
     * Name of the user-defined velocity
     */
@@ -58,28 +86,33 @@ class IntegratorVelocityVerletX: public IntegratorVelocityVerlet
     * Memory offset of the user-defined velocity in the particle tag
     */
     size_t m_v_offset;
-    
-    /*!
+
+  /*!
    * Initialize the property list
    */
-    void init();
+  void init();
 
-  public:
+public:
   /*!
    * Constructor
    * @param controller Pointer to the \a Controller object this \a Integrator belongs to
    */
-    IntegratorVelocityVerletX(Controller *controller);
+  IntegratorVelocityVerletDispX(Controller *controller);
 
   /*!
-     * Destructor
+   * Destructor
    */
-    virtual ~IntegratorVelocityVerletX();
+  virtual ~IntegratorVelocityVerletDispX();
 
   /*!
-     * Integration of the position
+   * Setup for this \a Integrator
    */
-    virtual void integratePosition(Particle* p, Cell* cell);
+  virtual void setup();
+
+  /*!
+   * Integration of the position and calculating the displacement
+   */
+  virtual void integratePosition(Particle* p, Cell* cell);
 
     /*!
      * Solves the equation that checks for hits
@@ -88,16 +121,23 @@ class IntegratorVelocityVerletX: public IntegratorVelocityVerlet
 				      &force, vector<double>* results);
 
   /*!
-     * Checks which of the times (in the time vector) is the actual hit position. The function will 
-    be used in WallTriangle
+   * Checks which of the times (in the time vector) is the actual hit position. The function will 
+be used in WallTriangle
    */
-    virtual void hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, 
-                        const point_t &force);
+  virtual void hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, 
+const point_t &force);
 
-    /*!
-    * Set the offset for the velocity and call Integrator::setup()
-    */
-    virtual void setup();
+#ifdef _OPENMP
+  /*!
+   * Returns the degrees of freedom string for this \a Integrator
+   */
+  virtual string dofIntegr();
+
+  /*!
+   * Merge the copies at the end of every timestep
+   */
+
+#endif
 
 };
 
