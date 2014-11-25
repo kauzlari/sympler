@@ -33,7 +33,7 @@
 <!-- We do DPD! So no need for an additional thermostat (unless it could speed up equilibration).-->
 <!--
   <ThermostatVels
-    temperature = "0.0013333333333333"
+    kBToverM = "0.0013333333333333"
     activateAt = "0"
     deactivateAt = "4000"
     interval = "40"
@@ -41,7 +41,7 @@
   />
 
   <ThermostatVels
-    temperature = "0.0013333333333333"
+    kBToverM = "0.0013333333333333"
     activateAt = "0"
     deactivateAt = "4000"
     interval = "40"

@@ -236,7 +236,7 @@ symmetry="-1"
 <ReflectorStochastic/>
 
 <ParticleCreatorStatic
-temperature = "1"
+kBToverM = "1"
 density = "32.768"
 species = "BAR"
 posX = "posX"
@@ -251,7 +251,7 @@ E = "32.768"
 />
 
 <ParticleCreatorStatic
-temperature = "1"
+kBToverM = "1"
 density = "32.768"
 species = "WALL"
 posX = "posX"

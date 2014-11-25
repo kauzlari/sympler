@@ -132,8 +132,8 @@ void ThermostatLA::init()
   m_species.second = "UNDEF";
   
   DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Temperature to thermalize to.");
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> to thermalize to.");
   m_temperature = 1;
 }
 

@@ -23,7 +23,7 @@
      weightingFunction="square"
      species1="fluid"
      species2="fluid"
-     temperature = "1"
+     kBToverM = "1"
      dissipation = "20"
   />
   <Phase>
@@ -48,7 +48,7 @@
 	nLatticePX="10"
 	nLatticePY="10"
 	nLatticePZ="10"
-	temperature = "1"
+	kBToverM = "1"
       />
     </BoundaryCuboid>
   </Phase>

@@ -67,8 +67,8 @@ void ThermostatVels::init()
   );
 
   DOUBLEPC
-      (temperature, temperature, 0,
-       "Temperature to thermalize to.");
+    (kBToverM, temperature, 0,
+     "k_BT/m = <v^2> to thermalize to.");
   temperature = 1;
 
   STRINGPC

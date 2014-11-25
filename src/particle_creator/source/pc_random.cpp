@@ -174,11 +174,6 @@ void ParticleCreatorRandom::init()
     "Creates randomly distributed particles. Does only work with a cuboid volume!"
   );
     
-  DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Initial temperature of the particles. Note that this "
-     "can be overriden by setting vel*.");
-
   INTPC
     (nParticles, m_nparticles, -2,
      "Number of particles.");
@@ -189,7 +184,6 @@ void ParticleCreatorRandom::init()
   
   m_density = -1;
   m_nparticles = -1;
-  m_temperature = 1;
 }
 
 

@@ -71,12 +71,12 @@ void ReflectorThermalizeInternalEnergy::init()
      );
     
   FUNCTIONFIXEDPC
-    (temperature, m_temperature, 
-     "Gives the temperature in dependence on the x, y and z coordinate of where the particle hit.");
+    (kBToverM, m_temperature, 
+     "Gives k_BT/m = <v^2> for setting the temperature in dependence on the x, y and z coordinate of where the particles hit the wall.");
 
   FUNCTIONFIXEDPC
     (internalEnergy, m_internal_energy,
-     "Gives the internal energy in dependence on the x, y and z coordinate of where the particle hit.");
+     "Gives the internal energy in dependence on the x, y and z coordinate of where the particles hit the wall.");
 
   m_temperature.addVariables("x", "y", "z");
   m_temperature_sqrt.addVariables("x", "y", "z");

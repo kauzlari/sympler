@@ -86,8 +86,8 @@ void FDPD::init()
      "Defines the dissipation constant.");
 
   DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Defines the temperature.");
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> to thermalize to.");
 
   m_weighting_function = "default";
   m_species.first = "fluid";

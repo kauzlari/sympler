@@ -140,25 +140,25 @@
   />
 
 	<ThermostatPetersIso
-		temperature = "5"
+		kBToverM = "5"
 		dissipation = "20"
 		species1 = "fluid"
 		species2 = "fluid"
 		weightingFunction = "L1" />
 	<ThermostatPetersIso
-		temperature = "0.00000000001"
+		kBToverM = "0.00000000001"
 		dissipation = "3000"
 		species1 = "solida"
 		species2 = "solida"
 		weightingFunction = "L1" />
 	<ThermostatPetersIso
-		temperature = "0.00000000001"
+		kBToverM = "0.00000000001"
 		dissipation = "3000"
 		species1 = "solida"
 		species2 = "solidb"
 		weightingFunction = "L1" />
 	<ThermostatPetersIso
-		temperature = "0.00000000001"
+		kBToverM = "0.00000000001"
 		dissipation = "3000"
 		species1 = "solidb"
 		species2 = "solidb"
@@ -179,7 +179,7 @@
 	periodicY = "yes"
 	periodicZ = "no"
     >
-      <ReflectorThermalize oneHit="true" temperature="5"/>
+      <ReflectorThermalize oneHit="true" kBToverM="5"/>
       <ParticleCreatorFile
       nameInputFile="particlesNewSmall.pos"
       />
@@ -192,7 +192,7 @@
            species="fluid"
            corner1 = "(1.25,1.25,-0.5)"
            corner2 = "(2.75,2.75,1.0)"
-           temperature = "5"
+           kBToverM = "5"
 	   ellipsoid = "true"
 	/>
 	<ParticleCreatorWall

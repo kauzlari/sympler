@@ -73,7 +73,14 @@ void ParticleCreatorWithRngPCalc::init()
       (randomize, m_randomize,
        "If set to \"yes\", this produces a different set of random numbers for the positions and velocities of the particles.");
 
+  DOUBLEPC
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> for setting the initial thermal velocities of the particles. Note that this "
+     "can be overriden by setting vel*.");
+
   m_randomize = false;
+  m_temperature = 1;
+
 }
 
 void ParticleCreatorWithRngPCalc::setup()
