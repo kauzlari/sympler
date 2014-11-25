@@ -95,9 +95,9 @@ void BondedPairParticleCalc::setup()
     throw gError("BondedPairParticleCalc::setup", ": Attribute 'stage' is " + ObjToString(m_phaseUser) + ", which is none of the allowed values \"0\", \"1\", \"2\".");
    
   if(m_species.first == "undefined")
-    throw gError("BondedPairParticleCalc::setup", ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+    throw gError("BondedPairParticleCalc::setup", "For module " + name() + ": Attribute 'species1' has value \"undefined\"."); 
   if(m_species.second == "undefined")
-    throw gError("BondedPairParticleCalc::setup", ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+    throw gError("BondedPairParticleCalc::setup", "For module " + name() + ": Attribute 'species2' has value \"undefined\"."); 
   
   ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
   

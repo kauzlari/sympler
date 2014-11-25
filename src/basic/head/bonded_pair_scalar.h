@@ -29,43 +29,25 @@
  */
 
 
-#ifndef __PAIR_SCALAR_H_
-#define __PAIR_SCALAR_H_
+#ifndef __BONDED_PAIR_SCALAR_H_
+#define __BONDED_PAIR_SCALAR_H_
 
-#include "val_calculator.h"
-#include "function_pair.h"
+#include "bonded_pair_arbitrary.h"
+//#include "function_pair.h"
 #include "general.h"
 
 using namespace std;
 
-/* Module for calculation of pair forces; the result is saved as a pair attribute*/
+/*! Module for calculation of a scalar Symbol stored in a pair*/
 
-class PairScalar : public ValCalculatorPair {
-
+class BondedPairScalar : public BondedPairArbitrary {
+  
  protected:
-  /*!
-   * Cut-off radius for the pair summation
-   */
-  double m_cutoff;
-  /*!
-   * A string for m_function;
-   */
-  string m_expression_string;
-  
-  /*!
-   * The function pair computing the user defined pair factor
-   */
-  
-  FunctionPair m_function;
-  
-  /*!
-   * This string holds the symbols, which are not waited for to be computed beforehand
-   */
-  string m_oldSymbols;
   
   virtual ValCalculatorPair* copyMySelf() {
-    return new PairScalar(*this);
+    return new BondedPairScalar(*this);
   }
+
   /*!
    * Initialise the property list
    */
@@ -73,18 +55,16 @@ class PairScalar : public ValCalculatorPair {
 
  public:
   
-  PairScalar(string symbol);
-
   /*!
    * Constructor for Node hierarchy//
    */
-  PairScalar(/*Node*/Simulation* parent);
+  BondedPairScalar(/*Node*/Simulation* parent);
   
   /*!
    * Destructor//
    */
-  virtual ~PairScalar();
-  
+  virtual ~BondedPairScalar();
+
   /*!
    * Setup this Calculator
    */
@@ -96,28 +76,20 @@ class PairScalar : public ValCalculatorPair {
   virtual string myName() {
     return m_symbolName;
   }
-  
-  //set the slots for the pairs
-  virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp);
-  
-  //Slots for each particle,we need a slot per pair,so this should not be called
-  virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots,
-			bool oneProp) {
-    throw gError
-      ("PairScalar::setSlots", "(ColourPair*, "
-       "pair<size_t, size_t>&, bool ) should not be called! Contact the programmers.");
-  }
-  
+
+// Now (2014-10-31) in BondedPairArbitrary
+//  /*! 
+//   * set the slots for the pairs
+//   */
+//  virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp);
+
   void mySlot(size_t& slot) const {
     slot = m_slot;
   }
   
-  virtual void mySlots(pair<size_t, size_t> &theSlots) {
-    throw gError("PairScalar::mySlots(pair<size_t, size_t>*) should "
-		 "not be called!");
-  }
-  
-  /*Compute the user defined expression for pair pD*/
+  /*! 
+   * Compute the user defined expression for pair dis
+   */
 #ifdef _OPENMP
   virtual void compute(Pairdist* dis, int threadNum) {
     // does the same as in serial mode at the moment; 
@@ -126,30 +98,18 @@ class PairScalar : public ValCalculatorPair {
   }
 #endif
   virtual void compute(Pairdist* dis) {
-    if (dis->abs() < m_cutoff) {
       
-      double temp;
+/*       double temp; */
       
       // compute the expression for the pair function
-      m_function(&temp, dis);
-      dis->tag.doubleByOffset(m_slot)=temp;
-      
-      //MSG_DEBUG("PairScalar::compute", "  In pair with value " << temp);
-    }
+/*       m_function(&temp, dis); */
+      m_function(&(dis->tag.doubleByOffset(m_slot)), dis);
+/*       dis->tag.doubleByOffset(m_slot)=temp; */
+
+      // MSG_DEBUG("BondedPairScalar::compute", "In pair with value " << temp);
     
   }
-  
-  /*!
-   * Diffenrently to the function in \a Symbol, this class really has
-   * to determine its stage during run-time
-   */
-  virtual bool findStage();
-  
-  /*!
-   * Diffenrently to the function in \a Symbol, this class really has
-   * to determine its stage during run-time
-   */
-  virtual bool findStage_0();
+
 };
 
-#endif /*PAIR_SCALAR_H_*/
+#endif 

@@ -46,112 +46,108 @@
  */
 class BondedPairParticleArbitrary : public BondedPairParticleCalc
 {
-  protected:
-
-
-   /*!
-    * The mathematical pair-expression to be computed
-        */
-    string m_expression;
-
-    /*!
-     * The \a FunctionPair computing the user defined pair factor
-     */
-    FunctionPair m_function;
-
-
-    /*!
-     * An additional factor for the 1st particle
-     */
-    FunctionPair m_1stparticleFactor;
-
-    /*!
-     * An additional factor for the 2nd particle
-     */
-    FunctionPair m_2ndparticleFactor;
-
-   /*!
-     * The mathematical expression for \a m_1stparticleFactor
-    */
-    string m_1stPExpression;
-
-   /*!
-     * The mathematical expression for \a m_2ndparticleFactor
-    */
-    string m_2ndPExpression;
-
-    /*!
-    * This string holds the symbols, which are not waited for to be computed beforehand
-    */
-    string m_oldSymbols;
-
-    /*!
-     * Initialise the property list
-     */
-    virtual void init();
-    
-    /*!
-     * Helper function for polymorphic copying
-     */
-    virtual ValCalculator* copyMySelf() = 0;
-/*     { */
-/*       return new BondedPairParticleArbitrary(*this); */
-/*     } */
-
-    /*!
-     * copies the members of this class to \a vc
-     */
-    virtual void copyMembersTo(ValCalculator* vc);
-
+ protected:
   
-  public:
-   
-    /*!
-   * Constructor for the \a Node hierarchy
-     */
-    BondedPairParticleArbitrary(/*Node*/Simulation* parent);
+  /*!
+   * The mathematical pair-expression to be computed
+   */
+  string m_expression;
+  
+  /*!
+   * The \a FunctionPair computing the user defined pair factor
+   */
+  FunctionPair m_function;
+  
+  /*!
+   * An additional factor for the 1st particle
+   */
+  FunctionPair m_1stparticleFactor;
+  
+  /*!
+   * An additional factor for the 2nd particle
+   */
+  FunctionPair m_2ndparticleFactor;
+  
+  /*!
+   * The mathematical expression for \a m_1stparticleFactor
+   */
+  string m_1stPExpression;
+  
+  /*!
+   * The mathematical expression for \a m_2ndparticleFactor
+   */
+  string m_2ndPExpression;
 
   /*!
-     * Destructor
+   * This string holds the symbols, which are not waited for to be computed beforehand
    */
-    virtual ~BondedPairParticleArbitrary();
-
-#ifdef _OPENMP
-    /*!
-     * Merge the copies of all threads together
-     */
-    virtual void mergeCopies(ColourPair* cp, int thread_no) = 0;
-#endif
-
-    /*!
-     * Compute the user defined expression for pair \a pD
-     * @param pD \a Pairdist whose contribution we calculate
-     */
-#ifndef _OPENMP
-    virtual void compute(Pairdist* pD) = 0;
-#else
-    virtual void compute(Pairdist* pD, int thread_no) = 0;
-#endif
-
-	/*!
-         * Setup this Calculator
-	 */
-        virtual void setup();
-
-
-	/*!
-	 * Diffenrently to the function in \a Symbol, this class really has
-	 * to determine its stage during run-time
-	 */
-	virtual bool findStage();
-	
-	/*!
-	 * Diffenrently to the function in \a Symbol, this class really has
-	 * to determine its stage during run-time
-	 */
-	virtual bool findStage_0();
+  string m_oldSymbols;
+  
+  /*!
+   * Initialise the property list
+   */
+  virtual void init();
     
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ValCalculator* copyMySelf() = 0;
+  /*     { */
+  /*       return new BondedPairParticleArbitrary(*this); */
+  /*     } */
+  
+  /*!
+   * copies the members of this class to \a vc
+   */
+  virtual void copyMembersTo(ValCalculator* vc);
 
+  
+ public:
+  
+  /*!
+   * Constructor for the \a Node hierarchy
+   */
+  BondedPairParticleArbitrary(/*Node*/Simulation* parent);
+  
+  /*!
+   * Destructor
+   */
+  virtual ~BondedPairParticleArbitrary();
+  
+#ifdef _OPENMP
+  /*!
+   * Merge the copies of all threads together
+   */
+  virtual void mergeCopies(ColourPair* cp, int thread_no) = 0;
+#endif
+  
+  /*!
+   * Compute the user defined expression for pair \a pD
+   * @param pD \a Pairdist whose contribution we calculate
+   */
+#ifndef _OPENMP
+  virtual void compute(Pairdist* pD) = 0;
+#else
+  virtual void compute(Pairdist* pD, int thread_no) = 0;
+#endif
+  
+  /*!
+   * Setup this Calculator
+   */
+  virtual void setup();
+
+  /*!
+   * Diffenrently to the function in \a Symbol, this class really has
+   * to determine its stage during run-time
+   */
+  virtual bool findStage();
+  
+  /*!
+   * Diffenrently to the function in \a Symbol, this class really has
+   * to determine its stage during run-time
+   */
+  virtual bool findStage_0();
+    
 };
 
 #endif
