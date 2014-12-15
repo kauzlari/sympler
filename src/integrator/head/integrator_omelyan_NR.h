@@ -30,7 +30,7 @@
 
 
 //
-// C++ Implementation: integrator_omelyan
+// C++ Implementation: integrator_omelyan_NR
 //
 // Description: This integrator is based on the paper by Igor P. Omelyan,
 // On the numerical integration of rigid polyatomics: The modified quaternion approach,
@@ -40,8 +40,8 @@
 //
 
 
-#ifndef __INTEGRATOR_OMELYAN_H
-#define __INTEGRATOR_OMELYAN_H
+#ifndef __INTEGRATOR_OMELYAN_NR_H
+#define __INTEGRATOR_OMELYAN_NR_H
 
 #include "integrator.h"
 
@@ -53,10 +53,10 @@ class Controller;
 class WallTriangle;
 class Cell;
 
-//----IntegratorOmelyan ----
+//----IntegratorOmelyanNR ----
 
 /*!
- * C++ Implementation: integrator_omelyan
+ * C++ Implementation: integrator_omelyan_NR
  *
  * Description: This integrator is based on the paper by Igor P. Omelyan,
  * On the numerical integration of rigid polyatomics: The modified quaternion approach,
@@ -65,7 +65,7 @@ class Cell;
  * of Liquids (Clarendon, Oxford, 1987)
  */
 
-class IntegratorOmelyan: public Integrator
+class IntegratorOmelyanNR: public Integrator
 {
 protected:
   /*!
@@ -172,12 +172,12 @@ public:
    * Constructor
    * @param controller Pointer to the \a Controller object this \a Integrator belongs to
    */
-  IntegratorOmelyan(Controller *controller);
+  IntegratorOmelyanNR(Controller *controller);
 
   /*!
    * Destructor
    */
-  virtual ~IntegratorOmelyan();
+  virtual ~IntegratorOmelyanNR();
 
   /*!
     *    * Register the field and the force of the field with the \a Particle

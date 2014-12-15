@@ -83,9 +83,9 @@ void FPairVector::init()
 
   m_vector_name = "vector";
 
-  m_pairFactorStr = "idVec(1)";
-  m_1stPExpression = "idVec(1)";
-  m_2ndPExpression = "idVec(1)";
+  m_pairFactorStr = "idVec(0)";
+  m_1stPExpression = "idVec(0)";
+  m_2ndPExpression = "idVec(0)";
 
   m_is_pair_force = true;
   m_is_particle_force = false;

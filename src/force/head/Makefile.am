@@ -21,6 +21,7 @@ include_HEADERS = \
 	f_pair_vels_wf.h \
 	f_pair_wf.h \
 	f_particle.h \
+	f_particle_vector.h \
 	f_particle_vector_matrix.h \
 	f_particle_vector_rand_matrix.h \
 	f_particle_vels.h \

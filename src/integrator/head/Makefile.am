@@ -14,6 +14,7 @@ include_HEADERS = \
 	integrator_vector.h \
 	integrator_vector_lambda.h \
 	integrator_omelyan.h \
+	integrator_omelyan_NR.h \
 	integrator_velocity_verlet.h \
 	integrator_velocity_verlet_pressure.h \
 	integrator_velocity_verlet_symbols.h \

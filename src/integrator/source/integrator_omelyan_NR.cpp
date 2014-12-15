@@ -11,6 +11,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
+ *
  * SYMPLER is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -27,15 +28,14 @@
  * 
  */
 
-
 //
-// C++ Implementation: integrator_omelyan
+// C++ Implementation: integrator_omelyan_NR
 //
 // Description: This integrator is based on the paper by Igor P. Omelyan,
 // On the numerical integration of rigid polyatomics: The modified quaternion approach,
 // Computers in Physics, Vol. 12, No. 1, p. 97 (1998).
 // Careful, I use the notation Q=(q_0,\vect{q}) here as in Allen/Tidesley, Computer Simulation 
-// of Liquids (Clarendon, Oxford, 1987)
+// of Liquids (Clarendon, Oxford, 1987). The difference to its simple version is a NewtonRaphson iteration
 //
 
 #include "gen_f.h"
@@ -43,7 +43,7 @@
 #include "threads.h"
 #include "controller.h"
 #include "simulation.h"
-#include "integrator_omelyan.h"
+#include "integrator_omelyan_NR.h"
 #include "cell.h"
 
 using namespace std;
@@ -55,28 +55,30 @@ using namespace std;
 
 //
 #define M_MANAGER M_PHASE->manager()
-const Integrator_Register<IntegratorOmelyan> integrator_omelyan("IntegratorOmelyan");
+const Integrator_Register<IntegratorOmelyanNR> integrator_omelyan_NR("IntegratorOmelyanNR");
 
 //---- Constructors/Destructor ----
 
-IntegratorOmelyan::IntegratorOmelyan(Controller *controller)
+IntegratorOmelyanNR::IntegratorOmelyanNR(Controller *controller)
 :Integrator(controller),m_first_sweep(true)
 {
   init();
 }
 
 
-IntegratorOmelyan::~IntegratorOmelyan()
+IntegratorOmelyanNR::~IntegratorOmelyanNR()
 {
 }
 
 
 //---- Methods ----
 
-void IntegratorOmelyan::init()
+void IntegratorOmelyanNR::init()
 {
-  m_properties.setClassName("IntegratorOmelyan");
-  m_properties.setName("IntegratorOmelyan");
+  // some modules need to know whether there is an Integrator,
+  // which changes positions, that's why the following
+  m_properties.setClassName("IntegratorOmelyanNR");
+  m_properties.setName("IntegratorOmelyanNR");
 
   m_properties.setDescription("Integrates the orientation and angular velocity of each rigid body attached to a particle according to the algorithm described by Omelyan");
   DOUBLEPC
@@ -160,7 +162,7 @@ void IntegratorOmelyan::init()
   m_normalize = false;
 }
 
-void IntegratorOmelyan::setup()
+void IntegratorOmelyanNR::setup()
 {
   M_CONTROLLER->registerForSetupAfterParticleCreation(this);
   Integrator::setup();
@@ -254,7 +256,7 @@ void IntegratorOmelyan::setup()
 /*!
  *  Calculate rotation matrix after particle setup
  */
-void IntegratorOmelyan::setupAfterParticleCreation()
+void IntegratorOmelyanNR::setupAfterParticleCreation()
 {
 // Let us define some helpers for writing the formulae
 // 1. the 4 components of the quaternion 
@@ -295,9 +297,9 @@ void IntegratorOmelyan::setupAfterParticleCreation()
       );
   } 
 /*!
- * Unprotect the forces onomega
+ * Unprotect the forces on omega
  */
-void IntegratorOmelyan::unprotect(size_t index)
+void IntegratorOmelyanNR::unprotect(size_t index)
 {
   Phase *phase = M_PHASE;
 
@@ -313,7 +315,7 @@ void IntegratorOmelyan::unprotect(size_t index)
 /*!
  *
  */
-void IntegratorOmelyan::integrateStep1(){
+void IntegratorOmelyanNR::integrateStep1(){
   Phase *phase = M_PHASE;
   size_t force_index = M_CONTROLLER->forceIndex();
   size_t other_force_index = (force_index+1)&(FORCE_HIST_SIZE-1);
@@ -370,19 +372,20 @@ void IntegratorOmelyan::integrateStep1(){
 // The Lagrangian multiplier
 //
 //
-  if(m_first_sweep == true){
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
-      Tbff = RT*TauNew;
-      );
-    m_first_sweep = false;
-  }
+//  if(m_first_sweep == true){
+//    FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
+//      Tbff = RT*TauNew;
+//      );
+//    m_first_sweep = false;
+//  }
   FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
+      Tbff = RT*TauNew;
       LAMBDA = (1.e0-QdotSQ*DT*DT/2.e0-sqrt(1.e0-QdotSQ*DT*DT-QdotQddot*DT*DT*DT-(QddotSQ-QdotSQ*QdotSQ)*DT*DT*DT*DT/4.e0));
       Q0 = Q0 + Q0dot*DT + Q0ddot*DT*DT/2.0 - LAMBDA*Q0;
       Q1 = Q1 + Q1dot*DT + Q1ddot*DT*DT/2.0 - LAMBDA*Q1;
       Q2 = Q2 + Q2dot*DT + Q2ddot*DT*DT/2.0 - LAMBDA*Q2;
       Q3 = Q3 + Q3dot*DT + Q3ddot*DT*DT/2.0 - LAMBDA*Q3;
-//      if(i->mySlot == 13) MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "NormQ " << sqrt(Q0*Q0+Q1*Q1+Q2*Q2+Q3*Q3));
+//      if(i->mySlot == 13) MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "NormQ " << sqrt(Q0*Q0+Q1*Q1+Q2*Q2+Q3*Q3));
       R(0,0) = Q0*Q0+Q1*Q1-Q2*Q2-Q3*Q3;
       R(0,1) = 2*(Q1*Q2-Q0*Q3);
       R(0,2) = 2*(Q1*Q3+Q0*Q2);
@@ -402,27 +405,29 @@ void IntegratorOmelyan::integrateStep1(){
       RT(0,2) = R(2,0);
       RT(1,2) = R(2,1);
       RT(2,2) = R(2,2);
-      Tbff = RT*TauNew;
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "Colour = " << c);
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "[q0,q1,q2,q3] = [" << Q0 << ", " << Q1 << ", " << Q2 << ", " << Q3 <<"]");
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "omega = " << Omega);
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "rotmat  = " << R);
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "rotmatT = " << RT);
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "Tbff = " << Tbff);
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "TauOld = " << TauOld);
-//MSG_DEBUG("IntegratorOmelyan::integrateStep1()", "TauNew = " << TauNew);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "Colour = " << c);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "[q0,q1,q2,q3] = [" << Q0 << ", " << Q1 << ", " << Q2 << ", " << Q3 <<"]");
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "omega = " << Omega);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "rotmat  = " << R);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "rotmatT = " << RT);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "Tbff = " << Tbff);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "TauOld = " << TauOld);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep1()", "TauNew = " << TauNew);
       );
 }
 
 
-void IntegratorOmelyan::integrateStep2(){
+void IntegratorOmelyanNR::integrateStep2(){
   Phase *phase = M_PHASE;
-  double OxIter=0.0, OxSav=0.0; 
-  double OyIter=0.0, OySav=0.0; 
-  double OzIter=0.0, OzSav=0.0;
-  double INHOMX, INHOMY, INHOMZ;
-  double PreFacX, PreFacY, PreFacZ;
-  double relaerr = 1.0, residue = 1.0, norm = 1.0;
+  double X, DX; 
+  double Y, DY; 
+  double Z, DZ;
+  double IX, IY, IZ;
+  double FX, FY, FZ;
+  double A, B, C, D, F, G, DETF;
+  double GXX, GXY, GXZ, GYX, GYY, GYZ, GZX, GZY, GZZ;
+  double PFX, PFY, PFZ;
+  double relaerr = 1.0, residue = 1.0, norm=1.0;
   int iter, imax=1;
   point_t TauOldPrime, TauNewPrime;
 //
@@ -438,15 +443,22 @@ void IntegratorOmelyan::integrateStep2(){
 //
   size_t force_index = M_CONTROLLER->forceIndex();
   size_t other_force_index = (force_index+1)&(FORCE_HIST_SIZE-1);
-//  MSG_DEBUG("IntegratorOmelyan::integrateStep2()", "force_index: " << force_index << ", other_force_index: " << other_force_index);       
+//  MSG_DEBUG("IntegratorOmelyanNR::integrateStep2()", "force_index: " << force_index << ", other_force_index: " << other_force_index);       
 //
-//MSG_DEBUG("IntegratorOmelyan::integrateStep2()", "other_force_index " << other_force_index << " force_index " << force_index);
+//MSG_DEBUG("IntegratorOmelyanNR::integrateStep2()", "other_force_index " << other_force_index << " force_index " << force_index);
 //exit(0);
   FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
-        PreFacX = DT*(m_J2-m_J3)/m_J1/2.0;
-        PreFacY = DT*(m_J3-m_J1)/m_J2/2.0;
-        PreFacZ = DT*(m_J1-m_J2)/m_J3/2.0;
-	TauNewPrime=RT*TauNew;
+    PFX = DT*(m_J2-m_J3)/m_J1;// /2.0;
+    PFY = DT*(m_J3-m_J1)/m_J2;// /2.0;
+    PFZ = DT*(m_J1-m_J2)/m_J3;// /2.0;
+    TauNewPrime=RT*TauNew;
+    TauOldPrime=RT*TauOld;
+    IX = Omega.x+(TauOldPrime.x+TauNewPrime.x)*DT/m_J1/2.0;//+PFX*Omega.y*Omega.z;
+    IY = Omega.y+(TauOldPrime.y+TauNewPrime.y)*DT/m_J2/2.0;//+PFY*Omega.z*Omega.x;
+    IZ = Omega.z+(TauOldPrime.z+TauNewPrime.z)*DT/m_J3/2.0;//+PFZ*Omega.x*Omega.y;
+    X = Omega.x;
+    Y = Omega.y;
+    Z = Omega.z;
 //
 // We have to solve the system of equations of second order that looks like rhis
 //
@@ -454,46 +466,56 @@ void IntegratorOmelyan::integrateStep2(){
 //       OyNew = OyOld + (TauyOld+TauyNew)*DT/m_J2/2.0 + (m_J3-m_J1)/m_J2 * (Omega.z*Omega.x+OzNew*OxNew);
 //       OzNew = OzOld + (TauzOld+TauzNew)*DT/m_J3/2.0 + (m_J1-m_J2)/m_J3 * (Omega.x*Omega.y+OxNew*OyNew);
 //
-    INHOMX = (Tbff.x+TauNewPrime.x)*DT/m_J1/2.0+PreFacX*Omega.y*Omega.z;
-    INHOMY = (Tbff.y+TauNewPrime.y)*DT/m_J2/2.0+PreFacY*Omega.z*Omega.x;
-    INHOMZ = (Tbff.z+TauNewPrime.z)*DT/m_J3/2.0+PreFacZ*Omega.x*Omega.y;
-    OxIter = Omega.x;
-    OyIter = Omega.y;
-    OzIter = Omega.z;
     iter=0;
     do{
      iter+=1;
-     OxSav = OxIter;
-     OySav = OyIter;
-     OzSav = OzIter;
-     OxIter = Omega.x+INHOMX+PreFacX*OyIter*OzIter;
-     OyIter = Omega.y+INHOMY+PreFacY*OzIter*OxIter;
-     OzIter = Omega.z+INHOMZ+PreFacZ*OxIter*OyIter;
 //
-#define resOx (-OxIter + Omega.x+INHOMX+PreFacX*OyIter*OzIter)
-#define resOy (-OyIter + Omega.y+INHOMY+PreFacX*OzIter*OxIter)
-#define resOz (-OzIter + Omega.z+INHOMZ+PreFacZ*OxIter*OyIter)
-#define delOx (OxIter-OxSav)
-#define delOy (OyIter-OySav)
-#define delOz (OzIter-OzSav)
+     FX = (X-PFX*Y*Z-IX);
+     FY = (Y-PFY*Z*X-IY);
+     FZ = (Z-PFZ*X*Y-IZ);
+     A = -PFX*Z;
+     B = -PFX*Y;
+     C = -PFY*Z;
+     D = -PFY*X;
+     F = -PFZ*Y;
+     G = -PFZ*X;
+     DETF = 1.0-A*C-B*F-D*G+A*D*F+B*C*G;
+     GXX = (1.0-D*G)/DETF;
+     GXY = (B*G-A)/DETF;
+     GXZ = (A*D-B)/DETF;
+     GYX = (D*F-C)/DETF;
+     GYY = (1.0-B*F)/DETF;
+     GYZ = (B*C-D)/DETF;
+     GZX = (C*G-F)/DETF;
+     GZY = (A*F-G)/DETF;
+     GZZ = (1.0-A*C)/DETF;
 //
-     residue = sqrt(resOx*resOx+resOy*resOy+resOz*resOz);
-     relaerr = sqrt(delOx*delOx+delOy*delOy+delOz*delOz)/sqrt(OxIter*OxIter+OyIter*OyIter+OzIter*OzIter);
-     if(iter>100){
-       MSG_DEBUG("IntegratorOmelyan::integrateStep2()", "iter = " << iter << ", residue = " << residue << ", relaerr = " << relaerr);
+     DX = -GXX*FX-GXY*FY-GXZ*FZ;
+     DY = -GYX*FX-GYY*FY-GYZ*FZ;
+     DZ = -GZX*FX-GZY*FY-GZZ*FZ;
+//
+     X = X+DX;
+     Y = Y+DY;
+     Z = Z+DZ;
+//
+//
+     residue = sqrt(FX*FX+FY*FY+FZ*FZ);
+     relaerr = sqrt(DX*DX+DY*DY+DZ*DZ)/sqrt(X*X+Y*Y+Z*Z);
+     if(iter>10){
+       MSG_DEBUG("IntegratorOmelyanNR::integrateStep2()", "iter = " << iter << ", residue = " << residue << ", relaerr = " << relaerr);
        exit(0);
      }
-/*     MSG_DEBUG("IntegratorOmelyan::integrateStep(2)", "TauOld.x = " << TauOld.x << ", " << "TauOld.y = " << TauOld.y << ", " << "TauOld.z = " << TauOld.z << endl
+/*     MSG_DEBUG("IntegratorOmelyanNR::integrateStep(2)", "TauOld.x = " << TauOld.x << ", " << "TauOld.y = " << TauOld.y << ", " << "TauOld.z = " << TauOld.z << endl
 	 << "TauNew.x = " << TauNew.x << ", " << "TauyNew = " << TauyNew << ", " << "TauzNew = " << TauzNew << endl);
 */
    }
-   while(residue > 1.e-12 && relaerr > 1.e-12);
-//  MSG_DEBUG("IntegratorOmelyan::integrateStep(2)", "exit do-while loop");      
+   while(residue > 1.e-10 || relaerr > 1.e-10);
+//  MSG_DEBUG("IntegratorOmelyanNR::integrateStep(2)", "exit do-while loop");      
 //
 //
-   Omega.x = OxIter;
-   Omega.y = OyIter;
-   Omega.z = OzIter;
+   Omega.x = X;
+   Omega.y = Y;
+   Omega.z = Z;
    Tbff = TauNewPrime;
    if(m_normalize){
      norm = sqrt(Q0*Q0+Q1*Q1+Q2*Q2+Q3*Q3);
@@ -502,17 +524,16 @@ void IntegratorOmelyan::integrateStep2(){
      Q2 = Q2/norm;
      Q3 = Q3/norm;
    }
-//  MSG_DEBUG("IntegratorOmelyan::integrateStep(2)", "Omega = " << Omega);      
    if(iter > imax) imax=iter;
       );
 }
 
 #ifdef _OPENMP
-string IntegratorOmelyan::dofIntegr() {
+string IntegratorOmelyanNR::dofIntegr() {
   return m_omega_name;
 }
 
-void IntegratorOmelyan::mergeCopies(Particle* p, int thread_no, int force_index) {
+void IntegratorOmelyanNR::mergeCopies(Particle* p, int thread_no, int force_index) {
   if (m_merge == true) {
     for (int i = 0; i < SPACE_DIMS; ++i) {
       p->tag.pointByOffset(m_omega_force_offset[force_index])[i] += (*p->tag.vectorDoubleByOffset(m_vec_offset[thread_no]))[m_vec_pos + i];
@@ -522,4 +543,3 @@ void IntegratorOmelyan::mergeCopies(Particle* p, int thread_no, int force_index)
 }
 
 #endif
-

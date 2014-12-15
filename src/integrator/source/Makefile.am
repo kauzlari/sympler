@@ -5,6 +5,7 @@ libintegrator_la_SOURCES = \
 	integrator_energy.cpp \
 	integrator_lse.cpp \
 	integrator_omelyan.cpp \
+	integrator_omelyan_NR.cpp \
 	integrator_position.cpp \
 	integrator_scalar.cpp \
 	integrator_scalar_lambda.cpp \

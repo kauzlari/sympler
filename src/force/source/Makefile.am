@@ -24,6 +24,7 @@ libforce_la_SOURCES = \
 	f_pair_wf.cpp \
 	f_particle.cpp \
 	f_particle_scalar.cpp \
+	f_particle_vector.cpp \
 	f_particle_vector_matrix.cpp \
 	f_particle_vector_rand_matrix.cpp \
 	f_particle_vels.cpp \

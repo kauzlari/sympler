@@ -119,7 +119,7 @@ void FParticleTensor::init()
 
   m_tensor_name = "undefined";
   
-  m_exprString = "0";
+  m_exprString = "unitMat(0)";
   m_is_pair_force = false;
   m_is_particle_force = true;
 }

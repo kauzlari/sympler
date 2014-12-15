@@ -182,6 +182,7 @@ void sayHello() {
 #include "f_pair_vels_BC.h"
 #include "f_pair_vels_wf.h"
 #include "f_particle_scalar.h"
+#include "f_particle_vector.h"
 #include "f_particle_vector_matrix.h"
 #include "f_particle_vector_rand_matrix.h"
 #include "f_particle_vels.h"
@@ -223,6 +224,7 @@ void sayHello() {
 #include "integrator_energy.h"
 #include "integrator_lse.h"
 #include "integrator_omelyan.h"
+#include "integrator_omelyan_NR.h"
 #include "integrator_position.h"
 #include "integrator_scalar.h"
 #include "integrator_scalar_lambda.h"
@@ -401,6 +403,7 @@ void link_all_properly()
   new FPairVelsBC(NULL);
   new FPairVelsWF(NULL);
   new FParticleScalar(NULL);
+  new FParticleVector(NULL);
   new FParticleVectorMatrix(NULL);
   new FParticleVectorRandMatrix(NULL);
   new FParticleVels(NULL);
@@ -442,6 +445,7 @@ void link_all_properly()
   // Integrators
   new IntegratorEnergy(NULL);
   new IntegratorOmelyan(NULL);
+  new IntegratorOmelyanNR(NULL);
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H
   new IntegratorLSE(NULL);
