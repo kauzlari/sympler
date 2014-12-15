@@ -182,6 +182,7 @@ void sayHello() {
 #include "f_pair_vels_BC.h"
 #include "f_pair_vels_wf.h"
 #include "f_particle_scalar.h"
+#include "f_particle_vector.h"
 #include "f_particle_vector_matrix.h"
 #include "f_particle_vector_rand_matrix.h"
 #include "f_particle_vels.h"
@@ -400,6 +401,7 @@ void link_all_properly()
   new FPairVelsBC(NULL);
   new FPairVelsWF(NULL);
   new FParticleScalar(NULL);
+  new FParticleVector(NULL);
   new FParticleVectorMatrix(NULL);
   new FParticleVectorRandMatrix(NULL);
   new FParticleVels(NULL);
