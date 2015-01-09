@@ -246,7 +246,7 @@ void BoundarySTL::setup(Simulation* sim, ManagerCell *mgr)
 
                 for (int j = 0; j < 3; j++) {
                     //                    MSG_DEBUG("BoundarySTL::setup", "... = " << wt->corner(j)[dir] - coord);
-                    if (abs(wt->corner(j)[dir] - coord) >= g_geom_eps)
+                    if (fabs(wt->corner(j)[dir] - coord) >= g_geom_eps)
                         del = false;
                 }
 
@@ -283,7 +283,7 @@ void BoundarySTL::setup(Simulation* sim, ManagerCell *mgr)
             vector<int> corners;
 
             for (int j = 0; j < 3; j++) {
-                if (abs(w->corner(j)[dir] - coord) < g_geom_eps)
+                if (fabs(w->corner(j)[dir] - coord) < g_geom_eps)
                     corners.push_back(w->cornerVertex(j));
             }
 
@@ -376,7 +376,7 @@ void BoundarySTL::setup(Simulation* sim, ManagerCell *mgr)
         /* Easy version */
 /*        vector<point_t> &vertices = m_container->vertices();
         for (vector<point_t>::iterator i = vertices.begin(); i != vertices.end(); i++) {
-            if (abs((*i)[dir] - coord) < g_geom_eps) {
+            if (fabs((*i)[dir] - coord) < g_geom_eps) {
                 (*i)[dir] -= m_inlet_normal[dir]*m_inlet_length;
             }
             }*/

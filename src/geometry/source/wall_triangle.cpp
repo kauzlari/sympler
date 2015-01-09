@@ -185,7 +185,7 @@ bool WallTriangle::intersects(const point_t& from, const point_t& dir, /*point_t
     return false;
 	
   // if a is correct, we can now compute the absolute value of dist
-  dist = abs(dist);
+  dist = fabs(dist);
   
   point_t hit_pos = from + dir*a;
 //    MSG_DEBUG("WallTriangle::intersects", "hit_pos = " << hit_pos << ", m_periodicity = " << m_periodicity);	
@@ -398,100 +398,3 @@ bool WallTriangle::operator==(const Wall& wall) const
   return same; 
 }
 
-// next is for debugging in order to minimise recompilations when changing a .cpp instead of a .h
-#if 0
-bool WallTriangle::isInRange(const double& range, const point_t& p) const
-  {
-    // distance to plane, the wall is in
-    double dist = abs((p - m_corners[0])*m_surface_normal);
-			
-//     if(dist <=1 && p.x>285.458 && p.x < 285.460 && p.y>234.711 && p.y < 234.713 && p.z>273.468 && p.z < 273.470) MSG_DEBUG("WallTriangle::isInRange", "dist =" << dist << ", m_corners[0]=" << m_corners[0] << ", m_corners[1]=" << m_corners[1] << ", m_corners[2]=" << m_corners[2] << ", m_surface_normal=" << m_surface_normal << ", p=" << p);
-			
-    if(dist > range) return false;
-    else
-
-      // NEW STYLE
-      {
-	// the perpendicular projection of p to the plane
-	point_t proj = p + dist*m_surface_normal;
-	// see below for what the next one is needed
-	bool tempBool = true;
-	// loop over the side(normal)s
-	for (int i = 0; i < 3; ++i)
-	  {
-	    // the distance of the projection to the current side
-	    // <0 is outside the triangle, >0 is inside
-	    // (because m_side_normals[i] always points inside the triangle)
-	    double projDist = m_side_normals[i] * (proj - m_corners[i]);
-	    // is projDist on the 'backside' of this side?
-	    // If the normal product of the side normal with 'proj'
-	    // becomes smaller than zero the point is outside.
-	    // comparison to zero should be OK because, no matter if it's maybe a very small
-	    // positive or negative number, the function will end up with 'true' anyhow
-// 	    if(dist <=1 && p.x>285.458 && p.x < 285.460 && p.y>234.711 && p.y < 234.713 && p.z>273.468 && p.z < 273.470) MSG_DEBUG("WallTriangle::isInRange", "p=" << p << ", projDist(" << i << ")=" << projDist << ", side=" << m_sides[i]); 
-	    if(projDist < 0)
-	      {
-		// now we need the normal vector of the 'region-boarder';
-		// since the boarder is perp. to the side, the normal vector can be
-		// obtained directly from the side itself
-		// by construction of m_sides[i] it always points from 
-		// m_corners[i] to m_corbers[(i+1)%SPACE_DIMS]
-		point_t boarderNormal = m_sides[i] / m_sides[i].abs();
-		// distance of 'proj' to the boarder at m_corners[i]
-		double dist2BorderFrom = boarderNormal * (proj - m_corners[i]);
-		// is it in the 'corner zone' ?
-		// I don't see any danger to compare with zero here
-		if(dist2BorderFrom < 0)
-		  {
-// 		    if(dist <=1 && p.x>285.458 && p.x < 285.460 && p.y>234.711 && p.y < 234.713 && p.z>273.468 && p.z < 273.470) MSG_DEBUG("WallTriangle::isInRange", "CORNER ZONE: p=" << p << ", side=" << m_sides[i]);
-		    // So the final distance we need is the one from the point to the current corner
-		    point_t finalDistVec = p - m_corners[i];
-		    // point_t corner2Proj = proj - m_corners[i];
-		    // we may not return 'false' directly because for angles>90deg. it may
-		    // happen that 'proj' does not really lie in the corner zone but
-		    // in the neighbouring centre zone 
-		    if(/*corner2Proj*/finalDistVec.abs() > range) 
-		      {
-// if(dist <=1 && p.x>285.458 && p.x < 285.460 && p.y>234.711 && p.y < 234.713 && p.z>273.468 && p.z < 273.470) MSG_DEBUG("WallTriangle::isInRange", "FIRST CORNER ZONE FALSE: p=" << p << ", side=" << m_sides[i]);
-			tempBool = false;
-		      }
-		    else 
-		      {
-// 			if(dist <=1 && p.x>285.458 && p.x < 285.460 && p.y>234.711 && p.y < 234.713 && p.z>273.468 && p.z < 273.470) MSG_DEBUG("WallTriangle::isInRange", "FIRST CORNER ZONE TRUE: p=" << p << ", side=" << m_sides[i]);
-			// So we found at least one point of the triangle which is in range, that's enough
-			return true;
-		      }
-		  }
-		else
-		  {
-		    // distance of 'proj' to the boarder at m_corners[(i+1)%SPACE_DIMS]
-		    double dist2Border2 = boarderNormal * (proj - m_corners[(i+1)%SPACE_DIMS]);
-		    // is it in the second 'corner zone' ?
-		    // I don't see any danger to compare with zero here
-		    // !!! must be the opposite comparison (besides the ==) to the previous one,
-		    // since we use the same 'boarderNormal' !!!
-		    if(dist2Border2 > 0)
-		      {
-// 			if(dist <=1 && p.x>285.458 && p.x < 285.460 && p.y>234.711 && p.y < 234.713 && p.z>273.468 && p.z < 273.470) MSG_DEBUG("WallTriangle::isInRange", "SECOND CORNER ZONE: p=" << p << ", side=" << m_sides[i]);
-			// So the final distance we need is the one from the point to the current corner
-			point_t finalDistVec = p - m_corners[(i+1)%SPACE_DIMS];
-			// point_t corner2Proj = proj - m_corners[(i+1)%SPACE_DIMS];
-			if(/*corner2Proj*/finalDistVec.abs() > range) tempBool = false;
-			else return true;
-		      }
-		    else // so it is in the 'centre zone'
-		      {
-			// 					MSG_DEBUG("WallTriangle::isInRange", "centre zone: p=" << p << ", projDist(" << i << ")=" << projDist << ", side=" << m_sides[i]); 
-			// take care, projDist is negative !!!					
-			// if((projDist+range) < 0) return false;
-			if(sqrt(projDist*projDist+dist*dist) > range) tempBool = false;
-			else return true;
-		      }
-		  }
-	      } // end: if(projDist < 0)
-	  } // end: loop over the side(normal)s
-	// 				MSG_DEBUG("WallTriangle::isInRange", "p=" << p << ", returning tmpBool=" << tempBool);
-	return tempBool;
-      }		
-  }
-#endif

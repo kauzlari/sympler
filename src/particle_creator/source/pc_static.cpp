@@ -152,7 +152,7 @@ void ParticleCreatorStatic::createParticles()
       point_t boxcenter = (m_static_box.corner1 + m_static_box.corner2)/2;
       point_t boxradii = (m_static_box.corner2 - m_static_box.corner1)/2;
       for(int i = 0; i < SPACE_DIMS; i++)
-	boxradii[i] = abs(boxradii[i]);
+	boxradii[i] = fabs(boxradii[i]);
            
       manager = M_PHASE->manager();
       
@@ -288,7 +288,7 @@ void ParticleCreatorStatic::createMoreParticles()
       point_t boxcenter = (m_static_box.corner1 + m_static_box.corner2)/2;
       point_t boxradii = (m_static_box.corner2 - m_static_box.corner1)/2;
       for(int i = 0; i < SPACE_DIMS; i++)
-    	  boxradii[i] = abs(boxradii[i]);
+    	  boxradii[i] = fabs(boxradii[i]);
 
       manager = M_PHASE->manager();
     

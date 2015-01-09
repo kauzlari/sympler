@@ -164,8 +164,8 @@ void IEWallHeatConduction::computeForces(Particle* part, int force_index)
        }
 
        if (weight > 0 &&
-	   abs(__iSLFE->r[m_perp_dir1]) < m_spot_size &&
-	   abs(__iSLFE->r[m_perp_dir2]) < m_spot_size) {
+	   fabs(__iSLFE->r[m_perp_dir1]) < m_spot_size &&
+	   fabs(__iSLFE->r[m_perp_dir2]) < m_spot_size) {
 	 double f = weight * weight * m_kappa
 	   * (m_ie->reciprocalTemperature(*__iSLFE) - Tinv);
 	 /* fixme!!! commented out heat fluctuation.
