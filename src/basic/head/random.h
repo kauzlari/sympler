@@ -51,6 +51,9 @@ class RandomNumberGenerator
     virtual ~RandomNumberGenerator();
 
     /* Generate 0 or 1 with equal probability */
+    virtual int integer(size_t n);
+
+    /* Generate 0 or 1 with equal probability */
     virtual int binary();
 
     /* Generate random number from 0 to 1, uniformly distributed */
