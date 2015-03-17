@@ -78,17 +78,9 @@ protected:
   size_t m_displacement_offset;
 
   /*!
-   * The name of the old position
+   * The tag offset of the last move
    */
-  string m_oldpos_name;
-  /*!
-   * The symbol (short name) of the 
-   */
-  string m_oldpos_symbol;
-  /*!
-   * The tag offset of the old positin
-   */
-  size_t m_oldpos_offset;
+  size_t m_lastmove_offset;
   /*!
    * Declare the random number generator
    */
@@ -118,6 +110,10 @@ protected:
    * the temperature we start the MC with
    */
   double m_kT;
+  /*!
+   * Intervals for writing the acceptance rate
+   */
+  int m_wint;
   /*!
    * The name of total energy.
    */
@@ -152,6 +148,13 @@ protected:
   size_t m_q1_offset;
   size_t m_q2_offset;
   size_t m_q3_offset;
+  /*!
+   * The tag offset of old quaternion components
+   */
+  size_t m_q0Old_o;
+  size_t m_q1Old_o;
+  size_t m_q2Old_o;
+  size_t m_q3Old_o;
     /*!
    * The name of the rotation matrix
    */
@@ -185,7 +188,11 @@ protected:
    * The maximum velocity for each MC move
    */
   double m_velmax;
-
+  /*!
+   * The number of moves m_moves and the number of accepted moves
+   * m_accept
+   */
+  size_t m_moves, m_accept;
 public:
   /*!
    * Constructor
