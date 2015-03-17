@@ -88,6 +88,10 @@ void IntegratorRigidBodyMC::init()
       (kT, m_kT,0,
        "Initial temperature.");
     m_kT = 1.0;
+  INTPC
+      (writeintervals, m_wint, 0,
+	            "Number of timesteps after which to write the acceptance rate:.");
+  m_wint = 1000;
   STRINGPC
       (tensrotmat, m_rotmat_name,
        "Full name of the rotation matrix usable as attribute in other modules");
@@ -193,6 +197,34 @@ void IntegratorRigidBodyMC::setup()
        true,
        m_q3_symbol).offset;
 /*!
+ * Setup old quaternion components
+ */
+
+  m_q0Old_o =
+    Particle::s_tag_format[m_colour].addAttribute
+      ("__q0Old__",
+       DataFormat::DOUBLE,
+       true,
+       "__q0Old__").offset;
+  m_q1Old_o =
+    Particle::s_tag_format[m_colour].addAttribute
+      ("__q1Old__",
+       DataFormat::DOUBLE,
+       true,
+       "__q1Old__").offset;
+  m_q2Old_o =
+    Particle::s_tag_format[m_colour].addAttribute
+      ("__q2Old__",
+       DataFormat::DOUBLE,
+       true,
+       "__q2Old__").offset;
+  m_q3Old_o =
+    Particle::s_tag_format[m_colour].addAttribute
+      ("__q3Old__",
+       DataFormat::DOUBLE,
+       true,
+       "__q3Old__").offset;
+/*!
  * Setup the rotation matrix
  */
   m_rotmat_offset =
@@ -211,13 +243,13 @@ void IntegratorRigidBodyMC::setup()
        true,
        m_rotmatT_symbol).offset;
 /*!
- * Setup the old position
+ * Setup the last move
  */
-  m_oldpos_offset = 
+  m_lastmove_offset = 
     Particle::s_tag_format[m_colour].addAttribute
-      (m_oldpos_name,
+      ("__lastmove",
        DataFormat::POINT,
-       true,m_oldpos_symbol).offset;
+       true,"__lastmove").offset;
 /*!
  * Setup the displacement
  */
@@ -239,6 +271,8 @@ void IntegratorRigidBodyMC::setupAfterParticleCreation()
 {
   m_reject = false;
   EtotOld = 1.0e40;
+  m_moves = 0;
+  m_accept = 0;
 /*!
  * Fetch the total energy from the particleScalar
  * Why is this here? ::setup is too early we must
@@ -266,6 +300,10 @@ void IntegratorRigidBodyMC::setupAfterParticleCreation()
 #define Q1 (i->tag.doubleByOffset(m_q1_offset))
 #define Q2 (i->tag.doubleByOffset(m_q2_offset))
 #define Q3 (i->tag.doubleByOffset(m_q3_offset))
+#define Q0Old (i->tag.doubleByOffset(m_q0Old_o))
+#define Q1Old (i->tag.doubleByOffset(m_q1Old_o))
+#define Q2Old (i->tag.doubleByOffset(m_q2Old_o))
+#define Q3Old (i->tag.doubleByOffset(m_q3Old_o))
 #define  X (i->r.x)
 #define  Y (i->r.y)
 #define  Z (i->r.z)
@@ -297,7 +335,11 @@ void IntegratorRigidBodyMC::setupAfterParticleCreation()
       RT(0,2) = R(2,0);
       RT(1,2) = R(2,1);
       RT(2,2) = R(2,2);
-
+// Let us save the initial positions
+      Q0Old = Q0;
+      Q1Old = Q1;
+      Q2Old = Q2;
+      Q3Old = Q3;
       );
   } 
 
@@ -319,30 +361,41 @@ void IntegratorRigidBodyMC::integrateStep1(){
   if(EtotNew<EtotOld){
     m_reject = false;
     EtotOld = EtotNew;
+    m_accept+=1;
   }
   else{
     rnumber=m_rng.uniform();
     expfact=exp(-(EtotNew-EtotOld)/m_kT);
     if( rnumber - expfact < 0.0){
       m_reject = false;
-//MSG_DEBUG("IntegratorRigidBodyMC::integrateStep1()", name() << " r and exp " << rnumber << ", " << expfact);
+      EtotOld = EtotNew;
+      m_accept+=1;
     }
     else{
       m_reject = true;
-//MSG_DEBUG("IntegratorRigidBodyMC::integrateStep1()", name() <<  " r and exp " << rnumber << ", " << expfact);
+
     }
   }
-
 // 
   m_velmax = m_DeltaR/m_dt;
   if(m_reject){
     M_PHASE->invalidatePositions((IntegratorPosition*) this);
+    FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
+	Q0=Q0Old;
+	Q1=Q1Old;
+	Q2=Q2Old;
+	Q3=Q3Old;
+    );
     m_reject = false;
   }
   M_PHASE->invalidatePositions((IntegratorPosition*) this);
 //
-//
   FOR_EACH_FREE_PARTICLE_C__PARALLEL(phase, m_colour, this,
+// First we save the old positions
+      Q0Old=Q0;
+      Q1Old=Q1;
+      Q2Old=Q2;
+      Q3Old=Q3;
 // Here we first draw a random axis o rotate about
       u = 1.0-2.0*m_rng.uniform();
       v = 1.0-2.0*m_rng.uniform();
@@ -381,7 +434,7 @@ void IntegratorRigidBodyMC::integrateStep1(){
       Q1 = Q1/norm;
       Q2 = Q2/norm;
       Q3 = Q3/norm;
-//  
+// 
       R(0,0) = Q0*Q0+Q1*Q1-Q2*Q2-Q3*Q3;
       R(0,1) = 2*(Q1*Q2-Q0*Q3);
       R(0,2) = 2*(Q1*Q3+Q0*Q2);
@@ -402,6 +455,7 @@ void IntegratorRigidBodyMC::integrateStep1(){
       RT(1,2) = R(2,1);
       RT(2,2) = R(2,2);
       );
+  m_moves+=1;
 }
 
 void IntegratorRigidBodyMC::integratePosition(Particle* p, Cell* cell)
@@ -412,11 +466,12 @@ void IntegratorRigidBodyMC::integratePosition(Particle* p, Cell* cell)
 // Here we displace the body by a random vector 
 // we first draw a random unit vector as above
   if(m_reject){
-    p->tag.pointByOffset(m_displacement_offset)=p->tag.pointByOffset(m_oldpos_offset)-p->r;
-    p->r=p->tag.pointByOffset(m_oldpos_offset);
+//  Instead of saving the last position we use the las displacement to reject the MC move.
+//  This ensure that the PBC are not yet applied, which must be done in Cell::updatePostions  
+    p->tag.pointByOffset(m_displacement_offset)-=p->tag.pointByOffset(m_lastmove_offset);
+    p->r-=p->tag.pointByOffset(m_lastmove_offset);
   }
   else{
-      p->tag.pointByOffset(m_oldpos_offset)=p->r;
       u = 1.0-2.0*m_rng.uniform();
       v = 1.0-2.0*m_rng.uniform();
       w = 1.0-2.0*m_rng.uniform();
@@ -428,13 +483,17 @@ void IntegratorRigidBodyMC::integratePosition(Particle* p, Cell* cell)
       p->v.x = randvel*u;
       p->v.y = randvel*v;
       p->v.z = randvel*w;
-  cell->doCollision(p, p->r, p->v, pt, (IntegratorPosition*) this);
-  p->r += p->dt * p->v ;
+      cell->doCollision(p, p->r, p->v, pt, (IntegratorPosition*) this);
+      // muss hier p->dt stehen???
+      point_t temp=m_dt*p->v;
+      p->tag.pointByOffset(m_lastmove_offset) = temp;
+      p->r += temp ;
+      p->tag.pointByOffset(m_displacement_offset) += temp;
   }
-// MSG_DEBUG("IntegratorRigidBodyMC::integratePosition", name() << "doCollision called, final update of r done");
 }
 
 void IntegratorRigidBodyMC::integrateStep2(){
+if((m_moves%m_wint)==0)MSG_DEBUG("IntegratorRigidBodyMC::integrateStep2()", name() << " m_accept/m_moves = " << double(m_accept)/double(m_moves));
 }
 
 void IntegratorRigidBodyMC::solveHitTimeEquation(WallTriangle* wallTriangle, const Particle* p, const point_t &force, vector<double>* results)
