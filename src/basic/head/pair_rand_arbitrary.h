@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,43 +29,57 @@
  */
 
 
-#ifndef __PAIR_SCALAR_H_
-#define __PAIR_SCALAR_H_
+#ifndef __PAIR_RAND_ARBITRARY_H_
+#define __PAIR_RAND_ARBITRARY_H_
 
+#include "random.h"
 #include "val_calculator.h"
 #include "function_pair.h"
 #include "general.h"
 
 using namespace std;
 
-/* Module for calculation of pair symbols; the result is saved as a pair attribute*/
+/*! Module for calculation of random pair symbols; the result is saved as a pair attribute*/
 
-class PairScalar : public ValCalculatorPair {
+class PairRandArbitrary : public ValCalculatorPair {
 
  protected:
+
+  /*!
+   * A random number generator
+   */
+  RandomNumberGenerator m_rng;
+
+  /*!
+   * Seed used for the random number generator
+   */
+  size_t m_seed;
+  
   /*!
    * Cut-off radius for the pair summation
    */
   double m_cutoff;
+
   /*!
    * A string for m_function;
    */
   string m_expression_string;
   
   /*!
-   * The pair function computing the user defined pair factor
-   */
-  
+   * The pair function computing a user defined pair factor
+   */  
   FunctionPair m_function;
   
   /*!
    * This string holds the symbols, which are not waited for to be computed beforehand
    */
   string m_oldSymbols;
-  
-  virtual ValCalculatorPair* copyMySelf() {
-    return new PairScalar(*this);
-  }
+
+  /*!
+   * For copying an instance of this class
+   */  
+  virtual ValCalculatorPair* copyMySelf() = 0;
+
   /*!
    * Initialise the property list
    */
@@ -73,17 +87,17 @@ class PairScalar : public ValCalculatorPair {
 
  public:
   
-  PairScalar(string symbol);
+  PairRandArbitrary(string symbol);
 
   /*!
    * Constructor for Node hierarchy//
    */
-  PairScalar(/*Node*/Simulation* parent);
+  PairRandArbitrary(/*Node*/Simulation* parent);
   
   /*!
    * Destructor//
    */
-  virtual ~PairScalar();
+  virtual ~PairRandArbitrary();
   
   /*!
    * Setup this Calculator
@@ -104,7 +118,7 @@ class PairScalar : public ValCalculatorPair {
   virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots,
 			bool oneProp) {
     throw gError
-      ("PairScalar::setSlots", "(ColourPair*, "
+      ("PairRandArbitrary::setSlots", "(ColourPair*, "
        "pair<size_t, size_t>&, bool ) should not be called! Contact the programmers.");
   }
   
@@ -113,8 +127,8 @@ class PairScalar : public ValCalculatorPair {
   }
   
   virtual void mySlots(pair<size_t, size_t> &theSlots) {
-    throw gError("PairScalar::mySlots(pair<size_t, size_t>*) should "
-		 "not be called!");
+    throw gError("PairRandArbitrary::mySlots(pair<size_t, size_t>*) should "
+		 "not be called! Contact the programmers.");
   }
   
   /*Compute the user defined expression for pair pD*/
@@ -125,29 +139,15 @@ class PairScalar : public ValCalculatorPair {
     compute(dis);
   }
 #endif
-  virtual void compute(Pairdist* dis) {
-    if (dis->abs() < m_cutoff) {
-      
-      double temp;
-      
-      // compute the expression for the pair function
-      m_function(&temp, dis);
-      dis->tag.doubleByOffset(m_slot)=temp;
-      
-      //MSG_DEBUG("PairScalar::compute", "  In pair with value " << temp);
-    }
-    
-  }
+  virtual void compute(Pairdist* dis) = 0;
   
   /*!
-   * Diffenrently to the function in \a Symbol, this class really has
-   * to determine its stage during run-time
+   * Determine the stage of computation due to symbol dependencies
    */
   virtual bool findStage();
   
   /*!
-   * Diffenrently to the function in \a Symbol, this class really has
-   * to determine its stage during run-time
+   * Determine the stage of computation due to symbol dependencies
    */
   virtual bool findStage_0();
 };

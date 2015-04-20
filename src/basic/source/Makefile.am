@@ -43,6 +43,8 @@ libbasic_la_SOURCES = \
 	pair_particle_scalar.cpp \
 	pair_particle_tensor.cpp \
 	pair_particle_vector.cpp \
+	pair_rand_arbitrary.cpp \
+	pair_rand_scalar.cpp \
 	pair_scalar.cpp\
 	pair_vector.cpp\
 	particle.cpp \

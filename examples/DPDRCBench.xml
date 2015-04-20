@@ -59,7 +59,9 @@
 -->
   <!-- with the above friction, this gives a temperature of 1 -->
   <!-- Note: Currently, Frand already multiplies internally with 
-       a weighting function (1-rij/rc) as mention in the help -->
+       a weighting function (1-rij/rc) as mention in the help 
+       (and divides by sqrt(dt)!!!)
+  -->
   <Frand
     weightingFunction = "default"
      species1="fluid"
