@@ -29,71 +29,73 @@
  */
 
 
-#ifndef __PAIR_SCALAR_H_
-#define __PAIR_SCALAR_H_
+#ifndef __PAIR_RAND_TENSOR_H_
+#define __PAIR_RAND_TENSOR_H_
 
-#include "pair_arbitrary.h"
+#include "pair_rand_arbitrary.h"
 
 using namespace std;
 
-/*! Module for calculation of a scalar Symbol which is stored in each pair (within the cutoff).*/
+/*! Module for calculation of a random square matrix Symbol [pairFactor]*[ranTensor] stored per non-bonded pair of particles, where [pairFactor] is a user-defined runtime-compiled suqare matrix expression and [ranTensor] is a square matrix of independent Gaussian random numbers with zero mean and unit variance. Note that you can modify the mean and variance through a suitable [pairFactor]. [pairFactor] and [ranTensor] are multiplied componentwise.*/
 
-class PairScalar : public PairArbitrary {
+class PairRandTensor : public PairRandArbitrary {
 
  protected:
   
+  /*!
+   * For copying an instance of this class
+   */  
   virtual ValCalculatorPair* copyMySelf() {
-    return new PairScalar(*this);
+    return new PairRandTensor(*this);
   }
   /*!
    * Initialise the property list
    */
   virtual void init();
 
-
  public:
   
-  PairScalar(string symbol);
+  /*!
+   * Old, usually not used constructor
+   */
+  PairRandTensor(string symbol);
 
   /*!
-   * Constructor for Node hierarchy//
+   * Constructor for Node hierarchy
    */
-  PairScalar(/*Node*/Simulation* parent);
+  PairRandTensor(/*Node*/Simulation* parent);
   
   /*!
    * Destructor//
    */
-  virtual ~PairScalar();
+  virtual ~PairRandTensor();
+    
   
-  /*!
-   * Setup this Calculator
-   */
-  virtual void setup();
-  
-
-  /*! Compute the user defined expression for pair \a dis.*/
-  virtual void compute(Pairdist* dis) {
-    if (dis->abs() < m_cutoff) {
-      
-      double& scalar = dis->tag.doubleByOffset(m_slot);
-      
-      // compute the expression for the pair function
-      m_function(&scalar, dis);
-
-    }   
-  }
-  
-
+  /*Compute the user defined expression for pair pD*/
 #ifdef _OPENMP
-  /*! Compute the user defined expression for pair \a dis -- parallel version. Should be that simple because only looping over and writing into pairs (not particles of the pair!)*/
   virtual void compute(Pairdist* dis, int threadNum) {
     // does the same as in serial mode at the moment; 
     // it writes into pairs, so should work
     compute(dis);
   }
 #endif
+  virtual void compute(Pairdist* dis) {
+    if (dis->abs() < m_cutoff) {
 
+      tensor_t& tensor =  dis->tag.tensorByOffset(m_slot);
+      
+      // compute the expression for the pair function
+      m_function(&tensor, dis);
 
+      // multiply Gaussian random numbers
+      for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	for(size_t j = 0; j < SPACE_DIMS; ++j) 
+	  tensor(i,j) *=  m_rng.normal(1);
+      }
+
+    }    
+  }
+  
 };
 
-#endif
+#endif 

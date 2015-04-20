@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,10 +29,11 @@
  */
 
 
-#include "pair_scalar.h"
+#include "pair_rand_vector.h"
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
+#include "particle_cache.h"
 
 using namespace std;
 
@@ -41,34 +42,27 @@ using namespace std;
 #define M_MANAGER  M_PHASE->manager()
 #define M_CONTROLLER M_SIMULATION->controller()
 
-const SymbolRegister<PairScalar> pair_scalar("PairScalar");
+const SymbolRegister<PairRandVector> pair_rand_vector("PairRandVector");
 
-PairScalar::PairScalar(string symbol) :
-	PairArbitrary(symbol) {
+PairRandVector::PairRandVector(string symbol) :
+	PairRandArbitrary(symbol) {
 }
 
-PairScalar::PairScalar(Simulation* parent) :
-	PairArbitrary(parent) {
-	m_function.setReturnType(Variant::SCALAR);
-	m_datatype = DataFormat::DOUBLE;
+PairRandVector::PairRandVector(Simulation* parent) :
+	PairRandArbitrary(parent) {
+	m_function.setReturnType(Variant::VECTOR);
+	m_datatype = DataFormat::POINT;
 	init();
 }
 
-PairScalar::~PairScalar() {
+PairRandVector::~PairRandVector() {
 }
 
-void PairScalar::init() {
-  m_properties.setClassName("PairScalar");
-  m_properties.setDescription("Module for calculation of a scalar Symbol stored per non-bonded pair of particles.");
+void PairRandVector::init() {
+
+  m_properties.setClassName("PairRandVector");
+  m_properties.setDescription("Module for calculation of a random vector Symbol [pairFactor]*[ranScalar] stored per non-bonded pair of particles, where pairFactor is a user-defined runtime-compiled vector expression and ranScalar is a vector of independent Gaussian random numbers with zero mean and unit variance. Note that you can modify the mean and variance through a suitable pairFactor. [pairFactor] and [ranScalar] are multiplied componentwise.");
   
+  m_expression_string = "idVec(1)";
+
 }
-
-//---- Methods ----
-
-void PairScalar::setup() {
-  
-  PairArbitrary::setup();
-  
-}
-
-

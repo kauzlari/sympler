@@ -341,7 +341,10 @@ void sayHello() {
 #include "pair_particle_tensor.h"
 #include "pair_particle_vector.h"
 #include "pair_rand_scalar.h"
+#include "pair_rand_tensor.h"
+#include "pair_rand_vector.h"
 #include "pair_scalar.h"
+#include "pair_tensor.h"
 #include "pair_vector.h"
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
@@ -353,9 +356,6 @@ void sayHello() {
 #include "val_calculator_r_i.h"
 #include "val_calculator_r_i6.h"
 #include "val_calculator_rho.h"
-// commented out because trying to get rid of it
-// #include "val_calculator_shear.h"
-// #include "val_calculator_shear_x.h"
 // commented out because buggy
 // #include "val_calculator_symmetry_BC_scalar.h"
 #include "val_calculator_volume.h"
@@ -513,7 +513,10 @@ void link_all_properly()
   new PCaMatrixInverse(NULL);
   new PCaRandom(NULL);
   new PairRandScalar(NULL);
+  new PairRandTensor(NULL);
+  new PairRandVector(NULL);
   new PairScalar(NULL);
+  new PairTensor(NULL);
   new PairVector(NULL);
   
   

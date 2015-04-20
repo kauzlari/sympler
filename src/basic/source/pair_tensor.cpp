@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -28,8 +28,7 @@
  * 
  */
 
-
-#include "pair_scalar.h"
+#include "pair_tensor.h"
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
@@ -41,34 +40,33 @@ using namespace std;
 #define M_MANAGER  M_PHASE->manager()
 #define M_CONTROLLER M_SIMULATION->controller()
 
-const SymbolRegister<PairScalar> pair_scalar("PairScalar");
+const SymbolRegister<PairTensor> pair_tensor("PairTensor");
 
-PairScalar::PairScalar(string symbol) :
-	PairArbitrary(symbol) {
+PairTensor::PairTensor(string symbol) 
+  : PairArbitrary(symbol) {
 }
 
-PairScalar::PairScalar(Simulation* parent) :
-	PairArbitrary(parent) {
-	m_function.setReturnType(Variant::SCALAR);
-	m_datatype = DataFormat::DOUBLE;
-	init();
+PairTensor::PairTensor(Simulation* parent) 
+  : PairArbitrary(parent) {
+  m_function.setReturnType(Variant::TENSOR);
+  m_datatype = DataFormat::TENSOR;
+  init();
 }
 
-PairScalar::~PairScalar() {
+PairTensor::~PairTensor() {
 }
 
-void PairScalar::init() {
-  m_properties.setClassName("PairScalar");
-  m_properties.setDescription("Module for calculation of a scalar Symbol stored per non-bonded pair of particles.");
+void PairTensor::init() {
+  m_properties.setClassName("PairTensor");
+  m_properties.setDescription("Module for calculation of a square matrix Symbol which is stored in each pair (within the cutoff).");
   
 }
 
 //---- Methods ----
 
-void PairScalar::setup() {
+void PairTensor::setup() {
   
   PairArbitrary::setup();
   
 }
-
 
