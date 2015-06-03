@@ -89,7 +89,7 @@
 	nLatticePX="10"
 	nLatticePY="10"
 	nLatticePZ="10"
-	temperature = "1"
+	kBToverM = "1"
       />
     </BoundaryCuboid>
   </Phase>

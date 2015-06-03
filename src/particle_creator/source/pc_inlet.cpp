@@ -69,11 +69,6 @@ void ParticleCreatorInlet::init()
         "Number of timesteps for increasing the density linearly from 'initDensity' to 'density'. If rampSteps = 1, the attribute 'initDensity is ignored.'");
   
   DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Initial temperature of the particles. Note that this "
-     "can be overriden by setting vel*.");
-
-  DOUBLEPC
       (density, m_density, 0,
        "Desired particle density in the inlet.");
   
@@ -82,7 +77,6 @@ void ParticleCreatorInlet::init()
        "This is used as an initial density when a time ramp is used. See also attribute 'rampSteps'");
   
   m_density = 10;
-  m_temperature = 1;
   m_nSteps = 1;
   m_initDensity = HUGE_VAL;
 }

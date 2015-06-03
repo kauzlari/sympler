@@ -41,7 +41,6 @@
 /*!
  * Parent class for computing properties for the 
  * particles, which need summation over bonded pairs. 
- * Since it is the first of its kind and the complete hierarchy doesn't 
  */
 class BondedPairParticleCalc : public ValCalculatorPart
 {
@@ -72,17 +71,14 @@ class BondedPairParticleCalc : public ValCalculatorPart
 
 
   /*!
-     * Initialise the property list
+   * Initialise the property list
    */
-    virtual void init();
+  virtual void init();
   
-
-    // next commented out as long as I don't need it
-
-        /*!
-         * Helper function for polymorphic copying
-         */
-    virtual ValCalculator* copyMySelf() = 0;
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ValCalculator* copyMySelf() = 0;
 /*         { */
 /*           return new BondedPairParticleVector(*this); */
 /*         } */

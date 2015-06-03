@@ -71,7 +71,8 @@ void ThermostatWallVelIso::init()
   m_species = "UNDEF";
      
   DOUBLEPC
-    (wallTemperature, m_temperature, 0., "temperature for thermalisation of the wall particles.");
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> to thermalize wall-particles to.");
   m_temperature = 1;
 }
 

@@ -151,7 +151,7 @@ void ParticleCreatorFreePCalc::init()
   /* Allow unknown properties. Those ones have to be identified later.
   They are used to set the particles degree of freedoms initially. */
   m_properties.allowUnknown();
-		
+
   for (int i = 0; i < SPACE_DIMS; i++) {
     m_properties.addProperty
         ("pos" + string(1, 'X'+i), PropertyList::STRING, &m_str_poss[i], NULL,

@@ -444,8 +444,8 @@ void ParticleCreatorLattice::init()
   );
     
   DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Initial kinetic temperature of the particles. Note that this "
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> for setting the initial thermal velocities of the particles. Note that this "
      "can be overriden by setting vel*.");
     
   for (int i = 0; i < SPACE_DIMS; i++) {

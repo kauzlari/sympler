@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -69,25 +69,13 @@ void FDPD::init()
     ("An implementation of the DPD forces."
      );
 
-//   STRINGPC
-//     (species1, m_species.first,
-//      "First species, this force should act on.");
-//
-//   STRINGPC
-//     (species2, m_species.second,
-//      "Second species, this force should act on.");
-//
-//   STRINGPC
-//     (weightingFunction, m_weighting_function,
-//      "Defines the weighting function to be used.");
-
   DOUBLEPC
     (dissipation, m_dissipation, 0,
      "Defines the dissipation constant.");
 
   DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Defines the temperature.");
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> to thermalize to.");
 
   m_weighting_function = "default";
   m_species.first = "fluid";
@@ -106,16 +94,9 @@ void FDPD::computeForces(Pairdist* pair, int force_index)
 void FDPD::computeForces(Pairdist* pair, int force_index, int thread_no)
 #endif
 {
-//   M_PAIRCREATOR->createDistances();
-  //RandomNumberGenerator m_rng;
-  //OLD:
-//   assert(m_cp);
 
   m_force_index = force_index;
 
-//   FOR_EACH_PAIR__PARALLEL
-//     (FDPD,
-//      m_cp,
      if (pair->abs() < this->m_cutoff) {
        /* We use interpolate because of the normalization */
        double weighti = this->m_wf->interpolate(pair, pair->firstPart()->r);
@@ -130,14 +111,6 @@ void FDPD::computeForces(Pairdist* pair, int force_index, int thread_no)
 
        point_t fi = (fd*weightj+fn*sqrt(weightj))*eij;
        point_t fj = (fd*weighti+fn*sqrt(weighti))*eij;
-
-       /* Set elements of the stress tensor */
-//        for (int a = 0; a < SPACE_DIMS; ++a) {
-//          for (int b = 0; b < SPACE_DIMS; ++b) {
-// 	   pair->firstPart()->stress(a, b) += (*pair)[a]*fi[b];
-// 	   pair->secondPart()->stress(a, b) += (*pair)[a]*fj[b];
-//          }
-//        }
 
 #ifndef _OPENMP
        if (pair->actsOnFirst())
@@ -185,23 +158,9 @@ void FDPD::computeForces(int force_index)
 
 void FDPD::setup()
 {
-  GenF::setup();
-
-  ColourPair *m_cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second));
-
-  m_wf = M_SIMULATION->findWeightingFunction(m_weighting_function);
-  m_cutoff = m_wf->cutoff();
-
-  /* Colour pair initialization */
-  m_cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
-
-
-  m_cp->registerForce(this);
-  m_cp->setNeedPairs(true);
-  m_cp->setCutoff(m_cutoff);
-
+  FWithRng::setup();
+  
   m_sqrt_r_dt = 1/sqrt(M_CONTROLLER->dt());
-
   m_noise = sqrt(2*m_temperature*m_dissipation);
 }
 

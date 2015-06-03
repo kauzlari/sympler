@@ -152,7 +152,7 @@ void ParticleCreatorStatic::createParticles()
       point_t boxcenter = (m_static_box.corner1 + m_static_box.corner2)/2;
       point_t boxradii = (m_static_box.corner2 - m_static_box.corner1)/2;
       for(int i = 0; i < SPACE_DIMS; i++)
-	boxradii[i] = abs(boxradii[i]);
+	boxradii[i] = fabs(boxradii[i]);
            
       manager = M_PHASE->manager();
       
@@ -288,7 +288,7 @@ void ParticleCreatorStatic::createMoreParticles()
       point_t boxcenter = (m_static_box.corner1 + m_static_box.corner2)/2;
       point_t boxradii = (m_static_box.corner2 - m_static_box.corner1)/2;
       for(int i = 0; i < SPACE_DIMS; i++)
-    	  boxradii[i] = abs(boxradii[i]);
+    	  boxradii[i] = fabs(boxradii[i]);
 
       manager = M_PHASE->manager();
     
@@ -414,12 +414,6 @@ void ParticleCreatorStatic::init()
      "Should the particle creator explicitly check whether the particles that should be created are really inside and only create them if this is true?");
   
   DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Initial temperature of the particles. Note that this "
-     "can be overriden by setting vel*.");
-  
-  
-  DOUBLEPC
     (dtForMore, m_dtForMore, 0,
      "Time between creation of more particles. Will be ignored if 'more = \"no\"'.");
   
@@ -466,7 +460,6 @@ void ParticleCreatorStatic::init()
   /* Default values */
     
   m_distance = m_density = HUGE_VAL;
-  m_temperature = 1;
   m_force_boundary_size = true;
   
   m_static_box.corner1[0] = 0;

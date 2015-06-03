@@ -33,7 +33,7 @@
 <!-- We do DPD! So no need for an additional thermostat (unless it could speed up equilibration).-->
 <!--
   <ThermostatVels
-    temperature = "0.0013333333333333"
+    kBToverM = "0.0013333333333333"
     activateAt = "0"
     deactivateAt = "4000"
     interval = "40"
@@ -41,7 +41,7 @@
   />
 
   <ThermostatVels
-    temperature = "0.0013333333333333"
+    kBToverM = "0.0013333333333333"
     activateAt = "0"
     deactivateAt = "4000"
     interval = "40"
@@ -85,13 +85,23 @@
         symbol = "FDPDangularNS"
   />
 
+  <!-- test of BondedPairVector-->
+
+  <BondedPairVector
+    species1 = "blobTF" 
+    species2 = "blobTF"
+    symbol = "v"
+    expression = "[vi]-[vj]"  
+    listName = "springDPDTF"
+  />
+
   <!-- friction; mass multiplied below -->
   <BondedPairParticleVector
     species1 = "blobTF" 
     species2 = "blobTF"
     listName = "springDPDTF"
     symbol = "FDPDspringTF" 
-    expression = "-0.52*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+    expression = "-0.52*(([vij]):[rij])*[rij]/(rij*rij)"
     symmetry = "-1"
     overwrite = "no"
   />

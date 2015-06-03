@@ -29,7 +29,7 @@
  */
 
 
-#include "bonded_pair_particle_arbitrary.h"
+#include "bonded_pair_arbitrary.h"
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
@@ -43,89 +43,143 @@
 #define M_CONTROLLER M_SIMULATION->controller()
 
 
-BondedPairParticleArbitrary::BondedPairParticleArbitrary(Simulation* parent)
-  : BondedPairParticleCalc(parent)
+BondedPairArbitrary::BondedPairArbitrary(Simulation* parent)
+  : ValCalculatorPair(parent)
 {
   init();
 }
 
-BondedPairParticleArbitrary::~BondedPairParticleArbitrary()
+BondedPairArbitrary::~BondedPairArbitrary()
 {
 }
 
-void BondedPairParticleArbitrary::init()
+void BondedPairArbitrary::init()
 {
-//   m_properties.setClassName("BondedPairParticleArbitrary");
-  m_properties.setClassName("ValCalculatorPart");
-  m_properties.setName("BondedPairParticleArbitrary");
+//   m_properties.setClassName("BondedPairArbitrary");
+  m_properties.setClassName("ValCalculatorPair");
+  // Note that if a child-class uses setClassName, it also sets back the name. Since this is the usual case, the next line is rather a reminder that the children have to do this line again according to their needs!
+  m_properties.setName("BondedPairArbitrary");
+
+  STRINGPC(listName, m_listName, "Identifier of the list of bonded pairs, this Calculator should belong to.");
+
+  STRINGPC
+      (symbol, m_symbolName,
+       "Name of the symbol for the calculated property.");
+
+
+  BOOLPC
+      (overwrite, m_overwrite,
+       "Is this calculator allowed to overwrite already existing symbols " 
+           "with name given in attribute 'symbol' ?");
 
   STRINGPC
       (expression, m_expression,
        "The mathematical expression to be computed for the pairFactor."
-      );
-  
-  STRINGPC
-      (particleFactor_i, m_1stPExpression,
-       "The mathematical expression of the additional particle factor for the first particle."
-      );
-
-  STRINGPC
-      (particleFactor_j, m_2ndPExpression,
-       "The mathematical expression of the additional particle factor for the second particle."
       );
 
   STRINGPC
       (useOldFor, m_oldSymbols,
        "Here, you can list the used symbols, which should be treated as \"old\", i.e., this calculator will not wait for those symbols to be computed beforehand, but it will take what it finds. Separate the symbols by the \"|\"- (\"pipe\"-) symbol."
       );
-    
+
+
+#ifdef _OPENMP
+  m_particleCalculator = false;
+#endif
+  m_overwrite = false;
+  m_listName = "undefined";
+
   m_oldSymbols = "---";
 
 }
 
-void BondedPairParticleArbitrary::setup()
+void BondedPairArbitrary::setup()
 {
-  if(m_expression == "undefined")
-    throw gError("BondedPairParticleArbitrary::setup", ": Attribute 'expression' has value \"undefined\"");
-       
-  ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second));
+   if(m_allPairs == true)
+     throw gError("BondedPairArbitrary::setup", "For module " + className() + " for symbol " + m_symbolName + ": For bonded pairs, 'allPairs = \"yes\" is currently not supported. Please switch off.");
+
+  if(m_listName == "undefined")
+    throw gError("BondedPairArbitrary::setup", "Module " + className() + " for symbol " + m_symbolName + ": Attribute 'listName' is undefined!");
+
+  if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
+    throw gError("BondedPairArbitrary::setup", "Module " + className() + " for symbol " + m_symbolName + ": Attribute 'stage' is " + ObjToString(m_phaseUser) + ", which is none of the allowed values \"0\", \"1\", \"2\".");
+
+  /*m_allPairs == false ALWAYS!*/
+   
+  if(m_species.first == "undefined")
+    throw gError("BondedPairArbitrary::setup", "Module " + className() + " for symbol " + m_symbolName + ": Attribute 'species1' has value \"undefined\"."); 
+  if(m_species.second == "undefined")
+    throw gError("BondedPairArbitrary::setup", "Module " + className() + " for symbol " + m_symbolName + ": Attribute 'species2' has value \"undefined\"."); 
   
+  ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
+    
+  // next lines are just necessary for non-bonded pairs, so not here!
+  //      cp->setNeedPairs(true);
+  //   cp->setCutoff(m_cutoff);
+
+  if(m_expression == "undefined")
+    throw gError("BondedPairArbitrary::setup", "Module " + className() + " for symbol " + m_symbolName + ": Attribute 'expression' has value \"undefined\"");
+
   m_function.setExpression(m_expression);
   m_function.setColourPair(cp);
-  m_1stparticleFactor.setExpression(m_1stPExpression);
-  m_1stparticleFactor.setColourPair(cp);
-  m_2ndparticleFactor.setExpression(m_2ndPExpression);
-  m_2ndparticleFactor.setColourPair(cp);
 
-  BondedPairParticleCalc::setup();
   
+  MSG_DEBUG("BondedPairArbitrary::setup", "Module " + className() + " for symbol " + m_symbolName + ": registering " << this->name() << ".");
+  
+  if(m_phaseUser == 0)    
+    cp->registerBondedCalc_0(this);
+  else if(m_phaseUser == 1)    
+    cp->registerBondedCalc(this);
+  else // so it is 2
+    {
+      ValCalculator* vc = copyMySelf() /*new BondedPairArbitrary(*this)*/;
+
+      copyMembersTo(vc);
+      
+      MSG_DEBUG("BondedPairArbitrary::setup", "Module " + className() + " for symbol " + m_symbolName + ": registering copy of " << this->name() << ", CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");    
+      
+      cp->registerBondedCalc(vc);
+      cp->registerBondedCalc_0(this);
+    }
+
+  ValCalculatorPair::setup();
+
 }
 
-void BondedPairParticleArbitrary::copyMembersTo(ValCalculator* vc)
+void BondedPairArbitrary::setSlot(ColourPair* cp, size_t& slot,
+						 bool oneProp) {
+  m_slot = slot = cp->tagFormat().addAttribute
+    // OLD-STYLE. No idea why this was done.
+    //    ("BondedPairVector_" + cp->toString(), m_datatype, false, "m_scalar").offset;
+    // NEW-STYLE (2014-10-31)
+    (m_symbolName, m_datatype, false, m_symbolName).offset;
+}
+
+void BondedPairArbitrary::copyMembersTo(ValCalculator* vc)
 {
-  BondedPairParticleCalc::copyMembersTo(vc);
+
+  ((BondedPairArbitrary*) vc)->m_overwrite = m_overwrite;
+
+#ifdef _OPENMP
+  ((BondedPairArbitrary*) vc)->m_particleCalculator = m_particleCalculator;
+#endif
 
    ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
 
-  ((BondedPairParticleArbitrary*) vc)->m_function.setExpression(m_expression);
-  ((BondedPairParticleArbitrary*) vc)->m_function.setColourPair(cp);
-  //       ((BondedPairParticleArbitrary*) vc)->m_function.setReturnType(funcType);
-  ((BondedPairParticleArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
-  ((BondedPairParticleArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
-  ((BondedPairParticleArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
-  ((BondedPairParticleArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
+  ((BondedPairArbitrary*) vc)->m_function.setExpression(m_expression);
+  ((BondedPairArbitrary*) vc)->m_function.setColourPair(cp);
 
 }
 
-bool BondedPairParticleArbitrary::findStage()
+bool BondedPairArbitrary::findStage()
 {
   if(m_stage == -1)
   {
     // no symbols used?
-    if(m_function.usedSymbols().empty() && m_1stparticleFactor.usedSymbols().empty() && m_2ndparticleFactor.usedSymbols().empty())
+    if(m_function.usedSymbols().empty())
     {
       m_stage = 0;
-      MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
+      MSG_DEBUG("BondedPairArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
       return true;
     }
   // this is for aborting, when there is a Calculator, which has stage = -1 itself
@@ -138,10 +192,6 @@ bool BondedPairParticleArbitrary::findStage()
     
     typed_value_list_t usedSymbols;
     for(typed_value_list_t::const_iterator s = m_function.usedSymbols().begin(); s != m_function.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_1stparticleFactor.usedSymbols().begin(); s != m_1stparticleFactor.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_2ndparticleFactor.usedSymbols().begin(); s != m_2ndparticleFactor.usedSymbols().end() && !tooEarly; ++s)
       usedSymbols.push_back(*s);
     
     // go through the string of "old" symbols and remove those from usedSymbols 
@@ -173,7 +223,7 @@ bool BondedPairParticleArbitrary::findStage()
         for(typed_value_list_t::const_iterator s = toRemove.begin(); s != toRemove.end(); ++s)
           usedSymbols.remove(*s);
         if(toRemove.empty())
-          throw gError("BondedPairParticleArbitrary::findStage", "Unable to find old symbol '" + cur + "' among used symbols");
+          throw gError("BondedPairArbitrary::findStage", "Unable to find old symbol '" + cur + "' among used symbols");
       }
     }
 
@@ -182,7 +232,7 @@ bool BondedPairParticleArbitrary::findStage()
     {
       
       string name = (*s)->name();
-      MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << ": now checking for used symbol with complete name " << name);
+      MSG_DEBUG("BondedPairArbitrary::findStage", className() << ": now checking for used symbol with complete name " << name);
       // unfortunately, we have to remove the brackets for vectors and tensors
       if(name[0] == '{' || name[0] == '[')
       {
@@ -198,14 +248,14 @@ bool BondedPairParticleArbitrary::findStage()
       else
         // remove "i" or "j"
         name.erase(name.size()-1, name.size()-1);
-//       MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << ":short name: " << name);
+//       MSG_DEBUG("BondedPairArbitrary::findStage", className() << ":short name: " << name);
       
       // in the following loops we check, whether there exists a
       // ValCalculator for the current symbol. If yes, we check the 
       // stage of it and try to set the stage of this ValCalculator 
       // consistently to it,
         
-//       MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for " << mySymbolName() << ": m_phaseUser = " << m_phaseUser);
+//       MSG_DEBUG("BondedPairArbitrary::findStage", className() << " for " << mySymbolName() << ": m_phaseUser = " << m_phaseUser);
 
       assert(m_phaseUser == 1 || m_phaseUser == 2);
 
@@ -226,7 +276,7 @@ bool BondedPairParticleArbitrary::findStage()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("BondedPairParticleArbitrary::findStage", "symbols of VC: ");
+		 //             MSG_DEBUG("BondedPairArbitrary::findStage", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -240,7 +290,7 @@ bool BondedPairParticleArbitrary::findStage()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("BondedPairArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -264,7 +314,7 @@ bool BondedPairParticleArbitrary::findStage()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("BondedPairParticleArbitrary::findStage", "symbols of VC: ");
+		 //             MSG_DEBUG("BondedPairArbitrary::findStage", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -278,7 +328,7 @@ bool BondedPairParticleArbitrary::findStage()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("BondedPairArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -341,7 +391,7 @@ bool BondedPairParticleArbitrary::findStage()
 	    // we have to search now in the TripletCalculators
 	    vector<TripletCalculator*>* tCs;
 	    tCs = M_PHASE->bondedTripletCalculatorsFlat();
-	    // MSG_DEBUG("BondedPairParticleArbitrary::findStage", "loop over triplet calculators START");
+	    // MSG_DEBUG("BondedPairArbitrary::findStage", "loop over triplet calculators START");
             FOR_EACH
 	      (
 	       vector<TripletCalculator*>, (*tCs),              
@@ -377,34 +427,34 @@ bool BondedPairParticleArbitrary::findStage()
       if(nothing)
       {
         m_stage = 0;
-        MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        MSG_DEBUG("BondedPairArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
         return true;
       } 
       else return false;
     }
     else 
     {
-      MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      MSG_DEBUG("BondedPairArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
       return true;
     }
   } // end if(m_stage == -1)
   else 
   {
-    MSG_DEBUG("BondedPairParticleArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    MSG_DEBUG("BondedPairArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
     return true;
   }
 }
 
 
-bool BondedPairParticleArbitrary::findStage_0()
+bool BondedPairArbitrary::findStage_0()
 {
   if(m_stage == -1)
   {
     // no symbols used?
-    if(m_function.usedSymbols().empty() && m_1stparticleFactor.usedSymbols().empty() && m_2ndparticleFactor.usedSymbols().empty())
+    if(m_function.usedSymbols().empty())
     {
       m_stage = 0;
-      MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
+      MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
       return true;
     }
   // this is for aborting, when there is a Calculator, which has stage = -1 itself
@@ -417,10 +467,6 @@ bool BondedPairParticleArbitrary::findStage_0()
     
     typed_value_list_t usedSymbols;
     for(typed_value_list_t::const_iterator s = m_function.usedSymbols().begin(); s != m_function.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_1stparticleFactor.usedSymbols().begin(); s != m_1stparticleFactor.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_2ndparticleFactor.usedSymbols().begin(); s != m_2ndparticleFactor.usedSymbols().end() && !tooEarly; ++s)
       usedSymbols.push_back(*s);
     
     // go through the string of "old" symbols and remove those from usedSymbols 
@@ -452,7 +498,7 @@ bool BondedPairParticleArbitrary::findStage_0()
         for(typed_value_list_t::const_iterator s = toRemove.begin(); s != toRemove.end(); ++s)
           usedSymbols.remove(*s);
         if(toRemove.empty())
-          throw gError("BondedPairParticleArbitrary::findStage_0", "Unable to find old symbol '" + cur + "' among used symbols");
+          throw gError("BondedPairArbitrary::findStage_0", "Unable to find old symbol '" + cur + "' among used symbols");
       }
     }
 
@@ -461,7 +507,7 @@ bool BondedPairParticleArbitrary::findStage_0()
     {
       
       string name = (*s)->name();
-      MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << ": now checking for used symbol with complete name " << name);
+      MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << ": now checking for used symbol with complete name " << name);
       // unfortunately, we have to remove the brackets for vectors and tensors
       if(name[0] == '{' || name[0] == '[')
       {
@@ -477,11 +523,11 @@ bool BondedPairParticleArbitrary::findStage_0()
       else
         // remove "i" or "j"
         name.erase(name.size()-1, name.size()-1);
-//       MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << ":short name: " << name);
+//       MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << ":short name: " << name);
       
         // we do if((*vCIt) != this) now, so, next should be unnecessary
 /*      if(m_symbolName == name)
-      throw gError("BondedPairParticleArbitrary::findStage_0", className() + " reporting: I cannot use my own symbol as argument.");*/
+      throw gError("BondedPairArbitrary::findStage_0", className() + " reporting: I cannot use my own symbol as argument.");*/
           
       // in the following loops we check, whether there exists a
       // ValCalculator for the current symbol. If yes, we check the 
@@ -503,7 +549,7 @@ bool BondedPairParticleArbitrary::findStage_0()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", "symbols of VC: ");
+		 //             MSG_DEBUG("BondedPairArbitrary::findStage_0", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -517,7 +563,7 @@ bool BondedPairParticleArbitrary::findStage_0()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -542,7 +588,7 @@ bool BondedPairParticleArbitrary::findStage_0()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", "symbols of VC: ");
+		 //             MSG_DEBUG("BondedPairArbitrary::findStage_0", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -556,7 +602,7 @@ bool BondedPairParticleArbitrary::findStage_0()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -620,7 +666,7 @@ bool BondedPairParticleArbitrary::findStage_0()
 	    // we have to search now in the TripletCalculators
 	    vector<TripletCalculator*>* tCs;
 	    tCs = M_PHASE->bondedTripletCalculatorsFlat_0();
-	    // MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", "loop over triplet calculators START");
+	    // MSG_DEBUG("BondedPairArbitrary::findStage_0", "loop over triplet calculators START");
             FOR_EACH
 	      (
 	       vector<TripletCalculator*>, (*tCs),
@@ -656,20 +702,24 @@ bool BondedPairParticleArbitrary::findStage_0()
       if(nothing)
       {
         m_stage = 0;
-        MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
         return true;
       } 
       else return false;
     }
     else 
     {
-      MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
       return true;
     }
   } // end if(m_stage == -1)
   else 
   {
-    MSG_DEBUG("BondedPairParticleArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    MSG_DEBUG("BondedPairArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
     return true;
   }
 }
+
+
+
+

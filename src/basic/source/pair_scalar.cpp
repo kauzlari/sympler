@@ -44,10 +44,10 @@ using namespace std;
 
 const SymbolRegister<PairScalar> pair_scalar("PairScalar");
 
-PairScalar::PairScalar(/*WeightingFunction *wf,*/string symbol) :
-	ValCalculatorPair(symbol) /*,m_wf(wf)*/{
+PairScalar::PairScalar(string symbol) :
+	ValCalculatorPair(symbol) {
 }
-////Constructor/Destructor
+
 PairScalar::PairScalar(Simulation* parent) :
 	ValCalculatorPair(parent) {
 	m_function.setReturnType(Variant::SCALAR);
@@ -60,8 +60,7 @@ PairScalar::~PairScalar() {
 
 void PairScalar::init() {
   m_properties.setClassName("PairScalar");
-  m_properties.setDescription("Module for calculation of the pair factor between a pair of particles "
-			      "saves it in the pair attribute");
+  m_properties.setDescription("Module for calculation of a scalar Symbol stored per non-bonded pair of particles.");
   
   STRINGPC
     (symbol, m_symbolName,
@@ -93,7 +92,6 @@ void PairScalar::init() {
 
 void PairScalar::setup() {
   
-  MSG_DEBUG("PairScalar::setup()","Set up of PairScalar");
   ValCalculatorPair::setup();
   
   //MSG_DEBUG("PairScalar::setup()","Set up of ValCalPair already done");
@@ -105,15 +103,13 @@ void PairScalar::setup() {
     throw gError("PairScalar::setup", className() + ": Attribute 'expression' has value \"undefined\"");
   
   MSG_DEBUG("PairScalar::setup",className() << "  Cutoff used  = " << m_cutoff);
-  MSG_DEBUG("PairScalar::setup",className() << "  If all pairs used  = " << m_allPairs);
-  MSG_DEBUG("PairScalar::setup",className() << "  Symbol used  = " << m_symbolName);
+
   if (m_allPairs) {
     FOR_EACH_COLOUR_PAIR
       (
        M_MANAGER,
        cp->setCutoff(m_cutoff);
        cp->setNeedPairs(true);
-       MSG_DEBUG("PairScalar::setup()",className() << " defined Cutoff = " << m_cutoff);
        vector<ColourPair*>::iterator cpTester = __cp;
        if(++cpTester == __end)
 	 {
@@ -125,9 +121,9 @@ void PairScalar::setup() {
   } else /*m_allPairs == false*/
     {
       if (m_species.first == "undefined")
-	throw gError("ValCalculatorKernel::setup", "Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled.");
+	throw gError("PairScalar::setup", "For module " + className() + ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled.");
       if (m_species.second == "undefined")
-	throw gError("ValCalculatorKernel::setup", "Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled.");
+	throw gError("PairScalar::setup", "For module " + className() + ": Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled.");
       ColourPair* cp= M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
       cp->setCutoff(m_cutoff);
       cp->setNeedPairs(true);
@@ -138,12 +134,13 @@ void PairScalar::setup() {
   
   
 }
-void /*pair<size_t, size_t>*/PairScalar::setSlot(ColourPair* cp, size_t& slot,
-						 bool oneProp) {
-  
+
+void PairScalar::setSlot(ColourPair* cp, size_t& slot, bool oneProp) {
   m_slot = slot = cp->tagFormat().addAttribute
-    ("PairScalar_" + cp->toString(), DataFormat::DOUBLE, false, "m_scalar").offset;
-  cout<<"****************PairScalar_" + cp->toString() <<endl;
+    // OLD-STYLE. No idea why this was done.
+    //    ("PairScalar_" + cp->toString(), DataFormat::DOUBLE, false, "m_scalar").offset;
+    // NEW-STYLE (2014-10-31)
+    (m_symbolName, DataFormat::DOUBLE, false, m_symbolName).offset;
 }
 
 bool PairScalar::findStage() {

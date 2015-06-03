@@ -245,10 +245,11 @@ void ParticleCreatorTube::init() {
 		" If the tube is single clamped, a force can be applied on the free tip."
 		" Note that the size of the simulation box can't be modified by this"
 		" ParticleCreator.");
-	DOUBLEPC (temperature, m_temperature, 0,
-			"Initial temperature of the particles. Note that this "
-			"can be overriden by setting vel*.")
-	;
+  DOUBLEPC
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> for setting the initial thermal velocities of the particles. Note that this "
+     "can be overriden by setting vel*.");
+		
 
 	BOOLPC(randomize, m_randomize,
 			"Set to 'no' to get the same random numbers for every simulation run.")

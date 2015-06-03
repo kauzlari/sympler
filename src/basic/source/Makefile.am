@@ -2,12 +2,15 @@
 noinst_LTLIBRARIES = libbasic.la
 
 libbasic_la_SOURCES = \
+	bonded_pair_arbitrary.cpp \
 	bonded_pair_particle_arbitrary.cpp \
 	bonded_pair_particle_calc.cpp \
 	bonded_pair_particle_one_noise_vector.cpp \
 	bonded_pair_particle_scalar.cpp \
 	bonded_pair_particle_tensor_noise_vector.cpp \
 	bonded_pair_particle_vector.cpp \
+	bonded_pair_scalar.cpp \
+	bonded_pair_vector.cpp \
 	boundary.cpp \
 	callable.cpp \
 	cell.cpp \

@@ -128,7 +128,7 @@ void ParticleCreatorWall::adjustBoxSize(point_t &size, bool_point_t& frameRCfron
 		{
 		//next is the relative difference between given distance and the one computed 
 		//from the density
-			double diff = abs(1 - m_distance/pow(1/m_density, (1./3)));
+			double diff = fabs(1 - m_distance/pow(1/m_density, (1./3)));
 			MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "diff = " << diff);
 			//we only complain if diff > 0.1%
 			if(diff > 0.001)

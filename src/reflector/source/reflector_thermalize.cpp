@@ -73,8 +73,8 @@ void ReflectorThermalize::init()
   );
     
   DOUBLEPC
-    (temperature, m_temperature, 0,
-     "Temperature the particles velocity is set to.");
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> for thermalisation of the particles' velocities.");
 
 //   m_properties.addProperty
 //     ("biasVelocity", PropertyList::DOUBLE, &m_bias_velocity, NULL,

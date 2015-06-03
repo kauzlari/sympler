@@ -330,7 +330,7 @@ class WallTriangle: public Wall
     */
     virtual double distToPlane(const point_t& p) const
     {
-      return abs((p - m_corners[0])*m_surface_normal);
+      return fabs((p - m_corners[0])*m_surface_normal);
     }
 
     
@@ -345,13 +345,10 @@ class WallTriangle: public Wall
     virtual bool isInRange(const double& range, const point_t& p) const
   {
     // distance to plane, the wall is in
-    double dist = abs((p - m_corners[0])*m_surface_normal);
-			
-//     if(dist <=1 && p.x>285.458 && p.x < 285.460 && p.y>234.711 && p.y < 234.713 && p.z>273.468 && p.z < 273.470) MSG_DEBUG("WallTriangle::isInRange", "dist =" << dist << ", m_corners[0]=" << m_corners[0] << ", m_corners[1]=" << m_corners[1] << ", m_corners[2]=" << m_corners[2] << ", m_surface_normal=" << m_surface_normal << ", p=" << p);
+    double dist = fabs((p - m_corners[0])*m_surface_normal);
 			
     if(dist > range) return false;
     else
-
       // NEW STYLE
       {
 	// the perpendicular projection of p to the plane

@@ -34,8 +34,11 @@
 #include "phase.h"
 #include "simulation.h"
 #include "manager_cell.h"
-// preliminary necessary as long as we don'T have the complete hierarchy
-#include "bonded_pair_particle_vector.h"
+// OLD-STYLE: preliminary necessary as long as we don't have the complete hierarchy
+// #include "bonded_pair_particle_vector.h"
+// NEW_STYLE: 2014-10-31
+#include "bonded_pair_arbitrary.h"
+#include "bonded_pair_particle_calc.h"
 
 
 #define M_PHASE  m_manager->phase()
@@ -454,8 +457,18 @@ void ColourPair::sortStages()
 
   for(vector<ValCalculator*>::iterator i = m_bondedValCalculators_flat.begin(); i != m_bondedValCalculators_flat.end(); ++i)
     {
-      // preliminary cast as long as we don't have the complete hierarchy
-      string listName = ((BondedPairParticleVector*) (*i))->listName();
+      // NEW STYLE: 2014-10-31. Note that in the "ValCalculatorPair"-case the correct name might change if you start implementing non-arbitrary Calculators one day. Then you probably need a parent "...Calc"-class as in the "BondedPairParticleCalc"-case.
+      string listName;
+      if((*i) -> className() == "ValCalculatorPart") {
+	listName = ((BondedPairParticleCalc*) (*i))->listName();
+      }
+      else if((*i) -> className() == "ValCalculatorPair") {
+	listName = ((BondedPairArbitrary*) (*i))->listName();
+      }
+      else throw gError("ColourPair::sortStages", "Can not find stage for bonded calculator '" + (*i) -> name() + "' because don't know how to handle its polymorphic class name '" + (*i) -> className() + "'. Looks like a bug for a programmer.");
+      // OLD preliminary cast as long as we don't have the complete hierarchy replace by NEW STYLE above
+//       string listName = ((BondedPairParticleVector*) (*i))->listName();
+
       size_t listIndex = connectedListIndex(listName);
 
       int stage = (*i)->stage();
@@ -597,8 +610,18 @@ void ColourPair::sortStages_0()
 
   for(vector<ValCalculator*>::iterator i = m_bondedValCalculators_flat_0.begin(); i != m_bondedValCalculators_flat_0.end(); ++i)
     {
-      // preliminary cast as long as we don't have the complete hierarchy
-      string listName = ((BondedPairParticleVector*) (*i))->listName();
+      // NEW STYLE: 2014-10-31. Note that in the "BondedPairArbitrary"-case the correct name might change if you start implementing non-arbitrary Calculators one day. Then you probably need a parent "...Calc"-class as in the "BondedPairParticleCalc"-case.
+      string listName;
+      if((*i) -> name() == "BondedPairParticleCalc") {
+	listName = ((BondedPairParticleCalc*) (*i))->listName();
+      }
+      else if((*i) -> name() == "BondedPairArbitrary") {
+	listName = ((BondedPairArbitrary*) (*i))->listName();
+      }
+      else throw gError("ColourPair::sortStages", "Can not find stage for bonded calculator '" + (*i) -> className() + "' because don't know how to handle its polymorphic class name '" + (*i) -> name() + "'. Looks like a bug for a programmer.");
+      // OLD preliminary cast as long as we don't have the complete hierarchy replace by NEW STYLE above
+//       string listName = ((BondedPairParticleVector*) (*i))->listName();
+
       size_t listIndex = connectedListIndex(listName);
 
       int stage = (*i)->stage();

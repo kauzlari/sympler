@@ -87,7 +87,7 @@ void ValCalculatorPair::init()
 {
   m_properties.setClassName("ValCalculatorPair");
 
-  BOOLPC(allPairs, m_allPairs, "Should the quantity be computed for all colour combinations? If yes, this disables 'species1' and 'species2'");
+  BOOLPC(allPairs, m_allPairs, "Should the quantity be computed for all colour combinations? If yes, this disables 'species1' and 'species2'. NOTE: This feature is currently not supported for bonded pairs.");
 
   m_allPairs = false;
 

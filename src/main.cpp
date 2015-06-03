@@ -336,6 +336,8 @@ void sayHello() {
 #include "bonded_pair_particle_scalar.h"
 #include "bonded_pair_particle_tensor_noise_vector.h"
 #include "bonded_pair_particle_vector.h"
+#include "bonded_pair_scalar.h"
+#include "bonded_pair_vector.h"
 #include "pair_particle_scalar.h"
 #include "pair_particle_tensor.h"
 #include "pair_particle_vector.h"
@@ -564,6 +566,8 @@ void link_all_properly()
   new BondedPairParticleScalar(NULL);
   new BondedPairParticleTensorNoiseVector(NULL);
   new BondedPairParticleVector(NULL);
+  new BondedPairScalar(NULL);
+  new BondedPairVector(NULL);
   new PairParticleScalar(NULL);
   new PairParticleTensor(NULL);
   new PairParticleVector(NULL);

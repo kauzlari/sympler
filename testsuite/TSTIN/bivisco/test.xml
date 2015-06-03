@@ -309,7 +309,7 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
                    u = "0*u"
                    v = "0"
                    w = "0*w"
-                   temperature = "10000"
+                   kBToverM = "10000"
                 />
 
    </BoundaryCuboid>

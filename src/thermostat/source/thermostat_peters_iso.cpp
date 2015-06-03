@@ -67,8 +67,8 @@ void ThermostatPetersIso::init()
       "Isothermal Peters thermostat. See: E. A. J. F. Peters, Europhys. Lett. 66 (3), pp. 311.");
 
   DOUBLEPC
-      (temperature, m_temperature, 0,
-       "Temperature to thermostat to.");
+    (kBToverM, m_temperature, 0,
+     "k_BT/m = <v^2> to thermalize to.");
 
   m_temperature = 1;
 }
