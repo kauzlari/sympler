@@ -29,60 +29,58 @@
  */
 
 
-#ifndef __PAIR_SCALAR_H_
-#define __PAIR_SCALAR_H_
+
+#ifndef __PAIR_TENSOR_H_
+#define __PAIR_TENSOR_H_
+
 
 #include "pair_arbitrary.h"
 
 using namespace std;
 
-/*! Module for calculation of a scalar Symbol which is stored in each pair (within the cutoff).*/
+/*! Module for calculation of a square matrix Symbol which is stored in each pair (within the cutoff).*/
 
-class PairScalar : public PairArbitrary {
+class PairTensor: public PairArbitrary {
 
- protected:
+ protected:  
   
   virtual ValCalculatorPair* copyMySelf() {
-    return new PairScalar(*this);
+    return new PairTensor(*this);
   }
   /*!
    * Initialise the property list
    */
   virtual void init();
-
-
+  
  public:
   
-  PairScalar(string symbol);
-
+  PairTensor(/*WeightingFunction *wf,*/string symbol);
   /*!
    * Constructor for Node hierarchy//
    */
-  PairScalar(/*Node*/Simulation* parent);
+  PairTensor(/*Node*/Simulation* parent);
   
   /*!
-   * Destructor//
+   * Destructor
    */
-  virtual ~PairScalar();
+  virtual ~PairTensor();
   
   /*!
    * Setup this Calculator
    */
   virtual void setup();
   
-
   /*! Compute the user defined expression for pair \a dis.*/
   virtual void compute(Pairdist* dis) {
+    
     if (dis->abs() < m_cutoff) {
-      
-      double& scalar = dis->tag.doubleByOffset(m_slot);
-      
-      // compute the expression for the pair function
-      m_function(&scalar, dis);
-
-    }   
-  }
   
+      tensor_t& tensor = dis->tag.tensorByOffset(m_slot);
+          
+      // compute the expression for the pair function
+      m_function(&tensor, dis);
+    }
+  }
 
 #ifdef _OPENMP
   /*! Compute the user defined expression for pair \a dis -- parallel version. Should be that simple because only looping over and writing into pairs (not particles of the pair!)*/

@@ -243,6 +243,7 @@ string expr_help_str
      "   * sinh(Scalar): self-explanatory, component-wise for non-scalars\n"
      "   * step(Scalar): unit step function with the following definition: 1 for x>0 and 0 otherwise, component-wise for non-scalars\n"
      "   * stpVal(Scalar): step function with the following definition: x for x>0 and 0 otherwise, component-wise for non-scalars\n"
+     "   * sqrt(Scalar): square root of a positive real number, component-wise for non-scalars\n"
      "   * tan(Scalar): self-explanatory, component-wise for non-scalars\n"
      "   * unitMat(Scalar) = Matrix: Scalar*([1,1,1]@[1,1,1]), e.g., \"unitMat(a)\"\n"
      "   * uran(Scalar) = Uniform random number in the interval [0,1]; the argument is not used at the moment, e.g., \"uran(1)\"\n"

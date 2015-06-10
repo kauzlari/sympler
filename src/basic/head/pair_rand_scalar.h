@@ -29,71 +29,70 @@
  */
 
 
-#ifndef __PAIR_SCALAR_H_
-#define __PAIR_SCALAR_H_
+#ifndef __PAIR_RAND_SCALAR_H_
+#define __PAIR_RAND_SCALAR_H_
 
-#include "pair_arbitrary.h"
+#include "pair_rand_arbitrary.h"
 
 using namespace std;
 
-/*! Module for calculation of a scalar Symbol which is stored in each pair (within the cutoff).*/
+/*! Module for calculation of a random scalar Symbol pairFactor*ranScalar stored per non-bonded pair of particles, where pairFactor is a scalar user-defined runtime-compiled expression and ranScalar is a Gaussian random number with zero mean and unit variance. Note that you can modify the mean and variance through a suitable pairFactor. */
 
-class PairScalar : public PairArbitrary {
+class PairRandScalar : public PairRandArbitrary {
 
  protected:
   
+  /*!
+   * For copying an instance of this class
+   */  
   virtual ValCalculatorPair* copyMySelf() {
-    return new PairScalar(*this);
+    return new PairRandScalar(*this);
   }
   /*!
    * Initialise the property list
    */
   virtual void init();
 
-
  public:
   
-  PairScalar(string symbol);
+  /*!
+   * Old, usually not used constructor
+   */
+  PairRandScalar(string symbol);
 
   /*!
-   * Constructor for Node hierarchy//
+   * Constructor for Node hierarchy
    */
-  PairScalar(/*Node*/Simulation* parent);
+  PairRandScalar(/*Node*/Simulation* parent);
   
   /*!
    * Destructor//
    */
-  virtual ~PairScalar();
+  virtual ~PairRandScalar();
+    
   
-  /*!
-   * Setup this Calculator
-   */
-  virtual void setup();
-  
-
-  /*! Compute the user defined expression for pair \a dis.*/
-  virtual void compute(Pairdist* dis) {
-    if (dis->abs() < m_cutoff) {
-      
-      double& scalar = dis->tag.doubleByOffset(m_slot);
-      
-      // compute the expression for the pair function
-      m_function(&scalar, dis);
-
-    }   
-  }
-  
-
+  /*Compute the user defined expression for pair pD*/
 #ifdef _OPENMP
-  /*! Compute the user defined expression for pair \a dis -- parallel version. Should be that simple because only looping over and writing into pairs (not particles of the pair!)*/
   virtual void compute(Pairdist* dis, int threadNum) {
     // does the same as in serial mode at the moment; 
     // it writes into pairs, so should work
     compute(dis);
   }
 #endif
+  virtual void compute(Pairdist* dis) {
+    if (dis->abs() < m_cutoff) {
 
+      double& scalar =  dis->tag.doubleByOffset(m_slot);
+      
+      // compute the expression for the pair function
+      m_function(&scalar, dis);
 
+      // multiply Gaussian random number
+      scalar *=  m_rng.normal(1);
+
+    }    
+  }
+  
 };
 
-#endif
+#endif 

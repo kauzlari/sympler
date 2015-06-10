@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 
 void sayHello() {
   cout << endl << "SYMPLER: SYMbolic ParticLE simulatoR" << endl
-       << "Copyright 2002-2013, David Kauzlaric and " << endl
+       << "Copyright 2002-2015, David Kauzlaric and " << endl
        << "other authors listed in the AUTHORS file." << endl
        << "This program comes with ABSOLUTELY NO WARRANTY;" << endl
        << "for details see the LICENSE file." << endl
@@ -340,8 +340,12 @@ void sayHello() {
 #include "pair_particle_scalar.h"
 #include "pair_particle_tensor.h"
 #include "pair_particle_vector.h"
+#include "pair_rand_scalar.h"
+#include "pair_rand_tensor.h"
+#include "pair_rand_vector.h"
 #include "pair_scalar.h"
-#include  "pair_vector.h"
+#include "pair_tensor.h"
+#include "pair_vector.h"
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
 #include "triplet_calc_central_part_scalar.h"
@@ -352,9 +356,6 @@ void sayHello() {
 #include "val_calculator_r_i.h"
 #include "val_calculator_r_i6.h"
 #include "val_calculator_rho.h"
-// commented out because trying to get rid of it
-// #include "val_calculator_shear.h"
-// #include "val_calculator_shear_x.h"
 // commented out because buggy
 // #include "val_calculator_symmetry_BC_scalar.h"
 #include "val_calculator_volume.h"
@@ -511,7 +512,11 @@ void link_all_properly()
   new PCaEigensystem(NULL);
   new PCaMatrixInverse(NULL);
   new PCaRandom(NULL);
+  new PairRandScalar(NULL);
+  new PairRandTensor(NULL);
+  new PairRandVector(NULL);
   new PairScalar(NULL);
+  new PairTensor(NULL);
   new PairVector(NULL);
   
   

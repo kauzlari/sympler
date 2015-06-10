@@ -44,7 +44,13 @@ include_HEADERS = \
 	pair_particle_scalar.h \
 	pair_particle_tensor.h \
 	pair_particle_vector.h \
+	pair_rand_arbitrary.h \
+	pair_rand_scalar.h \
+	pair_rand_tensor.h \
+	pair_rand_vector.h \
+	pair_arbitrary.h\
 	pair_scalar.h\
+	pair_tensor.h\
 	pair_vector.h\
 	particle.h \
 	particle_cache.h \

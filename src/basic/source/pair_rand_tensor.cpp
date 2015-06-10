@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,10 +29,11 @@
  */
 
 
-#include "pair_scalar.h"
+#include "pair_rand_tensor.h"
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
+#include "particle_cache.h"
 
 using namespace std;
 
@@ -41,34 +42,27 @@ using namespace std;
 #define M_MANAGER  M_PHASE->manager()
 #define M_CONTROLLER M_SIMULATION->controller()
 
-const SymbolRegister<PairScalar> pair_scalar("PairScalar");
+const SymbolRegister<PairRandTensor> pair_rand_tensor("PairRandTensor");
 
-PairScalar::PairScalar(string symbol) :
-	PairArbitrary(symbol) {
+PairRandTensor::PairRandTensor(string symbol) :
+	PairRandArbitrary(symbol) {
 }
 
-PairScalar::PairScalar(Simulation* parent) :
-	PairArbitrary(parent) {
-	m_function.setReturnType(Variant::SCALAR);
-	m_datatype = DataFormat::DOUBLE;
+PairRandTensor::PairRandTensor(Simulation* parent) :
+	PairRandArbitrary(parent) {
+	m_function.setReturnType(Variant::TENSOR);
+	m_datatype = DataFormat::TENSOR;
 	init();
 }
 
-PairScalar::~PairScalar() {
+PairRandTensor::~PairRandTensor() {
 }
 
-void PairScalar::init() {
-  m_properties.setClassName("PairScalar");
-  m_properties.setDescription("Module for calculation of a scalar Symbol stored per non-bonded pair of particles.");
+void PairRandTensor::init() {
+
+  m_properties.setClassName("PairRandTensor");
+  m_properties.setDescription("Module for calculation of a random square matrix Symbol [pairFactor]*[ranTensor] stored per non-bonded pair of particles, where [pairFactor] is a user-defined runtime-compiled suqare matrix expression and [ranTensor] is a square matrix of independent Gaussian random numbers with zero mean and unit variance. Note that you can modify the mean and variance through a suitable [pairFactor]. [pairFactor] and [ranTensor] are multiplied componentwise.");
   
+  m_expression_string = "unitMat(1)";
+
 }
-
-//---- Methods ----
-
-void PairScalar::setup() {
-  
-  PairArbitrary::setup();
-  
-}
-
-

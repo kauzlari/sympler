@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,10 +29,11 @@
  */
 
 
-#include "pair_scalar.h"
+#include "pair_rand_scalar.h"
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
+#include "particle_cache.h"
 
 using namespace std;
 
@@ -41,34 +42,27 @@ using namespace std;
 #define M_MANAGER  M_PHASE->manager()
 #define M_CONTROLLER M_SIMULATION->controller()
 
-const SymbolRegister<PairScalar> pair_scalar("PairScalar");
+const SymbolRegister<PairRandScalar> pair_rand_scalar("PairRandScalar");
 
-PairScalar::PairScalar(string symbol) :
-	PairArbitrary(symbol) {
+PairRandScalar::PairRandScalar(string symbol) :
+	PairRandArbitrary(symbol) {
 }
 
-PairScalar::PairScalar(Simulation* parent) :
-	PairArbitrary(parent) {
+PairRandScalar::PairRandScalar(Simulation* parent) :
+	PairRandArbitrary(parent) {
 	m_function.setReturnType(Variant::SCALAR);
 	m_datatype = DataFormat::DOUBLE;
 	init();
 }
 
-PairScalar::~PairScalar() {
+PairRandScalar::~PairRandScalar() {
 }
 
-void PairScalar::init() {
-  m_properties.setClassName("PairScalar");
-  m_properties.setDescription("Module for calculation of a scalar Symbol stored per non-bonded pair of particles.");
+void PairRandScalar::init() {
+
+  m_properties.setClassName("PairRandScalar");
+  m_properties.setDescription("Module for calculation of a random scalar Symbol pairFactor*ranScalar stored per non-bonded pair of particles, where pairFactor is a scalar user-defined runtime-compiled expression and ranScalar is a Gaussian random number with zero mean and unit variance. Note that you can modify the mean and variance through a suitable pairFactor. ");
   
+  m_expression_string = "1";
+
 }
-
-//---- Methods ----
-
-void PairScalar::setup() {
-  
-  PairArbitrary::setup();
-  
-}
-
-

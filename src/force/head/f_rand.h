@@ -60,7 +60,13 @@ protected:
   void init();
 
   inline virtual double computeForceFactor(Pairdist *pair) {
-     return m_rng.normal(1) * m_noise_and_time * (1 - m_rcinv*pair->abs());
+
+      double debugTemp =  m_rng.normal(1);
+
+      MSG_DEBUG("FRand", "random number:" << debugTemp);
+
+     return debugTemp * m_noise_and_time * (1 - m_rcinv*pair->abs());
+/*      return m_rng.normal(1) * m_noise_and_time * (1 - m_rcinv*pair->abs()); */
   }
                                              
 public:
