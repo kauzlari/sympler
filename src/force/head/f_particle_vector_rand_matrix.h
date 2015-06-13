@@ -84,9 +84,9 @@ class FParticleVectorRandMatrix : public FParticle
   RandomNumberGenerator m_rng;
 
   /*!
-   * Should the RNG-seed be randomised?
+   * Seed used for the random number generator
    */
-  bool m_randomize;
+  size_t m_seed;
 
   /*!
    * The matrix provided by the user

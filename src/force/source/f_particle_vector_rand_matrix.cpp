@@ -150,13 +150,16 @@ void FParticleVectorRandMatrix::init()
 
   m_factor = 1;
 
-  BOOLPC(randomize, m_randomize, "Initalize random number generator with a non-default seed. This makes the outcome of two simulations with identical setup different.");
-
-  m_randomize = false;
+  INTPC
+    (seed, m_seed, 0,
+     "Seed to be used for the random number generator."
+     )
+    ;
+  
+  m_seed = RNG_DEFAULT_SEED;
 
   m_is_pair_force = false;
   m_is_particle_force = true;
-
   
 }
 
@@ -164,6 +167,8 @@ void FParticleVectorRandMatrix::setup()
 {
 
   FParticle::setup();
+
+  m_rng.setSeed(m_seed);
 
   if(m_vector_name == "undefined")
     throw gError("FParticleVectorRandMatrix::setup", "Attribute 'vector' has value \"undefined\".");
@@ -209,11 +214,6 @@ void FParticleVectorRandMatrix::setup()
   else {
     throw gError("FParticleVectorRandMatrix::setup", "Not able to open file " + m_matrixFile + " !");
   }
-
-  if (m_randomize)
-    m_rng.setSeed(getpid());
-  else
-    m_rng.setSeed(RNG_DEFAULT_SEED);
 
   M_CONTROLLER->registerForSetupAfterParticleCreation(this);
 
