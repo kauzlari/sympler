@@ -34,7 +34,7 @@
 #include "simulation.h"
 #include "triplet_calc_central_part_scalar.h"
 
-#include "triplet.h"
+// #include "triplet.h"
 
 #define M_SIMULATION ((Simulation*) m_parent)
 #define M_CONTROLLER M_SIMULATION->controller()
@@ -45,17 +45,9 @@
 
 const SymbolRegister<TripletCalcCentralPartScalar> triplet_calc_central_part_scalar("TripletCalcCentralPartScalar");
 
-TripletCalcCentralPartScalar::TripletCalcCentralPartScalar(Simulation *simulation): TripletCalculator(simulation)
-{
-  // does not depend on other symbols
-  m_stage = 0;
-
-  m_datatype = DataFormat::DOUBLE;
-  
+TripletCalcCentralPartScalar::TripletCalcCentralPartScalar(Simulation *simulation): TripletCalcPartScalar(simulation)
+{  
   init();
-#ifdef _OPENMP
-  m_particleCalculator = true;
-#endif
 }
 
 
@@ -66,18 +58,18 @@ void TripletCalcCentralPartScalar::init()
 
   m_properties.setDescription("TripletCalculator for cached properties computed during a loop over bonded triplets. This TripletCalculator specifically computes a scalar user-defined property depending on the cosine of the triplet angle \"ca\". For each triplet this property only contributes to the CENTRE particle by summation! ");
   
-  FUNCTIONFIXEDPC
-      (expression, m_expression, "Scalar function depending on the variable \"ca\" which is the cosine of the triplet-angle.");
-  m_expression.addVariable("ca");
-
 }
 
 
 void TripletCalcCentralPartScalar::setup()
 {
   // Since registration of Symbols is only necessary for the central particle, 
-  // we don't do the following line and instead perform all the setup here
-  //  TripletCalculator::setup();
+  // we don't do the following line and instead perform all the setup here.
+  // The reason is that TripletCalcPartScalar::setup calls TripletCalculator::setup,
+  // which sets all the symbols and their slots as if they had the same physical meaning, 
+  // which some inheriting classes either do not require (as here) or find to restrictive.
+
+  //  TripletCalcPartScalar::setup();
 
   M_SIMULATION->controller()->registerForSetupAfterParticleCreation(this);
 
@@ -154,77 +146,35 @@ void TripletCalcCentralPartScalar::setup()
 
 void TripletCalcCentralPartScalar::setupAfterParticleCreation()
 {
-  TripletCalculator::setupAfterParticleCreation();
+  TripletCalcPartScalar::setupAfterParticleCreation();
 }
 
-#ifndef _OPENMP
-void TripletCalcCentralPartScalar::compute(triplet_t* tr) {
-#else
-  void TripletCalcCentralPartScalar::compute(triplet_t* tr/*, size_t thread_no*/ /*FIXME: paralelise!*/) {
-#endif
-      // FIXME!!!: currently not parallelised
-    point_t b1, b2; // vector
-    double c11 = 0;
-    double c12 = 0;
-    double c22 = 0; // scalar product
-    double cos_a; //the cosine of the angle
-    for (int _i = 0; _i < SPACE_DIMS; _i++)
-      {
-	b1[_i] = tr->b->r[_i] - tr->a-> r[_i];
-	b2[_i] = tr->c->r[_i] - tr->b-> r[_i];
-	// periodic BCs
-	if(m_periodic) {
-	  if(b1[_i] > 0.5*m_boxSize[_i]) b1[_i] -= m_boxSize[_i]; 
-	  if(b1[_i] < -0.5*m_boxSize[_i]) b1[_i] += m_boxSize[_i]; 
-	  if(b2[_i] > 0.5*m_boxSize[_i]) b2[_i] -= m_boxSize[_i]; 
-	  if(b2[_i] < -0.5*m_boxSize[_i]) b2[_i] += m_boxSize[_i]; 
-	}	
+/*!
+ * Determines \a m_stage of the current \a Symbol.
+ * By default, we assume that the stage is fixed and known during compile-time, 
+ * so this function does nothing except returning the message (true) that the 
+ * stage was already found. Symbols, which determine the stage during run-time 
+ * have to redefine this function.
+ */
+bool TripletCalcCentralPartScalar::findStage()
+{
+  
+  // currently (2010/05/17) this always returns true
+  return TripletCalcPartScalar::findStage();
+}
 
-	c11 += b1[_i] * b1[_i];
-	c12 += b1[_i] * b2[_i];
-	c22 += b2[_i] * b2[_i];
-      }
-    double invAbsC11c22 = 1/sqrt(c11*c22);
-    
-    // if the desired angle is a, the next WITHOUT THE MINUS gives in fact cos(pi-a)=-cos(a) 
-    cos_a = -c12*invAbsC11c22;
-    
-    //        MSG_DEBUG("TripletCalcCentralPartScalar::calculate force", "particle " << p->b->mySlot << " cos(theta) = " << cos_a);
-    //       MSG_DEBUG("TripletCalcCentralPartScalar::calculate force", "particle " << p->b->mySlot << " m_thetaEq = " << m_thetaEq);
-    //        MSG_DEBUG("TripletCalcCentralPartScalar::calculate force", "particle " << p->b->mySlot << " m_cosEq = " << m_cosEq);
-        
-    // contributes only to central particle! (because, currently(2010-05-18), more not needed)
-    tr->b->tag.doubleByOffset(m_slots[1]) += m_expression(cos_a);
-    
-  }
-
-    /*!
-     * Determines \a m_stage of the current \a Symbol.
-     * By default, we assume that the stage is fixed and known during compile-time, 
-     * so this function does nothing except returning the message (true) that the 
-     * stage was already found. Symbols, which determine the stage during run-time 
-     * have to redefine this function.
-     */
-    bool TripletCalcCentralPartScalar::findStage()
-    {
-
-      // currently (2010/05/17) this always returns true
-      return TripletCalculator::findStage();
-    }
-    
-    /*!
-     * Determines \a m_stage of the current \a Symbol.
-     * By default, we assume that the stage is fixed and known during compile-time, 
-     * so this function does nothing except returning the message (true) that the 
-     * stage was already found. Symbols, which determine the stage during run-time 
-     * have to redefine this function.
-     */
-    bool TripletCalcCentralPartScalar::findStage_0()
-    {
-      // currently (2010/05/17) this always returns true
-      return TripletCalculator::findStage_0();
-    }
-
+/*!
+ * Determines \a m_stage of the current \a Symbol.
+ * By default, we assume that the stage is fixed and known during compile-time, 
+ * so this function does nothing except returning the message (true) that the 
+ * stage was already found. Symbols, which determine the stage during run-time 
+ * have to redefine this function.
+ */
+bool TripletCalcCentralPartScalar::findStage_0()
+{
+  // currently (2010/05/17) this always returns true
+  return TripletCalcPartScalar::findStage_0();
+}
 
 #ifdef _OPENMP
 // FIXME: This module is not yet parallelised. If you parallelise, the following function could roughly do what is commented out now
