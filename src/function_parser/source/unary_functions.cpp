@@ -126,11 +126,15 @@ MAKE_UNARY_FUNCTION(cos, cos, 6);
 MAKE_UNARY_FUNCTION(tan, tan, 6);
 MAKE_UNARY_FUNCTION(atan, atan, 6);
 
+// next two only defined for arguments in [-1,1] !!!
+// User must make sure this holds, otherwise the functions produce nan.
+MAKE_UNARY_FUNCTION(asin, asin, 6);
+MAKE_UNARY_FUNCTION(acos, acos, 6);
+
 MAKE_UNARY_FUNCTION(sinh, sinh, 6);
 MAKE_UNARY_FUNCTION(cosh, cosh, 6);
 MAKE_UNARY_FUNCTION(tanh, tanh, 6);
 
-// MAKE_UNARY_FUNCTION(step, , 6);
 MAKE_UNARY_FUNCTION(abs, fabs, 6);
 MAKE_UNARY_FUNCTION(exp, exp, 6);
 MAKE_UNARY_FUNCTION(round, round, 6);
