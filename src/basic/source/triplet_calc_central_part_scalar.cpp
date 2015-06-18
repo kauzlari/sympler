@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -64,10 +64,10 @@ void TripletCalcCentralPartScalar::init()
   m_properties.setClassName("TripletCalcPart");
   m_properties.setName("TripletCalcCentralPartScalar");
 
-  m_properties.setDescription("TripletCalculator for cached properties computed during a loop over bonded triplets. This TripletCalculator specifically computes a user-defined property depending on the cosine of the triplet angle \"ca\". For each triplet this property only contributes to the CENTRE particle by summation! ");
+  m_properties.setDescription("TripletCalculator for cached properties computed during a loop over bonded triplets. This TripletCalculator specifically computes a scalar user-defined property depending on the cosine of the triplet angle \"ca\". For each triplet this property only contributes to the CENTRE particle by summation! ");
   
   FUNCTIONFIXEDPC
-      (expression, m_expression, "Function depending on the variable \"ca\" which is the cosine of the triplet-angle.");
+      (expression, m_expression, "Scalar function depending on the variable \"ca\" which is the cosine of the triplet-angle.");
   m_expression.addVariable("ca");
 
 }
@@ -87,8 +87,6 @@ void TripletCalcCentralPartScalar::setup()
   if(m_listName == "undefined")
     throw gError("TripletCalcCentralPartScalar::setup", "Attribute 'listName' undefined!");
 
-  // add attributes only to species of central particle
-
     if(m_species[0] == "undefined")
       throw gError("TripletCalcCentralPartScalar::setup", ": Attribute 'species1' has value \"undefined\"!"); 
     if(m_species[1] == "undefined")
@@ -99,6 +97,9 @@ void TripletCalcCentralPartScalar::setup()
     m_firstColour = M_MANAGER->getColour(m_species[0]);
     m_secondColour = M_MANAGER->getColour(m_species[1]);
     m_thirdColour = M_MANAGER->getColour(m_species[2]);
+
+
+    // add symbols only to species of central particle
 
     if(m_overwrite)
     {

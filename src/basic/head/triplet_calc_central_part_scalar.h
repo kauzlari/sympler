@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,8 +29,8 @@
  */
 
 
-#ifndef __TRIPLET_CALC_CENTRAL_PART_SCALAR_F_H
-#define __TRIPLET_CALC_CENTRAL_PART_SCALAR_F_H
+#ifndef __TRIPLET_CALC_CENTRAL_PART_SCALAR_H
+#define __TRIPLET_CALC_CENTRAL_PART_SCALAR_H
 
 #include "triplet_calculator.h"
 
