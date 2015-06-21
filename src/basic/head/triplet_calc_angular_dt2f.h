@@ -39,7 +39,7 @@ class ColourPair;
 
 /*!
  * \a TripletCalculator for cached properties computed during a loop over bonded triplets
- * This \a Symbol specifically caches the 0th, 1st, and 2nd time derivatives of angular forces on particles derived 
+ * This \a Symbol specifically caches the 1st and 2nd time derivatives of angular forces on particles derived 
  * from the potential 0.5*k_a*(cosa-cosa_0)^2 with force constant "k_a", 
  * cosine of [PI - triplet angle] "cosa" and cosine of equilibrium angle "cosa_0" 
  */

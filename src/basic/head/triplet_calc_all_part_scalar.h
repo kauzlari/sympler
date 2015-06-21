@@ -140,18 +140,18 @@ public:
     cos_a = -c12*invAbsC11c22;
 
     // DEBUGGING
-    if(tr->b->r.y > 19.0) {
-      MSG_DEBUG("TripletCalcAllPart::compute", "Triplet debug info:\n" << "p1.r=" << tr->a->r << "\n" << "p2.r=" << tr->b->r << "\n" << "p3.r=" << tr->c->r << "\n"  << "c11=" << c11 << "\n" << "c12=" << c12 << "\n" << "c22=" << c22 << "\n"  << "cosa=" << cos_a << "\n"  << "alpha=" << acos(cos_a) << "\n" << "p1.tag before =" <<  tr->a->tag.doubleByOffset(m_slots[0]) << "\n" << "expressionL=" << m_expression1st.expression() << "\n" << "expressionC=" << m_expression.expression() << "\n" << "expressionR=" << m_expression3rd.expression() << "\n" << "p2.tag before =" <<  tr->b->tag.doubleByOffset(m_slots[1]) << "\n" << "p3.tag before =" <<  tr->c->tag.doubleByOffset(m_slots[2]) << "\n");
-    }
+/*     if(tr->b->r.y > 19.0) { */
+/*       MSG_DEBUG("TripletCalcAllPart::compute", "Triplet debug info:\n" << "p1.r=" << tr->a->r << "\n" << "p2.r=" << tr->b->r << "\n" << "p3.r=" << tr->c->r << "\n"  << "c11=" << c11 << "\n" << "c12=" << c12 << "\n" << "c22=" << c22 << "\n"  << "cosa=" << cos_a << "\n"  << "alpha=" << acos(cos_a) << "\n" << "p1.tag before =" <<  tr->a->tag.doubleByOffset(m_slots[0]) << "\n" << "expressionL=" << m_expression1st.expression() << "\n" << "expressionC=" << m_expression.expression() << "\n" << "expressionR=" << m_expression3rd.expression() << "\n" << "p2.tag before =" <<  tr->b->tag.doubleByOffset(m_slots[1]) << "\n" << "p3.tag before =" <<  tr->c->tag.doubleByOffset(m_slots[2]) << "\n"); */
+/*     } */
 
     tr->a->tag.doubleByOffset(m_slots[0]) += m_expression1st(cos_a);
     tr->b->tag.doubleByOffset(m_slots[1]) += m_expression(cos_a);
     tr->c->tag.doubleByOffset(m_slots[2]) += m_expression3rd(cos_a);
 
     // DEBUGGING
-    if(tr->b->r.y > 19.0) {
-      MSG_DEBUG("TripletCalcAllPart::compute", "p1.tag after =" <<  tr->a->tag.doubleByOffset(m_slots[0]) << "\n" << "p2.tag after =" <<  tr->b->tag.doubleByOffset(m_slots[1]) << "\n" << "p3.tag after =" <<  tr->c->tag.doubleByOffset(m_slots[2]) << "\n");
-    }
+/*     if(tr->b->r.y > 19.0) { */
+/*       MSG_DEBUG("TripletCalcAllPart::compute", "p1.tag after =" <<  tr->a->tag.doubleByOffset(m_slots[0]) << "\n" << "p2.tag after =" <<  tr->b->tag.doubleByOffset(m_slots[1]) << "\n" << "p3.tag after =" <<  tr->c->tag.doubleByOffset(m_slots[2]) << "\n"); */
+/*     } */
 
     
   }
