@@ -85,9 +85,6 @@ void TripletCalcAllPartScalar::init()
 void TripletCalcAllPartScalar::setup()
 {
 
-  // works because we redefine setupTags()
-  TripletCalcPartScalar::setup();
-
   if(m_expression1st.expression() == "Same as attribute 'expression'.")
     m_expression1st.setExpression(m_expression.expression());
 
@@ -99,6 +96,9 @@ void TripletCalcAllPartScalar::setup()
 
   if(m_symbolName3rd == "Same as attribute 'symbol'.")
     m_symbolName3rd = m_symbolName;
+
+  // works because we redefine setupTags()
+  TripletCalcPartScalar::setup();
 
 }
 
