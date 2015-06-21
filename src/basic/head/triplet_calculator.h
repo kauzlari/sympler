@@ -124,9 +124,19 @@ protected:
    * Helper function for polymorphic copying
    */
   virtual TripletCalculator* copyMySelf() = 0;
-/*   { */
-/*     return new TripletCalculator(*this); */
-/*   } */
+  /*   { */
+  /*     return new TripletCalculator(*this); */
+  /*   } */
+
+  /*!
+   * Called by setup() 
+   */
+  virtual void setupTags();
+
+  /*!
+   * Called by setup() 
+   */
+  virtual void registerCalc();
 
 
 public:

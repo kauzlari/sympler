@@ -346,6 +346,7 @@ void sayHello() {
 #include "pair_scalar.h"
 #include "pair_tensor.h"
 #include "pair_vector.h"
+#include "triplet_calc_all_part_scalar.h"
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
 #include "triplet_calc_central_part_scalar.h"
@@ -574,6 +575,7 @@ void link_all_properly()
   new PairParticleScalar(NULL);
   new PairParticleTensor(NULL);
   new PairParticleVector(NULL);
+  new TripletCalcAllPartScalar(NULL);
   new TripletCalcAngularDt2F(NULL);
   new TripletCalcAngularF(NULL);
   new TripletCalcCentralPartScalar(NULL);

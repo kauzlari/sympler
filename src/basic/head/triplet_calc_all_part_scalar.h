@@ -29,8 +29,8 @@
  */
 
 
-#ifndef __TRIPLET_CALC_CENTRAL_PART_SCALAR_H
-#define __TRIPLET_CALC_CENTRAL_PART_SCALAR_H
+#ifndef __TRIPLET_CALC_ALL_PART_SCALAR_H
+#define __TRIPLET_CALC_ALL_PART_SCALAR_H
 
 #include "triplet_calc_part_scalar.h"
 #include "triplet.h"
@@ -39,13 +39,33 @@ class Pairdist;
 class ColourPair;
 
 /*!
- * \a TripletCalculator for scalar cached properties computed during a loop over bonded triplets
- * This \a Symbol specifically caches a user-defined scalar in the central particle only,
- *  depending on the cosine of triplet angle "cosa".
+ * \a TripletCalculator for cached properties computed during a loop over bonded triplets.
+ * This \a Symbol computes (possibly different) runtme-compiled expressions depending on the
+ * cosine of triplet angle "cosa" and sums them up in the respective particles of the triplet. 
  */
-class TripletCalcCentralPartScalar : public TripletCalcPartScalar
+class TripletCalcAllPartScalar : public TripletCalcPartScalar
 {
 protected:
+  
+  /*!
+   * Additional user-defined function for the first particle depending on the cosine of the triplet-angle
+   */
+  FunctionFixed m_expression1st;
+  
+  /*!
+   * Additional user-defined function for the third particle depending on the cosine of the triplet-angle
+   */
+  FunctionFixed m_expression3rd;
+
+  /*!
+   * Additional symbol name for the first particle of the triplet
+   */
+  string m_symbolName1st;
+
+  /*!
+   * Additional symbol name for the third particle of the triplet
+   */
+  string m_symbolName3rd;
   
   /*!
   * Initialise the property list
@@ -55,27 +75,32 @@ protected:
   /*!
    * Helper function for polymorphic copying
    */
-  virtual TripletCalcCentralPartScalar* copyMySelf()
+  virtual TripletCalcAllPartScalar* copyMySelf()
   {
-    return new TripletCalcCentralPartScalar(*this);
+    return new TripletCalcAllPartScalar(*this);
   }
+
+  /*!
+   * Called by setup() 
+   */
+  virtual void setupTags();
 
 
 public:
   /*!
  * Constructor
    */
-  TripletCalcCentralPartScalar(string symbol);
+  TripletCalcAllPartScalar(string symbol);
   
   /*!
    * Constructor
    */
-  TripletCalcCentralPartScalar(/*Node*/Simulation* parent);
+  TripletCalcAllPartScalar(/*Node*/Simulation* parent);
    
   /*!
    * Destructor
    */
-  virtual ~TripletCalcCentralPartScalar() {
+  virtual ~TripletCalcAllPartScalar() {
   }
 
   /*!
@@ -113,9 +138,21 @@ public:
     
     // if the desired angle is a, the next WITHOUT THE MINUS gives in fact cos(pi-a)=-cos(a) 
     cos_a = -c12*invAbsC11c22;
-    
-    // contributes only to central particle! (because, currently(2010-05-18), more not needed)
+
+    // DEBUGGING
+    if(tr->b->r.y > 19.0) {
+      MSG_DEBUG("TripletCalcAllPart::compute", "Triplet debug info:\n" << "p1.r=" << tr->a->r << "\n" << "p2.r=" << tr->b->r << "\n" << "p3.r=" << tr->c->r << "\n"  << "c11=" << c11 << "\n" << "c12=" << c12 << "\n" << "c22=" << c22 << "\n"  << "cosa=" << cos_a << "\n"  << "alpha=" << acos(cos_a) << "\n" << "p1.tag before =" <<  tr->a->tag.doubleByOffset(m_slots[0]) << "\n" << "expressionL=" << m_expression1st.expression() << "\n" << "expressionC=" << m_expression.expression() << "\n" << "expressionR=" << m_expression3rd.expression() << "\n" << "p2.tag before =" <<  tr->b->tag.doubleByOffset(m_slots[1]) << "\n" << "p3.tag before =" <<  tr->c->tag.doubleByOffset(m_slots[2]) << "\n");
+    }
+
+    tr->a->tag.doubleByOffset(m_slots[0]) += m_expression1st(cos_a);
     tr->b->tag.doubleByOffset(m_slots[1]) += m_expression(cos_a);
+    tr->c->tag.doubleByOffset(m_slots[2]) += m_expression3rd(cos_a);
+
+    // DEBUGGING
+    if(tr->b->r.y > 19.0) {
+      MSG_DEBUG("TripletCalcAllPart::compute", "p1.tag after =" <<  tr->a->tag.doubleByOffset(m_slots[0]) << "\n" << "p2.tag after =" <<  tr->b->tag.doubleByOffset(m_slots[1]) << "\n" << "p3.tag after =" <<  tr->c->tag.doubleByOffset(m_slots[2]) << "\n");
+    }
+
     
   }
 

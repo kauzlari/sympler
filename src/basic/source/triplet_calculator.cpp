@@ -93,33 +93,11 @@ void TripletCalculator::init()
 }
 
 
-void TripletCalculator::setup()
+void TripletCalculator::setupTags()
 {
-  M_SIMULATION->controller()->registerForSetupAfterParticleCreation(this);
-
-  if(m_symbolName == "undefined")
-    throw gError("TripletCalculator::setup", "Attribute 'symbol' undefined!");
-
-  if(m_listName == "undefined")
-    throw gError("TripletCalculator::setup", "Attribute 'listName' undefined!");
-
-  // add attributes
-
-
-    if(m_species[0] == "undefined")
-      throw gError("TripletCalculator::setup", ": Attribute 'species1' has value \"undefined\"!"); 
-    if(m_species[1] == "undefined")
-      throw gError("TripletCalculator::setup", ": Attribute 'species2' has value \"undefined\"!"); 
-    if(m_species[2] == "undefined")
-      throw gError("TripletCalculator::setup", ": Attribute 'species3' has value \"undefined\"!"); 
-
-    m_firstColour = M_MANAGER->getColour(m_species[0]);
-    m_secondColour = M_MANAGER->getColour(m_species[1]);
-    m_thirdColour = M_MANAGER->getColour(m_species[2]);
-
-    if(m_overwrite)
+  if(m_overwrite)
     {
-
+      
       for(size_t p = 0; p < 3; ++p) {
 	try
 	  {
@@ -131,32 +109,32 @@ void TripletCalculator::setup()
 	    throw gError("TripletCalculator::setup", ": search for symbol for species '" + m_species[p] + " failed. The message was " + err.message()); 
 	  }
       } // end for(size_t p = 0
-
+      
     }
-    else // m_overwrite = false
+  else // m_overwrite = false
     {
       if(Particle::s_tag_format[M_MANAGER->getColour(m_species[0])].attrExists(m_symbolName)) 
         throw gError("TripletCalculator::setup", ": Symbol " + m_symbolName + " is already existing for species '" + m_species[0] + "'. Second definition is not allowed for overwrite = \"no\"");
-
+      
       if(Particle::s_tag_format[M_MANAGER->getColour(m_species[1])].attrExists(m_symbolName)) 
         throw gError("TripletCalculator::setup", ": Symbol " + m_symbolName + " is already existing for species '" + m_species[1] + "'. Second definition is not allowed for overwrite = \"no\"");
-
+      
       if(Particle::s_tag_format[M_MANAGER->getColour(m_species[2])].attrExists(m_symbolName)) 
         throw gError("TripletCalculator::setup", ": Symbol " + m_symbolName + " is already existing for species '" + m_species[2] + "'. Second definition is not allowed for overwrite = \"no\"");
-
-
-       MSG_DEBUG("TripletCalculator::setup", "adding symbol with name " << m_symbolName);
+      
+      
+      MSG_DEBUG("TripletCalculator::setup", "adding symbol with name " << m_symbolName);
       
       // see CONVENTION5 for rule about persistencies
       m_slots[0] = Particle::s_tag_format[M_MANAGER->getColour(m_species[0])].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
-  
+      
       if(m_species[0] != m_species[1])
-      {
-        // see CONVENTION5 for rule about persistencies
-	m_slots[1] = Particle::s_tag_format[M_MANAGER->getColour(m_species[1])].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
-      }
+	{
+	  // see CONVENTION5 for rule about persistencies
+	  m_slots[1] = Particle::s_tag_format[M_MANAGER->getColour(m_species[1])].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
+	}
       else m_slots[1] = m_slots[0];
-
+      
       if(m_species[2] == m_species[0])
 	m_slots[2] = m_slots[0];
       else if(m_species[2] == m_species[1])
@@ -164,14 +142,19 @@ void TripletCalculator::setup()
       else
         // see CONVENTION5 for rule about persistencies
 	m_slots[2] = Particle::s_tag_format[M_MANAGER->getColour(m_species[2])].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
-
+      
     } // end of else of if(m_overwrite == false)        
-    
-    if(m_phaseUser == 0)    
-      M_PHASE->registerBondedCalc_0(this);
-    else if(m_phaseUser == 1)    
-      M_PHASE->registerBondedCalc(this);
-    else // so it is 2
+
+}
+
+
+void TripletCalculator::registerCalc()
+{
+  if(m_phaseUser == 0)    
+    M_PHASE->registerBondedCalc_0(this);
+  else if(m_phaseUser == 1)    
+    M_PHASE->registerBondedCalc(this);
+  else // so it is 2
     {
       TripletCalculator* vc = copyMySelf();
       assert(((TripletCalculator*) vc)->m_symbolName == m_symbolName);
@@ -184,12 +167,39 @@ void TripletCalculator::setup()
       assert(((TripletCalculator*) vc)->m_species[0] == m_species[0]);
       assert(((TripletCalculator*) vc)->m_species[1] == m_species[1]);
       assert(((TripletCalculator*) vc)->m_species[2] == m_species[2]);
-        
-      MSG_DEBUG("TripletCalculator::setup", ": registering copy.");    
-       
+      
+      MSG_DEBUG("TripletCalculator::setup for " << m_properties.className(), ": registering copy.");    
+      
       M_PHASE->registerBondedCalc(vc);
       M_PHASE->registerBondedCalc_0(this);
     }
+}
+
+void TripletCalculator::setup()
+{
+  M_SIMULATION->controller()->registerForSetupAfterParticleCreation(this);
+
+  if(m_symbolName == "undefined")
+    throw gError("TripletCalculator::setup", "Attribute 'symbol' undefined!");
+
+  if(m_listName == "undefined")
+    throw gError("TripletCalculator::setup", "Attribute 'listName' undefined!");
+
+  
+  if(m_species[0] == "undefined")
+    throw gError("TripletCalculator::setup", ": Attribute 'species1' has value \"undefined\"!"); 
+  if(m_species[1] == "undefined")
+    throw gError("TripletCalculator::setup", ": Attribute 'species2' has value \"undefined\"!"); 
+  if(m_species[2] == "undefined")
+    throw gError("TripletCalculator::setup", ": Attribute 'species3' has value \"undefined\"!"); 
+  
+  m_firstColour = M_MANAGER->getColour(m_species[0]);
+  m_secondColour = M_MANAGER->getColour(m_species[1]);
+  m_thirdColour = M_MANAGER->getColour(m_species[2]);
+  
+  setupTags();
+
+  registerCalc();  
 }
 
 void TripletCalculator::setupAfterParticleCreation()

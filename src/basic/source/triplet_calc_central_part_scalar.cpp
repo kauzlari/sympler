@@ -56,7 +56,7 @@ void TripletCalcCentralPartScalar::init()
   m_properties.setClassName("TripletCalcPart");
   m_properties.setName("TripletCalcCentralPartScalar");
 
-  m_properties.setDescription("TripletCalculator for cached properties computed during a loop over bonded triplets. This TripletCalculator specifically computes a scalar user-defined property depending on the cosine of the triplet angle \"ca\". For each triplet this property only contributes to the CENTRE particle by summation! ");
+  m_properties.setDescription("TripletCalculator for scalar cached properties computed during a loop over bonded triplets. This TripletCalculator specifically computes a scalar user-defined property depending on the cosine \"ca\" of the triplet angle. For each triplet this property only contributes to the CENTRE particle by summation! ");
   
 }
 

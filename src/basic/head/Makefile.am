@@ -86,11 +86,11 @@ include_HEADERS = \
 	triangle_CGMD_interpolation2points.h \
 	triplet.h \
 	triplet_calculator.h \
+	triplet_calc_all_part_scalar.h \
 	triplet_calc_angular_dt2f.h \
 	triplet_calc_angular_f.h \
 	triplet_calc_central_part_scalar.h \
 	triplet_calc_part_scalar.h \
-	vel_constraints.h\
 	val_calculator.h \
 	val_calculator_arbitrary.h \
 	val_calculator_BC.h \
@@ -102,6 +102,7 @@ include_HEADERS = \
 	val_calculator_r_i6.h \
 	val_calculator_rho.h \
 	val_calculator_volume.h \
+	vel_constraints.h\
 	verlet_creator.h \
 	vtk_support.h \
 	weighting_function.h \

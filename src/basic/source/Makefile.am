@@ -81,9 +81,9 @@ libbasic_la_SOURCES = \
 	triangle_CGMD_interpolation.cpp \
 	triangle_CGMD_interpolation2points.cpp \
 	triplet_calculator.cpp \
+	triplet_calc_all_part_scalar.cpp \
 	triplet_calc_angular_dt2f.cpp \
 	triplet_calc_angular_f.cpp \
-	vel_constraints.cpp\
 	triplet_calc_central_part_scalar.cpp \
 	triplet_calc_part_scalar.cpp \
 	val_calculator.cpp \
@@ -95,6 +95,7 @@ libbasic_la_SOURCES = \
 	val_calculator_neg_dkernel_divr.cpp \
 	val_calculator_rho.cpp \
 	val_calculator_volume.cpp \
+	vel_constraints.cpp\
 	verlet_creator.cpp \
 	vtk_support.cpp \
 	weighting_function.cpp \
