@@ -116,7 +116,7 @@ void TripletCalcAllPartScalar::setupTags()
 	}
       catch(gError& err)
 	{
-	  throw gError("TripletCalcAllPartScalar::setup", ": search for symbol for species '" + m_species[1] + " failed. The message was " + err.message()); 
+	  throw gError("TripletCalcAllPartScalar::setup", ": search for symbol for species '" + m_species[0] + " failed. The message was " + err.message()); 
 	}
       
       try
