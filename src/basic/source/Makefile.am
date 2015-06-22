@@ -85,6 +85,7 @@ libbasic_la_SOURCES = \
 	triplet_calc_angular_dt2f.cpp \
 	triplet_calc_angular_f.cpp \
 	triplet_calc_central_part_scalar.cpp \
+	triplet_calc_harmonic_force_vector_contrib.cpp \
 	triplet_calc_part_scalar.cpp \
 	val_calculator.cpp \
 	val_calculator_arbitrary.cpp \

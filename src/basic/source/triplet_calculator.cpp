@@ -73,7 +73,7 @@ void TripletCalculator::init()
   STRINGPC(species2, m_species[1], "Species of second particle in the triplets.");
   STRINGPC(species3, m_species[2], "Species of third particle in the triplets.");
   
-  BOOLPC(periodic, m_periodic, "Should periodic boundary conditions be applied to the connections?")
+  BOOLPC(periodic, m_periodic, "Should periodic boundary conditions (PBCs) be applied to the connections? NOTE: \"yes\" means that PBCs are even checked when they are switched off in your Boundary-settings.")
 
   BOOLPC
       (overwrite, m_overwrite,

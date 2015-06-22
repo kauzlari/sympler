@@ -350,6 +350,7 @@ void sayHello() {
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
 #include "triplet_calc_central_part_scalar.h"
+#include "triplet_calc_harmonic_force_vector_contrib.h"
 // #include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_vels.h"
 #include "val_calculator_kernel.h"
@@ -579,6 +580,7 @@ void link_all_properly()
   new TripletCalcAngularDt2F(NULL);
   new TripletCalcAngularF(NULL);
   new TripletCalcCentralPartScalar(NULL);
+  new TripletCalcHarmonicForceVectorContrib(NULL);
 //   new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCVels(NULL);
   new ValCalculatorKernel(NULL);

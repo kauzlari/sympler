@@ -90,6 +90,7 @@ include_HEADERS = \
 	triplet_calc_angular_dt2f.h \
 	triplet_calc_angular_f.h \
 	triplet_calc_central_part_scalar.h \
+	triplet_calc_harmonic_force_vector_contrib.h \
 	triplet_calc_part_scalar.h \
 	val_calculator.h \
 	val_calculator_arbitrary.h \
