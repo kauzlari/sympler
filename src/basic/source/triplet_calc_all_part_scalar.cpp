@@ -152,7 +152,7 @@ void TripletCalcAllPartScalar::setupTags()
         throw gError("TripletCalcAllPartScalar::setup", ": Symbol " + m_symbolName3rd + " is already existing for species '" + m_species[2] + "'. Second definition is not allowed for overwrite = \"no\"");
       
       // see CONVENTION5 for rule about persistencies
-      m_slots[0] = Particle::s_tag_format[M_MANAGER->getColour(m_species[0])].addAttribute(m_symbolName1st, m_datatype, /*persist.first*/false, m_symbolName).offset;
+      m_slots[0] = Particle::s_tag_format[M_MANAGER->getColour(m_species[0])].addAttribute(m_symbolName1st, m_datatype, /*persist.first*/false, m_symbolName1st).offset;
       
       if(m_species[0] != m_species[1] || m_symbolName1st != m_symbolName)
 	{
@@ -168,7 +168,7 @@ void TripletCalcAllPartScalar::setupTags()
 	  m_slots[2] = m_slots[1];
 	else
 	  // see CONVENTION5 for rule about persistencies
-	  m_slots[2] = Particle::s_tag_format[M_MANAGER->getColour(m_species[2])].addAttribute(m_symbolName3rd, m_datatype, /*persist.first*/false, m_symbolName).offset;
+	  m_slots[2] = Particle::s_tag_format[M_MANAGER->getColour(m_species[2])].addAttribute(m_symbolName3rd, m_datatype, /*persist.first*/false, m_symbolName3rd).offset;
       }
       
     } // end of else of if(m_overwrite == false)        
