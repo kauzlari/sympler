@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -64,7 +64,7 @@ void InputWF::init() {
   m_properties.setClassName("InputWF");
 
   m_properties.setDescription(
-      "Interpolant fully specified by the user. The whole interpolation function is given by W(r) = (1/Iw)*w(r), where w(r) is the shape of the interpolation function with w(0) = 1, and Iw is the area or volume integral of w(r) over its range. w(r) is specified by the attribute 'interpolation while Iw is specified by the attribute 'selfContribution'.");
+      "Interpolant fully specified by the user. The whole interpolation function is given by W(r) = (1/Iw)*w(r), where w(r) is the shape of the interpolation function with w(0) = 1, and Iw is the (circular) area or (spherical) volume integral of w(r) over its range. w(r) is specified by the attribute 'interpolation while 1/Iw is specified by the attribute 'selfContribution'.");
     
   FUNCTIONFIXEDPC
       (interpolation , m_weightFunct, "The shape w(r) of the interpolant with w(0) = 1. The self contribution for r = 0 must be specified in 'selfContribution'."
@@ -75,8 +75,8 @@ void InputWF::init() {
   
   
   FUNCTIONFIXEDPC
-    (selfContribution , m_selfContrib, "Prefactor 'Iw' of the weighting function. "
-  "It is used for calculating self contributional values, i.e., for r = 0. "
+    (selfContribution , m_selfContrib, "Prefactor '1/Iw' of the weighting function. For the definition of 'Iw' see above. "
+  "'selfContribution' is used for computing values for r = 0. "
       "'rc' is the only accepted variable and is a placeholder for the value defined for 'cutoff'.");
   m_selfContrib.addVariable("rc");
   
