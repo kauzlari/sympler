@@ -73,6 +73,8 @@ include_HEADERS = \
 	phase.h \
 	postprocessor.h \
 	property_list.h \
+	quintet.h \
+	quintet_calculator.h \
 	random.h \
 	reflector.h \
 	simulation.h \
