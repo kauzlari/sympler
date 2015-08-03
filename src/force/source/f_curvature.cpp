@@ -97,13 +97,20 @@ void FCurvature::init()
 
 void FCurvature::computeForces(int force_index)
 {
+  // This Function is only valis in R3
+  if(SPACE_DIMS < 3) 
+    {
+      throw gError("FCurvature::computeForces", "This Force is only valid in R3 ");
+  }
+
+
   //   MSG_DEBUG("FAngular::computeForces", "START");
   // FIXME: not so nice to do that here, but currently the only possibility. See also GenQuintetr::setupAfterParticleCreation(). Is the problem solved if this function will be called for each triplet (when parallelised)?  
   if(!m_QuintetList) {
     MSG_DEBUG("FCurvature::computeForces", "requesting quintet list");
     m_QuintetList = M_PHASE -> returnQuintetList(m_force_name);
     MSG_DEBUG("FCurvature::computeForces", "got quintet list");
-}
+  }
 
   point_t boxSize = M_PHASE->boundary()->boundingBox().size();
 
