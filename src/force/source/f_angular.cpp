@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -119,21 +119,21 @@ void FAngular::computeForces(int force_index)
 
 // Old: 1 line
 //   for (tripletListItr p = m_TripletList.begin(); p != m_TripletList.end(); ++p) 
-  for (tripletListItr p = m_TripletList->begin(); p != m_TripletList->end(); ++p) 
+  for (tripletListItr t = m_TripletList->begin(); t != m_TripletList->end(); ++t) 
     {	
       point_t b1, b2; // vector
       double c11 = 0;
       double c12 = 0;
       double c22 = 0; // scalar product
-//       double abs_b1, abs_b2;
+
       double cos_a; //the cosine of the angle
       double F;
-//       double a;
+
       point_t force_a, force_b, force_c;
       for (int _i = 0; _i < SPACE_DIMS; _i++)
 	{
-	  b1[_i] = p->b->r[_i] - p->a-> r[_i];
-	  b2[_i] = p->c->r[_i] - p->b-> r[_i];
+	  b1[_i] = t->b->r[_i] - t->a-> r[_i];
+	  b2[_i] = t->c->r[_i] - t->b-> r[_i];
 	  // periodic BCs
 	  if(m_periodic == true)
 	    {
@@ -143,10 +143,12 @@ void FAngular::computeForces(int force_index)
 	      if(b2[_i] < -0.5*boxSize[_i]) b2[_i] += boxSize[_i]; 
 	  }
 
+	  //Scalar products
 	  c11 += b1[_i] * b1[_i];
 	  c12 += b1[_i] * b2[_i];
 	  c22 += b2[_i] * b2[_i];
 	}
+
       double invAbsC11c22 = 1/sqrt(c11*c22);
 
       cos_a = c12*invAbsC11c22;
@@ -166,9 +168,9 @@ void FAngular::computeForces(int force_index)
 //        MSG_DEBUG("FAngular::calculate force", "particle " << p->c->mySlot << " force_c " << force_c);
       force_b = -1*force_a - force_c;
 //        MSG_DEBUG("FAngular::calculate force", "particle " << p->b->mySlot << " force_b " << force_b);
-      p->a->force[force_index] += force_a;
-      p->b->force[force_index] += force_b;
-      p->c->force[force_index] += force_c;
+      t->a->force[force_index] += force_a;
+      t->b->force[force_index] += force_b;
+      t->c->force[force_index] += force_c;
     }
 }
 
@@ -192,6 +194,9 @@ void FAngular::computeForces(Particle* part, int force_index)
 void FAngular::setup()
 {
   GenTriplet::setup();
+  /*!
+   * m_cosEq Cosine of the equilibrium angle 
+  */
   m_cosEq = cos(PI-PI*m_thetaEq/180.);	
   // 	MSG_DEBUG("FAngular::setup", "m_cosEqDiff" << m_cosEq-cos(PI*m_thetaEq/180.));
   // 	MSG_DEBUG("FAngular::setup", "m_cosEqDiff2" << cos(PI*m_thetaEq/180)-cos(PI*m_thetaEq/180));

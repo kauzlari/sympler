@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -41,7 +41,7 @@ using namespace std;
 
 
 /*!
- * A force between five particles. The force depends on the Mean (TODO Gaussian K) curvature H. Its based on the Hamiltonian Function: V = int_A 2H^2 dA 
+ * A force between five particles. The force depends on the Mean (TODO Gaussian K) curvature H. Its based on the Hamiltonian Function: Fij = kA/4*Grad_rij(H^2).
   */
 class FCurvature : public GenQuintet
 {
