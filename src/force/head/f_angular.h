@@ -50,11 +50,23 @@ class FAngular : public GenTriplet
  * Initialize the property list
  */
 	void init();
-
+/*!
+ * m_k angular stiffnes
+*/
 	double m_k;
+/*!
+ * m_thetaEq equilibrium angle of the angular spring
+*/
 	double m_thetaEq;
-    double m_cosEq;
-		
+/*!
+ * m_cosEq Cosine of the equilibrium angle 
+*/
+	double m_cosEq;
+
+/*!
+ * m_periodic use periodic boundarys. (03.08.2015) Cannot distiguish directions yet (implementation)
+*/	
+	bool m_periodic;
 
 	public:
 /*!

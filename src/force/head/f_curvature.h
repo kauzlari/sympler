@@ -51,8 +51,15 @@ class FCurvature : public GenQuintet
  */
 	void init();
 
-	double m_kappa;	
-	double m_AWork;	
+/*!
+ * m_kappa_A Effective Bending rigidity Energy area product
+*/
+	double m_kA;	
+
+/*!
+ * m_periodic use periodic boundarys. (03.08.2015) Cannot distiguish directions yet (implementation)
+*/	
+	bool m_periodic;
 
 	public:
 /*!

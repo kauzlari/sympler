@@ -71,16 +71,34 @@ void FAngular::init()
 	m_properties.setClassName("FAngular");
 
 	m_properties.setDescription(
-			"This is a hookian angular force: F=k(cos(theta)-cos(theta_eq)).");
+			"This is an angular force: F=k(cos(theta)-cos(theta_eq)).");
 
 	DOUBLEPC(K, m_k, -1,"Spring force constant.");
+
 	DOUBLEPC(thetaEq, m_thetaEq, -1,"equilibrium angle (in degrees).");
 
+	BOOLPC(periodic, m_periodic, "Should periodic boundary conditions be applied to the connections?");
+
+	/*!
+	 * m_k angular stiffnes
+	*/
 	m_k = 0;
+
+	/*!
+	 * m_thetaEq equilibrium angle of the angular spring
+	*/	
 	m_thetaEq = 0;
 
-  m_is_pair_force = false;
-  m_is_particle_force = false;
+	/*!
+	 * m_periodic use periodic boundarys. (03.08.2015) Cannot distiguish directions yet (implementation)
+	*/
+	m_periodic = true; 
+
+	/*!
+	 * This Force is neither a particle force nor a pair force!
+	*/
+	m_is_pair_force = false;
+	m_is_particle_force = false;
 }
 
 
@@ -117,11 +135,14 @@ void FAngular::computeForces(int force_index)
 	  b1[_i] = p->b->r[_i] - p->a-> r[_i];
 	  b2[_i] = p->c->r[_i] - p->b-> r[_i];
 	  // periodic BCs
-	  if(b1[_i] > 0.5*boxSize[_i]) b1[_i] -= boxSize[_i]; 
-	  if(b1[_i] < -0.5*boxSize[_i]) b1[_i] += boxSize[_i]; 
-	  if(b2[_i] > 0.5*boxSize[_i]) b2[_i] -= boxSize[_i]; 
-	  if(b2[_i] < -0.5*boxSize[_i]) b2[_i] += boxSize[_i]; 
-	  
+	  if(m_periodic == true)
+	    {
+	      if(b1[_i] > 0.5*boxSize[_i]) b1[_i] -= boxSize[_i]; 
+	      if(b1[_i] < -0.5*boxSize[_i]) b1[_i] += boxSize[_i]; 
+	      if(b2[_i] > 0.5*boxSize[_i]) b2[_i] -= boxSize[_i]; 
+	      if(b2[_i] < -0.5*boxSize[_i]) b2[_i] += boxSize[_i]; 
+	  }
+
 	  c11 += b1[_i] * b1[_i];
 	  c12 += b1[_i] * b2[_i];
 	  c22 += b2[_i] * b2[_i];
