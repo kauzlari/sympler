@@ -1,21 +1,25 @@
-<!--Membrane with fixed connectors-->
-<!--Posfile from Pyhton Script -->
 <Simulation
 	simName="FCurvatureTest"
 	inputFromResults="no"
 	randomize = "yes"
 >
-
-
  <Controller
 	timesteps="1000"
 	statusEvery="10"
 	dt="0.01">
 
 	<IntegratorVelocityVerletDisp	
-		species = "membrane"
-		displacement = "dm"
-		symbol = "dm"
+		species = "memba"
+		displacement = "dma"
+		symbol = "dma"
+		lambda = "0.5"
+		mass = "1"
+	 />
+
+	<IntegratorVelocityVerletDisp	
+		species = "membb"
+		displacement = "dmb"
+		symbol = "dmb"
 		lambda = "0.5"
 		mass = "1"
 	 />
@@ -27,6 +31,7 @@
 		lambda = "0.5"
 		mass = "1"
 	 />
+
  </Controller>
 
 <!--Random Forces -->
@@ -40,12 +45,21 @@
  />
  <PairRandVector
 	species1="fluid"
-	species2="membrane"
-	symbol="PRfm"
+	species2="memba"
+	symbol="PRfma"
 	pairFactor="3*(1-rij)*[rij]/rij*10"
 	cutoff = "1"
 	seed="1023"	
  />
+ <PairRandVector
+	species1="fluid"
+	species2="membb"
+	symbol="PRfmb"
+	pairFactor="3*(1-rij)*[rij]/rij*10"
+	cutoff = "1"
+	seed="1023"	
+ />
+
 
   <PairParticleVector
      species1="fluid"
@@ -58,20 +72,33 @@
 
   <PairParticleVector
      species1="fluid"
-     species2="membrane"
-     expression = "[PRfmij]"
+     species2="memba"
+     expression = "[PRfmaij]"
      symmetry = "-1"
-     symbol = "FRfm"
+     symbol = "FRfma"
+     cutoff = "1"
+  />
+
+  <PairParticleVector
+     species1="fluid"
+     species2="membb"
+     expression = "[PRfmbij]"
+     symmetry = "-1"
+     symbol = "FRfmb"
      cutoff = "1"
   />
 
  <FParticleVels
     species = "fluid"
-    expression = "[FRff]+[FRfm]"
+    expression = "[FRff]+[FRfma]+[FRfmb]"
   />
   <FParticleVels
-    species = "membrane"
-    expression = "[FRfm]"
+    species = "memba"
+    expression = "[FRfma]"
+  />
+  <FParticleVels
+    species = "membb"
+    expression = "[FRfmb]"
   />
 
 
@@ -87,21 +114,35 @@
 
   <PairParticleVector
      species1="fluid"
-     species2="membrane"
+     species2="memba"
      expression = "4.5*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
      symmetry = "-1"
-     symbol = "FDfm"
+     symbol = "FDfma"
+     cutoff = "1"
+  />
+
+  <PairParticleVector
+     species1="fluid"
+     species2="membb"
+     expression = "4.5*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
+     symmetry = "-1"
+     symbol = "FDfmb"
      cutoff = "1"
   />
 
   <FParticleVels
     species = "fluid"
-    expression = "[FDff]+[FDfm]"
+    expression = "[FDff]+[FDfma]+[FDfmb]"
   />
 
   <FParticleVels
-    species = "membrane"
-    expression = "[FDfm]"
+    species = "memba"
+    expression = "[FDfma]"
+  />
+
+  <FParticleVels
+    species = "membb"
+    expression = "[FDfmb]"
   />
 
 <!-- Conservative Forces -->
@@ -114,32 +155,54 @@
 	cutoff ="1"
  />
 
-<!-- aij Different?!?!?!?! -->
  <PairParticleVector
 	species1 = "fluid"
-	species2 = "membrane"
-	expression = "35*(1-rij)*[rij]/rij"
+	species2 = "memba"
+	expression = "25*(1-rij)*[rij]/rij"
 	symmetry = "-1"
-	symbol = "FCfm"
+	symbol = "FCfma"
+	cutoff ="1"
+ />
+ <PairParticleVector
+	species1 = "fluid"
+	species2 = "membb"
+	expression = "25*(1-rij)*[rij]/rij"
+	symmetry = "-1"
+	symbol = "FCfmb"
 	cutoff ="1"
  />
 
+
   <FParticleVels
     species = "fluid"
-     expression = "[FCff]+[FCfm]"
+     expression = "[FCff]+[FCfma]+[FCfmb]"
   />
   <FParticleVels
-    species = "membrane"
-    expression = "[FCfm]"
+    species = "memba"
+    expression = "[FCfma]"
+  />
+  <FParticleVels
+    species = "membb"
+    expression = "[FCfmb]"
   />
 
-
-<!--MembraneInteractionForces-->
-<!--MembraneConnectors-->
  <ConnectBasic
-	forceName = "k_rho"
-	species1 = "membrane"
-	species2 = "membrane"
+	forceName = "k_rho_ab"
+	species1 = "memba"
+	species2 = "membb"
+	pairFactor = "54.1688*(1-rij/0.693361)*[rij]/(rij)"
+ />
+
+ <ConnectBasic
+	forceName = "k_rho_aa"
+	species1 = "memba"
+	species2 = "memba"
+	pairFactor = "54.1688*(1-rij/0.693361)*[rij]/(rij)"
+ />
+ <ConnectBasic
+	forceName = "k_rho_bb"
+	species1 = "membb"
+	species2 = "membb"
 	pairFactor = "54.1688*(1-rij/0.693361)*[rij]/(rij)"
  />
  <FCurvature 
@@ -147,7 +210,11 @@
 	kA = "0.0728088993"
 	periodic = "yes"	
  />
-
+ <FCurvature 
+	forceName = "k_curv_b"
+	kA = "0.0728088993"
+	periodic = "yes"	
+ />
 
 <Phase>
 	<LinkedListCreator />	
@@ -162,34 +229,11 @@
 
 	<ReflectorStochastic/>
 	
-       <ParticleCreatorStatic
-                nStaticPX = "10"
-                nStaticPY = "10"
-                nStaticPZ = "1"
-                species = "fluid"
-                corner1 = "(0,0,0)"
-                corner2 = "(10,10,4.5)"
-        />
-
-       <ParticleCreatorStatic
-                nStaticPX = "10"
-                nStaticPY = "10"
-                nStaticPZ = "1"
-                species = "fluid"
-                corner1 = "(0,0,5.5)"
-                corner2 = "(10,10,10)"
-        />
-
-       <ParticleCreatorStatic
-                nStaticPX = "10"
-                nStaticPY = "10"
-                nStaticPZ = "1"
-                species = "membrane"
-                corner1 = "(0,0,4.5)"
-                corner2 = "(10,10,5.5)"
-        />
+       <ParticleCreatorFile
+		nameInputFile = "input.pos"
+       />
 	<ParticleConnectorFile
-		species = "membrane"
+		species="memba membb"
 		nameInputFile = "confile.con"
 	/>
 	
@@ -199,7 +243,8 @@
 
 
  <MeterAverage>
-	<KineticEnergy species="membrane"/>
+	<KineticEnergy species="memba"/>
+	<KineticEnergy species="membb"/>
 	<OutputFile
 	 nameOutputFile = "f_curvature.dat" 
 	 multipleFiles = "no"/>

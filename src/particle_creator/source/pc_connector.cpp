@@ -152,7 +152,7 @@ void ParticleConnectorFile::setup() {
       pos >> skipws >> species1;
       pos >> skipws >> species2;
 
-//       MSG_DEBUG("ParticleConnectorFile::setup", "pair case: list=" << type << ", species1 = " << species1 << ", species2=" << species2);
+       MSG_DEBUG("ParticleConnectorFile::setup", "pair case: list=" << type << ", species1 = " << species1 << ", species2=" << species2);
       
       try {
 ColourPair* cp = 
@@ -172,9 +172,8 @@ ColourPair* cp =
       catch(gError& err) {
 	throw gError("ParticleConnectorFile::setup", "Error while reading a line starting with \"triplet\" in the declarations part of " + m_filename + ". Does it have a declaration at all? See the help text of ParticleConnectorFile. The error message was: " + err.message());
       }
-
     }
- else if(type == "quintet") {
+    else if(type == "quintet") {
       pos >> skipws >> type;
 //       MSG_DEBUG("ParticleConnectorFile::setup", "found quintet, creating list " << type);
       try {
@@ -183,14 +182,12 @@ ColourPair* cp =
       catch(gError& err) {
 	throw gError("ParticleConnectorFile::setup", "Error while reading a line starting with \"quintet\" in the declarations part of " + m_filename + ". Does it have a declaration at all? See the help text of ParticleConnectorFile. The error message was: " + err.message());
       }
-
     }
     else if(type == "!!!") {
       inDeclaration = false;
     }
     else 
       throw gError("ParticleConnectorFile::setup", "unknown type" + type + "in declaration part of file " + m_filename + "! Allowed expressions: \"pair\",\"triplet\" ,\"quintet\", and \"!!!\".");
-
   }
   // the rest of the file is skipped and read in setupAfterParticleCreation
   pos.close();
@@ -257,7 +254,7 @@ void ParticleConnectorFile::setupAfterParticleCreation() {
 
       // read list name
       pos >> skipws >> s;
-      // read first particle (of a total of one to three)
+      // read first particle (of a total of one to five)
       pos >> skipws >> np1 >> skipws >> freeOrFrozen;
       p1 = getParticleFromNumber(np1,freeOrFrozen);
 

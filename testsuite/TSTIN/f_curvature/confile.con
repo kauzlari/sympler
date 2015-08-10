@@ -1,504 +1,307 @@
-pair k_rho membrane membrane
-pair k_rho_q membrane membrane
+pair k_rho_aa memba memba
+pair k_rho_bb membb membb
+pair k_rho_ab memba membb             
 quintet k_curv
-!!!
-pair k_rho 0 free 1 free
-pair k_rho 0 free 10 free
-pair k_rho 1 free 2 free
-pair k_rho 1 free 11 free
-pair k_rho 2 free 3 free
-pair k_rho 2 free 12 free
-pair k_rho 3 free 4 free
-pair k_rho 3 free 13 free
-pair k_rho 4 free 5 free
-pair k_rho 4 free 14 free
-pair k_rho 5 free 6 free
-pair k_rho 5 free 15 free
-pair k_rho 6 free 7 free
-pair k_rho 6 free 16 free
-pair k_rho 7 free 8 free
-pair k_rho 7 free 17 free
-pair k_rho 8 free 9 free
-pair k_rho 8 free 18 free
-pair k_rho 9 free 0 free
-pair k_rho 9 free 19 free
-pair k_rho 10 free 11 free
-pair k_rho 10 free 20 free
-pair k_rho 11 free 12 free
-pair k_rho 11 free 21 free
-pair k_rho 12 free 13 free
-pair k_rho 12 free 22 free
-pair k_rho 13 free 14 free
-pair k_rho 13 free 23 free
-pair k_rho 14 free 15 free
-pair k_rho 14 free 24 free
-pair k_rho 15 free 16 free
-pair k_rho 15 free 25 free
-pair k_rho 16 free 17 free
-pair k_rho 16 free 26 free
-pair k_rho 17 free 18 free
-pair k_rho 17 free 27 free
-pair k_rho 18 free 19 free
-pair k_rho 18 free 28 free
-pair k_rho 19 free 10 free
-pair k_rho 19 free 29 free
-pair k_rho 20 free 21 free
-pair k_rho 20 free 30 free
-pair k_rho 21 free 22 free
-pair k_rho 21 free 31 free
-pair k_rho 22 free 23 free
-pair k_rho 22 free 32 free
-pair k_rho 23 free 24 free
-pair k_rho 23 free 33 free
-pair k_rho 24 free 25 free
-pair k_rho 24 free 34 free
-pair k_rho 25 free 26 free
-pair k_rho 25 free 35 free
-pair k_rho 26 free 27 free
-pair k_rho 26 free 36 free
-pair k_rho 27 free 28 free
-pair k_rho 27 free 37 free
-pair k_rho 28 free 29 free
-pair k_rho 28 free 38 free
-pair k_rho 29 free 20 free
-pair k_rho 29 free 39 free
-pair k_rho 30 free 31 free
-pair k_rho 30 free 40 free
-pair k_rho 31 free 32 free
-pair k_rho 31 free 41 free
-pair k_rho 32 free 33 free
-pair k_rho 32 free 42 free
-pair k_rho 33 free 34 free
-pair k_rho 33 free 43 free
-pair k_rho 34 free 35 free
-pair k_rho 34 free 44 free
-pair k_rho 35 free 36 free
-pair k_rho 35 free 45 free
-pair k_rho 36 free 37 free
-pair k_rho 36 free 46 free
-pair k_rho 37 free 38 free
-pair k_rho 37 free 47 free
-pair k_rho 38 free 39 free
-pair k_rho 38 free 48 free
-pair k_rho 39 free 30 free
-pair k_rho 39 free 49 free
-pair k_rho 40 free 41 free
-pair k_rho 40 free 50 free
-pair k_rho 41 free 42 free
-pair k_rho 41 free 51 free
-pair k_rho 42 free 43 free
-pair k_rho 42 free 52 free
-pair k_rho 43 free 44 free
-pair k_rho 43 free 53 free
-pair k_rho 44 free 45 free
-pair k_rho 44 free 54 free
-pair k_rho 45 free 46 free
-pair k_rho 45 free 55 free
-pair k_rho 46 free 47 free
-pair k_rho 46 free 56 free
-pair k_rho 47 free 48 free
-pair k_rho 47 free 57 free
-pair k_rho 48 free 49 free
-pair k_rho 48 free 58 free
-pair k_rho 49 free 40 free
-pair k_rho 49 free 59 free
-pair k_rho 50 free 51 free
-pair k_rho 50 free 60 free
-pair k_rho 51 free 52 free
-pair k_rho 51 free 61 free
-pair k_rho 52 free 53 free
-pair k_rho 52 free 62 free
-pair k_rho 53 free 54 free
-pair k_rho 53 free 63 free
-pair k_rho 54 free 55 free
-pair k_rho 54 free 64 free
-pair k_rho 55 free 56 free
-pair k_rho 55 free 65 free
-pair k_rho 56 free 57 free
-pair k_rho 56 free 66 free
-pair k_rho 57 free 58 free
-pair k_rho 57 free 67 free
-pair k_rho 58 free 59 free
-pair k_rho 58 free 68 free
-pair k_rho 59 free 50 free
-pair k_rho 59 free 69 free
-pair k_rho 60 free 61 free
-pair k_rho 60 free 70 free
-pair k_rho 61 free 62 free
-pair k_rho 61 free 71 free
-pair k_rho 62 free 63 free
-pair k_rho 62 free 72 free
-pair k_rho 63 free 64 free
-pair k_rho 63 free 73 free
-pair k_rho 64 free 65 free
-pair k_rho 64 free 74 free
-pair k_rho 65 free 66 free
-pair k_rho 65 free 75 free
-pair k_rho 66 free 67 free
-pair k_rho 66 free 76 free
-pair k_rho 67 free 68 free
-pair k_rho 67 free 77 free
-pair k_rho 68 free 69 free
-pair k_rho 68 free 78 free
-pair k_rho 69 free 60 free
-pair k_rho 69 free 79 free
-pair k_rho 70 free 71 free
-pair k_rho 70 free 80 free
-pair k_rho 71 free 72 free
-pair k_rho 71 free 81 free
-pair k_rho 72 free 73 free
-pair k_rho 72 free 82 free
-pair k_rho 73 free 74 free
-pair k_rho 73 free 83 free
-pair k_rho 74 free 75 free
-pair k_rho 74 free 84 free
-pair k_rho 75 free 76 free
-pair k_rho 75 free 85 free
-pair k_rho 76 free 77 free
-pair k_rho 76 free 86 free
-pair k_rho 77 free 78 free
-pair k_rho 77 free 87 free
-pair k_rho 78 free 79 free
-pair k_rho 78 free 88 free
-pair k_rho 79 free 70 free
-pair k_rho 79 free 89 free
-pair k_rho 80 free 81 free
-pair k_rho 80 free 90 free
-pair k_rho 81 free 82 free
-pair k_rho 81 free 91 free
-pair k_rho 82 free 83 free
-pair k_rho 82 free 92 free
-pair k_rho 83 free 84 free
-pair k_rho 83 free 93 free
-pair k_rho 84 free 85 free
-pair k_rho 84 free 94 free
-pair k_rho 85 free 86 free
-pair k_rho 85 free 95 free
-pair k_rho 86 free 87 free
-pair k_rho 86 free 96 free
-pair k_rho 87 free 88 free
-pair k_rho 87 free 97 free
-pair k_rho 88 free 89 free
-pair k_rho 88 free 98 free
-pair k_rho 89 free 80 free
-pair k_rho 89 free 99 free
-pair k_rho 90 free 91 free
-pair k_rho 90 free 0 free
-pair k_rho 91 free 92 free
-pair k_rho 91 free 1 free
-pair k_rho 92 free 93 free
-pair k_rho 92 free 2 free
-pair k_rho 93 free 94 free
-pair k_rho 93 free 3 free
-pair k_rho 94 free 95 free
-pair k_rho 94 free 4 free
-pair k_rho 95 free 96 free
-pair k_rho 95 free 5 free
-pair k_rho 96 free 97 free
-pair k_rho 96 free 6 free
-pair k_rho 97 free 98 free
-pair k_rho 97 free 7 free
-pair k_rho 98 free 99 free
-pair k_rho 98 free 8 free
-pair k_rho 99 free 90 free
-pair k_rho 99 free 9 free
-pair k_rho 0 free 11 free
-pair k_rho 0 free 19 free
-pair k_rho 1 free 12 free
-pair k_rho 1 free 10 free
-pair k_rho 2 free 13 free
-pair k_rho 2 free 11 free
-pair k_rho 3 free 14 free
-pair k_rho 3 free 12 free
-pair k_rho 4 free 15 free
-pair k_rho 4 free 13 free
-pair k_rho 5 free 16 free
-pair k_rho 5 free 14 free
-pair k_rho 6 free 17 free
-pair k_rho 6 free 15 free
-pair k_rho 7 free 18 free
-pair k_rho 7 free 16 free
-pair k_rho 8 free 19 free
-pair k_rho 8 free 17 free
-pair k_rho 9 free 10 free
-pair k_rho 9 free 18 free
-pair k_rho 10 free 21 free
-pair k_rho 10 free 29 free
-pair k_rho 11 free 22 free
-pair k_rho 11 free 20 free
-pair k_rho 12 free 23 free
-pair k_rho 12 free 21 free
-pair k_rho 13 free 24 free
-pair k_rho 13 free 22 free
-pair k_rho 14 free 25 free
-pair k_rho 14 free 23 free
-pair k_rho 15 free 26 free
-pair k_rho 15 free 24 free
-pair k_rho 16 free 27 free
-pair k_rho 16 free 25 free
-pair k_rho 17 free 28 free
-pair k_rho 17 free 26 free
-pair k_rho 18 free 29 free
-pair k_rho 18 free 27 free
-pair k_rho 19 free 20 free
-pair k_rho 19 free 28 free
-pair k_rho 20 free 31 free
-pair k_rho 20 free 39 free
-pair k_rho 21 free 32 free
-pair k_rho 21 free 30 free
-pair k_rho 22 free 33 free
-pair k_rho 22 free 31 free
-pair k_rho 23 free 34 free
-pair k_rho 23 free 32 free
-pair k_rho 24 free 35 free
-pair k_rho 24 free 33 free
-pair k_rho 25 free 36 free
-pair k_rho 25 free 34 free
-pair k_rho 26 free 37 free
-pair k_rho 26 free 35 free
-pair k_rho 27 free 38 free
-pair k_rho 27 free 36 free
-pair k_rho 28 free 39 free
-pair k_rho 28 free 37 free
-pair k_rho 29 free 30 free
-pair k_rho 29 free 38 free
-pair k_rho 30 free 41 free
-pair k_rho 30 free 49 free
-pair k_rho 31 free 42 free
-pair k_rho 31 free 40 free
-pair k_rho 32 free 43 free
-pair k_rho 32 free 41 free
-pair k_rho 33 free 44 free
-pair k_rho 33 free 42 free
-pair k_rho 34 free 45 free
-pair k_rho 34 free 43 free
-pair k_rho 35 free 46 free
-pair k_rho 35 free 44 free
-pair k_rho 36 free 47 free
-pair k_rho 36 free 45 free
-pair k_rho 37 free 48 free
-pair k_rho 37 free 46 free
-pair k_rho 38 free 49 free
-pair k_rho 38 free 47 free
-pair k_rho 39 free 40 free
-pair k_rho 39 free 48 free
-pair k_rho 40 free 51 free
-pair k_rho 40 free 59 free
-pair k_rho 41 free 52 free
-pair k_rho 41 free 50 free
-pair k_rho 42 free 53 free
-pair k_rho 42 free 51 free
-pair k_rho 43 free 54 free
-pair k_rho 43 free 52 free
-pair k_rho 44 free 55 free
-pair k_rho 44 free 53 free
-pair k_rho 45 free 56 free
-pair k_rho 45 free 54 free
-pair k_rho 46 free 57 free
-pair k_rho 46 free 55 free
-pair k_rho 47 free 58 free
-pair k_rho 47 free 56 free
-pair k_rho 48 free 59 free
-pair k_rho 48 free 57 free
-pair k_rho 49 free 50 free
-pair k_rho 49 free 58 free
-pair k_rho 50 free 61 free
-pair k_rho 50 free 69 free
-pair k_rho 51 free 62 free
-pair k_rho 51 free 60 free
-pair k_rho 52 free 63 free
-pair k_rho 52 free 61 free
-pair k_rho 53 free 64 free
-pair k_rho 53 free 62 free
-pair k_rho 54 free 65 free
-pair k_rho 54 free 63 free
-pair k_rho 55 free 66 free
-pair k_rho 55 free 64 free
-pair k_rho 56 free 67 free
-pair k_rho 56 free 65 free
-pair k_rho 57 free 68 free
-pair k_rho 57 free 66 free
-pair k_rho 58 free 69 free
-pair k_rho 58 free 67 free
-pair k_rho 59 free 60 free
-pair k_rho 59 free 68 free
-pair k_rho 60 free 71 free
-pair k_rho 60 free 79 free
-pair k_rho 61 free 72 free
-pair k_rho 61 free 70 free
-pair k_rho 62 free 73 free
-pair k_rho 62 free 71 free
-pair k_rho 63 free 74 free
-pair k_rho 63 free 72 free
-pair k_rho 64 free 75 free
-pair k_rho 64 free 73 free
-pair k_rho 65 free 76 free
-pair k_rho 65 free 74 free
-pair k_rho 66 free 77 free
-pair k_rho 66 free 75 free
-pair k_rho 67 free 78 free
-pair k_rho 67 free 76 free
-pair k_rho 68 free 79 free
-pair k_rho 68 free 77 free
-pair k_rho 69 free 70 free
-pair k_rho 69 free 78 free
-pair k_rho 70 free 81 free
-pair k_rho 70 free 89 free
-pair k_rho 71 free 82 free
-pair k_rho 71 free 80 free
-pair k_rho 72 free 83 free
-pair k_rho 72 free 81 free
-pair k_rho 73 free 84 free
-pair k_rho 73 free 82 free
-pair k_rho 74 free 85 free
-pair k_rho 74 free 83 free
-pair k_rho 75 free 86 free
-pair k_rho 75 free 84 free
-pair k_rho 76 free 87 free
-pair k_rho 76 free 85 free
-pair k_rho 77 free 88 free
-pair k_rho 77 free 86 free
-pair k_rho 78 free 89 free
-pair k_rho 78 free 87 free
-pair k_rho 79 free 80 free
-pair k_rho 79 free 88 free
-pair k_rho 80 free 91 free
-pair k_rho 80 free 99 free
-pair k_rho 81 free 92 free
-pair k_rho 81 free 90 free
-pair k_rho 82 free 93 free
-pair k_rho 82 free 91 free
-pair k_rho 83 free 94 free
-pair k_rho 83 free 92 free
-pair k_rho 84 free 95 free
-pair k_rho 84 free 93 free
-pair k_rho 85 free 96 free
-pair k_rho 85 free 94 free
-pair k_rho 86 free 97 free
-pair k_rho 86 free 95 free
-pair k_rho 87 free 98 free
-pair k_rho 87 free 96 free
-pair k_rho 88 free 99 free
-pair k_rho 88 free 97 free
-pair k_rho 89 free 90 free
-pair k_rho 89 free 98 free
-pair k_rho 90 free 1 free
-pair k_rho 90 free 9 free
-pair k_rho 91 free 2 free
-pair k_rho 91 free 0 free
-pair k_rho 92 free 3 free
-pair k_rho 92 free 1 free
-pair k_rho 93 free 4 free
-pair k_rho 93 free 2 free
-pair k_rho 94 free 5 free
-pair k_rho 94 free 3 free
-pair k_rho 95 free 6 free
-pair k_rho 95 free 4 free
-pair k_rho 96 free 7 free
-pair k_rho 96 free 5 free
-pair k_rho 97 free 8 free
-pair k_rho 97 free 6 free
-pair k_rho 98 free 9 free
-pair k_rho 98 free 7 free
-pair k_rho 99 free 0 free
-pair k_rho 99 free 8 free
-quintet k_curv 9 free 10 free 1 free 99 free 0 free
-quintet k_curv 0 free 11 free 2 free 90 free 1 free
-quintet k_curv 1 free 12 free 3 free 91 free 2 free
-quintet k_curv 2 free 13 free 4 free 92 free 3 free
-quintet k_curv 3 free 14 free 5 free 93 free 4 free
-quintet k_curv 4 free 15 free 6 free 94 free 5 free
-quintet k_curv 5 free 16 free 7 free 95 free 6 free
-quintet k_curv 6 free 17 free 8 free 96 free 7 free
-quintet k_curv 7 free 18 free 9 free 97 free 8 free
-quintet k_curv 8 free 19 free 0 free 98 free 9 free
-quintet k_curv 19 free 20 free 11 free 9 free 10 free
-quintet k_curv 10 free 21 free 12 free 0 free 11 free
-quintet k_curv 11 free 22 free 13 free 1 free 12 free
-quintet k_curv 12 free 23 free 14 free 2 free 13 free
-quintet k_curv 13 free 24 free 15 free 3 free 14 free
-quintet k_curv 14 free 25 free 16 free 4 free 15 free
-quintet k_curv 15 free 26 free 17 free 5 free 16 free
-quintet k_curv 16 free 27 free 18 free 6 free 17 free
-quintet k_curv 17 free 28 free 19 free 7 free 18 free
-quintet k_curv 18 free 29 free 10 free 8 free 19 free
-quintet k_curv 29 free 30 free 21 free 19 free 20 free
-quintet k_curv 20 free 31 free 22 free 10 free 21 free
-quintet k_curv 21 free 32 free 23 free 11 free 22 free
-quintet k_curv 22 free 33 free 24 free 12 free 23 free
-quintet k_curv 23 free 34 free 25 free 13 free 24 free
-quintet k_curv 24 free 35 free 26 free 14 free 25 free
-quintet k_curv 25 free 36 free 27 free 15 free 26 free
-quintet k_curv 26 free 37 free 28 free 16 free 27 free
-quintet k_curv 27 free 38 free 29 free 17 free 28 free
-quintet k_curv 28 free 39 free 20 free 18 free 29 free
-quintet k_curv 39 free 40 free 31 free 29 free 30 free
-quintet k_curv 30 free 41 free 32 free 20 free 31 free
-quintet k_curv 31 free 42 free 33 free 21 free 32 free
-quintet k_curv 32 free 43 free 34 free 22 free 33 free
-quintet k_curv 33 free 44 free 35 free 23 free 34 free
-quintet k_curv 34 free 45 free 36 free 24 free 35 free
-quintet k_curv 35 free 46 free 37 free 25 free 36 free
-quintet k_curv 36 free 47 free 38 free 26 free 37 free
-quintet k_curv 37 free 48 free 39 free 27 free 38 free
-quintet k_curv 38 free 49 free 30 free 28 free 39 free
-quintet k_curv 49 free 50 free 41 free 39 free 40 free
-quintet k_curv 40 free 51 free 42 free 30 free 41 free
-quintet k_curv 41 free 52 free 43 free 31 free 42 free
-quintet k_curv 42 free 53 free 44 free 32 free 43 free
-quintet k_curv 43 free 54 free 45 free 33 free 44 free
-quintet k_curv 44 free 55 free 46 free 34 free 45 free
-quintet k_curv 45 free 56 free 47 free 35 free 46 free
-quintet k_curv 46 free 57 free 48 free 36 free 47 free
-quintet k_curv 47 free 58 free 49 free 37 free 48 free
-quintet k_curv 48 free 59 free 40 free 38 free 49 free
-quintet k_curv 59 free 60 free 51 free 49 free 50 free
-quintet k_curv 50 free 61 free 52 free 40 free 51 free
-quintet k_curv 51 free 62 free 53 free 41 free 52 free
-quintet k_curv 52 free 63 free 54 free 42 free 53 free
-quintet k_curv 53 free 64 free 55 free 43 free 54 free
-quintet k_curv 54 free 65 free 56 free 44 free 55 free
-quintet k_curv 55 free 66 free 57 free 45 free 56 free
-quintet k_curv 56 free 67 free 58 free 46 free 57 free
-quintet k_curv 57 free 68 free 59 free 47 free 58 free
-quintet k_curv 58 free 69 free 50 free 48 free 59 free
-quintet k_curv 69 free 70 free 61 free 59 free 60 free
-quintet k_curv 60 free 71 free 62 free 50 free 61 free
-quintet k_curv 61 free 72 free 63 free 51 free 62 free
-quintet k_curv 62 free 73 free 64 free 52 free 63 free
-quintet k_curv 63 free 74 free 65 free 53 free 64 free
-quintet k_curv 64 free 75 free 66 free 54 free 65 free
-quintet k_curv 65 free 76 free 67 free 55 free 66 free
-quintet k_curv 66 free 77 free 68 free 56 free 67 free
-quintet k_curv 67 free 78 free 69 free 57 free 68 free
-quintet k_curv 68 free 79 free 60 free 58 free 69 free
-quintet k_curv 79 free 80 free 71 free 69 free 70 free
-quintet k_curv 70 free 81 free 72 free 60 free 71 free
-quintet k_curv 71 free 82 free 73 free 61 free 72 free
-quintet k_curv 72 free 83 free 74 free 62 free 73 free
-quintet k_curv 73 free 84 free 75 free 63 free 74 free
-quintet k_curv 74 free 85 free 76 free 64 free 75 free
-quintet k_curv 75 free 86 free 77 free 65 free 76 free
-quintet k_curv 76 free 87 free 78 free 66 free 77 free
-quintet k_curv 77 free 88 free 79 free 67 free 78 free
-quintet k_curv 78 free 89 free 70 free 68 free 79 free
-quintet k_curv 89 free 90 free 81 free 79 free 80 free
-quintet k_curv 80 free 91 free 82 free 70 free 81 free
-quintet k_curv 81 free 92 free 83 free 71 free 82 free
-quintet k_curv 82 free 93 free 84 free 72 free 83 free
-quintet k_curv 83 free 94 free 85 free 73 free 84 free
-quintet k_curv 84 free 95 free 86 free 74 free 85 free
-quintet k_curv 85 free 96 free 87 free 75 free 86 free
-quintet k_curv 86 free 97 free 88 free 76 free 87 free
-quintet k_curv 87 free 98 free 89 free 77 free 88 free
-quintet k_curv 88 free 99 free 80 free 78 free 89 free
-quintet k_curv 99 free 0 free 91 free 89 free 90 free
-quintet k_curv 90 free 1 free 92 free 80 free 91 free
-quintet k_curv 91 free 2 free 93 free 81 free 92 free
-quintet k_curv 92 free 3 free 94 free 82 free 93 free
-quintet k_curv 93 free 4 free 95 free 83 free 94 free
-quintet k_curv 94 free 5 free 96 free 84 free 95 free
-quintet k_curv 95 free 6 free 97 free 85 free 96 free
-quintet k_curv 96 free 7 free 98 free 86 free 97 free
-quintet k_curv 97 free 8 free 99 free 87 free 98 free
-quintet k_curv 98 free 9 free 90 free 88 free 99 free
+quintet k_curv_b
+!!!           
+pair k_rho_aa 0 free 5 free
+pair k_rho_aa 1 free 6 free
+pair k_rho_aa 2 free 7 free
+pair k_rho_aa 3 free 8 free
+pair k_rho_aa 4 free 9 free
+pair k_rho_aa 5 free 10 free
+pair k_rho_aa 6 free 11 free
+pair k_rho_aa 7 free 12 free
+pair k_rho_aa 8 free 13 free
+pair k_rho_aa 9 free 14 free
+pair k_rho_aa 10 free 15 free
+pair k_rho_aa 11 free 16 free
+pair k_rho_aa 12 free 17 free
+pair k_rho_aa 13 free 18 free
+pair k_rho_aa 14 free 19 free
+pair k_rho_aa 15 free 20 free
+pair k_rho_aa 16 free 21 free
+pair k_rho_aa 17 free 22 free
+pair k_rho_aa 18 free 23 free
+pair k_rho_aa 19 free 24 free
+pair k_rho_aa 20 free 25 free
+pair k_rho_aa 21 free 26 free
+pair k_rho_aa 22 free 27 free
+pair k_rho_aa 23 free 28 free
+pair k_rho_aa 24 free 29 free
+pair k_rho_aa 25 free 30 free
+pair k_rho_aa 26 free 31 free
+pair k_rho_aa 27 free 32 free
+pair k_rho_aa 28 free 33 free
+pair k_rho_aa 29 free 34 free
+pair k_rho_aa 30 free 35 free
+pair k_rho_aa 31 free 36 free
+pair k_rho_aa 32 free 37 free
+pair k_rho_aa 33 free 38 free
+pair k_rho_aa 34 free 39 free
+pair k_rho_aa 35 free 40 free
+pair k_rho_aa 36 free 41 free
+pair k_rho_aa 37 free 42 free
+pair k_rho_aa 38 free 43 free
+pair k_rho_aa 39 free 44 free
+pair k_rho_aa 40 free 45 free
+pair k_rho_aa 41 free 46 free
+pair k_rho_aa 42 free 47 free
+pair k_rho_aa 43 free 48 free
+pair k_rho_aa 44 free 49 free
+pair k_rho_aa 45 free 0 free
+pair k_rho_aa 46 free 1 free
+pair k_rho_aa 47 free 2 free
+pair k_rho_aa 48 free 3 free
+pair k_rho_aa 49 free 4 free
+pair k_rho_bb 50 free 55 free
+pair k_rho_bb 51 free 56 free
+pair k_rho_bb 52 free 57 free
+pair k_rho_bb 53 free 58 free
+pair k_rho_bb 54 free 59 free
+pair k_rho_bb 55 free 60 free
+pair k_rho_bb 56 free 61 free
+pair k_rho_bb 57 free 62 free
+pair k_rho_bb 58 free 63 free
+pair k_rho_bb 59 free 64 free
+pair k_rho_bb 60 free 65 free
+pair k_rho_bb 61 free 66 free
+pair k_rho_bb 62 free 67 free
+pair k_rho_bb 63 free 68 free
+pair k_rho_bb 64 free 69 free
+pair k_rho_bb 65 free 70 free
+pair k_rho_bb 66 free 71 free
+pair k_rho_bb 67 free 72 free
+pair k_rho_bb 68 free 73 free
+pair k_rho_bb 69 free 74 free
+pair k_rho_bb 70 free 75 free
+pair k_rho_bb 71 free 76 free
+pair k_rho_bb 72 free 77 free
+pair k_rho_bb 73 free 78 free
+pair k_rho_bb 74 free 79 free
+pair k_rho_bb 75 free 80 free
+pair k_rho_bb 76 free 81 free
+pair k_rho_bb 77 free 82 free
+pair k_rho_bb 78 free 83 free
+pair k_rho_bb 79 free 84 free
+pair k_rho_bb 80 free 85 free
+pair k_rho_bb 81 free 86 free
+pair k_rho_bb 82 free 87 free
+pair k_rho_bb 83 free 88 free
+pair k_rho_bb 84 free 89 free
+pair k_rho_bb 85 free 90 free
+pair k_rho_bb 86 free 91 free
+pair k_rho_bb 87 free 92 free
+pair k_rho_bb 88 free 93 free
+pair k_rho_bb 89 free 94 free
+pair k_rho_bb 90 free 95 free
+pair k_rho_bb 91 free 96 free
+pair k_rho_bb 92 free 97 free
+pair k_rho_bb 93 free 98 free
+pair k_rho_bb 94 free 99 free
+pair k_rho_bb 95 free 50 free
+pair k_rho_bb 96 free 51 free
+pair k_rho_bb 97 free 52 free
+pair k_rho_bb 98 free 53 free
+pair k_rho_bb 99 free 54 free
+pair k_rho_ab 0 free 50 free
+pair k_rho_ab 1 free 51 free
+pair k_rho_ab 2 free 52 free
+pair k_rho_ab 3 free 53 free
+pair k_rho_ab 4 free 54 free
+pair k_rho_ab 5 free 55 free
+pair k_rho_ab 6 free 56 free
+pair k_rho_ab 7 free 57 free
+pair k_rho_ab 8 free 58 free
+pair k_rho_ab 9 free 59 free
+pair k_rho_ab 10 free 60 free
+pair k_rho_ab 11 free 61 free
+pair k_rho_ab 12 free 62 free
+pair k_rho_ab 13 free 63 free
+pair k_rho_ab 14 free 64 free
+pair k_rho_ab 15 free 65 free
+pair k_rho_ab 16 free 66 free
+pair k_rho_ab 17 free 67 free
+pair k_rho_ab 18 free 68 free
+pair k_rho_ab 19 free 69 free
+pair k_rho_ab 20 free 70 free
+pair k_rho_ab 21 free 71 free
+pair k_rho_ab 22 free 72 free
+pair k_rho_ab 23 free 73 free
+pair k_rho_ab 24 free 74 free
+pair k_rho_ab 25 free 75 free
+pair k_rho_ab 26 free 76 free
+pair k_rho_ab 27 free 77 free
+pair k_rho_ab 28 free 78 free
+pair k_rho_ab 29 free 79 free
+pair k_rho_ab 30 free 80 free
+pair k_rho_ab 31 free 81 free
+pair k_rho_ab 32 free 82 free
+pair k_rho_ab 33 free 83 free
+pair k_rho_ab 34 free 84 free
+pair k_rho_ab 35 free 85 free
+pair k_rho_ab 36 free 86 free
+pair k_rho_ab 37 free 87 free
+pair k_rho_ab 38 free 88 free
+pair k_rho_ab 39 free 89 free
+pair k_rho_ab 40 free 90 free
+pair k_rho_ab 41 free 91 free
+pair k_rho_ab 42 free 92 free
+pair k_rho_ab 43 free 93 free
+pair k_rho_ab 44 free 94 free
+pair k_rho_ab 45 free 95 free
+pair k_rho_ab 46 free 96 free
+pair k_rho_ab 47 free 97 free
+pair k_rho_ab 48 free 98 free
+pair k_rho_ab 49 free 99 free
+pair k_rho_ab 0 free 54 free
+pair k_rho_ab 1 free 50 free
+pair k_rho_ab 2 free 51 free
+pair k_rho_ab 3 free 52 free
+pair k_rho_ab 4 free 53 free
+pair k_rho_ab 5 free 59 free
+pair k_rho_ab 6 free 55 free
+pair k_rho_ab 7 free 56 free
+pair k_rho_ab 8 free 57 free
+pair k_rho_ab 9 free 58 free
+pair k_rho_ab 10 free 64 free
+pair k_rho_ab 11 free 60 free
+pair k_rho_ab 12 free 61 free
+pair k_rho_ab 13 free 62 free
+pair k_rho_ab 14 free 63 free
+pair k_rho_ab 15 free 69 free
+pair k_rho_ab 16 free 65 free
+pair k_rho_ab 17 free 66 free
+pair k_rho_ab 18 free 67 free
+pair k_rho_ab 19 free 68 free
+pair k_rho_ab 20 free 74 free
+pair k_rho_ab 21 free 70 free
+pair k_rho_ab 22 free 71 free
+pair k_rho_ab 23 free 72 free
+pair k_rho_ab 24 free 73 free
+pair k_rho_ab 25 free 79 free
+pair k_rho_ab 26 free 75 free
+pair k_rho_ab 27 free 76 free
+pair k_rho_ab 28 free 77 free
+pair k_rho_ab 29 free 78 free
+pair k_rho_ab 30 free 84 free
+pair k_rho_ab 31 free 80 free
+pair k_rho_ab 32 free 81 free
+pair k_rho_ab 33 free 82 free
+pair k_rho_ab 34 free 83 free
+pair k_rho_ab 35 free 89 free
+pair k_rho_ab 36 free 85 free
+pair k_rho_ab 37 free 86 free
+pair k_rho_ab 38 free 87 free
+pair k_rho_ab 39 free 88 free
+pair k_rho_ab 40 free 94 free
+pair k_rho_ab 41 free 90 free
+pair k_rho_ab 42 free 91 free
+pair k_rho_ab 43 free 92 free
+pair k_rho_ab 44 free 93 free
+pair k_rho_ab 45 free 99 free
+pair k_rho_ab 46 free 95 free
+pair k_rho_ab 47 free 96 free
+pair k_rho_ab 48 free 97 free
+pair k_rho_ab 49 free 98 free
+quintet k_curv 54 free 5 free 51 free 45 free 0 free
+quintet k_curv 50 free 6 free 52 free 46 free 1 free
+quintet k_curv 51 free 7 free 53 free 47 free 2 free
+quintet k_curv 52 free 8 free 54 free 48 free 3 free
+quintet k_curv 53 free 9 free 55 free 49 free 4 free
+quintet k_curv 59 free 10 free 56 free 0 free 5 free
+quintet k_curv 55 free 11 free 57 free 1 free 6 free
+quintet k_curv 56 free 12 free 58 free 2 free 7 free
+quintet k_curv 57 free 13 free 59 free 3 free 8 free
+quintet k_curv 58 free 14 free 60 free 4 free 9 free
+quintet k_curv 64 free 15 free 61 free 5 free 10 free
+quintet k_curv 60 free 16 free 62 free 6 free 11 free
+quintet k_curv 61 free 17 free 63 free 7 free 12 free
+quintet k_curv 62 free 18 free 64 free 8 free 13 free
+quintet k_curv 63 free 19 free 65 free 9 free 14 free
+quintet k_curv 69 free 20 free 66 free 10 free 15 free
+quintet k_curv 65 free 21 free 67 free 11 free 16 free
+quintet k_curv 66 free 22 free 68 free 12 free 17 free
+quintet k_curv 67 free 23 free 69 free 13 free 18 free
+quintet k_curv 68 free 24 free 70 free 14 free 19 free
+quintet k_curv 74 free 25 free 71 free 15 free 20 free
+quintet k_curv 70 free 26 free 72 free 16 free 21 free
+quintet k_curv 71 free 27 free 73 free 17 free 22 free
+quintet k_curv 72 free 28 free 74 free 18 free 23 free
+quintet k_curv 73 free 29 free 75 free 19 free 24 free
+quintet k_curv 79 free 30 free 76 free 20 free 25 free
+quintet k_curv 75 free 31 free 77 free 21 free 26 free
+quintet k_curv 76 free 32 free 78 free 22 free 27 free
+quintet k_curv 77 free 33 free 79 free 23 free 28 free
+quintet k_curv 78 free 34 free 80 free 24 free 29 free
+quintet k_curv 84 free 35 free 81 free 25 free 30 free
+quintet k_curv 80 free 36 free 82 free 26 free 31 free
+quintet k_curv 81 free 37 free 83 free 27 free 32 free
+quintet k_curv 82 free 38 free 84 free 28 free 33 free
+quintet k_curv 83 free 39 free 85 free 29 free 34 free
+quintet k_curv 89 free 40 free 86 free 30 free 35 free
+quintet k_curv 85 free 41 free 87 free 31 free 36 free
+quintet k_curv 86 free 42 free 88 free 32 free 37 free
+quintet k_curv 87 free 43 free 89 free 33 free 38 free
+quintet k_curv 88 free 44 free 90 free 34 free 39 free
+quintet k_curv 94 free 45 free 91 free 35 free 40 free
+quintet k_curv 90 free 46 free 92 free 36 free 41 free
+quintet k_curv 91 free 47 free 93 free 37 free 42 free
+quintet k_curv 92 free 48 free 94 free 38 free 43 free
+quintet k_curv 93 free 49 free 95 free 39 free 44 free
+quintet k_curv 99 free 0 free 96 free 40 free 45 free
+quintet k_curv 95 free 1 free 97 free 41 free 46 free
+quintet k_curv 96 free 2 free 98 free 42 free 47 free
+quintet k_curv 97 free 3 free 99 free 43 free 48 free
+quintet k_curv 98 free 4 free 90 free 44 free 49 free
+quintet k_curv_b 0 free 55 free 1 free 95 free 50 free
+quintet k_curv_b 1 free 56 free 2 free 96 free 51 free
+quintet k_curv_b 2 free 57 free 3 free 97 free 52 free
+quintet k_curv_b 3 free 58 free 4 free 98 free 53 free
+quintet k_curv_b 4 free 59 free 0 free 99 free 54 free
+quintet k_curv_b 5 free 60 free 6 free 50 free 55 free
+quintet k_curv_b 6 free 61 free 7 free 51 free 56 free
+quintet k_curv_b 7 free 62 free 8 free 52 free 57 free
+quintet k_curv_b 8 free 63 free 9 free 53 free 58 free
+quintet k_curv_b 9 free 64 free 5 free 54 free 59 free
+quintet k_curv_b 10 free 65 free 11 free 55 free 60 free
+quintet k_curv_b 11 free 66 free 12 free 56 free 61 free
+quintet k_curv_b 12 free 67 free 13 free 57 free 62 free
+quintet k_curv_b 13 free 68 free 14 free 58 free 63 free
+quintet k_curv_b 14 free 69 free 10 free 59 free 64 free
+quintet k_curv_b 15 free 70 free 16 free 60 free 65 free
+quintet k_curv_b 16 free 71 free 17 free 61 free 66 free
+quintet k_curv_b 17 free 72 free 18 free 62 free 67 free
+quintet k_curv_b 18 free 73 free 19 free 63 free 68 free
+quintet k_curv_b 19 free 74 free 15 free 64 free 69 free
+quintet k_curv_b 20 free 75 free 21 free 65 free 70 free
+quintet k_curv_b 21 free 76 free 22 free 66 free 71 free
+quintet k_curv_b 22 free 77 free 23 free 67 free 72 free
+quintet k_curv_b 23 free 78 free 24 free 68 free 73 free
+quintet k_curv_b 24 free 79 free 20 free 69 free 74 free
+quintet k_curv_b 25 free 80 free 26 free 70 free 75 free
+quintet k_curv_b 26 free 81 free 27 free 71 free 76 free
+quintet k_curv_b 27 free 82 free 28 free 72 free 77 free
+quintet k_curv_b 28 free 83 free 29 free 73 free 78 free
+quintet k_curv_b 29 free 84 free 25 free 74 free 79 free
+quintet k_curv_b 30 free 85 free 31 free 75 free 80 free
+quintet k_curv_b 31 free 86 free 32 free 76 free 81 free
+quintet k_curv_b 32 free 87 free 33 free 77 free 82 free
+quintet k_curv_b 33 free 88 free 34 free 78 free 83 free
+quintet k_curv_b 34 free 89 free 30 free 79 free 84 free
+quintet k_curv_b 35 free 90 free 36 free 80 free 85 free
+quintet k_curv_b 36 free 91 free 37 free 81 free 86 free
+quintet k_curv_b 37 free 92 free 38 free 82 free 87 free
+quintet k_curv_b 38 free 93 free 39 free 83 free 88 free
+quintet k_curv_b 39 free 94 free 35 free 84 free 89 free
+quintet k_curv_b 40 free 95 free 41 free 85 free 90 free
+quintet k_curv_b 41 free 96 free 42 free 86 free 91 free
+quintet k_curv_b 42 free 97 free 43 free 87 free 92 free
+quintet k_curv_b 43 free 98 free 44 free 88 free 93 free
+quintet k_curv_b 44 free 99 free 40 free 89 free 94 free
+quintet k_curv_b 45 free 50 free 46 free 90 free 95 free
+quintet k_curv_b 46 free 51 free 47 free 91 free 96 free
+quintet k_curv_b 47 free 52 free 48 free 92 free 97 free
+quintet k_curv_b 48 free 53 free 49 free 93 free 98 free
+quintet k_curv_b 49 free 54 free 45 free 94 free 99 free
+
