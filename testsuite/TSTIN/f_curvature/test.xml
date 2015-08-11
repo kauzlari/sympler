@@ -1,7 +1,6 @@
 <Simulation
 	simName="FCurvatureTest"
 	inputFromResults="no"
-	randomize = "yes"
 >
  <Controller
 	timesteps="1000"
@@ -34,72 +33,6 @@
 
  </Controller>
 
-<!--Random Forces -->
- <PairRandVector
-	species1="fluid"
-	species2="fluid"
-	symbol="PRff"
-	pairFactor="3*(1-rij)*[rij]/rij*10"
-	cutoff = "1"
-	seed="1023"
- />
- <PairRandVector
-	species1="fluid"
-	species2="memba"
-	symbol="PRfma"
-	pairFactor="3*(1-rij)*[rij]/rij*10"
-	cutoff = "1"
-	seed="1023"	
- />
- <PairRandVector
-	species1="fluid"
-	species2="membb"
-	symbol="PRfmb"
-	pairFactor="3*(1-rij)*[rij]/rij*10"
-	cutoff = "1"
-	seed="1023"	
- />
-
-
-  <PairParticleVector
-     species1="fluid"
-     species2="fluid"
-     expression = "[PRffij]"
-     symmetry = "-1"
-     symbol = "FRff"
-     cutoff = "1"
-  />
-
-  <PairParticleVector
-     species1="fluid"
-     species2="memba"
-     expression = "[PRfmaij]"
-     symmetry = "-1"
-     symbol = "FRfma"
-     cutoff = "1"
-  />
-
-  <PairParticleVector
-     species1="fluid"
-     species2="membb"
-     expression = "[PRfmbij]"
-     symmetry = "-1"
-     symbol = "FRfmb"
-     cutoff = "1"
-  />
-
- <FParticleVels
-    species = "fluid"
-    expression = "[FRff]+[FRfma]+[FRfmb]"
-  />
-  <FParticleVels
-    species = "memba"
-    expression = "[FRfma]"
-  />
-  <FParticleVels
-    species = "membb"
-    expression = "[FRfmb]"
-  />
 
 
 <!--Dissipative Forces -->
@@ -185,34 +118,32 @@
     species = "membb"
     expression = "[FCfmb]"
   />
-
  <ConnectBasic
 	forceName = "k_rho_ab"
 	species1 = "memba"
 	species2 = "membb"
-	pairFactor = "54.1688*(1-rij/0.693361)*[rij]/(rij)"
- />
-
+	pairFactor = "50*(1-rij)*[rij]/(rij)"
+ /> 
  <ConnectBasic
 	forceName = "k_rho_aa"
 	species1 = "memba"
 	species2 = "memba"
-	pairFactor = "54.1688*(1-rij/0.693361)*[rij]/(rij)"
+	pairFactor = "50*(1-rij)*[rij]/(rij)"
  />
  <ConnectBasic
 	forceName = "k_rho_bb"
 	species1 = "membb"
 	species2 = "membb"
-	pairFactor = "54.1688*(1-rij/0.693361)*[rij]/(rij)"
+	pairFactor = "50*(1-rij)*[rij]/(rij)"
  />
  <FCurvature 
 	forceName = "k_curv"
-	kA = "0.0728088993"
+	kA = "0.07"
 	periodic = "yes"	
  />
  <FCurvature 
 	forceName = "k_curv_b"
-	kA = "0.0728088993"
+	kA = "0.07"
 	periodic = "yes"	
  />
 
@@ -240,8 +171,6 @@
 	</BoundaryCuboid>
 
 </Phase>
-
-
  <MeterAverage>
 	<KineticEnergy species="memba"/>
 	<KineticEnergy species="membb"/>
