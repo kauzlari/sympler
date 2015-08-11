@@ -30,10 +30,10 @@
 
 
 
-#ifndef _F_ANGULAR_H
-#define _F_ANGULAR_H
+#ifndef _F_CURVATURE_H
+#define _F_CURVATURE_H
 
-#include "gen_triplet.h"
+#include "gen_quintet.h"
 #include "simulation.h"
 #include "manager_cell.h"
 
@@ -41,27 +41,20 @@ using namespace std;
 
 
 /*!
- * A force between three particles. depends on the angle of the triplet F=k(theta-thetaEq)
- */
-class FAngular : public GenTriplet
+ * A force between five particles. The force depends on the Mean (TODO Gaussian K) curvature H. Its based on the Hamiltonian Function: Fij = kA/4*Grad_rij(H^2).
+  */
+class FCurvature : public GenQuintet
 {
 	protected:
 /*!
  * Initialize the property list
  */
 	void init();
+
 /*!
- * m_k angular stiffnes
+ * m_kappa_A Effective Bending rigidity Energy area product
 */
-	double m_k;
-/*!
- * m_thetaEq equilibrium angle of the angular spring
-*/
-	double m_thetaEq;
-/*!
- * m_cosEq Cosine of the equilibrium angle 
-*/
-	double m_cosEq;
+	double m_kA;	
 
 /*!
  * m_periodic use periodic boundarys. (03.08.2015) Cannot distiguish directions yet (implementation)
@@ -72,20 +65,20 @@ class FAngular : public GenTriplet
 /*!
  * Constructor
  */
-	FAngular(Simulation *simulation);
-	FAngular();
+	FCurvature(Simulation *simulation);
+	FCurvature();
 
 /*!
  * Destructor
  */
-	virtual ~FAngular();
+	virtual ~FCurvature();
 
 #ifdef _OPENMP
   virtual void setForceSlots(Integrator* intr, int thread_no) {}
 #endif
 
 /*!
- * Computes the force on the three particles.
+ * Computes the force on the five particles.
  * @param force_index The index within the force history
  */
   virtual void computeForces(int force_index);
@@ -106,7 +99,7 @@ class FAngular : public GenTriplet
 	virtual void setup();
 
 /*!
- * Setup assigning the right triplet list to this force
+ * Setup assigning the right quintet list to this force
  */
 /* virtual void setupAfterParticleCreation(); */
 

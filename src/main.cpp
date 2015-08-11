@@ -167,6 +167,7 @@ void sayHello() {
 #include "ie_heat_conduction.h"
 #include "ie_wall_heat_conduction.h"
 #include "f_angular.h"
+#include "f_curvature.h"
 #include "f_centrifugal.h"
 #include "f_coriolis.h"
 #include "f_dpd.h"
@@ -198,6 +199,7 @@ void sayHello() {
 // #include "viscosity_migration.h"
 #include "gen_connector.h"
 #include "gen_triplet.h"
+#include "gen_quintet.h"
 #include "gm_array_attr.h"
 #include "gm_density.h"
 #include "gm_ekin.h"
@@ -389,6 +391,7 @@ void link_all_properly()
   new IEHeatConduction(NULL);
   new IEWallHeatConduction(NULL);
   new FAngular(NULL);
+  new FCurvature(NULL);
   new FCentrifugal(NULL);
   new FCoriolis(NULL);
   new FDPD(NULL);

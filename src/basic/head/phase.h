@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -175,11 +175,15 @@ class ManagerCell;
 class PairCreator;
 class IntegratorPosition;
 class TripletCalculator;
+class QuintetCalculator;
 struct triplet_t;
+struct quintet_t;
 
 typedef list<triplet_t> tripletList;
 typedef list<triplet_t>::iterator tripletListItr;  
 
+typedef list<quintet_t> quintetList;
+typedef list<quintet_t>::iterator quintetListItr;  
 
 /*!
  * The \a Phase is the main object in charge of the whole simulation domain.
@@ -299,6 +303,45 @@ class Phase: public NodeManyChildren
    * are registered here and afterwards sorted by stages into \a m_bondedTripletCalculators .
    */
   vector<TripletCalculator*> m_bondedTripletCalculators_flat_0;
+
+
+//------------------------------------------------------------------------------------------------------------------------
+  /*!
+   * Stores lists of bonded quintets of \a Particle s
+   */
+  vector<quintetList*> m_quintetLists;
+
+  /*!
+   * String identifiers of the quintet lists in \a m_quintetLists
+   */
+  vector<string> m_quintetListNames;
+
+  /*!
+   * This Calculators are for 
+   * bonded quintet. An additional vector-layer is used for distinguishing 
+   * between the different available bonded lists.
+   */
+  vector<vector<vector<QuintetCalculator*> > > m_bondedQuintetCalculators;
+
+  /*!
+   * As \a m_bondedQuintetCalculators but called at another instant during one timestep by the \a Controller
+  */
+  vector<vector<vector<QuintetCalculator*> > > m_bondedQuintetCalculators_0;
+
+  /*!
+   * This is a helper for building \a m_bondedQuintetCalculators . First, the \a ValCalculator s
+   * are registered here and afterwards sorted by stages into \a m_bondedQuintetCalculators .
+   */
+  vector<QuintetCalculator*> m_bondedQuintetCalculators_flat;
+
+  /*!
+   * This is a helper for building \a m_bondedQuintetCalculators_0 . First, the \a ValCalculator s
+   * are registered here and afterwards sorted by stages into \a m_bondedQuintetCalculators .
+   */
+  vector<QuintetCalculator*> m_bondedQuintetCalculators_flat_0;
+
+
+//------------------------------------------------------------------------------------------------------------------------
 
   /*!
    * The cell subdivsion manager
@@ -752,6 +795,106 @@ public:
    * Register the bonded triplet calculators for instant "_0"
    */
   void registerBondedCalc_0(TripletCalculator* vC);
+
+ //----------------------------------------------------------------------------------------------------------------------------
+  /*!
+   * Quintet Calculator Definition of lists an itterators
+   */
+
+  vector<QuintetCalculator*>* bondedQuintetCalculatorsFlat() {
+    return &m_bondedQuintetCalculators_flat;
+  }
+
+  vector<QuintetCalculator*>* bondedQuintetCalculatorsFlat_0() {
+    return &m_bondedQuintetCalculators_flat_0;
+  }
+
+  /*!
+   * Return a pointer to \a m_quintetLists
+   */
+  vector<quintetList*>* quintetLists() {
+    return &m_quintetLists;
+  }
+
+  /*!
+   * Return the connected list from \a m_connectedLists at slot \a slot.
+   */
+  quintetList* returnQuintetList(size_t slot) {
+    return m_quintetLists[slot];
+  }
+  
+  /*!
+   * Add the three \a Particle s to the \a quintetList of \a m_quintetLists indexed by \a listIndex
+   */
+  void addQuintet(Particle *p1, Particle *p2, Particle *p3, Particle *p4, Particle *pc, size_t listIndex);
+
+  /*!
+   * Add the three \a Particle s to the \a quintetList of \a m_quintetLists indexed by \a listIndex and write into a file
+   */
+  void addQuintetAndWrite(Particle *p1, Particle *p2, Particle *p3, Particle *p4, Particle *pc, size_t listIndex);
+
+  /*!
+   * Returns the string identifier of the \a quintetList from \a m_quintetLists with index \a listIndex
+   */
+  string quintetListName(size_t listIndex);
+
+  /*!
+   * Returns the index of the \a quintetList from \a m_quintetLists with string identifier \a name
+   */
+  size_t quintetListIndex(string name);
+
+  /*!
+   * Returns the index of the \a quintetList from \a m_quintetLists with string identifier \a name . If it does not exist yet it is created and writte to a file.
+   */
+  size_t createQuintetListIndexAndWrite(string name);
+
+  /*!
+   * Returns the index of the \a quintetList from \a m_quintetLists with string identifier \a name . If it does not exist yet it is created.
+   */
+  size_t createQuintetListIndex(string name);
+
+  /*!
+   * Returns the index of the \a quintetList from \a m_quintetLists with string identifier \a name
+   */
+  int searchQuintetListIndex(string name);
+
+  /*!
+   * Returns the \a quintetList from \a m_quintetLists with string identifier \a name
+   */
+  quintetList* returnQuintetList(string name);
+
+    
+  /*!
+   * Register the bonded quintet calculators
+   */
+  void registerBondedQuinCalc(QuintetCalculator* vC);
+
+  /*!
+   * Register the bonded quintet calculators for instant "_0"
+   */
+  void registerBondedQuinCalc_0(QuintetCalculator* vC);
+
+
+  /*!
+   * Return the list of calculators with index \a listIndex 
+   * from \a m_bondedQuintetCalculators for stage \a stage. 
+   */
+  vector<QuintetCalculator*>& bondedQuintetCalculators(size_t stage, size_t listIndex) {
+    return (m_bondedQuintetCalculators[listIndex][stage]);
+  }
+
+  /*!
+   * Return the list of calculators with index \a listIndex 
+   * from \a m_bondedQuintetCalculators_0 for stage \a stage. 
+   */
+  vector<QuintetCalculator*>& bondedQuintetCalculators_0(size_t stage, size_t listIndex) {
+    return (m_bondedQuintetCalculators_0[listIndex][stage]);
+  }
+
+
+
+//----------------------------------------------------------------------------------------------------------------------------
+
 
   /*!
    * Sort the stages of the Calculators

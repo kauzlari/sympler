@@ -72,6 +72,7 @@ libbasic_la_SOURCES = \
 	phase.cpp \
 	postprocessor.cpp \
 	property_list.cpp \
+	quintet_calculator.cpp \
 	random.cpp \
 	reflector.cpp \
 	simulation.cpp \

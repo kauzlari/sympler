@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -38,6 +38,7 @@
 #include "manager_cell.h"
 #include "pair_creator.h"
 #include "triplet.h"
+#include "quintet.h"
 
 // #include "valgrind/memcheck.h"
 
@@ -46,6 +47,7 @@ using namespace std;
 Phase *DEBUG_g_phase;
 
 Phase* triplet_t::s_phase = NULL;
+Phase* quintet_t::s_phase = NULL;
 
 bool Phase::connectionDeclarationFinished = false;
 
@@ -70,8 +72,10 @@ Phase::Phase(Simulation *simulation)
   DEBUG_g_phase = this;
   if(triplet_t::s_phase)
     throw gError("Phase::Phase(Simulation *simulation)", "Fatal error: triplet_t::s_phase was already set! Contact the programmers.");
+  if(quintet_t::s_phase)
+    throw gError("Phase::Phase(Simulation *simulation)", "Fatal error: quintet_t::s_phase was already set! Contact the programmers.");
   triplet_t::s_phase = this;
-
+  quintet_t::s_phase = this;
   init();
 }
 
@@ -82,8 +86,11 @@ Phase::Phase(Simulation *simulation)
   delete m_manager;
   for(size_t i = 0; i < m_tripletLists.size(); ++i)
     delete m_tripletLists[i];
+  for(size_t i = 0; i < m_quintetLists.size(); ++i)
+    delete m_quintetLists[i];
   //delete m_pairCreator;
 }
+
 
 
 void Phase::removeParticle(Particle *p)
@@ -446,7 +453,11 @@ void Phase::writeRestartFile(string name)
   pos.close();
 }
 
-
+//--------------------------------------------------------------------------------------------------------------------------
+/*
+ * Triplet Calculator Functions in Phase 
+ *
+*/
 void Phase::addTripletAndWrite(Particle *p1, Particle *p2, Particle *p3, size_t listIndex) {
 	triplet_t tmp;
 	ofstream file_stream;
@@ -644,12 +655,236 @@ void Phase::registerBondedCalc_0(TripletCalculator* vC)
 //   MSG_DEBUG("Phase::registerBondedCalc_0", "m_bondedTripletCalculators_flat_0.size now = " << m_bondedTripletCalculators_flat_0.size() << ", name[last] = " << m_bondedTripletCalculators_flat_0[m_bondedTripletCalculators_flat_0.size()-1]->className());  
 }
 
+//------------------------------------------------------------------------------------------------------------------------
+/* 
+ * Quintet Calculator Functions in Phase 
+ * Implementation of Quintets based Triplet implementation
+*/
+
+void Phase::addQuintetAndWrite(Particle *p1, Particle *p2, Particle *p3, Particle *p4, Particle *pc, size_t listIndex) {
+	quintet_t tmp;
+	ofstream file_stream;
+	string file_name;
+	tmp.p00 = p1;
+	tmp.p20 = p2;
+	tmp.p22 = p3;
+	tmp.p02 = p4;
+	tmp.p11 = pc;
+
+	m_quintetLists[listIndex]->push_back(tmp);
+
+	file_name = ((Simulation*) m_parent)->name();
+	file_name += "_connector.con";
+
+	file_stream.open(file_name.c_str(), ios_base::app);
+	file_stream.seekp(0, std::ios_base::end);
+
+	// first connection in file? Then write the line "!!!" first
+	if(!Phase::connectionDeclarationFinished) {
+	  Phase::connectionDeclarationFinished = true;
+	  file_stream << "!!!" << endl;
+	}
+
+	file_stream << "quintet " << quintetListName(listIndex) << " " << p1 -> mySlot << " ";
+	if (p1->isFrozen)
+		file_stream << "frozen" << " ";
+	else
+		file_stream << "free" << " ";
+	file_stream << p2 -> mySlot << " ";
+	if (p2->isFrozen)
+		file_stream << "frozen" << " ";
+	else
+		file_stream << "free" << " ";
+	file_stream << p3 -> mySlot << " ";
+	if (p3->isFrozen)
+		file_stream << "frozen" << " ";
+	else
+		file_stream << "free" << " ";
+	file_stream << p4 -> mySlot << " ";
+	if (p4->isFrozen)
+		file_stream << "frozen" << " ";
+	else
+		file_stream << "free" << " ";
+	file_stream << pc -> mySlot << " ";
+	if (pc->isFrozen)
+		file_stream << "frozen" << " "<< endl;
+
+	else
+		file_stream << "free" << " "<< endl;
+	file_stream.close();
+
+}
+
+void Phase::addQuintet(Particle *p1, Particle *p2, Particle *p3, Particle *p4, Particle *pc, size_t listIndex) {
+	quintet_t tmp;
+	ofstream file_stream;
+	string file_name;
+	tmp.p00 = p1;
+	tmp.p20 = p2;
+	tmp.p22 = p3;
+	tmp.p02 = p4;
+	tmp.p11 = pc;
+
+	m_quintetLists[listIndex]->push_back(tmp);
+// 	MSG_DEBUG("Phase::addQuintet", "added Quinet (" << p1->mySlot << ", " << p2->mySlot << ", " << p3->mySlot << p4->mySlot << pc->mySlot <<")");
+}
+
+
+/*!
+ * Returns the string identifier of the \a quintetList from \a m_quintetLists with index \a listIndex
+ */
+string Phase::quintetListName(size_t listIndex)
+{
+  if(listIndex < m_quintetLists.size())
+    return m_quintetListNames[listIndex];
+  else 
+    throw gError("Phase::quintetListName"+FILE_INFO, "Requested index out of bounds! Contact programmer.");
+}
+
+/*!
+ * Returns the \a quintetList from \a m_quintetLists with string identifier \a name
+ */
+quintetList* Phase::returnQuintetList(string name) {
+//   MSG_DEBUG("Phase::returnQuintetList", "CALLED");
+  size_t i = quintetListIndex(name);
+  return m_quintetLists[i];
+  }
+
+
+/*!
+ * Returns the index of the \a quintetList from \a m_quintetLists with string identifier \a name
+ */
+size_t Phase::quintetListIndex(string name)
+{
+  int tmp = -1;
+//   MSG_DEBUG("Phase::quintetListIndex", "Nof quintetLists: " << m_quintetListNames.size() );
+  for(size_t i = 0; i < m_quintetListNames.size(); ++i) {
+    if(m_quintetListNames[i] == name) {
+//       MSG_DEBUG("Phase::quintetListIndex", "now at name " << m_quintetListNames[i] );
+      // the same name cannot appear twice, so the following should be OK
+      if(tmp == -1) tmp = i;
+      else 
+	throw gError("Phase::quintetListIndex"+FILE_INFO, "Two quintet lists with same identifier \"" + name + "\" found!");
+    }  
+  }
+  if(tmp == -1) {
+    MSG_DEBUG("Phase::quintetListIndex"+FILE_INFO, "before not-found exception");
+    throw gError("Phase::quintetListIndex"+FILE_INFO, "No quintet list with identifier \"" + name + "\" found!"); 
+  }
+  return size_t(tmp);
+}
+
+size_t Phase::createQuintetListIndexAndWrite(string name)
+{
+  if(!Phase::connectionDeclarationFinished) {
+    int tmp = -1;
+    size_t i;
+    for(i = 0; i < m_quintetListNames.size(); ++i) {
+      if(m_quintetListNames[i] == name) {
+	if(tmp == -1) tmp = i;
+	else 
+	  throw gError("Phase::createQuintetListIndexAndWrite"+FILE_INFO, "Two quintet lists with same identifier \"" + name + "\" found! Shouldn't happen. Contact the programmers");
+      }  
+    }
+    if(tmp == -1) {
+      // create
+      m_quintetListNames.push_back(name);
+      m_quintetLists.push_back(new quintetList());
+
+      // write in file
+      // FIXME: one of at least four places where we create the same file_name from scratch: redundant and error-prone! Replace by member m_connections_file?
+      string file_name = ((Simulation*) m_parent)->name();
+      file_name += "_connector.con";
+      ofstream file_stream;
+      file_stream.open(file_name.c_str(), ios_base::app);
+      file_stream.seekp(0, std::ios_base::end);
+      file_stream << "quintet " << name << endl;
+
+
+      return i; // index of the new list
+    }
+    
+    return size_t(tmp); // index of an existing list we found
+  }
+  else
+    throw gError("Phase::createQuintetListIndexAndWrite"+FILE_INFO, "Attempt to create a new quintet list eventhough it seems too late for that. Contact programmer.");
+}
+
+size_t Phase::createQuintetListIndex(string name)
+{
+  if(!Phase::connectionDeclarationFinished) {
+    int tmp = -1;
+    size_t i;
+    for(i = 0; i < m_quintetListNames.size(); ++i) {
+      if(m_quintetListNames[i] == name) {
+	if(tmp == -1) tmp = i;
+	else 
+	  throw gError("Phase::createQuintetListIndex"+FILE_INFO, "Two quintets lists with same identifier \"" + name + "\" found! Shouldn't happen. Contact the programmers");
+      }  
+    }
+    if(tmp == -1) {
+      // create
+      m_quintetListNames.push_back(name);
+      m_quintetLists.push_back(new quintetList());
+
+      return i; // index of the new list
+    }
+    
+    return size_t(tmp); // index of an existing list we found
+  }
+  else
+    throw gError("Phase::createQuintetListIndex"+FILE_INFO, "Attempt to create a new quintet list eventhough it seems too late for that. Contact programmer.");
+}
+
+/*!
+ * Returns the index of the \a quintetList from \a m_quintetLists with string identifier \a name
+ */
+int Phase::searchQuintetListIndex(string name)
+{
+  int tmp = -1;
+  for(size_t i = 0; i < m_quintetListNames.size(); ++i) {
+    if(m_quintetListNames[i] == name) {
+      if(tmp == -1) tmp = i;
+      else throw gError("Phase::searchQuintetListIndex"+FILE_INFO, "Two quintet lists with same identifier \"" + name + "\" found!");
+    }
+  }
+  return tmp;
+}
+
+// this function assumes that the Valcalculator does all the registering work itself
+void Phase::registerBondedQuinCalc(QuintetCalculator* vC)
+{
+  // this should be a safe check whether this function should be used
+  if(!vC->parent())
+    throw gError("Phase::registerBondedQuintetCalc(ValCalculator* vC)", "The function shouldn't have been called because vC does not belong to a node hierarchy. Contact the programmer.");
+  
+  m_bondedQuintetCalculators_flat.push_back(vC);
+
+//   MSG_DEBUG("Phase::registerBondedCalc", "m_bondedQuintetCalculators_flat.size now = " << m_bondedQuintetCalculators_flat.size() << ", name[last] = " << m_bondedQuintetCalculators_flat[m_bondedQuintetCalculators_flat.size()-1]->className());  
+}
+
+// this function assumes that the Valcalculator does all the registering work itself
+void Phase::registerBondedQuinCalc_0(QuintetCalculator* vC)
+{
+  // this should be a safe check whether this function should be used
+  if(!vC->parent())
+    throw gError("Phase::registerBondedQuintetCalc_0(ValCalculator* vC)", "The function shouldn't have been called because vC does not belong to a node hierarchy. Contact the programmer.");
+  
+  m_bondedQuintetCalculators_flat_0.push_back(vC);
+
+//   MSG_DEBUG("Phase::registerBondedCalc_0", "m_bondedQuintetCalculators_flat_0.size now = " << m_bondedQuintetCalculators_flat_0.size() << ", name[last] = " << m_bondedQuintetCalculators_flat_0[m_bondedQuintetCalculators_flat_0.size()-1]->className());  
+}
+
 
 bool Phase::findStages()
 {    
   bool finished = true;
 
   for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculators_flat.begin(); i != m_bondedTripletCalculators_flat.end(); ++i)
+    // must be findStage() first so that it is definitely executed
+    finished = (*i)->findStage() && finished; 
+
+  for(vector<QuintetCalculator*>::iterator i = m_bondedQuintetCalculators_flat.begin(); i != m_bondedQuintetCalculators_flat.end(); ++i)
     // must be findStage() first so that it is definitely executed
     finished = (*i)->findStage() && finished; 
 
@@ -664,8 +899,18 @@ bool Phase::findStages_0()
     // must be this order so that findSTage() is definitely executed
     finished = (*i)->findStage_0() && finished; 
 
+  for(vector<QuintetCalculator*>::iterator i = m_bondedQuintetCalculators_flat_0.begin(); i != m_bondedQuintetCalculators_flat_0.end(); ++i)
+    // must be this order so that findSTage() is definitely executed
+    finished = (*i)->findStage_0() && finished; 
+
   return finished;
 }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
+
+//29.06.2015 Quintetts need to be implemented with sortStages() 
 
 void Phase::sortStages()
 {
