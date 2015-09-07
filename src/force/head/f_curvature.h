@@ -33,6 +33,7 @@
 #ifndef _F_CURVATURE_H
 #define _F_CURVATURE_H
 
+#include "math.h"
 #include "gen_quintet.h"
 #include "simulation.h"
 #include "manager_cell.h"
@@ -52,9 +53,14 @@ class FCurvature : public GenQuintet
 	void init();
 
 /*!
- * m_kappa_A Effective Bending rigidity Energy area product
+ * m_kappa Effective Bending rigidity
 */
-	double m_kA;	
+	double m_k;	
+
+/*
+ * C0 Spontaneous curvature used for Bilayer Simulation
+*/
+	double C0;
 
 /*!
  * m_periodic use periodic boundarys. (03.08.2015) Cannot distiguish directions yet (implementation)
