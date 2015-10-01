@@ -83,6 +83,7 @@ libbasic_la_SOURCES = \
 	triplet_calculator.cpp \
 	triplet_calc_angular_dt2f.cpp \
 	triplet_calc_angular_f.cpp \
+	triplet_calc_angular_falpha.cpp \
 	vel_constraints.cpp\
 	triplet_calc_central_part_scalar.cpp \
 	val_calculator.cpp \
