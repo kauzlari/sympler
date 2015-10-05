@@ -127,6 +127,9 @@ void TripletCalcAngularFalpha::compute(triplet_t* tr) {
 
     // !!! this is PI- the bond angle !!! 
     cos_a = c12*invAbsC11c22; // = (rb-ra).(rc-rb)/(|rb-ra|*|rc-rb|)
+    // analytically cos_a !>1 and !<-1 so, the following correction should be OK
+    if(cos_a > 1.) cos_a = 1.;
+    if(cos_a < -1.) cos_a = -1.;
     angle = acos(cos_a); // returns value in [0,pi]
     // sin_a
     sin_a = sqrt(1-cos_a*cos_a);
@@ -136,11 +139,16 @@ void TripletCalcAngularFalpha::compute(triplet_t* tr) {
 
 
     
-    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << p->b->mySlot << " cos(theta) = " << cos_a);
-    //       MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << p->b->mySlot << " m_thetaEq = " << m_thetaEq);
-    //       MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << p->b->mySlot << " cosEQ = " << cos(PI*m_thetaEq/180));
-    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << p->b->mySlot << " m_cosEq = " << m_cosEq);
-    
+    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " cos(theta) = " << cos_a);
+    //       MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " m_thetaEq = " << m_thetaEq);
+    //       MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " cosEQ = " << cos(PI*m_thetaEq/180));
+    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " m_cosEq = " << m_cosEq);
+    if(tr->a->mySlot == 0 && tr->b->mySlot == 1 && tr->c->mySlot == 2) {
+        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " cos_a = " << cos_a);
+        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " 1-cos_a = " << 1.-cos_a << " acos(1.) = " << acos(1.));
+        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " angle = " << angle);
+    }
+
     if(angle == 0.) {
       if(m_angleEq == 0.)
 	F = -m_k; // because sin_a/a -> 1 for a->0
