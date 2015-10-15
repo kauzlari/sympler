@@ -158,7 +158,7 @@ void FCurvature::computeForces(int force_index)
       double M = 0;
       double L = 0;
 
-      int _1 = -1;
+      //int _1 = -1;
       int _j = 0;
       int _k = 0;
  
@@ -200,8 +200,8 @@ void FCurvature::computeForces(int force_index)
 	  /*!
 	   * Calculation of the derivatives dS/ds and dS/dt of the Surface S
 	  */
-	  Ss[_i] = (b22[_i]+b20[_i]-b02[_i]-b00[_i])/4;
-	  St[_i] = (b22[_i]-b20[_i]+b02[_i]-b00[_i])/4;
+	  Ss[_i] = (b22[_i]+b20[_i]-b02[_i]-b00[_i])/4.0;
+	  St[_i] = (b22[_i]-b20[_i]+b02[_i]-b00[_i])/4.0;
 
 	  /*!
 	   * The Coefficients of the first fundamental form
@@ -213,26 +213,27 @@ void FCurvature::computeForces(int force_index)
 	  /*!
 	   *  The Gradients of the first fundamental form coefficients with respect to the paricle ij
 	  */
-	  GradE00[_i] = (b00[_i]+b02[_i]-b20[_i]-b22[_i])/8;
-	  GradE20[_i] = (b22[_i]+b20[_i]-b02[_i]-b00[_i])/8;  //= GradE22
-	  GradE02[_i] = (b00[_i]+b02[_i]-b20[_i]-b22[_i])/8; //= GradE00
-	  GradE22[_i] = (b22[_i]+b20[_i]-b02[_i]-b00[_i])/8; 
+	  GradE00[_i] = (b00[_i]+b02[_i]-b20[_i]-b22[_i])/8.0;
+	  GradE20[_i] = (b22[_i]+b20[_i]-b02[_i]-b00[_i])/8.0;  //= GradE22
+	  GradE02[_i] = (b00[_i]+b02[_i]-b20[_i]-b22[_i])/8.0; //= GradE00
+	  GradE22[_i] = (b22[_i]+b20[_i]-b02[_i]-b00[_i])/8.0; 
 	  
-	  GradF00[_i] = (b00[_i]-b22[_i])/8;
-	  GradF20[_i] = (b02[_i]-b20[_i])/8;
-	  GradF02[_i] = (b20[_i]-b02[_i])/8;
-	  GradF22[_i] = (b22[_i]-b00[_i])/8;
+	  GradF00[_i] = (b00[_i]-b22[_i])/8.0;
+	  GradF20[_i] = (b02[_i]-b20[_i])/8.0;
+	  GradF02[_i] = (b20[_i]-b02[_i])/8.0;
+	  GradF22[_i] = (b22[_i]-b00[_i])/8.0;
 
-	  GradG00[_i] = (b00[_i]-b02[_i]+b20[_i]-b22[_i])/8;
-	  GradG20[_i] = (b00[_i]-b02[_i]+b20[_i]-b22[_i])/8; //= GradG00
-	  GradG02[_i] = (b22[_i]-b20[_i]+b02[_i]-b00[_i])/8;  //= GradG22
-	  GradG22[_i] = (b22[_i]-b20[_i]+b02[_i]-b00[_i])/8; 
+	  GradG00[_i] = (b00[_i]-b02[_i]+b20[_i]-b22[_i])/8.0;
+	  GradG20[_i] = (b00[_i]-b02[_i]+b20[_i]-b22[_i])/8.0; //= GradG00
+	  GradG02[_i] = (b22[_i]-b20[_i]+b02[_i]-b00[_i])/8.0;  //= GradG22
+	  GradG22[_i] = (b22[_i]-b20[_i]+b02[_i]-b00[_i])/8.0; 
 
 	}
 
   /*!
    *   Loop for alle the quantities that contain crossproducts 
   */
+
       for (int _i = 0; _i < SPACE_DIMS; _i++)
 	{   		
 	  /*!
@@ -240,60 +241,76 @@ void FCurvature::computeForces(int force_index)
 	  */
 	  _j = _i + 1;
 	  _k = _i + 2;	  
- 	  _1 = _1*-1;
+ 	  //_1 = _1*-1;
 	  if (_j > SPACE_DIMS-1) _j -= SPACE_DIMS;
 	  if (_k > SPACE_DIMS-1) _k -= SPACE_DIMS;
 
 	  /*!
 	   *Calculation of the non normed normalvector of the surface N = (St x Ss)
 	  */
-	  nv[_i] = _1*((b02[_j]-b20[_j])*(b00[_k]-b22[_k])-(b00[_j]-b22[_j])*(b02[_k]-b20[_k]));
+	  nv[_i]=(b02[_j]-b20[_j])*(b00[_k]-b22[_k])-(b00[_j]-b22[_j])*(b02[_k]-b20[_k]);
 
 	  /*!
 	   * The Coefficients of the second fundamental form: where N == L
 	  */
-	  N += (b22[_i]+b20[_i]+b02[_i]+b00[_i])*nv[_i]/16/2; //Sss.N = Sss.(Ss x St), N == L
-	  M += (b22[_i]-b20[_i]-b02[_i]+b00[_i])*nv[_i]/32/2;//Sst.N = Sst.(Ss x St)
+	  N += (b22[_i]+b20[_i]+b02[_i]+b00[_i])*nv[_i]/16.0; //Sss.N = Sss.(Ss x St), N == L (Durch 2 ???)
+	  M += (b22[_i]-b20[_i]-b02[_i]+b00[_i])*nv[_i]/32.0;//Sst.N = Sst.(Ss x St)
 	  //L += (b22[_i]+b20[_i]+b02[_i]+b00[_i])*nv[_i]/16//Stt.N = Stt.(Ss x St)
 
 	  /*!
 	   * The Gradients of the second fundamental form coefficients with respect to the paricle ij
 	  */
 	  // GradNij == GradLij
-	  GradN00[_i] = (b22[_j]*(b02[_k]-b20[_k])+b20[_j]*(b02[_k]+b22[_k])-b02[_j]*(b20[_k] + b22[_k]))/8;
-	  GradN20[_i] = (b22[_j]*(b00[_k]+b02[_k])+b02[_j]*(b00[_k]-b22[_k])-b00[_j]*(b02[_k] + b22[_k]))/8;
-	  GradN02[_i] = (b00[_j]*(b20[_k]+b22[_k])+b20[_j]*(b22[_k]-b00[_k])-b22[_j]*(b00[_k] + b20[_k]))/8;
-	  GradN22[_i] = (b00[_j]*(b20[_k]-b02[_k])+b02[_j]*(b00[_k]+b20[_k])-b20[_j]*(b00[_k] + b02[_k]))/8;
+	  GradN00[_i] = (b22[_j]*(b02[_k]-b20[_k])+b20[_j]*(b02[_k]+b22[_k])-b02[_j]*(b20[_k]+b22[_k]))/8.0;
+	  GradN20[_i] = (b22[_j]*(b00[_k]+b02[_k])+b02[_j]*(b00[_k]-b22[_k])-b00[_j]*(b02[_k]+b22[_k]))/8.0;
+	  GradN02[_i] = (b00[_j]*(b20[_k]+b22[_k])+b20[_j]*(b22[_k]-b00[_k])-b22[_j]*(b00[_k]+b20[_k]))/8.0;
+	  GradN22[_i] = (b00[_j]*(b20[_k]-b02[_k])+b02[_j]*(b00[_k]+b20[_k])-b20[_j]*(b00[_k]+b02[_k]))/8.0;
 	  // Controll Force
-	  GradN11[_i] = ((b00[_j]-b22[_j])*(b02[_k]-b20[_k])+b20[_j]*(b00[_k]-b22[_k])+b02[_j]*(b22[_k]-b00[_k]))/4;
+	  //GradN11[_i] = ((b00[_j]-b22[_j])*(b02[_k]-b20[_k])+b20[_j]*(b00[_k]-b22[_k])+b02[_j]*(b22[_k]-b00[_k]))/4.0;
 
-	  GradM00[_i] = (b22[_j]*(b02[_k]-b20[_k])+b02[_j]*(b20[_k]-b22[_k])+b20[_j]*(b22[_k]-b02[_k]))/16;
-	  GradM20[_i] = (b22[_j]*(b00[_k]-b02[_k])+b00[_j]*(b02[_k]-b22[_k])+b02[_j]*(b22[_k]-b00[_k]))/16;
-	  GradM02[_i] = (b22[_j]*(b20[_k]-b00[_k])+b20[_j]*(b00[_k]-b22[_k])+b00[_j]*(b22[_k]-b20[_k]))/16;
-	  GradM22[_i] = (b20[_j]*(b02[_k]-b00[_k])+b02[_j]*(b00[_k]-b20[_k])+b00[_j]*(b20[_k]-b02[_k]))/16;
+	  GradM00[_i] = (b22[_j]*(b02[_k]-b20[_k])+b02[_j]*(b20[_k]-b22[_k])+b20[_j]*(b22[_k]-b02[_k]))/16.0;
+	  GradM20[_i] = (b22[_j]*(b00[_k]-b02[_k])+b00[_j]*(b02[_k]-b22[_k])+b02[_j]*(b22[_k]-b00[_k]))/16.0;
+	  GradM02[_i] = (b22[_j]*(b20[_k]-b00[_k])+b20[_j]*(b00[_k]-b22[_k])+b00[_j]*(b22[_k]-b20[_k]))/16.0;
+	  GradM22[_i] = (b20[_j]*(b02[_k]-b00[_k])+b02[_j]*(b00[_k]-b20[_k])+b00[_j]*(b20[_k]-b02[_k]))/16.0;
 
 	  /*!
 	   * Gradients of the Area with respect to the particle ij , 2Grad[Awork]=2GradAw/(Awork*4)/8=2GradAw_1/Awork1
 	   */	  	
-	  GradAw1_00[_i] = (b00[_i]*(b02[_j]*b02[_j]+b02[_k]*b02[_k])-b02[_i]*(b00[_j]*b02[_j] + b00[_k]*b02[_k]));
-	  GradAw4_00[_i] = (b00[_i]*(b20[_j]*b20[_j]+b20[_k]*b20[_k])-b20[_i]*(b00[_j]*b20[_j] + b00[_k]*b20[_k]));
+	  GradAw1_00[_i] = (b00[_i]*(b02[_j]*b02[_j]+b02[_k]*b02[_k])-b02[_i]*(b00[_j]*b02[_j]+b00[_k]*b02[_k]));
+	  GradAw4_00[_i] = (b00[_i]*(b20[_j]*b20[_j]+b20[_k]*b20[_k])-b20[_i]*(b00[_j]*b20[_j]+b00[_k]*b20[_k]));
 
-	  GradAw1_02[_i] = (b02[_i]*(b00[_j]*b00[_j]+b00[_k]*b00[_k])-b00[_i]*(b02[_j]*b00[_j] + b02[_k]*b00[_k]));
-	  GradAw2_02[_i] = (b02[_i]*(b22[_j]*b22[_j]+b22[_k]*b22[_k])-b22[_i]*(b02[_j]*b22[_j] + b02[_k]*b22[_k]));
+	  GradAw1_02[_i] = (b02[_i]*(b00[_j]*b00[_j]+b00[_k]*b00[_k])-b00[_i]*(b02[_j]*b00[_j]+b02[_k]*b00[_k]));
+	  GradAw2_02[_i] = (b02[_i]*(b22[_j]*b22[_j]+b22[_k]*b22[_k])-b22[_i]*(b02[_j]*b22[_j]+b02[_k]*b22[_k]));
 
-	  GradAw2_22[_i] = (b22[_i]*(b02[_j]*b02[_j]+b02[_k]*b02[_k])-b02[_i]*(b22[_j]*b02[_j] + b22[_k]*b02[_k]));
-	  GradAw3_22[_i] = (b22[_i]*(b20[_j]*b20[_j]+b20[_k]*b20[_k])-b20[_i]*(b22[_j]*b20[_j] + b22[_k]*b20[_k]));
+	  GradAw2_22[_i] = (b22[_i]*(b02[_j]*b02[_j]+b02[_k]*b02[_k])-b02[_i]*(b22[_j]*b02[_j]+b22[_k]*b02[_k]));
+	  GradAw3_22[_i] = (b22[_i]*(b20[_j]*b20[_j]+b20[_k]*b20[_k])-b20[_i]*(b22[_j]*b20[_j]+b22[_k]*b20[_k]));
 
-	  GradAw3_20[_i] = (b20[_i]*(b22[_j]*b22[_j]+b22[_k]*b22[_k])-b22[_i]*(b20[_j]*b22[_j] + b20[_k]*b22[_k]));
-	  GradAw4_20[_i] = (b20[_i]*(b00[_j]*b00[_j]+b00[_k]*b00[_k])-b00[_i]*(b20[_j]*b00[_j] + b20[_k]*b00[_k]));
+	  GradAw3_20[_i] = (b20[_i]*(b22[_j]*b22[_j]+b22[_k]*b22[_k])-b22[_i]*(b20[_j]*b22[_j]+b20[_k]*b22[_k]));
+	  GradAw4_20[_i] = (b20[_i]*(b00[_j]*b00[_j]+b00[_k]*b00[_k])-b00[_i]*(b20[_j]*b00[_j]+b20[_k]*b00[_k]));
 
 	}	
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " Nv" << nv);
 
-	//MSG_DEBUG("FCurvature::calculate force", "calc b00" <<  b00);
-	//MSG_DEBUG("FCurvature::calculate force", "calc b20" <<  b20);
-	//MSG_DEBUG("FCurvature::calculate force", "calc b22" <<  b22);
-	//MSG_DEBUG("FCurvature::calculate force", "calc b02" <<  b02);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot  <<  "calc GradAw1_00" <<   GradAw1_00);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot  <<  "calc GradAw4_00" <<   GradAw4_00);
+
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw1_02" <<   GradAw1_02);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw2_01" <<   GradAw2_02);
+
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw2_22" <<   GradAw2_22);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw3_22" <<   GradAw3_22);
 	
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw3_20" <<   GradAw3_20);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw4_20" <<   GradAw4_20);
+	
+	
+
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot  <<  " calc GradN20" <<  GradN20);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot  <<  " calc GradN02" <<  GradN02);
+
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot  <<  " calc GradM20" <<  GradM20);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot  <<  " calc GradM02" <<  GradM02);
+
 	L = N;
 
 	// The mean curvature caculates as H = A/B*1/2 
@@ -310,11 +327,15 @@ void FCurvature::computeForces(int force_index)
         //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " Awork " << Awork);
 	
 	//Gradient in Working Area
-	GradAw00 = (GradAw1_00/Awork1+GradAw4_00/Awork4)/4;
-	GradAw02 = (GradAw1_02/Awork1+GradAw2_02/Awork2)/4;
-	GradAw22 = (GradAw2_22/Awork2+GradAw3_22/Awork3)/4;
-	GradAw20 = (GradAw3_20/Awork3+GradAw4_20/Awork4)/4;
+	GradAw00 = (GradAw1_00/Awork1+GradAw4_00/Awork4)/4.0;
+	GradAw02 = (GradAw1_02/Awork1+GradAw2_02/Awork2)/4.0;
+	GradAw22 = (GradAw2_22/Awork2+GradAw3_22/Awork3)/4.0;
+	GradAw20 = (GradAw3_20/Awork3+GradAw4_20/Awork4)/4.0;
 
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw00" <<   GradAw00);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw02" <<   GradAw02);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw22" <<   GradAw22);
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw20" <<   GradAw20);
 
 	// Variables for faster Caclulation
 	double B4 = B*B*B*B;
@@ -322,7 +343,7 @@ void FCurvature::computeForces(int force_index)
 	double A2 = A*A;
 
 	//Spontaeous Curvature Prefactor (H-C0/2)^2 (C0 = 0)
-	double HC02 = A2/B3/4;
+	double HC02 = A2/B3/4.0;
 	
 //	MSG_DEBUG("FCurvature::calculate force", "Normal Vector " <<  nv);
 //	MSG_DEBUG("FCurvature::calculate force", "calc A " <<  A);
@@ -332,41 +353,43 @@ void FCurvature::computeForces(int force_index)
 	/*
 	 *Calculation of the gradient of A (Grad(A)) Chain and Prodict rule on A
 	*/
-	GradA00 = GradE00*N+E*GradN00+GradG00*L+G*GradN00-2*M*GradF00-2*F*GradM00; 
-	GradA22 = GradE22*N+E*GradN22+GradG22*L+G*GradN22-2*M*GradF22-2*F*GradM22;  
-	GradA02 = GradE02*N+E*GradN02+GradG02*L+G*GradN02-2*M*GradF02-2*F*GradM02; //GradE02 = GradE00,GradG02 = GradG22
+	GradA00 = GradE00*N+E*GradN00+GradG00*L+G*GradN00-2.0*M*GradF00-2.0*F*GradM00; 
+	GradA22 = GradE22*N+E*GradN22+GradG22*L+G*GradN22-2.0*M*GradF22-2.0*F*GradM22;  
+	GradA02 = GradE02*N+E*GradN02+GradG02*L+G*GradN02-2.0*M*GradF02-2.0*F*GradM02; //GradE02 = GradE00,GradG02 = GradG22
 	//GradA02 = GradE00*N+E*GradN02+GradG22*L+G*GradN02-2*M*GradF02-2*F*GradM02;	
-	GradA20 = GradE20*N+E*GradN20+GradG20*L+G*GradN20-2*M*GradF20-2*F*GradM20; //GradE20 = GradE22,GradG20 = GradG00
+	GradA20 = GradE20*N+E*GradN20+GradG20*L+G*GradN20-2.0*M*GradF20-2.0*F*GradM20; //GradE20 = GradE22,GradG20 = GradG00
 	//GradA20 = GradE22*N+E*GradN20+GradG00*L+G*GradN20-2*M*GradF20-2*F*GradM20; 
 
 	/*
 	 *Calculation of: -4*Grad(H^2) = -Grad(A^2/B^2) = 3*A^2/B^4*Grad(B) - 2*A/B^3*Grad(A)
 	 *Where: Grad(B) = Grad(E)*G + Grad(G)*E - 2*F*Grad(F)
 	*/
-	F00 = 3*A2/B4*(GradE00*G+E*GradG00-2*F*GradF00) - 2*A/B3*(GradA00) ;
-	F22 = 3*A2/B4*(GradE22*G+E*GradG22-2*F*GradF22) - 2*A/B3*(GradA22) ;
-	F02 = 3*A2/B4*(GradE02*G+E*GradG02-2*F*GradF02) - 2*A/B3*(GradA02) ; //GradE02 = GradE00,GradG02 = GradG2
+	F00 = (3.0*A2/B4*(GradE00*G+E*GradG00-2.0*F*GradF00)-2.0*A/B3*GradA00)/2.0;
+	F22 = (3.0*A2/B4*(GradE22*G+E*GradG22-2.0*F*GradF22)-2.0*A/B3*GradA22)/2.0;
+	F02 = (3.0*A2/B4*(GradE02*G+E*GradG02-2.0*F*GradF02)-2.0*A/B3*GradA02)/2.0; //GradE02 = GradE00,GradG02 = GradG22
 	//F02 = 3*A2/B4*(GradE00*G+E*GradG22-2*F*GradF02) - 2*A/B3*(GradA02);
-	F20 = 3*A2/B4*(GradE20*G+E*GradG20-2*F*GradF20) - 2*A/B3*(GradA20) ; //GradE20 = GradE22,GradG20 = GradG00
+	F20 = (3.0*A2/B4*(GradE20*G+E*GradG20-2.0*F*GradF20)-2.0*A/B3*GradA20)/2.0; //GradE20 = GradE22,GradG20 = GradG00
 	//F20 = 3*A2/B4*(GradE22*G+E*GradE22-2*F*GradF20) - 2*A/B3*(GradA20); 
 
 	
 	double B12 = sqrt(B);
+
+	//double H = A/B12/B/2;
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " H=" << H);
 
 	if(C0 != 0 ){		
 		double B32 = B12*B;		
 		double B52 = B32*B;
 
 		//Prefactor 1/4 pulled from the Brakets >> 4
-		F00 = F00 + 2*C0*GradA00/B32 - 3*C0*A/B52*(GradE00*G+E*GradG00-2*F*GradF00);
-		F22 = F22 + 2*C0*GradA22/B32 - 3*C0*A/B52*(GradE22*G+E*GradG22-2*F*GradF22);
-		F02 = F02 + 2*C0*GradA02/B32 - 3*C0*A/B52*(GradE02*G+E*GradG02-2*F*GradF02);
-		F20 = F20 + 2*C0*GradA20/B32 - 3*C0*A/B52*(GradE20*G+E*GradG20-2*F*GradF20);
+		F00 = F00 + 2.0*C0*GradA00/B32-3.0*C0*A/B52*(GradE00*G+E*GradG00-2.0*F*GradF00);
+		F22 = F22 + 2.0*C0*GradA22/B32-3.0*C0*A/B52*(GradE22*G+E*GradG22-2.0*F*GradF22);
+		F02 = F02 + 2.0*C0*GradA02/B32-3.0*C0*A/B52*(GradE02*G+E*GradG02-2.0*F*GradF02);
+		F20 = F20 + 2.0*C0*GradA20/B32-3.0*C0*A/B52*(GradE20*G+E*GradG20-2.0*F*GradF20);
 		//Spontaeous Curvature Prefactor (H-C0/2)^2 (C0 != 0)
-		HC02 = (A/B32-C0)*(A/B32-C0)/4;
+		HC02 = (A/B32-C0)*(A/B32-C0)/4.0;
 
-		//double H = A/B32/2;
-		//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " H=" << H);
+
 	}
 	
 	//F11 = -2*A/(B*B*B)*(GradN11*(E+G));
@@ -377,25 +400,25 @@ void FCurvature::computeForces(int force_index)
 //       MSG_DEBUG("FCurvature::calculate force", "particle " << q->b->mySlot << " m_cosEq = " << m_cosEq);
       
 	
-      force_p00 = m_k*(Awork/2*F00 - 2*GradAw00*HC02); 
+      force_p00 = m_k*(Awork/2.0*F00 - 2.0*GradAw00*HC02); 
         //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p00->mySlot << " force_p00 " << force_p00);
-      force_p20 = m_k*(Awork/2*F20 - 2*GradAw20*HC02);
+      force_p20 = m_k*(Awork/2.0*F20 - 2.0*GradAw20*HC02);
         //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p20->mySlot << " force_p20 " << force_p20);
-      force_p22 = m_k*(Awork/2*F22 - 2*GradAw22*HC02);
+      force_p22 = m_k*(Awork/2.0*F22 - 2.0*GradAw22*HC02);
        //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p22->mySlot << " force_p22 " << force_p22);
-      force_p02 = m_k*(Awork/2*F02 - 2*GradAw02*HC02);
+      force_p02 = m_k*(Awork/2.0*F02 - 2.0*GradAw02*HC02);
         //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p02->mySlot << " force_p02 " << force_p02);   
-      force_p11 = -1*(force_p00+force_p20+force_p02+force_p22);
+      force_p11 = -1.0*(force_p00+force_p20+force_p02+force_p22);
 
-      //Test Force consitency force_p11_1 === force_p11
+      //Test Force consitency force_p11_1 === force_p11Grad
       //force_p11_1 = m_k*Awork/2*F11-force_p11;
       //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " force_dp11 " << force_p11_1);
-      //MSG_DEBUG("FCurvature::calculate force", "particle " << p->p11->mySlot << " force_p11_1 " << force_p11_1);
+      //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " force_p11_1 " << force_p11_1);
 
       q->p00->force[force_index] += force_p00;
       q->p02->force[force_index] += force_p02;
       q->p22->force[force_index] += force_p22;
-      q->p02->force[force_index] += force_p02;
+      q->p20->force[force_index] += force_p20;
       q->p11->force[force_index] += force_p11;
     }
 }
