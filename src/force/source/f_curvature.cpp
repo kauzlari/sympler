@@ -323,14 +323,14 @@ void FCurvature::computeForces(int force_index)
 	double Awork3 = sqrt(b20b20*b22b22-(b20b22*b20b22));
 	double Awork4 = sqrt(b00b00*b20b20-(b00b20*b00b20));
         double Awork =  Awork1 + Awork2 + Awork3 + Awork4;
-	Awork = Awork/4;
+	Awork = Awork/2;
         //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " Awork " << Awork);
 	
 	//Gradient in Working Area
-	GradAw00 = (GradAw1_00/Awork1+GradAw4_00/Awork4)/4.0;
-	GradAw02 = (GradAw1_02/Awork1+GradAw2_02/Awork2)/4.0;
-	GradAw22 = (GradAw2_22/Awork2+GradAw3_22/Awork3)/4.0;
-	GradAw20 = (GradAw3_20/Awork3+GradAw4_20/Awork4)/4.0;
+	GradAw00 = (GradAw1_00/Awork1+GradAw4_00/Awork4)/2.0;
+	GradAw02 = (GradAw1_02/Awork1+GradAw2_02/Awork2)/2.0;
+	GradAw22 = (GradAw2_22/Awork2+GradAw3_22/Awork3)/2.0;
+	GradAw20 = (GradAw3_20/Awork3+GradAw4_20/Awork4)/2.0;
 
 	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw00" <<   GradAw00);
 	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot <<  "calc GradAw02" <<   GradAw02);
