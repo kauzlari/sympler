@@ -374,8 +374,8 @@ void FCurvature::computeForces(int force_index)
 	
 	double B12 = sqrt(B);
 
-	double H = A/B12/B/2;
-	MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " H=" << H);
+	//double H = A/B12/B/2;
+	//MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " H=" << H);
 
 	if(C0 != 0 ){		
 		double B32 = B12*B;		
