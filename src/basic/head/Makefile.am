@@ -75,6 +75,7 @@ include_HEADERS = \
 	property_list.h \
 	quintet.h \
 	quintet_calculator.h \
+	quintet_calc_curvature_f.h \
 	random.h \
 	reflector.h \
 	simulation.h \

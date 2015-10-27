@@ -116,6 +116,10 @@ void QuintetCalculator::setup()
       throw gError("QuintetCalculator::setup", ": Attribute 'species2' has value \"undefined\"!"); 
     if(m_species[2] == "undefined")
       throw gError("QuintetCalculator::setup", ": Attribute 'species3' has value \"undefined\"!"); 
+    if(m_species[3] == "undefined")
+      throw gError("QuintetCalculator::setup", ": Attribute 'species4' has value \"undefined\"!"); 
+    if(m_species[4] == "undefined")
+      throw gError("QuintetCalculator::setup", ": Attribute 'species5' has value \"undefined\"!"); 
 
     m_firstColour = M_MANAGER->getColour(m_species[0]);
     m_secondColour = M_MANAGER->getColour(m_species[1]);
@@ -127,7 +131,7 @@ void QuintetCalculator::setup()
     if(m_overwrite)
     {
 
-      for(size_t p = 0; p < 3; ++p) {
+      for(size_t p = 0; p < 5; ++p) {
 	try
 	  {
 	    m_slots[p] = Particle::s_tag_format[M_MANAGER->getColour(m_species[p])].indexOf(m_symbolName, m_datatype);
@@ -211,7 +215,7 @@ void QuintetCalculator::setup()
 
 void QuintetCalculator::setupAfterParticleCreation()
 {
-  m_boxSize = M_PHASE->boundary()->boundingBox().size();
+	m_boxSize = M_PHASE->boundary()->boundingBox().size();
 
   // FOLLOWING check cannot be done here because quintet lists 
   // are also created in a setupAfterParticleCreation()
@@ -247,10 +251,11 @@ bool QuintetCalculator::findStage()
 
 // check for consistency of calculator's and quintets' species
 void QuintetCalculator::checkConsistency() {
-
+//MSG_DEBUG("QuintetCalculator::checkConsistency", ": Start");    
   quintetList* quin = M_PHASE->returnQuintetList(m_listName);
-  
+//MSG_DEBUG("QuintetCalculator::checkConsistency", ": Return Quintet Lits");    
   quintetList::iterator firstQuin = quin->begin();
+//MSG_DEBUG("QuintetCalculator::checkConsistency", ": Iterate.");    
   
   if(M_MANAGER->getColour(m_species[0]) != firstQuin->p00->c)
     throw gError("QuintetCalculator::findStage", "For module " + name() + ": Inconsistency between the attribute species1=\"" + m_species[0] + "\" of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");

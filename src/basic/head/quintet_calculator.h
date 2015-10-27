@@ -135,7 +135,7 @@ protected:
    */
   virtual QuintetCalculator* copyMySelf() = 0;
 /*   { */
-/*     return new TripletCalculator(*this); */
+/*     return new QuintetCalculator(*this); */
 /*   } */
 
 
@@ -157,13 +157,13 @@ public:
   }
 
   /*!
-   * Compute cached properties for \a triplet_t \a tr
-   * @param tr The \a triplet_t for which to compute the cached properties
+   * Compute cached properties for \a quintet_t \a q
+   * @param q The \a quintet_t for which to compute the cached properties
    */
 #ifndef _OPENMP
-  virtual void compute(quintet_t* tr) = 0;
+  virtual void compute(quintet_t* q) = 0;
 #else
-  virtual void compute(quintet_t* tr/*, size_t thread_no*/ /*FIXME: parallelise!*/) = 0;
+  virtual void compute(quintet_t* q/*, size_t thread_no*/ /*FIXME: parallelise!*/) = 0;
 #endif
 
 #ifdef _OPENMP

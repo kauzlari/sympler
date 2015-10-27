@@ -46,6 +46,7 @@
 /* #include "triplet.h" */
 /* #include "triplet_calc_angular_f.h" */
 
+
 using namespace std;
 
 //---- Macros ---- 

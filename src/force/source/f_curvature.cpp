@@ -70,7 +70,7 @@ void FCurvature::init()
 	m_properties.setClassName("FCurvature");
 
 	m_properties.setDescription(
-			"This is a Force based on the curvature of the surface represented by five particles. The five particle are assumed to form a Surface that can be expressed by Lagrange polynomials. This potential is only valid in R3. Fij = kA/4*Grad_rij(H^2).");
+			"This is a force based on the curvature of the surface represented by five particles. The five particle are assumed to form a surface that can be expressed by lagrange polynomials. This potential is only valid in R3. Fij = kA/4*Grad_rij(H^2).");
 
 	DOUBLEPC(k, m_k, -1,"Bending rigidity (Energy).");
 	
