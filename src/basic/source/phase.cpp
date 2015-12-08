@@ -214,17 +214,17 @@ void Phase::read(const xmlNode *xmln)
   NodeManyChildren::read(xmln);
 		
   m_manager = new ManagerCell(this);
+
+  if(!m_boundary)
+    throw gError("Phase::read", "No Boundary defined.");
+  if(!m_pairCreator)
+    throw gError("Phase::read", "No PairCreator defined.");
 }
 
 
 void Phase::setup()
 {
   NodeManyChildren::setup();
-
-  if(!m_boundary)
-    throw gError("Phase::setup", "No boundary defined.");
-  if(!m_pairCreator)
-    throw gError("Phase::setup", "No pair creator defined.");
 
   if (((Simulation*) m_parent)->randomize())
     m_rng.setSeed(getpid());
