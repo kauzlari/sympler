@@ -32,7 +32,7 @@
 #include "threads.h"
 #include "particle.h"
 #include "simulation.h"
-#include "triplet_calc_angular_f.h"
+#include "triplet_calc_angular_falpha.h"
 
 #include "triplet.h"
 
@@ -43,9 +43,9 @@
 // #define PI 3.141592654
 #define PI M_PI
 
-const SymbolRegister<TripletCalcAngularF> triplet_calc_angular_f("TripletCalcAngularF");
+const SymbolRegister<TripletCalcAngularFalpha> triplet_calc_angular_falpha("TripletCalcAngularFalpha");
 
-TripletCalcAngularF::TripletCalcAngularF(Simulation *simulation): TripletCalculator(simulation)
+TripletCalcAngularFalpha::TripletCalcAngularFalpha(Simulation *simulation): TripletCalculator(simulation)
 {
   // does not depend on other symbols
   m_stage = 0;
@@ -59,15 +59,15 @@ TripletCalcAngularF::TripletCalcAngularF(Simulation *simulation): TripletCalcula
 }
 
 
-void TripletCalcAngularF::init()
+void TripletCalcAngularFalpha::init()
 {
   m_properties.setClassName("TripletCalcPart");
-  m_properties.setName("TripletCalcAngularF");
+  m_properties.setName("TripletCalcAngularFalpha");
 
   m_properties.setDescription( 
-			      "This TripletCalculator computes an angular force derived from the potential energy V=0.5*K*(cos(theta)-cos(theta_eq)).");
+			      "This TripletCalculator computes an angular force derived from the potential energy V=0.5*K*(theta-theta_eq).");
   
-  DOUBLEPC(K, m_k, -1,"Spring force constant.");
+  DOUBLEPC(K, m_k, -1,"Spring force constant K.");
   DOUBLEPC(thetaEq, m_thetaEq, -1,"equilibrium angle (in degrees).");
   
 
@@ -77,22 +77,24 @@ void TripletCalcAngularF::init()
 }
 
 
-void TripletCalcAngularF::setup()
+void TripletCalcAngularFalpha::setup()
 {
   TripletCalculator::setup();
 
-  m_cosEq = cos(PI-PI*m_thetaEq/180.);	
+  m_angleEq = PI-PI*m_thetaEq/180.;
+  m_cosEq = cos(m_angleEq);	
+//   m_cosEq = cos(PI-PI*m_thetaEq/180.);	
 }
 
-void TripletCalcAngularF::setupAfterParticleCreation()
+void TripletCalcAngularFalpha::setupAfterParticleCreation()
 {
   TripletCalculator::setupAfterParticleCreation();
 }
 
 #ifndef _OPENMP
-void TripletCalcAngularF::compute(triplet_t* tr) {
+void TripletCalcAngularFalpha::compute(triplet_t* tr) {
 #else
-  void TripletCalcAngularF::compute(triplet_t* tr/*, size_t thread_no*/ /*FIXME: paralelise!*/) {
+  void TripletCalcAngularFalpha::compute(triplet_t* tr/*, size_t thread_no*/ /*FIXME: paralelise!*/) {
 #endif
       // FIXME!!!: currently not parallelised
     point_t b1, b2; // vector
@@ -100,7 +102,7 @@ void TripletCalcAngularF::compute(triplet_t* tr) {
     double c12 = 0;
     double c22 = 0; // scalar product
 //     double abs_b1, abs_b2;
-    double cos_a; //the cosine of the angle
+    double cos_a, sin_a , angle; //the cos and sin of the angle, the angle
     double F;
 //     double a;
     point_t force_a, force_b, force_c;
@@ -125,22 +127,44 @@ void TripletCalcAngularF::compute(triplet_t* tr) {
 
     // !!! this is PI- the bond angle !!! 
     cos_a = c12*invAbsC11c22; // = (rb-ra).(rc-rb)/(|rb-ra|*|rc-rb|)
+    // analytically cos_a !>1 and !<-1 so, the following correction should be OK
+    if(cos_a > 1.) cos_a = 1.;
+    if(cos_a < -1.) cos_a = -1.;
+    angle = acos(cos_a); // returns value in [0,pi]
+    // sin_a
+    sin_a = sqrt(1-cos_a*cos_a);
+    // in the checked regions, sin is negative
+    if((angle < 0 && angle > -M_PI) || (angle > M_PI)) 
+      sin_a *= -1.;
+
+
     
-    //        MSG_DEBUG("TripletCalcAngularF::calculate force", "particle " << p->b->mySlot << " cos(theta) = " << cos_a);
-    //       MSG_DEBUG("TripletCalcAngularF::calculate force", "particle " << p->b->mySlot << " m_thetaEq = " << m_thetaEq);
-    //       MSG_DEBUG("TripletCalcAngularF::calculate force", "particle " << p->b->mySlot << " cosEQ = " << cos(PI*m_thetaEq/180));
-    //        MSG_DEBUG("TripletCalcAngularF::calculate force", "particle " << p->b->mySlot << " m_cosEq = " << m_cosEq);
-    
-    
-    F = -m_k*(cos_a-m_cosEq);
-    
+    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " cos(theta) = " << cos_a);
+    //       MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " m_thetaEq = " << m_thetaEq);
+    //       MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " cosEQ = " << cos(PI*m_thetaEq/180));
+    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " m_cosEq = " << m_cosEq);
+    if(tr->a->mySlot == 0 && tr->b->mySlot == 1 && tr->c->mySlot == 2) {
+        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " cos_a = " << cos_a);
+        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " 1-cos_a = " << 1.-cos_a << " acos(1.) = " << acos(1.));
+        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << tr->b->mySlot << " angle = " << angle);
+    }
+
+    if(angle == 0.) {
+      if(m_angleEq == 0.)
+	F = -m_k; // because sin_a/a -> 1 for a->0
+      else
+	throw gError("TripletCalcAngularFalpha::compute", "angle is zero but equilibium angle is not. So (angle-m_angleEq)/sin(angle) would lead to diverging force. Don't know (yet), how to handle this. Must abort. Sorry.");
+    }
+    else
+      F = -m_k*(angle-m_angleEq)/sin_a;
+   
     // fa = F*((rb-ra).(rc-rb)/(rb-ra)*(rb-ra)-(rc-rb))/(|rb-ra|*|rc-rb|)
     force_a = F*(c12/c11*b1-b2)*invAbsC11c22; 
-    //        MSG_DEBUG("TripletCalcAngularF::calculate force", "particle " << p->a->mySlot << " force_a " << force_a);
+    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << p->a->mySlot << " force_a " << force_a);
     force_c = F*(b1-c12/c22*b2)*invAbsC11c22;
-    //        MSG_DEBUG("TripletCalcAngularF::calculate force", "particle " << p->c->mySlot << " force_c " << force_c);
+    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << p->c->mySlot << " force_c " << force_c);
     force_b = -1*force_a - force_c;
-    //        MSG_DEBUG("TripletCalcAngularF::calculate force", "particle " << p->b->mySlot << " force_b " << force_b);
+    //        MSG_DEBUG("TripletCalcAngularFalpha::calculate force", "particle " << p->b->mySlot << " force_b " << force_b);
     tr->a->tag.pointByOffset(m_slots[0]) += force_a;
     tr->b->tag.pointByOffset(m_slots[1]) += force_b;
     tr->c->tag.pointByOffset(m_slots[2]) += force_c;
@@ -154,7 +178,7 @@ void TripletCalcAngularF::compute(triplet_t* tr) {
      * stage was already found. Symbols, which determine the stage during run-time 
      * have to redefine this function.
      */
-    bool TripletCalcAngularF::findStage()
+    bool TripletCalcAngularFalpha::findStage()
     {
 
       // currently (2010/05/17) this always returns true
@@ -168,7 +192,7 @@ void TripletCalcAngularF::compute(triplet_t* tr) {
      * stage was already found. Symbols, which determine the stage during run-time 
      * have to redefine this function.
      */
-    bool TripletCalcAngularF::findStage_0()
+    bool TripletCalcAngularFalpha::findStage_0()
     {
       // currently (2010/05/17) this always returns true
       return TripletCalculator::findStage_0();
@@ -177,7 +201,7 @@ void TripletCalcAngularF::compute(triplet_t* tr) {
 
 #ifdef _OPENMP
 // FIXME: This module is not yet parallelised. If you parallelise, the following function could roughly do what is commented out now
-void TripletCalcAngularF::mergeCopies(size_t thread_no) {
+void TripletCalcAngularFalpha::mergeCopies(size_t thread_no) {
 //   size_t slot1 = m_slots[0];
 //   size_t slot2 = m_slots[1];
 //   size_t slot3 = m_slots[2];
