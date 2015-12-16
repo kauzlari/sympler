@@ -276,6 +276,8 @@ void ValCalculatorBC::setupAfterParticleCreation()
       // I have to reserve the memory here too because the slots must correspond to the particle slots
       m_periodicWallTable.resize(phase->returnNofFrozenPC(m_wallColour) + 
 				 phase->returnNofFrozenPC(m_wallColour));
+  if(!m_wallTable.size())
+    throw gError("ValCalculatorBC::setupAfterParticleCreation", "No frozen particles of species " + m_wallSpecies + " found. Have you created them? Have you set attribute 'frozen' of this module (and possibly the ParticleCreator's) correctly?");    
     }
   else
     {
@@ -284,9 +286,10 @@ void ValCalculatorBC::setupAfterParticleCreation()
       // I have to reserve the memory here too because the slots must correspond to the particle slots
       m_periodicWallTable.resize(phase->returnNofPartC(m_wallColour) + 
 				 phase->returnNofPartC(m_wallColour));
-    }
   if(!m_wallTable.size())
-    throw gError("ValCalculatorBC::setupAfterParticleCreation", "No particles of species " + m_wallSpecies + " found.");    
+    throw gError("ValCalculatorBC::setupAfterParticleCreation", "No free particles of species " + m_wallSpecies + " found. Have you created them? Have you set attribute 'frozen' of this module (and possibly the ParticleCreator's) correctly?");    
+    }
+
   FOR_EACH_PARTICLE_C
       (phase,
        (size_t) m_wallColour,
