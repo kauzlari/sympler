@@ -350,6 +350,7 @@ void sayHello() {
 #include "pair_vector.h"
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
+#include "triplet_calc_angular_falpha.h"
 #include "triplet_calc_central_part_scalar.h"
 // #include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_vels.h"
@@ -579,6 +580,7 @@ void link_all_properly()
   new PairParticleVector(NULL);
   new TripletCalcAngularDt2F(NULL);
   new TripletCalcAngularF(NULL);
+  new TripletCalcAngularFalpha(NULL);
   new TripletCalcCentralPartScalar(NULL);
 //   new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCVels(NULL);
