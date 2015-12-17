@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -60,7 +60,7 @@ void ThermostatPeters::init()
   m_properties.setClassName("ThermostatPeters");
 
   m_properties.setDescription(
-    "Parnet class for Peters thermostats. See: E. A. J. F. Peters, " 
+    "Parent class for Peters thermostats. See: E. A. J. F. Peters, " 
       "Europhys. Lett. 66 (3), pp. 311.");
 
   STRINGPC

@@ -64,7 +64,10 @@ void ThermostatPetersIso::init()
   m_properties.setClassName("ThermostatPetersIso");
 
   m_properties.setDescription(
-      "Isothermal Peters thermostat. See: E. A. J. F. Peters, Europhys. Lett. 66 (3), pp. 311.");
+    "Isothermal Peters thermostat. See: E. A. J. F. Peters, Europhys. Lett. 66 (3), pp. 311.\n"
+    "NOTE: Equal masses m=1 are assumed for all thermalised particles!"
+
+);
 
   DOUBLEPC
     (kBToverM, m_temperature, 0,
