@@ -68,15 +68,25 @@ void ThermostatPetersIso::init()
 
   DOUBLEPC
     (kBToverM, m_temperature, 0,
-     "k_BT/m = <v^2> to thermalize to.");
+     "k_BT to thermalize to.");
+
+  DOUBLEPC
+    (mass1, m_mass1, 0,
+     "Particle mass of species 1.");
+  DOUBLEPC
+    (mass2, m_mass2, 0,
+     "Particle mass of species 2.");
 
   m_temperature = 1;
+  m_mass1 = 1;
+  m_mass2 = 1; 
 }
 
 
 void ThermostatPetersIso::setup()
 {
   ThermostatPeters::setup();
+  m_massred = m_mass1*m_mass2/(m_mass1+m_mass2);
 }
 
 
@@ -97,11 +107,11 @@ void ThermostatPetersIso::thermalize(Phase* phase)
 //       RandomNumberGenerator m_rng;
          /* ---- Peters Scheme II ---- */
 
-         weight *= 2 * weight * temp/*self->m_dissipation*/ * self->m_dt;
+         weight *= weight * temp/*self->m_dissipation*/ * self->m_dt / m_massred;
 
-         double a = (1-exp(-weight))/2;
+         double a = (1-exp(-weight)) * m_massred;
          double b = sqrt
-               ((1-exp(-2*weight))*self->m_temperature/2)*m_rng.normal(1);
+               ((1-exp(-2*weight))*self->m_temperature *  m_massred)*m_rng.normal(1);
 
 
          /* ---- Peter Scheme I ---- */
@@ -125,11 +135,11 @@ void ThermostatPetersIso::thermalize(Phase* phase)
        point_t dv = h*rij;
 
        if (pair->actsOnFirst()) {
-         pair->firstPart()->v += dv;
+         pair->firstPart()->v += dv/m_mass1;
        }
 
        if (pair->actsOnSecond()) {
-         pair->secondPart()->v -= dv;
+         pair->secondPart()->v -= dv/m_mass2;
        }
 
 #ifdef ENABLE_PTHREADS

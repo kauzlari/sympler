@@ -55,6 +55,21 @@ class ThermostatPetersIso : public ThermostatPeters
     double m_temperature;
 
   /*!
+     * Mass of the first species
+   */
+    double m_mass1;
+
+  /*!
+     * Mass of the second species
+   */
+    double m_mass2;
+
+  /*!
+     * Reduced mass (see reference)
+   */
+    double m_massred;
+
+  /*!
      * Initialize the property list
    */
     void init();
