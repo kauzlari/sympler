@@ -221,7 +221,7 @@ string expr_help_str
      "        * Matrix:Matrix = Scalar (contraction on tensors), e.g. \"{ai}:{bj}\"\n"
      "        * Tensor:Vector = Vector (Matrix-Vector product), e.g. \"{ai}:[bj]\"\n"
      "   * \"@\"\n"
-     "        * Vector@Vector = Tensor (inner product), e.g. \"[ai]@[bj]\"\n"
+     "        * Vector@Vector = Tensor (outer product), e.g. \"[ai]@[bj]\"\n"
      "   * \"^\" = exponentiation, e.g., \"a^b\"\n"
      "   * \"*\" = multiplication, component wise on Matrix and Vector, e.g., \"a*b\" or also \"{ai}*{bj}\"\n"
      "   * \"�\"\n"
