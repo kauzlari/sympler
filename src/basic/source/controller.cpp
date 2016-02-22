@@ -40,6 +40,7 @@
 #include "particle_cache.h"
 #include "threads.h"
 #include "triplet.h"
+#include "quintet.h"
 
 #ifdef _OPENMP
   #include "omp.h"
@@ -807,12 +808,26 @@ void Controller::runSymbols() {
       //FIXME: parallelise!
       size_t tlSize = phase->tripletLists()->size(); 
       for(size_t itl = 0; itl < tlSize; ++itl) {
-	if(phase->maxBondedStage(itl) >= stage) {
+	if(phase->maxBondedStage_triplet(itl) >= stage) {
 	  tripletList* tL = phase->returnTripletList(itl);
 	  // loop over triplets of current connected list 
 	  tripletListItr trEnd = tL->end();
 	  for(tripletListItr tr = tL->begin(); tr != trEnd; ++tr) {
 	    tr->runBondedTripletCalculators(stage, itl);
+	  }
+	}
+      }
+
+      // the bonded quintets
+      //FIXME: parallelise!
+      size_t qlSize = phase->quintetLists()->size(); 
+      for(size_t iql = 0; iql < qlSize; ++iql) {
+	if(phase->maxBondedStage_quintet(iql) >= stage) {
+	  quintetList* qL = phase->returnQuintetList(iql);
+	  // loop over triplets of current connected list 
+	  quintetListItr quinEnd = qL->end();
+	  for(quintetListItr quin = qL->begin(); quin != quinEnd; ++quin) {
+	    quin->runBondedQuintetCalculators(stage, iql);
 	  }
 	}
       }
@@ -1086,7 +1101,7 @@ void Controller::runSymbols_0() {
       size_t tlSize = phase->tripletLists()->size(); 
  //    MSG_DEBUG("Controller::runSymbols_0", "tlSize = " << tlSize); 
       for(size_t itl = 0; itl < tlSize; ++itl) {
-	    if(phase->maxBondedStage_0(itl) >= stage) {
+	    if(phase->maxBondedStage_triplet_0(itl) >= stage) {
 	      tripletList* tL = phase->returnTripletList(itl);
 	      // loop over pairs of current connected list 
 	      tripletListItr trEnd = tL->end();
@@ -1095,6 +1110,20 @@ void Controller::runSymbols_0() {
 	        tr->runBondedTripletCalculators_0(stage, itl);
 	      }
 	    }
+      }
+
+      // the bonded quintets
+      //FIXME: parallelise!
+      size_t qlSize = phase->quintetLists()->size(); 
+      for(size_t iql = 0; iql < qlSize; ++iql) {
+	if(phase->maxBondedStage_quintet_0(iql) >= stage) {
+	  quintetList* qL = phase->returnQuintetList(iql);
+	  // loop over triplets of current connected list 
+	  quintetListItr quinEnd = qL->end();
+	  for(quintetListItr quin = qL->begin(); quin != quinEnd; ++quin) {
+	    quin->runBondedQuintetCalculators_0(stage, iql);
+	  }
+	}
       }
 
 

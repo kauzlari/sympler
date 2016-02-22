@@ -72,8 +72,8 @@ void QuintetCalculator::init()
   STRINGPC(species1, m_species[0], "Species of first particle in the quintets.");
   STRINGPC(species2, m_species[1], "Species of second particle in the quintets.");
   STRINGPC(species3, m_species[2], "Species of third particle in the quintets.");
-  STRINGPC(species4, m_species[3], "Species of second particle in the quintets.");
-  STRINGPC(species5, m_species[4], "Species of third particle in the quintets.");
+  STRINGPC(species4, m_species[3], "Species of fourth particle in the quintets.");
+  STRINGPC(species5, m_species[4], "Species of fifth particle in the quintets.");
   
   BOOLPC(periodic, m_periodic, "Should periodic boundary conditions be applied to the connections?")
 
@@ -180,6 +180,28 @@ void QuintetCalculator::setup()
       else
         // see CONVENTION5 for rule about persistencies
 	m_slots[2] = Particle::s_tag_format[M_MANAGER->getColour(m_species[2])].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
+
+      if(m_species[3] == m_species[0])
+	m_slots[3] = m_slots[0];
+      else if(m_species[3] == m_species[1])
+	m_slots[3] = m_slots[1];
+      else if(m_species[3] == m_species[2])
+	m_slots[3] = m_slots[2];
+      else
+        // see CONVENTION5 for rule about persistencies
+	m_slots[3] = Particle::s_tag_format[M_MANAGER->getColour(m_species[3])].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
+
+      if(m_species[4] == m_species[0])
+	m_slots[4] = m_slots[0];
+      else if(m_species[4] == m_species[1])
+	m_slots[4] = m_slots[1];
+      else if(m_species[4] == m_species[2])
+	m_slots[4] = m_slots[2];
+      else if(m_species[4] == m_species[3])
+	m_slots[4] = m_slots[3];
+      else
+        // see CONVENTION5 for rule about persistencies
+	m_slots[4] = Particle::s_tag_format[M_MANAGER->getColour(m_species[4])].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
 
     } // end of else of if(m_overwrite == false)        
     

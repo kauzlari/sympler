@@ -242,12 +242,23 @@ class Phase: public NodeManyChildren
   /*!
    * The biggest stage occuring in \a m_bondedTripletCalculators . This is determined during runtime in Phase::sortStages()
    */
-  vector<size_t> m_maxBondedStage;
+  vector<size_t> m_maxBondedStage_triplet;
 
   /*!
    * The biggest stage occuring in \a m_bondedTripletCalculators_0 . This is determined during runtime in Phase::sortStages_0()
    */
-  vector<size_t> m_maxBondedStage_0;
+  vector<size_t> m_maxBondedStage_triplet_0;
+
+  /*!
+   * The biggest stage occuring in \a m_bondedQuintetCalculators . This is determined during runtime in Phase::sortStages()
+   */
+  vector<size_t> m_maxBondedStage_quintet;
+
+  /*!
+   * The biggest stage occuring in \a m_bondedQuintetCalculators_0 . This is determined during runtime in Phase::sortStages_0()
+   */
+  vector<size_t> m_maxBondedStage_quintet_0;
+
 
   /*!
    * Total number of particle
@@ -908,19 +919,35 @@ public:
   void sortStages_0();
       
   /*!
-   * return the \a m_maxBondedStage[icl] 
+   * return the \a m_maxBondedStage_triplet[icl] 
    */
-  size_t maxBondedStage(size_t icl) const
+  size_t maxBondedStage_triplet(size_t icl) const
   { 
-    return m_maxBondedStage[icl];
+    return m_maxBondedStage_triplet[icl];
   }
       
   /*!
-   * return the \a m_maxBondedStage_0[icl] 
+   * return the \a m_maxBondedStage_triplet_0[icl] 
    */
-  size_t maxBondedStage_0(size_t icl) const
+  size_t maxBondedStage_triplet_0(size_t icl) const
   { 
-    return m_maxBondedStage_0[icl];
+    return m_maxBondedStage_triplet_0[icl];
+  }
+
+  /*!
+   * return the \a m_maxBondedStage_quintet[icl] 
+   */
+  size_t maxBondedStage_quintet(size_t icl) const
+  { 
+    return m_maxBondedStage_quintet[icl];
+  }
+      
+  /*!
+   * return the \a m_maxBondedStage_quintet_0[icl] 
+   */
+  size_t maxBondedStage_quintet_0(size_t icl) const
+  { 
+    return m_maxBondedStage_quintet_0[icl];
   }
       
   /*!
