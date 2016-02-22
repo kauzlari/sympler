@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -43,6 +43,7 @@
 #include "simulation.h"
 #include "manager_cell.h"
 #include "triplet.h"
+#include "quintet.h"
 
 using namespace std;
 #define M_BOUNDARY ((Boundary*) m_parent)
@@ -151,7 +152,7 @@ void ParticleConnectorFile::setup() {
       pos >> skipws >> species1;
       pos >> skipws >> species2;
 
-//       MSG_DEBUG("ParticleConnectorFile::setup", "pair case: list=" << type << ", species1 = " << species1 << ", species2=" << species2);
+       MSG_DEBUG("ParticleConnectorFile::setup", "pair case: list=" << type << ", species1 = " << species1 << ", species2=" << species2);
       
       try {
 ColourPair* cp = 
@@ -171,14 +172,22 @@ ColourPair* cp =
       catch(gError& err) {
 	throw gError("ParticleConnectorFile::setup", "Error while reading a line starting with \"triplet\" in the declarations part of " + m_filename + ". Does it have a declaration at all? See the help text of ParticleConnectorFile. The error message was: " + err.message());
       }
-
+    }
+    else if(type == "quintet") {
+      pos >> skipws >> type;
+//       MSG_DEBUG("ParticleConnectorFile::setup", "found quintet, creating list " << type);
+      try {
+	M_PHASE -> createQuintetListIndex(type);
+      }
+      catch(gError& err) {
+	throw gError("ParticleConnectorFile::setup", "Error while reading a line starting with \"quintet\" in the declarations part of " + m_filename + ". Does it have a declaration at all? See the help text of ParticleConnectorFile. The error message was: " + err.message());
+      }
     }
     else if(type == "!!!") {
       inDeclaration = false;
     }
     else 
-      throw gError("ParticleConnectorFile::setup", "unknown type" + type + "in declaration part of file " + m_filename + "! Allowed expressions: \"pair\", \"triplet\", and \"!!!\".");
-
+      throw gError("ParticleConnectorFile::setup", "unknown type" + type + "in declaration part of file " + m_filename + "! Allowed expressions: \"pair\",\"triplet\" ,\"quintet\", and \"!!!\".");
   }
   // the rest of the file is skipped and read in setupAfterParticleCreation
   pos.close();
@@ -189,8 +198,8 @@ ColourPair* cp =
 
 void ParticleConnectorFile::setupAfterParticleCreation() {
 
-  size_t np1, np2, np3;
-  Particle *p1, *p2, *p3;
+  size_t np1, np2, np3, np4, np5 ;
+  Particle *p1, *p2, *p3, *p4, *pc ;
 
   size_t c;
   string s, type;
@@ -229,10 +238,14 @@ void ParticleConnectorFile::setupAfterParticleCreation() {
     else if(type == "triplet")
       // do nothing, skip listname
       pos >> skipws >> type;
+    else if(type == "quintet")
+      // do nothing, skip listname
+      pos >> skipws >> type;
     else if(type == "!!!") 
       inDeclaration = false;
     else 
-      throw gError("ParticleConnectorFile::setupAfterParticleCreation", "unknown type" + type + "in declaration part of file " + m_filename + "! Allowed expressions: \"pair\", \"triplet\", and \"!!!\".");
+      throw gError("ParticleConnectorFile::setup", "unknown type" + type + "in declaration part of file " + m_filename + "! Allowed expressions: \"pair\",\"triplet\" ,\"quintet\", and \"!!!\".");
+
   }
   // read list type
   while ((pos >> skipws >> type) && !pos.eof()) {
@@ -241,7 +254,7 @@ void ParticleConnectorFile::setupAfterParticleCreation() {
 
       // read list name
       pos >> skipws >> s;
-      // read first particle (of a total of one to three)
+      // read first particle (of a total of one to five)
       pos >> skipws >> np1 >> skipws >> freeOrFrozen;
       p1 = getParticleFromNumber(np1,freeOrFrozen);
 
@@ -291,6 +304,35 @@ void ParticleConnectorFile::setupAfterParticleCreation() {
 //  		  " and "<< p2->mySlot << " at " << p2->r<<
 //  		  " and "<< p3->mySlot << " at " << p3->r << ", colours: " << p1->c << p2->c << p3->c << ", slots = (" << p1->mySlot << ", " << p2->mySlot << ", " << p3->mySlot << ")" << ", particle numbers from input = " + ObjToString(np1) + ", " + ObjToString(np2) + ", " + ObjToString(np3));
 	
+      }
+      else if(type == "quintet") { // quintet
+	pos >> skipws >> np2 >> skipws >> freeOrFrozen;
+	p2 = getParticleFromNumber(np2,freeOrFrozen);
+	pos >> skipws >> np3 >> skipws >> freeOrFrozen;
+	p3 = getParticleFromNumber(np3,freeOrFrozen);
+	pos >> skipws >> np4 >> skipws >> freeOrFrozen;
+	p4 = getParticleFromNumber(np4,freeOrFrozen);
+	pos >> skipws >> np5 >> skipws >> freeOrFrozen;
+	pc = getParticleFromNumber(np5,freeOrFrozen);
+	size_t listIndex = phase -> quintetListIndex(s);
+
+	// safety check for CONVENTION6:
+	// check for consistency of the list's species
+	quintetList* quin = M_PHASE->returnQuintetList(s);
+	quintetList::iterator firstQuin = quin->begin();
+	// already some stored quintet inside?	
+	if(firstQuin != quin->end()) {
+	  // consistency-check
+	  if(p1->c != firstQuin->p00->c ||
+	     p2->c != firstQuin->p20->c ||
+    	     p3->c != firstQuin->p22->c ||
+	     p4->c != firstQuin->p02->c ||
+	     pc->c != firstQuin->p11->c 
+	     )
+	    throw gError("ParticleConnectorFile::setupAfterParticleCreation", "There seems to be an inconsistency in the order of the species of the connected particles in list \"" + s + "\". This is currently not allowed. p1 =  " + ObjToString(p1->mySlot) + ", c1 = "+ ObjToString(p1->c) + ", p2 = " + ObjToString(p2->mySlot) + ", c2 = "+ ObjToString(p2->c)+ ", p3 = " + ObjToString(p3->mySlot) + ", c3 = "+ ObjToString(p3->c) + ", p4 = " + ObjToString(p4->mySlot) + ", c4 = "+ ObjToString(p4->c)+ ", pc = " + ObjToString(pc->mySlot) + ", cc = "+ ObjToString(pc->c)+ ", expected colours = " + ObjToString(firstQuin->p00->c) + ObjToString(firstQuin->p20->c) + ObjToString(firstQuin->p22->c) + ObjToString(firstQuin->p02->c) + ObjToString(firstQuin->p11->c)+ ", particle numbers from input = " + ObjToString(np1) + ", " + ObjToString(np2) + ", " + ObjToString(np3)+ ", " + ObjToString(np4)+ ", " + ObjToString(np5));
+	}
+
+	phase->addQuintet(p1, p2, p3, p4, pc, listIndex);	
       }
       else // nothing found
 	throw gError("ParticleConnectorFile::setupAfterParticleCreation"+FILE_INFO,

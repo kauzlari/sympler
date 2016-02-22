@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -30,71 +30,64 @@
 
 
 
-#ifndef __THERMOSTAT_PETERS_ISO_H
-#define __THERMOSTAT_PETERS_ISO_H 
+#ifndef _G_QUINTET_H
+#define _G_QUINTET_H
 
-#include "thermostat_peters.h"
-#include "integrator_energy.h"
-#include "weighting_function.h"
-#include "function_pair.h"
+#include "gen_f.h"
+#include <map>
+#include <list>
+#include <utility>
 
+#include "misc.h"
+#include "list"
+#include "integrator_position.h"
 
 using namespace std;
 
+class Simulation;
+
 /*!
- * Implementation of the original isothermal Peters thermostat.
- * See: E. A. J. F. Peters, Europhys. Lett. 66, 311-317 (2004)
+ * Base class for all triplet forces.
+ * It also handles
+ * the creation of the triplet list for which the force is relevant.
  */
-class ThermostatPetersIso : public ThermostatPeters
+class GenQuintet : public GenF
 {
-  protected:
-
+ protected:
+  
   /*!
-     * The temperature of the heat bath
+   * Inititialize the property list.
    */
-    double m_temperature;
-
-  /*!
-     * Mass of the first species
+  void init();
+  
+  /*! The \a quintetList this \a GenQuintet is acting on. 
+   *This pointer must be assigned during setup by requesting 
+   *the correct list from the \a Phase
    */
-    double m_mass1;
-
-  /*!
-     * Mass of the second species
-   */
-    double m_mass2;
-
-  /*!
-     * Reduced mass (see reference)
-   */
-    double m_massred;
-
-  /*!
-     * Initialize the property list
-   */
-    void init();
-
-  public:
+  quintetList* m_QuintetList;
+  
+ public:
   /*!
    * Constructor
-   * @param sim Pointer to the main simulation object
    */
-    ThermostatPetersIso(Simulation* sim);
-
+  GenQuintet();	
+  GenQuintet(Simulation *simulation);		
   /*!
-     * Destructor
+   * Destructor
    */
-    virtual ~ThermostatPetersIso() {}
+  virtual ~GenQuintet();
+  
+  virtual void setup();
 
-  /*!
-     * Thermalize the system
-   */
-    virtual void thermalize(Phase* p);
+  virtual void setupAfterParticleCreation();
 
-  /*!
-     * Initialize variables
-   */
-    virtual void setup();
 };
 
 #endif
+
+
+
+
+
+
+

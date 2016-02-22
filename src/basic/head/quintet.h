@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2015, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,72 +29,71 @@
  */
 
 
+#ifndef __QUINTET_H
+#define __QUINTET_H
 
-#ifndef __THERMOSTAT_PETERS_ISO_H
-#define __THERMOSTAT_PETERS_ISO_H 
+#include "misc.h"
+#include "quintet_calculator.h"
 
-#include "thermostat_peters.h"
-#include "integrator_energy.h"
-#include "weighting_function.h"
-#include "function_pair.h"
-
-
-using namespace std;
 
 /*!
- * Implementation of the original isothermal Peters thermostat.
- * See: E. A. J. F. Peters, Europhys. Lett. 66, 311-317 (2004)
+ * Used for storing bonded quintets of \a Particle s in the \a Phase
  */
-class ThermostatPetersIso : public ThermostatPeters
-{
-  protected:
-
+struct quintet_t{
   /*!
-     * The temperature of the heat bath
+   * Particles defined from r00
    */
-    double m_temperature;
-
   /*!
-     * Mass of the first species
+   * first particle
    */
-    double m_mass1;
-
+  Particle* p00;
   /*!
-     * Mass of the second species
+   * second particle
    */
-    double m_mass2;
-
+  Particle* p20;
   /*!
-     * Reduced mass (see reference)
+   * third particle
    */
-    double m_massred;
-
+  Particle* p22;
   /*!
-     * Initialize the property list
+   * fourth particle
    */
-    void init();
-
-  public:
+  Particle* p02;
   /*!
-   * Constructor
-   * @param sim Pointer to the main simulation object
+   * center particle
    */
-    ThermostatPetersIso(Simulation* sim);
+  Particle* p11;
 
+  
   /*!
-     * Destructor
+   * The \a Phase, this \a quintet_t belongs to. Currently (2015-07-20) there is only one \a Phase in the \a Simulation
    */
-    virtual ~ThermostatPetersIso() {}
-
+  static Phase* s_phase;
+  
   /*!
-     * Thermalize the system
+   * As the name says
    */
-    virtual void thermalize(Phase* p);
-
+  void runBondedQuintetCalculators(size_t stage, size_t listIndex)
+  {
+    FOR_EACH
+      (vector<QuintetCalculator*>,
+       s_phase->bondedQuintetCalculators(stage, listIndex),
+       (*__iFE)->compute(this);
+       );
+  }
+  
   /*!
-     * Initialize variables
+   * As the name says
    */
-    virtual void setup();
+  void runBondedQuintetCalculators_0(size_t stage, size_t listIndex)
+  {
+    FOR_EACH
+      (vector<QuintetCalculator*>,
+       s_phase->bondedQuintetCalculators_0(stage, listIndex),
+       (*__iFE)->compute(this);
+       );
+  }
+  
 };
 
 #endif

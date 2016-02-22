@@ -4,6 +4,7 @@ noinst_LTLIBRARIES = libforce.la
 libforce_la_SOURCES = \
 	connector_basic.cpp \
 	f_angular.cpp \
+	f_curvature.cpp \
 	f_centrifugal.cpp \
 	f_coriolis.cpp \
 	f_dpd.cpp \
@@ -39,6 +40,7 @@ libforce_la_SOURCES = \
 	gen_connector.cpp \
 	gen_f_solo.cpp \
 	gen_triplet.cpp \
+	gen_quintet.cpp \
 	ie_heat_conduction.cpp \
 	ie_wall_heat_conduction.cpp \
 	lennard_jones.cpp \

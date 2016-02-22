@@ -2,6 +2,7 @@
 include_HEADERS = \
 	connector_basic.h \
 	f_angular.h \
+	f_curvature.h \
 	f_centrifugal.h \
 	f_coriolis.h \
 	f_dpd.h \
@@ -37,6 +38,7 @@ include_HEADERS = \
 	gen_connector.h \
 	gen_f_solo.h \
 	gen_triplet.h \
+	gen_quintet.h \
 	ie_heat_conduction.h \
 	ie_wall_heat_conduction.h \
 	lennard_jones.h \

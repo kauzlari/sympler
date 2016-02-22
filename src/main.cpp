@@ -167,6 +167,7 @@ void sayHello() {
 #include "ie_heat_conduction.h"
 #include "ie_wall_heat_conduction.h"
 #include "f_angular.h"
+#include "f_curvature.h"
 #include "f_centrifugal.h"
 #include "f_coriolis.h"
 #include "f_dpd.h"
@@ -198,6 +199,7 @@ void sayHello() {
 // #include "viscosity_migration.h"
 #include "gen_connector.h"
 #include "gen_triplet.h"
+#include "gen_quintet.h"
 #include "gm_array_attr.h"
 #include "gm_density.h"
 #include "gm_ekin.h"
@@ -349,6 +351,8 @@ void sayHello() {
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
 #include "triplet_calc_central_part_scalar.h"
+#include "quintet_calc_curvature.h"
+#include "quintet_calc_curvature_f.h"
 // #include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_vels.h"
 #include "val_calculator_kernel.h"
@@ -389,6 +393,7 @@ void link_all_properly()
   new IEHeatConduction(NULL);
   new IEWallHeatConduction(NULL);
   new FAngular(NULL);
+  new FCurvature(NULL);
   new FCentrifugal(NULL);
   new FCoriolis(NULL);
   new FDPD(NULL);
@@ -577,6 +582,8 @@ void link_all_properly()
   new TripletCalcAngularDt2F(NULL);
   new TripletCalcAngularF(NULL);
   new TripletCalcCentralPartScalar(NULL);
+  new QuintetCalcCurvatureF(NULL);
+  new QuintetCalcCurvature(NULL);
 //   new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCVels(NULL);
   new ValCalculatorKernel(NULL);

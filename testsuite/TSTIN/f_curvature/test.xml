@@ -1,0 +1,185 @@
+<Simulation
+	simName="FCurvatureTest"
+	inputFromResults="no"
+>
+ <Controller
+	timesteps="1000"
+	statusEvery="10"
+	dt="0.01">
+
+	<IntegratorVelocityVerletDisp	
+		species = "memba"
+		displacement = "dma"
+		symbol = "dma"
+		lambda = "0.5"
+		mass = "1"
+	 />
+
+	<IntegratorVelocityVerletDisp	
+		species = "membb"
+		displacement = "dmb"
+		symbol = "dmb"
+		lambda = "0.5"
+		mass = "1"
+	 />
+
+	 <IntegratorVelocityVerletDisp
+		species = "fluid"
+		displacement = "df"
+		symbol = "df"
+		lambda = "0.5"
+		mass = "1"
+	 />
+
+ </Controller>
+
+
+
+<!--Dissipative Forces -->
+  <PairParticleVector
+     species1="fluid"
+     species2="fluid"
+     expression = "-4.5*((1-rij)^2)*(([vi]-[vj]):[rij])*[rij]/(rij*rij)"
+     symmetry = "-1"
+     symbol = "FDff"
+     cutoff = "1"
+  />
+
+  <PairParticleVector
+     species1="fluid"
+     species2="memba"
+     expression = "4.5*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
+     symmetry = "-1"
+     symbol = "FDfma"
+     cutoff = "1"
+  />
+
+  <PairParticleVector
+     species1="fluid"
+     species2="membb"
+     expression = "4.5*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
+     symmetry = "-1"
+     symbol = "FDfmb"
+     cutoff = "1"
+  />
+
+  <FParticleVels
+    species = "fluid"
+    expression = "[FDff]+[FDfma]+[FDfmb]"
+  />
+
+  <FParticleVels
+    species = "memba"
+    expression = "[FDfma]"
+  />
+
+  <FParticleVels
+    species = "membb"
+    expression = "[FDfmb]"
+  />
+
+<!-- Conservative Forces -->
+ <PairParticleVector
+	species1 = "fluid"
+	species2 = "fluid"
+	expression = "25*(1-rij)*[rij]/rij"
+	symmetry = "-1"
+	symbol = "FCff"
+	cutoff ="1"
+ />
+
+ <PairParticleVector
+	species1 = "fluid"
+	species2 = "memba"
+	expression = "25*(1-rij)*[rij]/rij"
+	symmetry = "-1"
+	symbol = "FCfma"
+	cutoff ="1"
+ />
+ <PairParticleVector
+	species1 = "fluid"
+	species2 = "membb"
+	expression = "25*(1-rij)*[rij]/rij"
+	symmetry = "-1"
+	symbol = "FCfmb"
+	cutoff ="1"
+ />
+
+
+  <FParticleVels
+    species = "fluid"
+     expression = "[FCff]+[FCfma]+[FCfmb]"
+  />
+  <FParticleVels
+    species = "memba"
+    expression = "[FCfma]"
+  />
+  <FParticleVels
+    species = "membb"
+    expression = "[FCfmb]"
+  />
+ <ConnectBasic
+	forceName = "k_rho_ab"
+	species1 = "memba"
+	species2 = "membb"
+	pairFactor = "50*(1-rij)*[rij]/(rij)"
+ /> 
+ <ConnectBasic
+	forceName = "k_rho_aa"
+	species1 = "memba"
+	species2 = "memba"
+	pairFactor = "50*(1-rij)*[rij]/(rij)"
+ />
+ <ConnectBasic
+	forceName = "k_rho_bb"
+	species1 = "membb"
+	species2 = "membb"
+	pairFactor = "50*(1-rij)*[rij]/(rij)"
+ />
+ <FCurvature 
+	forceName = "k_curv"
+	kA = "0.07"
+	periodic = "yes"	
+ />
+ <FCurvature 
+	forceName = "k_curv_b"
+	kA = "0.07"
+	periodic = "yes"	
+ />
+
+<Phase>
+	<LinkedListCreator />	
+	
+	<BoundaryCuboid
+		boxX = "10"
+		boxY = "10"
+		boxZ = "10"
+		periodicX = "yes"
+		periodicY = "yes"
+		periodicZ = "yes">
+
+	<ReflectorStochastic/>
+	
+       <ParticleCreatorFile
+		nameInputFile = "input.pos"
+       />
+	<ParticleConnectorFile
+		species="memba membb"
+		nameInputFile = "confile.con"
+	/>
+	
+	</BoundaryCuboid>
+
+</Phase>
+ <MeterAverage>
+	<KineticEnergy species="memba"/>
+	<KineticEnergy species="membb"/>
+	<OutputFile
+	 nameOutputFile = "f_curvature.dat" 
+	 multipleFiles = "no"/>
+ </MeterAverage>
+
+
+</Simulation>
+
+
