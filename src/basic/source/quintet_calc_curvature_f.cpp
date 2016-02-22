@@ -40,8 +40,7 @@
 #define M_CONTROLLER M_SIMULATION->controller()
 #define M_PHASE M_SIMULATION->phase()
 #define M_MANAGER M_PHASE->manager()
-// #define PI 3.141592654
-#define PI M_PI
+
 
 const SymbolRegister<QuintetCalcCurvatureF> quintet_calc_curvature_f("QuintetCalcCurvatureF");
 

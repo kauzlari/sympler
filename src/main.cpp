@@ -351,6 +351,7 @@ void sayHello() {
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
 #include "triplet_calc_central_part_scalar.h"
+#include "quintet_calc_curvature.h"
 #include "quintet_calc_curvature_f.h"
 // #include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_vels.h"
@@ -582,6 +583,7 @@ void link_all_properly()
   new TripletCalcAngularF(NULL);
   new TripletCalcCentralPartScalar(NULL);
   new QuintetCalcCurvatureF(NULL);
+  new QuintetCalcCurvature(NULL);
 //   new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCVels(NULL);
   new ValCalculatorKernel(NULL);

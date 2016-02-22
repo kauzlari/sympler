@@ -73,6 +73,7 @@ libbasic_la_SOURCES = \
 	postprocessor.cpp \
 	property_list.cpp \
 	quintet_calculator.cpp \
+	quintet_calc_curvature.cpp \
 	quintet_calc_curvature_f.cpp \
 	random.cpp \
 	reflector.cpp \
