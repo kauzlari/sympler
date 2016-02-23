@@ -138,14 +138,61 @@
  />
  <FCurvature 
 	forceName = "k_curv"
-	kA = "0.07"
+	k = "10"
+	C0 = "0"
 	periodic = "yes"	
  />
  <FCurvature 
 	forceName = "k_curv_b"
-	kA = "0.07"
+	k = "10"
+	C0 = "0"
 	periodic = "yes"	
  />
+
+ <QuintetCalcCurvatureF
+        species1 = "membb"
+        species2 = "memba"
+        species3 = "membb"
+        species4 = "memba"
+        species5 = "memba"
+        listName = "k_curv"
+	k = "10"
+	C0 = "0"
+        symbol = "F_Curv_1"
+ />
+
+ <QuintetCalcCurvatureF
+        species1 = "memba"
+        species2 = "membb"
+        species3 = "memba"
+        species4 = "membb"
+        species5 = "membb"
+        listName = "k_curv_b"
+	k = "10"
+	C0 = "0"
+        symbol = "F_Curv_2"
+ />
+
+ <QuintetCalcCurvature
+        species1 = "membb"
+        species2 = "memba"
+        species3 = "membb"
+        species4 = "memba"
+        species5 = "memba"
+        listName = "k_curv"
+        symbol = "Curv_1"
+ />
+
+ <QuintetCalcCurvature
+        species1 = "memba"
+        species2 = "membb"
+        species3 = "memba"
+        species4 = "membb"
+        species5 = "membb"
+        listName = "k_curv_b"
+        symbol = "Curv_2"
+ />
+
 
 <Phase>
 	<LinkedListCreator />	
@@ -171,9 +218,14 @@
 	</BoundaryCuboid>
 
 </Phase>
+
  <MeterAverage>
 	<KineticEnergy species="memba"/>
 	<KineticEnergy species="membb"/>
+	<Scalar symbol="Curv_1" species="memba" />
+	<Scalar symbol="Curv_2" species="membb"/>
+	<Vector symbol="F_Curv_1" species="memba" />
+	<Vector symbol="F_Curv_2" species="membb"/>
 	<OutputFile
 	 nameOutputFile = "f_curvature.dat" 
 	 multipleFiles = "no"/>
