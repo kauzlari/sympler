@@ -33,8 +33,9 @@
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
+#include "triplet_calculator.h"
+#include "quintet_calculator.h"
 
-#include "triplet_calc_angular_f.h"
 
 const SymbolRegister<PCaMatrixInverse> pca_matrix_inverse("MatrixInverse");
 
@@ -368,6 +369,46 @@ bool PCaMatrixInverse::findStage()
 	     }
 	   );
       } // end of if(!tooEarly) (for loop over TripletCalculators)
+
+    if(!tooEarly)
+      {
+        // we have to search now in the QuintetCalculators
+        // loop over stages
+	vector<QuintetCalculator*>* tCs;
+	tCs = M_PHASE->bondedQuintetCalculatorsFlat();
+	FOR_EACH
+	  (
+	   vector<QuintetCalculator*>,
+	   (*tCs),
+	   list<string> symbols = (*__iFE)->mySymbolNames();
+	   for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+	     {
+	       if ((*symIt) == m_tensor_symbol)
+		 {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) 
+		     {
+		       MSG_DEBUG("PCaMatrixInverse::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		       tooEarly = true;
+		       m_stage = -1;
+		     }
+		   else
+		     {
+		       if(stage >= m_stage) m_stage = stage+1;
+		     }
+		 }
+	     }
+	   // may we abort the loop over the ParticleCaches?
+	   if(tooEarly)
+	     {
+	       __iFE = __end;
+	       // important because there still comes the ++__iFE from the loop
+	       --__iFE; 
+	     }
+	   );
+      } // end of if(!tooEarly) (for loop over QuintetCalculators)
+
     
     if(tooEarly)
       return false;
@@ -573,6 +614,45 @@ bool PCaMatrixInverse::findStage_0()
 	     }
 	   );
       } // end of if(!tooEarly) (for loop over TripletCalculators)
+
+    if(!tooEarly)
+      {
+        // we have to search now in the QuintetCalculators
+        // loop over stages
+	vector<QuintetCalculator*>* tCs;
+	tCs = M_PHASE->bondedQuintetCalculatorsFlat_0();
+	FOR_EACH
+	  (
+	   vector<QuintetCalculator*>,
+	   (*tCs),
+	   list<string> symbols = (*__iFE)->mySymbolNames();
+	   for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+	     {
+	       if ((*symIt) == m_tensor_symbol)
+		 {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) 
+		     {
+		       MSG_DEBUG("PCaMatrixInverse::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		       tooEarly = true;
+		       m_stage = -1;
+		     }
+		   else
+		     {
+		       if(stage >= m_stage) m_stage = stage+1;
+		     }
+		 }
+	     }
+	   // may we abort the loop over the ParticleCaches?
+	   if(tooEarly)
+	     {
+	       __iFE = __end;
+	       // important because there still comes the ++__iFE from the loop
+	       --__iFE; 
+	     }
+	   );
+      } // end of if(!tooEarly) (for loop over QuintetCalculators)
 
 
         if(tooEarly)

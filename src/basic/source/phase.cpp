@@ -42,6 +42,7 @@
 
 // #include "valgrind/memcheck.h"
 
+
 using namespace std;
 
 Phase *DEBUG_g_phase;
@@ -910,15 +911,13 @@ bool Phase::findStages_0()
 //----------------------------------------------------------------------------------------------------------------------
 
 
-//29.06.2015 Quintetts need to be implemented with sortStages() 
-
 void Phase::sortStages()
 {
-  // bonded Calculators
-  m_maxBondedStage.resize(m_tripletLists.size());
+  // bonded triplet Calculators
+  m_maxBondedStage_triplet.resize(m_tripletLists.size());
   m_bondedTripletCalculators.resize(m_tripletLists.size());
-  for(size_t icl = 0; icl < m_maxBondedStage.size(); ++icl) 
-    m_maxBondedStage[icl] = 0;
+  for(size_t icl = 0; icl < m_maxBondedStage_triplet.size(); ++icl) 
+    m_maxBondedStage_triplet[icl] = 0;
 
   for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculators_flat.begin(); i != m_bondedTripletCalculators_flat.end(); ++i)
     {
@@ -930,7 +929,7 @@ void Phase::sortStages()
 
       int stage = (*i)->stage();
       assert(stage > -1);
-      if((size_t) stage > m_maxBondedStage[listIndex]) m_maxBondedStage[listIndex] = stage;
+      if((size_t) stage > m_maxBondedStage_triplet[listIndex]) m_maxBondedStage_triplet[listIndex] = stage;
       
       if(m_bondedTripletCalculators[listIndex].size() <= (size_t) stage)
 	{
@@ -967,7 +966,7 @@ void Phase::sortStages()
   for(size_t listIndex = 0; listIndex < m_bondedTripletCalculators.size(); ++listIndex) {
     if(!m_bondedTripletCalculators[listIndex].empty())
       {
-	for(size_t s = 0; s <= m_maxBondedStage[listIndex] /*s_maxStage*/; ++s)
+	for(size_t s = 0; s <= m_maxBondedStage_triplet[listIndex] /*s_maxStage*/; ++s)
 	  {
 	    for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculators[listIndex][s].begin(); i != m_bondedTripletCalculators[listIndex][s].end(); ++i)
 	      {
@@ -980,7 +979,7 @@ void Phase::sortStages()
 #ifdef _OPENMP
     if(!m_bondedalCalculatorParts[listIndex].empty())
       {
-	for(size_t s = 0; s <= m_maxBondedStage[listIndex] /*s_maxStage*/; ++s)
+	for(size_t s = 0; s <= m_maxBondedStage_triplet[listIndex] /*s_maxStage*/; ++s)
 	  {
 	    for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculatorParts[listIndex][s].begin(); i != m_bondedTripletCalculatorParts[listIndex][s].end(); ++i)
 	      {
@@ -992,18 +991,101 @@ void Phase::sortStages()
 #endif
 #endif
   }
-    
+
+
+  // bonded quintet Calculators
+  m_maxBondedStage_quintet.resize(m_quintetLists.size());
+  m_bondedQuintetCalculators.resize(m_quintetLists.size());
+  for(size_t icl = 0; icl < m_maxBondedStage_quintet.size(); ++icl) 
+    m_maxBondedStage_quintet[icl] = 0;
+
+  for(vector<QuintetCalculator*>::iterator i = m_bondedQuintetCalculators_flat.begin(); i != m_bondedQuintetCalculators_flat.end(); ++i)
+    {
+      // preliminary cast as long as we don't have the complete hierarchy
+      string listName = ((QuintetCalculator*) (*i))->listName();
+      size_t listIndex = quintetListIndex(listName);
+
+//       MSG_DEBUG("Phase::sortStages", "now bonded Calculator " << (*i)->className() << " with stage = " << (*i)->stage()) << ", for list \"" << listName << "\".";
+
+      int stage = (*i)->stage();
+      assert(stage > -1);
+      if((size_t) stage > m_maxBondedStage_quintet[listIndex]) m_maxBondedStage_quintet[listIndex] = stage;
+      
+      if(m_bondedQuintetCalculators[listIndex].size() <= (size_t) stage)
+	{
+// 	  MSG_DEBUG("Phase::sortStages", "increasing the number of bonded stage-slots to " << stage+1 << " because of " << (*i)->className());
+
+	  m_bondedQuintetCalculators[listIndex].resize(stage+1);
+	}
+#if 0 // this is when we will have a separation of Calculators
+#ifdef _OPENMP
+      if((m_valCalculatorParts.size() <= (size_t) stage))
+	{
+	  MSG_DEBUG("Phase::sortStages", "increasing the number of stage-slots to " << stage+1 << " because of " << (*i)->className());
+	  m_valCalculatorParts.resize(stage+1);
+	}
+#endif
+#endif
+      
+#ifndef _OPENMP
+      assert((size_t)stage < m_bondedQuintetCalculators[listIndex].size());
+      m_bondedQuintetCalculators[listIndex][stage].push_back(*i);
+#else
+      // The commented out code will be needed when we introduce a separation of Calculators
+      // 	if ((*i)->particleCalculator()) {
+      // 	  assert((size_t)stage < m_valCalculatorParts.size());
+// 	  m_valCalculatorParts[stage].push_back((ValCalculatorPart*)(*i));  
+// 	}
+// 	else {
+      assert((size_t)stage < m_bondedQuintetCalculators[listIndex].size());
+      m_bondedQuintetCalculators[listIndex][stage].push_back(*i);    
+      // 	}
+#endif
+    } // end of loop over m_bondedQuintetCalculators_flat
+
+  for(size_t listIndex = 0; listIndex < m_bondedQuintetCalculators.size(); ++listIndex) {
+    if(!m_bondedQuintetCalculators[listIndex].empty())
+      {
+	for(size_t s = 0; s <= m_maxBondedStage_quintet[listIndex] /*s_maxStage*/; ++s)
+	  {
+	    for(vector<QuintetCalculator*>::iterator i = m_bondedQuintetCalculators[listIndex][s].begin(); i != m_bondedQuintetCalculators[listIndex][s].end(); ++i)
+	      {
+		MSG_DEBUG("Phase::sortStages", "found stage " << s << " for " << (*i)->className());
+	      }
+	  }
+      }
+    else m_bondedQuintetCalculators[listIndex].resize(1);
+
+#if 0 // next will be needed when separating the bonded Calculators
+#ifdef _OPENMP
+    if(!m_bondedalCalculatorParts[listIndex].empty())
+      {
+	for(size_t s = 0; s <= m_maxBondedStage_triplet[listIndex] /*s_maxStage*/; ++s)
+	  {
+	    for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculatorParts[listIndex][s].begin(); i != m_bondedTripletCalculatorParts[listIndex][s].end(); ++i)
+	      {
+		MSG_DEBUG("Phase::sortStages", "found stage " << s << " for " << (*i)->className());
+	      }
+	  }
+      }
+    else m_bondedTripletCalculatorParts[listIndex].resize(1);
+#endif
+#endif
+
+  }    
+
+
 }
 
 
 void Phase::sortStages_0()
 {
 
-  // bonded Calculators
-  m_maxBondedStage_0.resize(m_tripletLists.size());
+  // bonded triplet Calculators
+  m_maxBondedStage_triplet_0.resize(m_tripletLists.size());
   m_bondedTripletCalculators_0.resize(m_tripletLists.size());
-  for(size_t icl = 0; icl < m_maxBondedStage_0.size(); ++icl) 
-    m_maxBondedStage_0[icl] = 0;
+  for(size_t icl = 0; icl < m_maxBondedStage_triplet_0.size(); ++icl) 
+    m_maxBondedStage_triplet_0[icl] = 0;
 
   for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculators_flat_0.begin(); i != m_bondedTripletCalculators_flat_0.end(); ++i)
     {
@@ -1013,7 +1095,7 @@ void Phase::sortStages_0()
 
       int stage = (*i)->stage();
       assert(stage > -1);
-      if((size_t) stage > m_maxBondedStage_0[listIndex]) m_maxBondedStage_0[listIndex] = stage;
+      if((size_t) stage > m_maxBondedStage_triplet_0[listIndex]) m_maxBondedStage_triplet_0[listIndex] = stage;
       
       if(m_bondedTripletCalculators_0[listIndex].size() <= (size_t) stage)
 	{
@@ -1047,7 +1129,7 @@ void Phase::sortStages_0()
   for(size_t listIndex = 0; listIndex < m_bondedTripletCalculators_0.size(); ++listIndex) {
     if(!m_bondedTripletCalculators_0[listIndex].empty())
       {
-	for(size_t s = 0; s <= m_maxBondedStage_0[listIndex] /*s_maxStage*/; ++s)
+	for(size_t s = 0; s <= m_maxBondedStage_triplet_0[listIndex] /*s_maxStage*/; ++s)
 	  {
 	    for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculators_0[listIndex][s].begin(); i != m_bondedTripletCalculators_0[listIndex][s].end(); ++i)
 	      {
@@ -1061,7 +1143,7 @@ void Phase::sortStages_0()
 #ifdef _OPENMP
     if(!m_bondedalCalculatorParts_0[listIndex].empty())
       {
-	for(size_t s = 0; s <= m_maxBondedStage_0[listIndex] /*s_maxStage*/; ++s)
+	for(size_t s = 0; s <= m_maxBondedStage_triplet_0[listIndex] /*s_maxStage*/; ++s)
 	  {
 	    for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculatorParts_0[listIndex][s].begin(); i != m_bondedTripletCalculatorParts_0[listIndex][s].end(); ++i)
 	      {
@@ -1074,4 +1156,79 @@ void Phase::sortStages_0()
 #endif
   }
 
+
+  // bonded quintet Calculators
+  m_maxBondedStage_quintet_0.resize(m_quintetLists.size());
+  m_bondedQuintetCalculators_0.resize(m_quintetLists.size());
+  for(size_t icl = 0; icl < m_maxBondedStage_quintet_0.size(); ++icl) 
+    m_maxBondedStage_quintet_0[icl] = 0;
+
+  for(vector<QuintetCalculator*>::iterator i = m_bondedQuintetCalculators_flat_0.begin(); i != m_bondedQuintetCalculators_flat_0.end(); ++i)
+    {
+      // preliminary cast as long as we don't have the complete hierarchy
+      string listName = ((QuintetCalculator*) (*i))->listName();
+      size_t listIndex = quintetListIndex(listName);
+
+      int stage = (*i)->stage();
+      assert(stage > -1);
+      if((size_t) stage > m_maxBondedStage_quintet_0[listIndex]) m_maxBondedStage_quintet_0[listIndex] = stage;
+      
+      if(m_bondedQuintetCalculators_0[listIndex].size() <= (size_t) stage)
+	{
+	  m_bondedQuintetCalculators_0[listIndex].resize(stage+1);
+	}
+#if 0 // this is when we will have a separation of Calculators
+#ifdef _OPENMP
+      if((m_valCalculatorParts_0.size() <= (size_t) stage))
+	{
+	  m_valCalculatorParts_0.resize(stage+1);
+	}
+#endif
+#endif
+      
+#ifndef _OPENMP
+      assert((size_t)stage < m_bondedQuintetCalculators_0[listIndex].size());
+      m_bondedQuintetCalculators_0[listIndex][stage].push_back(*i);
+#else
+      // The commented out code will be needed when we introduce a separation of Calculators
+      // 	if ((*i)->particleCalculator()) {
+      // 	  assert((size_t)stage < m_valCalculatorParts_0.size());
+      // 	  m_valCalculatorParts_0[stage].push_back((ValCalculatorPart*)(*i));  
+      // 	}
+      // 	else {
+      assert((size_t)stage < m_bondedQuintetCalculators_0[listIndex].size());
+      m_bondedQuintetCalculators_0[listIndex][stage].push_back(*i);    
+      // 	}
+#endif
+    } // end of loop over m_bondedQuintetCalculators_flat
+
+  for(size_t listIndex = 0; listIndex < m_bondedQuintetCalculators_0.size(); ++listIndex) {
+    if(!m_bondedQuintetCalculators_0[listIndex].empty())
+      {
+	for(size_t s = 0; s <= m_maxBondedStage_quintet_0[listIndex] /*s_maxStage*/; ++s)
+	  {
+	    for(vector<QuintetCalculator*>::iterator i = m_bondedQuintetCalculators_0[listIndex][s].begin(); i != m_bondedQuintetCalculators_0[listIndex][s].end(); ++i)
+	      {
+		MSG_DEBUG("Phase::sortStages_0", "found stage " << s << " for " << (*i)->className());
+	      }
+	  }
+      }
+    else m_bondedQuintetCalculators_0[listIndex].resize(1);
+  
+#if 0 // next will be needed when separating the bonded Calculators
+#ifdef _OPENMP
+    if(!m_bondedalCalculatorParts_0[listIndex].empty())
+      {
+	for(size_t s = 0; s <= m_maxBondedStage_triplet_0[listIndex] /*s_maxStage*/; ++s)
+	  {
+	    for(vector<TripletCalculator*>::iterator i = m_bondedTripletCalculatorParts_0[listIndex][s].begin(); i != m_bondedTripletCalculatorParts_0[listIndex][s].end(); ++i)
+	      {
+		MSG_DEBUG("Phase::sortStages_0", "found stage " << s << " for " << (*i)->className());
+	      }
+	  }
+      }
+    else m_bondedQuintetCalculatorParts_0[listIndex].resize(1);
+#endif
+#endif
+  }
 }
