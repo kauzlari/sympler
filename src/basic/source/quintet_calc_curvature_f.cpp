@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2015, 
+ * Copyright 2002-2013, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -32,51 +32,43 @@
 #include "threads.h"
 #include "particle.h"
 #include "simulation.h"
+#include "quintet_calc_curvature_f.h"
+
 #include "quintet.h"
-#include "f_curvature.h"
-
-
-// #include "valgrind/memcheck.h"
 
 #define M_SIMULATION ((Simulation*) m_parent)
 #define M_CONTROLLER M_SIMULATION->controller()
 #define M_PHASE M_SIMULATION->phase()
 #define M_MANAGER M_PHASE->manager()
 
-#define PI M_PI
 
-const GenFTypeConcr<FCurvature> curvature_force("FCurvature");
+const SymbolRegister<QuintetCalcCurvatureF> quintet_calc_curvature_f("QuintetCalcCurvatureF");
 
-//---- Constructors/Destructor ----
-
-FCurvature::FCurvature()
+QuintetCalcCurvatureF::QuintetCalcCurvatureF(Simulation *simulation): QuintetCalculator(simulation)
 {
-	throw gError("FCurvature::FCurvature(default)", "Should not be called. Contact the programmer.");
-}
+  // does not depend on other symbols
+  m_stage = 0;
 
-FCurvature::FCurvature(Simulation *simulation): GenQuintet(simulation)
-{
-	init();
-}
-
-
-FCurvature::~FCurvature()
-{
+  m_datatype = DataFormat::POINT;
+  
+  init();
+#ifdef _OPENMP
+  m_particleCalculator = true;
+#endif
 }
 
 
-void FCurvature::init()
+void QuintetCalcCurvatureF::init()
 {
-	m_properties.setClassName("FCurvature");
+  m_properties.setClassName("QuintetCalcPart");
+  m_properties.setName("QuintetCalcCurvatureF");
 
-	m_properties.setDescription(
-			"This is a force based on the curvature of the surface represented by five particles. The five particle are assumed to form a surface that can be expressed by lagrange polynomials. This potential is only valid in R3. Fij = kA/4*Grad_rij(H^2).");
-
+  m_properties.setDescription( 
+			      "This QuintetCalculator computes a force based on the curvature of the surface represented by five particles. The five particle are assumed to form a surface that can be expressed by lagrange polynomials. This potential is only valid in R3. Fij = kA/4*Grad_rij(H^2).");
+  
 	DOUBLEPC(k, m_k, -1,"Bending rigidity (Energy).");
 	
 	DOUBLEPC(C0, C0, -1,"Spontaneous curvature (1/L).");
-
-	BOOLPC(periodic, m_periodic, "Should periodic boundary conditions be applied to the connections?");
 
 	/*
 	 * m_kappa_A Effective Bending rigidity Energy area product
@@ -88,42 +80,26 @@ void FCurvature::init()
 	*/
 	C0 = 0;
 
-	/*!
-	 * m_periodic use periodic boundarys. (03.08.2015) Cannot distiguish directions yet (implementation)
-	*/
-	m_periodic = true; 
 
-	/*!
-	 * This Force is neither a particle force nor a pair force!
-	*/
-	m_is_pair_force = false;
-  	m_is_particle_force = false;
 }
 
 
-//---- Methods ----
-
-void FCurvature::computeForces(int force_index)
+void QuintetCalcCurvatureF::setup()
 {
-  // This Function is only valis in R3
-  if(SPACE_DIMS < 3) 
-    {
-      throw gError("FCurvature::computeForces", "This Force is only valid in R3 ");
-  }
+  QuintetCalculator::setup();
 
+}
 
-  //   MSG_DEBUG("FAngular::computeForces", "START");
-  // FIXME: not so nice to do that here, but currently the only possibility. See also GenQuintetr::setupAfterParticleCreation(). Is the problem solved if this function will be called for each triplet (when parallelised)?  
-  if(!m_QuintetList) {
-    MSG_DEBUG("FCurvature::computeForces", "requesting quintet list");
-    m_QuintetList = M_PHASE -> returnQuintetList(m_force_name);
-    MSG_DEBUG("FCurvature::computeForces", "got quintet list");
-  }
+void QuintetCalcCurvatureF::setupAfterParticleCreation()
+{
+  QuintetCalculator::setupAfterParticleCreation();
+}
 
-  point_t boxSize = M_PHASE->boundary()->boundingBox().size();
-
-  for (quintetListItr q = m_QuintetList->begin(); q != m_QuintetList->end(); ++q) 
-    {		
+#ifndef _OPENMP
+void QuintetCalcCurvatureF::compute(quintet_t* q) {
+#else
+  void QuintetCalcCurvatureF::compute(quintet_t* q/*, size_t thread_no*/ /*FIXME: paralelise!*/) {
+#endif
       point_t b00, b20, b02, b22; // position vectors
       point_t nv;
 
@@ -174,14 +150,14 @@ void FCurvature::computeForces(int force_index)
 	  // periodic BCs
 	  if(m_periodic == true)
 	    {
-	      if(b00[_i] > 0.5*boxSize[_i]) b00[_i] -= boxSize[_i]; 
-	      if(b00[_i] < -0.5*boxSize[_i]) b00[_i] += boxSize[_i]; 
-	      if(b20[_i] > 0.5*boxSize[_i]) b20[_i] -= boxSize[_i]; 
-	      if(b20[_i] < -0.5*boxSize[_i]) b20[_i] += boxSize[_i];
- 	      if(b02[_i] > 0.5*boxSize[_i]) b02[_i] -= boxSize[_i]; 
-	      if(b02[_i] < -0.5*boxSize[_i]) b02[_i] += boxSize[_i]; 
-	      if(b22[_i] > 0.5*boxSize[_i]) b22[_i] -= boxSize[_i]; 
-	      if(b22[_i] < -0.5*boxSize[_i]) b22[_i] += boxSize[_i]; 
+	      if(b00[_i] > 0.5*m_boxSize[_i]) b00[_i] -= m_boxSize[_i]; 
+	      if(b00[_i] < -0.5*m_boxSize[_i]) b00[_i] += m_boxSize[_i]; 
+	      if(b20[_i] > 0.5*m_boxSize[_i]) b20[_i] -= m_boxSize[_i]; 
+	      if(b20[_i] < -0.5*m_boxSize[_i]) b20[_i] += m_boxSize[_i];
+ 	      if(b02[_i] > 0.5*m_boxSize[_i]) b02[_i] -= m_boxSize[_i]; 
+	      if(b02[_i] < -0.5*m_boxSize[_i]) b02[_i] += m_boxSize[_i]; 
+	      if(b22[_i] > 0.5*m_boxSize[_i]) b22[_i] -= m_boxSize[_i]; 
+	      if(b22[_i] < -0.5*m_boxSize[_i]) b22[_i] += m_boxSize[_i]; 
 	  }
 
 	  /*!
@@ -394,11 +370,6 @@ void FCurvature::computeForces(int force_index)
 	
 	//F11 = -2*A/(B*B*B)*(GradN11*(E+G));
 
-//       MSG_DEBUG("FCurvature::calculate force", "particle " << q->b->mySlot << " cos(theta) = " << cos_a);
-//       MSG_DEBUG("FCurvature::calculate force", "particle " << q->b->mySlot << " m_thetaEq = " << m_thetaEq);
-//       MSG_DEBUG("FCurvature::calculate force", "particle " << q->b->mySlot << " cosEQ = " << cos(PI*m_thetaEq/180));
-//       MSG_DEBUG("FCurvature::calculate force", "particle " << q->b->mySlot << " m_cosEq = " << m_cosEq);
-      
 	
       force_p00 = m_k*(Awork/2*F00 - 2.0*GradAw00*HC02); 
         //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p00->mySlot << " force_p00 " << force_p00);
@@ -415,33 +386,76 @@ void FCurvature::computeForces(int force_index)
       //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " force_dp11 " << force_p11_1);
       //MSG_DEBUG("FCurvature::calculate force", "particle " << q->p11->mySlot << " force_p11_1 " << force_p11_1);
 
-      q->p00->force[force_index] += force_p00;
-      q->p02->force[force_index] += force_p02;
-      q->p22->force[force_index] += force_p22;
-      q->p20->force[force_index] += force_p20;
-      q->p11->force[force_index] += force_p11;
+
+    q->p00->tag.pointByOffset(m_slots[0]) += force_p00;
+    q->p02->tag.pointByOffset(m_slots[1]) += force_p02;
+    q->p22->tag.pointByOffset(m_slots[2]) += force_p22;
+    q->p20->tag.pointByOffset(m_slots[3]) += force_p20;
+    q->p11->tag.pointByOffset(m_slots[4]) += force_p11;
+  }
+
+    /*!
+     * Determines \a m_stage of the current \a Symbol.
+     * By default, we assume that the stage is fixed and known during compile-time, 
+     * so this function does nothing except returning the message (true) that the 
+     * stage was already found. Symbols, which determine the stage during run-time 
+     * have to redefine this function.
+     */
+    bool QuintetCalcCurvatureF::findStage()
+    {
+
+      // currently (2010/05/17) this always returns true
+      return QuintetCalculator::findStage();
     }
+    
+    /*!
+     * Determines \a m_stage of the current \a Symbol.
+     * By default, we assume that the stage is fixed and known during compile-time, 
+     * so this function does nothing except returning the message (true) that the 
+     * stage was already found. Symbols, which determine the stage during run-time 
+     * have to redefine this function.
+     */
+    bool QuintetCalcCurvatureF::findStage_0()
+    {
+      // currently (2010/05/17) this always returns true
+      return QuintetCalculator::findStage_0();
+    }
+
+
+#ifdef _OPENMP
+// FIXME: This module is not yet parallelised. If you parallelise, the following function could roughly do what is commented out now
+void QuintetCalcCurvatureF::mergeCopies(size_t thread_no) {
+//   size_t slot1 = m_slots[0];
+//   size_t slot2 = m_slots[1];
+//   size_t slot3 = m_slots[2];
+
+//   size_t copySlot1 = m_copy_slots[thread_no][0];
+//   size_t copySlot2 = m_copy_slots[thread_no][1];
+//   size_t copySlot3 = m_copy_slots[thread_no][2];
+//   size_t vecSlot1 = m_vector_slots[0];
+//   size_t vecSlot2 = m_vector_slots[1];
+//   size_t vecSlot3 = m_vector_slots[2];
+
+//   FOR_EACH_PARTICLE_C 
+//   (M_PHASE, m_firstColour,
+//     for (size_t j = 0; j < SPACE_DIMS; ++j) {
+//       __iSLFE->tag.pointByOffset(slot1)[j] += (*__iSLFE->tag.vectorDoubleByOffset(copySlot1))[vecSlot1 + j];
+//       (*__iSLFE->tag.vectorDoubleByOffset(copySlot1))[vecSlot1 + j] = 0;
+//     }
+//   );
+//   FOR_EACH_PARTICLE_C 
+//   (M_PHASE, m_secondColour,
+//     for (size_t j = 0; j < SPACE_DIMS; ++j) {
+//       __iSLFE->tag.pointByOffset(slot2)[j] += (*__iSLFE->tag.vectorDoubleByOffset(copySlot2))[vecSlot2 + j];
+//       (*__iSLFE->tag.vectorDoubleByOffset(copySlot2))[vecSlot2 + j] = 0;
+//     }
+//   );
+//   FOR_EACH_PARTICLE_C 
+//   (M_PHASE, m_thirdColour,
+//     for (size_t j = 0; j < SPACE_DIMS; ++j) {
+//       __iSLFE->tag.pointByOffset(slot3)[j] += (*__iSLFE->tag.vectorDoubleByOffset(copySlot3))[vecSlot3 + j];
+//       (*__iSLFE->tag.vectorDoubleByOffset(copySlot3))[vecSlot3 + j] = 0;
+//     }
+//   );
 }
-
-
-#ifndef _OPENMP
-void FCurvature::computeForces(Pairdist* pair, int force_index)
-#else
-void FCurvature::computeForces(Pairdist* pair, int force_index, int thread_no)
 #endif
-{
-  throw gError("FCurvature::computeForces", "Fatal error: do not call FCurvature::computeForces(Pairdist* pair, int force_index)!!! Please contact the programmer!");
-}
-
-
-void FCurvature::computeForces(Particle* part, int force_index)
-{
-  throw gError("FCurvature::computeForces", "Fatal error: do not call FCurvature::computeForces(Particle* part, int force_index)!!! Please contact the programmer!");
-}
-
-
-void FCurvature::setup()
-{
-  GenQuintet::setup();
-}
-

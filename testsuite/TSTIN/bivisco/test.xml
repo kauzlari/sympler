@@ -1,3 +1,7 @@
+<!-- 
+Note: Symbols such as 'B' ('Binv') or 'D' might miss a factor -1. But it looks as if the later uses 
+in Symbols such as 'Dwall' or 'g' compensate for the missing '-1'.
+-->
 <Simulation
   simName = "Biegeprobe"
   inputFromResults = "1"
