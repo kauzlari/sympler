@@ -115,7 +115,11 @@ int main(int argc, char *argv[])
 
 	MSG_INFO("main", "Total number of reflector hits: " << Reflector::s_n_hits);
       } catch (gError &err) {
-        cout << "The following ERROR occured: " << endl << err.message() << endl;
+        cout << "The following ERROR occured: " << endl 
+	     << err.message() << endl 
+	     << "---------------------" << endl
+	     << "Aborted with ERROR-message." << endl
+	     << "The ERROR-message might have been lengthy, so please search for the first keyword 'ERROR' occurring above." << endl;
         exitValue = err.exitValue();
       }
     } else
