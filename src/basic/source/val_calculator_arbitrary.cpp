@@ -260,8 +260,7 @@ void ValCalculatorArbitrary::setup()
          
         cp->registerCalc_0(this);
       }
-    }
-    
+    } // end of if(++cpTester == __end) 
     // No? Then make a copy
     else 
     {

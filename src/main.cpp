@@ -249,6 +249,8 @@ void sayHello() {
 #include "integrator_tensor.h"
 #include "integrator_static_lse.h"
 
+#include "lin_solve_tensor_vector.h"
+
 #include "meter_autocorrelation_vector.h"
 #include "meter_autocorrelation_vector_t.h"
 #include "meter_average.h"
@@ -485,6 +487,7 @@ void link_all_properly()
   new IntegratorVelocityVerletX(NULL);
   new IntegratorVelocityVerletXFull(NULL);
 
+  new LinSolveTensorVector(NULL);
 
   new MeterAutocorrelationVector(NULL);
   new MeterAutocorrelationVectorT(NULL);

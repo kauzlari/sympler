@@ -47,7 +47,7 @@ double global::R = 8.31441;
  */
 string make_filename(string s, int n)
 {
-  // if there is a dot, place the number n behind it (rfind searches from the end)
+  // if there is a dot, place the number n in froint of it (rfind searches from the end)
   int p = s.rfind('.');
   // otherwise put the number n at the end
   if(p<0)
@@ -57,6 +57,22 @@ string make_filename(string s, int n)
   h << setfill('0') << setw(5) << n;
   
   s.insert(p, "_"+h.str());
+  
+  return s;
+}
+
+/*!
+ * append_to_filename takes the filename 's' and appends the string 'post'
+ */
+string append_to_filename(string s, string post)
+{
+  // if there is a dot, place the postfix in front of it (rfind searches from the end)
+  int p = s.rfind('.');
+  // otherwise put the number n at the end
+  if(p<0)
+    p = s.size();
+  
+  s.insert(p, post);
   
   return s;
 }

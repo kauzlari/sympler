@@ -69,7 +69,7 @@ void TriangleCGMDInterpolation::init()
   
   STRINGPCINF
     (name, m_filename,
-     "Name of the file containing the nodal indices of the elements. It is assumed that these indices indicate slots of \a Particle s of species specified by the attribute 'nodeSpecies'");
+     "Name of the file containing the nodal indices of the elements. It is assumed that these indices indicate slots of particles of species specified by the attribute 'nodeSpecies'");
 
   m_filename = "undefined";
 

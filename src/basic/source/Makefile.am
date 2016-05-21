@@ -31,6 +31,7 @@ libbasic_la_SOURCES = \
 	inlet_cell.cpp \
 	integrator.cpp \
 	linked_list_creator.cpp \
+	lin_solve_tensor_vector.cpp \
 	manager_cell.cpp \
 	MArray2D.cpp \
 	meter.cpp \

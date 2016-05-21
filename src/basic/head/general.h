@@ -228,5 +228,9 @@ public:
    in front of the suffix. */
 string make_filename(string s, int n);
 
+/*! append_to_filename takes the filename 's' and appends the string 'post'
+   in front of the suffix. */
+string append_to_filename(string s, string post);
+
 #endif
 

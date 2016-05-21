@@ -87,9 +87,58 @@ Variant &Variant::operator=(const Variant &copy)
 Variant::variant_type_t Variant::sameType(const Variant &b) const 
 {
   if (m_type_id != b.m_type_id) {
+    string type1;
+    string type2;
+
+  switch (m_type_id) {
+  case SCALAR:
+    type1 = "scalar";
+    break;
+  case VECTOR:
+    type1 = "vector";
+    break;
+  case TENSOR:
+    type1 = "tensor";
+    break;
+  case SCALAR_STRING:
+    type1 = "scalar_string";
+    break;
+  case VECTOR_STRING:
+    type1 = "vector_string";
+    break;
+  case TENSOR_STRING:
+    type1 = "tensor_string";
+    break;
+  default:
+    type1 = "unknown";
+  }
+
+  switch (b.m_type_id) {
+  case SCALAR:
+    type2 = "scalar";
+    break;
+  case VECTOR:
+    type2 = "vector";
+    break;
+  case TENSOR:
+    type2 = "tensor";
+    break;
+  case SCALAR_STRING:
+    type2 = "scalar_string";
+    break;
+  case VECTOR_STRING:
+    type2 = "vector_string";
+    break;
+  case TENSOR_STRING:
+    type2 = "tensor_string";
+    break;
+  default:
+    type2 = "unknown";
+  }
+
     throw gError
         ("Variant::sameType",
-          "Type mismatch.");
+          "Type mismatch in some algebraic expression. This info might help to find it: Type1 = " + type1 + ". Type2 = " + type2);
   }
 
   return m_type_id;

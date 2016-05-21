@@ -31,6 +31,7 @@ include_HEADERS = \
 	inlet_cell.h \
 	integrator.h \
 	linked_list_creator.h \
+	lin_solve_tensor_vector.h \
 	manager_cell.h \
 	MArray2D.h \
 	meter.h \
