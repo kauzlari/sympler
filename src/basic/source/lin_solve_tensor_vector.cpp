@@ -383,7 +383,7 @@ void LinSolveTensorVector::call(size_t timestep) {
 	// open new file for matrix
 	m_s.open(make_filename(m_outputFileName, m_step_counter).c_str(), ios::out|ios::binary);
 	// write
-	m_s.write((char*) &m_mat, nParticles*nParticles*SPACE_DIMS_SQUARED*sizeof(double));
+	m_s.write((char*) &m_mat[0], nParticles*nParticles*SPACE_DIMS_SQUARED*sizeof(double));
 	m_s.close();
 
 	// open new file for RHS
@@ -391,14 +391,14 @@ void LinSolveTensorVector::call(size_t timestep) {
 	// write
 	FOR_EACH_FREE_PARTICLE_C
 	  (M_PHASE,m_colour1,
-	   m_s.write((char*) &(__iSLFE->tag.pointByOffset(m_RHSsymbolOffset1)), SPACE_DIMS*sizeof(double));
-	   m_s << endl; // new p goes in new row
+	   m_s.write((char*) &(__iSLFE->tag.pointByOffset(m_RHSsymbolOffset1).coords), SPACE_DIMS*sizeof(double));
 	   );
-	FOR_EACH_FREE_PARTICLE_C
-	  (M_PHASE,m_colour2,
-	   m_s.write((char*) &(__iSLFE->tag.pointByOffset(m_RHSsymbolOffset2)), SPACE_DIMS*sizeof(double));
-	   m_s << endl; // new p goes in new row
-	   );
+	if(m_colour2 != m_colour1) {
+	  FOR_EACH_FREE_PARTICLE_C
+	    (M_PHASE,m_colour2,
+	     m_s.write((char*) &(__iSLFE->tag.pointByOffset(m_RHSsymbolOffset2).coords), SPACE_DIMS*sizeof(double));
+	     );
+	}
 	m_s.close();
 
       } // end of if(m_binary)
