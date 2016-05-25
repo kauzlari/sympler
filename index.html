@@ -226,16 +226,25 @@ Useful [cxxflags] are (for more see the g++ documentation):</p>
 <h3>
 <a name="configuration-and-compilation-for-macos" class="anchor" href="#configuration-and-compilation-for-macos"><span class="octicon octicon-link"></span></a>Configuration and Compilation for MacOS</h3>
 
-<p>The following instructions were last successfully tested with Mac OS 10.6.8 and have been provided by Oliver Gruenert and Andreas Greiner.  </p>
+<p>The following instructions were last successfully tested with Mac OS X Yosemite 10.10.5 and have been provided by Tobias Wondratsch.  </p>
 
-<p>The libxml2 library comes already preinstalled by Apple. The easiest way to get the two remaining ones is to use one of the packaging-systems for Mac OS.</p>
+<p>The libxml2 library comes already preinstalled by Apple but caused trouble during the SYMPLER installation. You may give the preinstalled libxml2 a try or immediately go and get an alternative version and the two remaining libraries by using one of the packaging-systems for Mac OS.</p>
 
-<p>One of the best packaging-systems is homebrew. You can grab it and get a how-to install from <a href="http://github.com/mxcl/homebrew">http://github.com/mxcl/homebrew</a>. Two nice properties of homebrew are, that it is easy to install and very easy to UNINSTALL, meaning that your operating system will be the same as before, without any old header or binary files lying around. The best way (also mentioned on <a href="http://github.com/mxcl/homebrew">http://github.com/mxcl/homebrew</a>) is to install it in /usr/local and then </p>
+<p>One of the best packaging-systems is homebrew. How to install homebrew is described on <a href="https://brew.sh">https://brew.sh</a>. Two nice properties of homebrew are, that it is easy to install and very easy to UNINSTALL, meaning that your operating system will be the same as before, without any old header or binary files lying around. </p>
 
 <pre><code>$ sudo chown -R `whoami` /usr/local
 </code></pre>
 
-<p>After homebrew is installed, you are ready to install the GSL and the SDL library. To install GSL type</p>
+<p>After homebrew is installed, you are ready to install the GSL and the SDL library. But first, on a fresh system, you might still be lacking </p>
+
+<pre><code>
+  $ brew install gcc
+  $ brew install libtool
+  $ brew install autoconf
+  $ brew install automake
+</code></pre>
+
+<p>To install GSL type</p>
 
 <pre><code>$ brew install gsl 
 </code></pre>
@@ -248,22 +257,29 @@ Then, to install SDL type</p>
 
 <p>into your terminal. </p>
 
+<p>If you have to, also instal libxml2 </p>
+
+<pre><code>$ brew install libxml2 
+</code></pre>
+
+
 <p>Try first to skip this paragraph because the next step is only necessary if you run into trouble with your already preinstalled command-line tool gm4 (a macro processor used by aclocal). Then you need to replace it with a newer version, since the old version which came from Apple was broken. This was the case for example in MacOS 10.6.2. You can grab the most recent version from <a href="http://ftp.gnu.org/gnu/m4/">http://ftp.gnu.org/gnu/m4/</a>. Now drag the old gm4 tool in /usr/bin to a backup folder (for example your Desktop) and replace it with the newer version (you will be asked to enter your root password).</p>
 
-<p>Now you are ready to compile sympler! So grab the SYMPLER source code into a code directory (called $CODE-DIR here) and create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal:</p>
+<p>Now you are ready to compile sympler! So grab the SYMPLER source code into a code directory (called $CODE-DIR here) and create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal (adapt the paths to your needs):</p>
 
 <pre><code>$ cd $CODE-DIR
-$ aclocal -I /usr/local/Cellar/gsl/1.13/share/aclocal -I /usr/local/Cellar/sdl/1.2.14/share/aclocal
-$ autoconf
 $ glibtoolize --force
+$ aclocal -I /usr/local/Cellar/gsl/1.16/share/aclocal -I /usr/local/Cellar/sdl/1.2.15/share/aclocal -I /usr/local/Cellar/libxml2/2.9.2/share/aclocal
+$ autoconf
 $ automake --add-missing
-
 $ cd $BUILD-DIR
-$ $CODE-DIR/configure CXXFLAGS="-O3" --disable-shared
+$ $CODE-DIR/configure CXXFLAGS="-O3"
 $ make -j[1 to roughly the number of available cores]
 </code></pre>
 
 <p>After successful compilation the executable "sympler" will be created in the directory src/ </p>
+
+<p>A known problem that may occur is a conflict with a libxml2 version previously installed in MacOS, for example due to a previous installation of Xcode. Just find a way to clean your system from this old libxml2 version and the SYMPLER installation should work fine by using the brew version of libxml2.</p>
 
 <h3>
 <a name="sympler-and-intel-compilers" class="anchor" href="#sympler-and-intel-compilers"><span class="octicon octicon-link"></span></a>SYMPLER and Intel compilers:</h3>
