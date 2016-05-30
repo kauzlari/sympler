@@ -220,26 +220,31 @@ void LinSolveTensorVector::setup()
   }
   else m_RHSsymbolOffset2 = m_RHSsymbolOffset1;
 
+  MSG_DEBUG("LinSolveTensorVector::setup", "FunctionPair m_cps.size() = " << m_cps.size());
+
   int cpIdx = -1;
-  for(vector<ColourPair*>::iterator cpit = m_cps.begin(); *cpit != NULL; ++cpit) {
-    ++cpIdx;
-    ColourPair* cp = *cpit;
-
-    m_functions[cpIdx] = new FunctionPair();
-    m_functions[cpIdx]->setExpression(m_expression);
-    m_functions[cpIdx]->setColourPair(cp);
-    m_functions[cpIdx]->setReturnType(Variant::TENSOR);
-    
-    m_1stParticleFactors[cpIdx] = new FunctionPair();
-    m_1stParticleFactors[cpIdx]->setExpression(m_1stPExpression);
-    m_1stParticleFactors[cpIdx]->setColourPair(cp);
-    m_1stParticleFactors[cpIdx]->setReturnType(Variant::TENSOR);
-    
-    m_2ndParticleFactors[cpIdx] = new FunctionPair();
-    m_2ndParticleFactors[cpIdx]->setExpression(m_2ndPExpression);
-    m_2ndParticleFactors[cpIdx]->setColourPair(cp);
-    m_2ndParticleFactors[cpIdx]->setReturnType(Variant::TENSOR);
-
+  for(vector<ColourPair*>::iterator cpit = m_cps.begin(); cpit != m_cps.end(); ++cpit) {
+    if(*cpit) { // should still be NULL if no further ColourPair assigned
+      ++cpIdx;
+      ColourPair* cp = *cpit;
+      
+      MSG_DEBUG("LinSolveTensorVector::setup", "FunctionPair setup for cpIdx = " << cpIdx);
+      
+      m_functions[cpIdx] = new FunctionPair();
+      m_functions[cpIdx]->setExpression(m_expression);
+      m_functions[cpIdx]->setColourPair(cp);
+      m_functions[cpIdx]->setReturnType(Variant::TENSOR);
+      
+      m_1stParticleFactors[cpIdx] = new FunctionPair();
+      m_1stParticleFactors[cpIdx]->setExpression(m_1stPExpression);
+      m_1stParticleFactors[cpIdx]->setColourPair(cp);
+      m_1stParticleFactors[cpIdx]->setReturnType(Variant::TENSOR);
+      
+      m_2ndParticleFactors[cpIdx] = new FunctionPair();
+      m_2ndParticleFactors[cpIdx]->setExpression(m_2ndPExpression);
+      m_2ndParticleFactors[cpIdx]->setColourPair(cp);
+      m_2ndParticleFactors[cpIdx]->setReturnType(Variant::TENSOR);
+    }
   }
 
   M_CONTROLLER->registerForSetupAfterParticleCreation(this);
@@ -278,96 +283,98 @@ void LinSolveTensorVector::call(size_t timestep) {
   int nPOffset1 = 0;
   int nPOffset2 = 0;
   int cpIdx = -1;
-  for(vector<ColourPair*>::iterator cpit = m_cps.begin(); *cpit != NULL; ++cpit) {
-    ++cpIdx;
-    FunctionPair* m_function = m_functions[cpIdx];
-    FunctionPair* m_1stParticleFactor = m_1stParticleFactors[cpIdx];
-    FunctionPair* m_2ndParticleFactor = m_2ndParticleFactors[cpIdx];
-    ColourPair* cp = *cpit;
-    FOR_EACH_PAIR
-      (cp,  
-       if(pair->abs() < m_cutoff) {
-	 tensor_t temp;
-	 
-	 // compute the pair-expression
-	 (*m_function)(&temp, pair);
-	 
-	 tensor_t tempFirst;
-	 tensor_t tempSecond;
-	 // compute the particle-expressions
-	 (*m_1stParticleFactor)(&tempFirst, pair);
-	 (*m_2ndParticleFactor)(&tempSecond, pair);
-	 
-	 Particle* first = pair->firstPart();
-	 Particle* second = pair->secondPart();
-	 // the offsets only become active for the 2nd or latest the 3rd ColourPair 
-	 // (see definition above), by assuming that the first rows and columns of 
-	 // m_mat are for species1 and the following for species2
-	 size_t firstSlot = nPOffset1*nParticles1 + first->mySlot;
-	 size_t secondSlot = nPOffset2*nParticles1 + second->mySlot;
-	 // MSG_DEBUG("LinSolveTensorVector::compute", "temp = " << temp);
-	 
-	 // write into matrix
-	 // FIXME: think about sparse-matrix format
-	 if(pair->actsOnFirst()) {
-	   // component-wise product for tensor_t
-	   tempFirst *= temp;
+  for(vector<ColourPair*>::iterator cpit = m_cps.begin(); cpit != m_cps.end(); ++cpit) {
+    if(*cpit) { // should still be NULL if no further ColourPair assigned
+      ++cpIdx;
+      FunctionPair* m_function = m_functions[cpIdx];
+      FunctionPair* m_1stParticleFactor = m_1stParticleFactors[cpIdx];
+      FunctionPair* m_2ndParticleFactor = m_2ndParticleFactors[cpIdx];
+      ColourPair* cp = *cpit;
+      FOR_EACH_PAIR
+	(cp,  
+	 if(pair->abs() < m_cutoff) {
+	   tensor_t temp;
 	   
-	   // precompute
-	   size_t firstSlotSPACE_DIMS_SQUARED = firstSlot*SPACE_DIMS_SQUARED;
-
-	   for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	   // compute the pair-expression
+	   (*m_function)(&temp, pair);
+	   
+	   tensor_t tempFirst;
+	   tensor_t tempSecond;
+	   // compute the particle-expressions
+	   (*m_1stParticleFactor)(&tempFirst, pair);
+	   (*m_2ndParticleFactor)(&tempSecond, pair);
+	   
+	   Particle* first = pair->firstPart();
+	   Particle* second = pair->secondPart();
+	   // the offsets only become active for the 2nd or latest the 3rd ColourPair 
+	   // (see definition above), by assuming that the first rows and columns of 
+	   // m_mat are for species1 and the following for species2
+	   size_t firstSlot = nPOffset1*nParticles1 + first->mySlot;
+	   size_t secondSlot = nPOffset2*nParticles1 + second->mySlot;
+	   // MSG_DEBUG("LinSolveTensorVector::compute", "temp = " << temp);
+	   
+	   // write into matrix
+	   // FIXME: think about sparse-matrix format
+	   if(pair->actsOnFirst()) {
+	     // component-wise product for tensor_t
+	     tempFirst *= temp;
+	     
 	     // precompute
-	     size_t iSPACE_DIMS = i*SPACE_DIMS;
-	     for(size_t j = 0; j < SPACE_DIMS; ++j) {
-	       // off-diagonal
-	       /* 		   m_mat[j+i*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = tempFirst(i,j); */
-	       m_mat[j+iSPACE_DIMS+secondSlot*SPACE_DIMS_SQUARED+firstSlotSPACE_DIMS_SQUARED*nParticles] = tempFirst(i,j);
-	       /* 		   m_mat[j+(i+(secondSlot+firstSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = tempFirst(i,j); */
-	       
-	       // subtract from diagonal for first particle
-	       /* 		   m_mat[j+i*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS*nParticles] -= tempFirst(i,j); */
-	       m_mat[j+iSPACE_DIMS+firstSlotSPACE_DIMS_SQUARED*(1+nParticles)] -= tempFirst(i,j);
-	       /* 		   m_mat[j+(i+(firstSlot+firstSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] -= tempFirst(i,j); */
-	       /* 		   m_mat[j+(i+(firstSlot*(1+nParticles))*SPACE_DIMS)*SPACE_DIMS] -= tempFirst(i,j); */
+	     size_t firstSlotSPACE_DIMS_SQUARED = firstSlot*SPACE_DIMS_SQUARED;
+	     
+	     for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	       // precompute
+	       size_t iSPACE_DIMS = i*SPACE_DIMS;
+	       for(size_t j = 0; j < SPACE_DIMS; ++j) {
+		 // off-diagonal
+		 /* 		   m_mat[j+i*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = tempFirst(i,j); */
+		 m_mat[j+iSPACE_DIMS+secondSlot*SPACE_DIMS_SQUARED+firstSlotSPACE_DIMS_SQUARED*nParticles] = tempFirst(i,j);
+		 /* 		   m_mat[j+(i+(secondSlot+firstSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = tempFirst(i,j); */
+		 
+		 // subtract from diagonal for first particle
+		 /* 		   m_mat[j+i*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS*nParticles] -= tempFirst(i,j); */
+		 m_mat[j+iSPACE_DIMS+firstSlotSPACE_DIMS_SQUARED*(1+nParticles)] -= tempFirst(i,j);
+		 /* 		   m_mat[j+(i+(firstSlot+firstSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] -= tempFirst(i,j); */
+		 /* 		   m_mat[j+(i+(firstSlot*(1+nParticles))*SPACE_DIMS)*SPACE_DIMS] -= tempFirst(i,j); */
+	       }
 	     }
+	     // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating first particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
 	   }
-	   // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating first particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
+	   
+	   if(pair->actsOnSecond()) {
+	     // component-wise product for tensor_t
+	     tempSecond *= temp*m_symmetry;
+	     
+	     // precompute
+	     size_t secondSlotSPACE_DIMS_SQUARED = secondSlot*SPACE_DIMS_SQUARED;
+	     
+	     for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	       // precompute
+	       size_t iSPACE_DIMS = i*SPACE_DIMS;
+	       for(size_t j = 0; j < SPACE_DIMS; ++j) {
+		 // i and j can stay the same (REALLY?!?), but first and second swap compared to above
+		 // off-diagonal
+		 /* 		   m_mat[j+i*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = tempSecond(i,j); */
+		 m_mat[j+iSPACE_DIMS+firstSlot*SPACE_DIMS_SQUARED+secondSlotSPACE_DIMS_SQUARED*nParticles] = tempSecond(i,j);
+		 /* 		   m_mat[j+(i+(firstSlot+secondSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = tempSecond(i,j); */
+		 
+		 // subtract from diagonal for first particle
+		 /* 		   m_mat[j+i*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS*nParticles] -= tempSecond(i,j); */
+		 m_mat[j+iSPACE_DIMS+secondSlotSPACE_DIMS_SQUARED*(1+nParticles)] -= tempSecond(i,j);
+		 /* 		   m_mat[j+(i+(secondSlot+secondSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] -= tempSecond(i,j); */
+		 /* 		   m_mat[j+(i+(secondSlot*(1+nParticles))*SPACE_DIMS)*SPACE_DIMS] -= tempSecond(i,j); */
+	       }
+	     }	       
+	     // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating second particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
+	   }
 	 }
 	 
-	 if(pair->actsOnSecond()) {
-	   // component-wise product for tensor_t
-	   tempSecond *= temp*m_symmetry;
-	   
-	   // precompute
-	   size_t secondSlotSPACE_DIMS_SQUARED = secondSlot*SPACE_DIMS_SQUARED;
-
-	   for(size_t i = 0; i < SPACE_DIMS; ++i) {
-	     // precompute
-	     size_t iSPACE_DIMS = i*SPACE_DIMS;
-	     for(size_t j = 0; j < SPACE_DIMS; ++j) {
-	       // i and j can stay the same (REALLY?!?), but first and second swap compared to above
-	       // off-diagonal
-	       /* 		   m_mat[j+i*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = tempSecond(i,j); */
-	       m_mat[j+iSPACE_DIMS+firstSlot*SPACE_DIMS_SQUARED+secondSlotSPACE_DIMS_SQUARED*nParticles] = tempSecond(i,j);
-	       /* 		   m_mat[j+(i+(firstSlot+secondSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = tempSecond(i,j); */
-	       
-	       // subtract from diagonal for first particle
-	       /* 		   m_mat[j+i*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS*nParticles] -= tempSecond(i,j); */
-	       m_mat[j+iSPACE_DIMS+secondSlotSPACE_DIMS_SQUARED*(1+nParticles)] -= tempSecond(i,j);
-	       /* 		   m_mat[j+(i+(secondSlot+secondSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] -= tempSecond(i,j); */
-	       /* 		   m_mat[j+(i+(secondSlot*(1+nParticles))*SPACE_DIMS)*SPACE_DIMS] -= tempSecond(i,j); */
-	     }
-	   }	       
-	   // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating second particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
-	 }
-       }
-       
-       ); // end FOR_EACH_PAIR
-    
-    // for the three ColourPairs, we will have for (nPOffset1,nPOffset2): (0,0), (0,1), (1,1)
-    nPOffset1 += nPOffset2;
-    nPOffset2 += 1-nPOffset1; 
+	 ); // end FOR_EACH_PAIR
+      
+      // for the three ColourPairs, we will have for (nPOffset1,nPOffset2): (0,0), (0,1), (1,1)
+      nPOffset1 += nPOffset2;
+      nPOffset2 += 1-nPOffset1; 
+    } // end of if(*cpit)
   } // end of for(vector<ColourPair*>::iterator cpit = m_cps.begin(); *cpit != NULL; ++cpit)
   
   
@@ -467,65 +474,67 @@ void LinSolveTensorVector::call(size_t timestep) {
     // see the increments at end of loop
     nPOffset1 = 0;
     nPOffset2 = 0;
-    for(vector<ColourPair*>::iterator cpit = m_cps.begin(); *cpit != NULL; ++cpit) {
-      ColourPair* cp = *cpit;
-      FOR_EACH_PAIR
-	(cp,  
-	 if(pair->abs() < m_cutoff) {	   
-	   Particle* first = pair->firstPart();
-	   Particle* second = pair->secondPart();
-	   // the offsets only become active for the 2nd or latest the 3rd ColourPair 
-	   // (see definition above), by assuming that the first rows and columns of 
-	   // m_mat are for species1 and the following for species2
-	   size_t firstSlot = nPOffset1*nParticles1 + first->mySlot;
-	   size_t secondSlot = nPOffset2*nParticles1 + second->mySlot;
-	   // MSG_DEBUG("LinSolveTensorVector::compute", "temp = " << temp);
-	   
-	   // write into matrix
-	   // FIXME: think about sparse-matrix format
-	   if(pair->actsOnFirst()) {
-	     // precompute
-	     size_t firstSlotSPACE_DIMS_SQUARED = firstSlot*SPACE_DIMS_SQUARED;
+    for(vector<ColourPair*>::iterator cpit = m_cps.begin(); cpit != m_cps.end(); ++cpit) {
+      if(*cpit) { // should still be NULL if no further ColourPAir assigned
+	ColourPair* cp = *cpit;
+	FOR_EACH_PAIR
+	  (cp,  
+	   if(pair->abs() < m_cutoff) {	   
+	     Particle* first = pair->firstPart();
+	     Particle* second = pair->secondPart();
+	     // the offsets only become active for the 2nd or latest the 3rd ColourPair 
+	     // (see definition above), by assuming that the first rows and columns of 
+	     // m_mat are for species1 and the following for species2
+	     size_t firstSlot = nPOffset1*nParticles1 + first->mySlot;
+	     size_t secondSlot = nPOffset2*nParticles1 + second->mySlot;
+	     // MSG_DEBUG("LinSolveTensorVector::compute", "temp = " << temp);
 	     
-	     for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	     // write into matrix
+	     // FIXME: think about sparse-matrix format
+	     if(pair->actsOnFirst()) {
 	       // precompute
-	       size_t iSPACE_DIMS = i*SPACE_DIMS;
-	       for(size_t j = 0; j < SPACE_DIMS; ++j) {
-		 // off-diagonal
-		 /* 		   m_mat[j+i*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = 0; */
-		 m_mat[j+iSPACE_DIMS+secondSlot*SPACE_DIMS_SQUARED+firstSlotSPACE_DIMS_SQUARED*nParticles] = 0;
-		 /* 		   m_mat[j+(i+(secondSlot+firstSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = 0; */
-		 
+	       size_t firstSlotSPACE_DIMS_SQUARED = firstSlot*SPACE_DIMS_SQUARED;
+	       
+	       for(size_t i = 0; i < SPACE_DIMS; ++i) {
+		 // precompute
+		 size_t iSPACE_DIMS = i*SPACE_DIMS;
+		 for(size_t j = 0; j < SPACE_DIMS; ++j) {
+		   // off-diagonal
+		   /* 		   m_mat[j+i*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = 0; */
+		   m_mat[j+iSPACE_DIMS+secondSlot*SPACE_DIMS_SQUARED+firstSlotSPACE_DIMS_SQUARED*nParticles] = 0;
+		   /* 		   m_mat[j+(i+(secondSlot+firstSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = 0; */
+		   
+		 }
 	       }
+	       // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating first particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
 	     }
-	     // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating first particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
-	   }
-	   
-	   if(pair->actsOnSecond()) {
-	     // precompute
-	     size_t secondSlotSPACE_DIMS_SQUARED = secondSlot*SPACE_DIMS_SQUARED;
 	     
-	     for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	     if(pair->actsOnSecond()) {
 	       // precompute
-	       size_t iSPACE_DIMS = i*SPACE_DIMS;
-	       for(size_t j = 0; j < SPACE_DIMS; ++j) {
-		 // i and j can stay the same (REALLY?!?), but first and second swap compared to above
-		 // off-diagonal
-		 /* 		   m_mat[j+i*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = 0; */
-		 m_mat[j+iSPACE_DIMS+firstSlot*SPACE_DIMS_SQUARED+secondSlotSPACE_DIMS_SQUARED*nParticles] = 0;
-		 /* 		   m_mat[j+(i+(firstSlot+secondSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = 0; */
-		 
-	       }
-	     }	       
-	     // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating second particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
-	   }
-	 }       
-	 ); // end FOR_EACH_PAIR
-      
-      // for the three ColourPairs, we will have for (nPOffset1,nPOffset2): (0,0), (0,1), (1,1)
-      nPOffset1 += nPOffset2;
-      nPOffset2 += 1-nPOffset1; 
-
+	       size_t secondSlotSPACE_DIMS_SQUARED = secondSlot*SPACE_DIMS_SQUARED;
+	       
+	       for(size_t i = 0; i < SPACE_DIMS; ++i) {
+		 // precompute
+		 size_t iSPACE_DIMS = i*SPACE_DIMS;
+		 for(size_t j = 0; j < SPACE_DIMS; ++j) {
+		   // i and j can stay the same (REALLY?!?), but first and second swap compared to above
+		   // off-diagonal
+		   /* 		   m_mat[j+i*SPACE_DIMS+firstSlot*SPACE_DIMS*SPACE_DIMS+secondSlot*SPACE_DIMS*SPACE_DIMS*nParticles] = 0; */
+		   m_mat[j+iSPACE_DIMS+firstSlot*SPACE_DIMS_SQUARED+secondSlotSPACE_DIMS_SQUARED*nParticles] = 0;
+		   /* 		   m_mat[j+(i+(firstSlot+secondSlot*nParticles)*SPACE_DIMS)*SPACE_DIMS] = 0; */
+		   
+		 }
+	       }	       
+	       // MSG_DEBUG("LinSolveTensorVector::compute", "AFTER updating second particle entries: NO DEBUG OUTPUT SPECIFIED YET!);
+	     }
+	   }       
+	   ); // end FOR_EACH_PAIR
+	
+	// for the three ColourPairs, we will have for (nPOffset1,nPOffset2): (0,0), (0,1), (1,1)
+	nPOffset1 += nPOffset2;
+	nPOffset2 += 1-nPOffset1; 
+	
+      } // end of if(*cpit)
     } // end of for(vector<ColourPair*>::iterator cpit = m_cps.begin(); *cpit != NULL; ++cpit)
     
     
