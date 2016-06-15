@@ -1,0 +1,310 @@
+<Simulation simName="BlochInChannel" inputFromResults="1" wtDistEps="-1e-10">
+<!--  Weighting functions  -->
+<Square cutoff="1.5" name="L1"/>
+
+<Controller timesteps="300000" statusEvery="100" dt="1.0e-4">
+<IntegratorVelocityVerlet species="H" lambda="0.5"/>
+
+<!--
+ Define different magentizations rotating with different Larmorfrequencies 
+-->
+<!--  1  -->
+<IntegratorScalarLambda species="H" scalar="mx" symbol="mx" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my" symbol="my" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz" symbol="mz" lambda="1"/>
+<!--  2  -->
+<IntegratorScalarLambda species="H" scalar="mx2" symbol="mx2" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my2" symbol="my2" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz2" symbol="mz2" lambda="1"/>
+<!--  3  -->
+<IntegratorScalarLambda species="H" scalar="mx3" symbol="mx3" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my3" symbol="my3" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz3" symbol="mz3" lambda="1"/>
+<!--  4  -->
+<IntegratorScalarLambda species="H" scalar="mx4" symbol="mx4" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my4" symbol="my4" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz4" symbol="mz4" lambda="1"/>
+<!--  5  -->
+<IntegratorScalarLambda species="H" scalar="mx5" symbol="mx5" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my5" symbol="my5" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz5" symbol="mz5" lambda="1"/>
+<!--  6  -->
+<IntegratorScalarLambda species="H" scalar="mx6" symbol="mx6" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my6" symbol="my6" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz6" symbol="mz6" lambda="1"/>
+<!--  7  -->
+<IntegratorScalarLambda species="H" scalar="mx7" symbol="mx7" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my7" symbol="my7" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz7" symbol="mz7" lambda="1"/>
+<!--  8  -->
+<IntegratorScalarLambda species="H" scalar="mx8" symbol="mx8" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my8" symbol="my8" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz8" symbol="mz8" lambda="1"/>
+<!--  9  -->
+<IntegratorScalarLambda species="H" scalar="mx9" symbol="mx9" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my9" symbol="my9" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz9" symbol="mz9" lambda="1"/>
+<!--  10  -->
+<IntegratorScalarLambda species="H" scalar="mx10" symbol="mx10" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my10" symbol="my10" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz10" symbol="mz10" lambda="1"/>
+<!--  11  -->
+<IntegratorScalarLambda species="H" scalar="mx11" symbol="mx11" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my11" symbol="my11" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz11" symbol="mz11" lambda="1"/>
+<!--  12  -->
+<IntegratorScalarLambda species="H" scalar="mx12" symbol="mx12" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my12" symbol="my12" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz12" symbol="mz12" lambda="1"/>
+<!--  13  -->
+<IntegratorScalarLambda species="H" scalar="mx13" symbol="mx13" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my13" symbol="my13" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz13" symbol="mz13" lambda="1"/>
+<!--  14  -->
+<IntegratorScalarLambda species="H" scalar="mx14" symbol="mx14" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="my14" symbol="my14" lambda="1"/>
+<IntegratorScalarLambda species="H" scalar="mz14" symbol="mz14" lambda="1"/>
+
+<!--
+The usage of the following Integrators is a workaround:
+- "s" makes the current time accessible in runtime compiled expressions. Check further occurences of "s" for how time integration and a generalised force is used for incrementing time.
+- Dt, tau1, tau2,... allow to use symbol names for constants in runtime compiled expressions. Check the ParticleCreator for the values of the constants.        
+-->
+<!--                                                -->
+<IntegratorScalar species="H" scalar="s" symbol="s"/>
+<IntegratorScalar species="H" scalar="Dt" symbol="Dt"/>
+<!--  1  -->
+<IntegratorScalar species="H" scalar="tau1" symbol="tau1"/>
+<!--  2  -->
+<IntegratorScalar species="H" scalar="tau2" symbol="tau2"/>
+<!--  3  -->
+<IntegratorScalar species="H" scalar="tau3" symbol="tau3"/>
+<!--  4  -->
+<IntegratorScalar species="H" scalar="tau4" symbol="tau4"/>
+<!--  5  -->
+<IntegratorScalar species="H" scalar="tau5" symbol="tau5"/>
+<!--  6  -->
+<IntegratorScalar species="H" scalar="tau6" symbol="tau6"/>
+<!--  7  -->
+<IntegratorScalar species="H" scalar="tau7" symbol="tau7"/>
+<!--  8  -->
+<IntegratorScalar species="H" scalar="tau8" symbol="tau8"/>
+<!--  9  -->
+<IntegratorScalar species="H" scalar="tau9" symbol="tau9"/>
+<!--  10  -->
+<IntegratorScalar species="H" scalar="tau10" symbol="tau10"/>
+<!--  11  -->
+<IntegratorScalar species="H" scalar="tau11" symbol="tau11"/>
+<!--  12  -->
+<IntegratorScalar species="H" scalar="tau12" symbol="tau12"/>
+<!--  13  -->
+<IntegratorScalar species="H" scalar="tau13" symbol="tau13"/>
+<!--  14  -->
+<IntegratorScalar species="H" scalar="tau14" symbol="tau14"/>
+<!--  End  -->
+<IntegratorScalar species="H" scalar="t2" symbol="t2"/>
+<IntegratorScalar species="H" scalar="t1" symbol="t1"/>
+<IntegratorScalar species="H" scalar="DwM" symbol="DwM"/>
+<IntegratorScalar species="H" scalar="gG" symbol="gG"/>
+<IntegratorScalar species="H" scalar="m0" symbol="m0"/>
+</Controller>
+
+<!-- Generalised Forces-->
+<!--  This force is used for incrementing time  -->
+<FParticleScalar forceName="TimeInc" species="H" expression="1" scalar="s"/>
+
+<!--  1  -->
+<!--
+ The following forces describe a precession and a pi-pulse in x-dicrection 
+-->
+<FParticleScalar forceName="BlochMX" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my-mx/t2)" scalar="mx"/>
+<FParticleScalar forceName="BlochMY" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx-my/t2)" scalar="my"/>
+<FParticleScalar forceName="BlochMZ" species="H" expression="(-(mz-m0)/t1)" scalar="mz"/>
+<!--  Define the symbols to be used in simulation  -->
+<ParticleScalar species="H" expression="mx" symbol="echox1"/>
+<ParticleScalar species="H" expression="my" symbol="echoy1"/>
+<ParticleScalar species="H" expression="my*(1.0-(step(s-tau1)*step(tau1+Dt-s)))-my*(step(s-tau1)*step(tau1+Dt-s))" symbol="my" overwrite="yes"/>
+
+<!--  2  -->
+<FParticleScalar forceName="BlochMX2" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my2-mx2/t2)" scalar="mx2"/>
+<FParticleScalar forceName="BlochMY2" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx2-my2/t2)" scalar="my2"/>
+<FParticleScalar forceName="BlochMZ2" species="H" expression="(-(mz2-m0)/t1)" scalar="mz2"/>
+<ParticleScalar species="H" expression="mx2" symbol="echox2"/>
+<ParticleScalar species="H" expression="my2" symbol="echoy2"/>
+<ParticleScalar species="H" expression="my2*(1.0-(step(s-tau2)*step(tau2+Dt-s)))-my2*(step(s-tau2)*step(tau2+Dt-s))" symbol="my2" overwrite="yes"/>
+
+<!--  3  -->
+<FParticleScalar forceName="BlochMX3" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my3-mx3/t2)" scalar="mx3"/>
+<FParticleScalar forceName="BlochMY3" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx3-my3/t2)" scalar="my3"/>
+<FParticleScalar forceName="BlochMZ" species="H" expression="(-(mz3-m0)/t1)" scalar="mz3"/>
+<ParticleScalar species="H" expression="mx3" symbol="echox3"/>
+<ParticleScalar species="H" expression="my3" symbol="echoy3"/>
+<ParticleScalar species="H" expression="my3*(1.0-(step(s-tau3)*step(tau3+Dt-s)))-my3*(step(s-tau3)*step(tau3+Dt-s))" symbol="my3" overwrite="yes"/>
+
+<!--  4  -->
+<FParticleScalar forceName="BlochMX4" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my4-mx4/t2)" scalar="mx4"/>
+<FParticleScalar forceName="BlochMY4" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx4-my4/t2)" scalar="my4"/>
+<FParticleScalar forceName="BlochMZ4" species="H" expression="(-(mz4-m0)/t1)" scalar="mz4"/>
+<ParticleScalar species="H" expression="mx4" symbol="echox4"/>
+<ParticleScalar species="H" expression="my4" symbol="echoy4"/>
+<ParticleScalar species="H" expression="my4*(1.0-(step(s-tau4)*step(tau4+Dt-s)))-my4*(step(s-tau4)*step(tau4+Dt-s))" symbol="my4" overwrite="yes"/>
+
+<!--  5  -->
+<FParticleScalar forceName="BlochMX5" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my5-mx5/t2)" scalar="mx5"/>
+<FParticleScalar forceName="BlochMY5" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx5-my5/t2)" scalar="my5"/>
+<FParticleScalar forceName="BlochMZ5" species="H" expression="(-(mz5-m0)/t1)" scalar="mz5"/>
+<ParticleScalar species="H" expression="mx5" symbol="echox5"/>
+<ParticleScalar species="H" expression="my5" symbol="echoy5"/>
+<ParticleScalar species="H" expression="my5*(1.0-(step(s-tau5)*step(tau5+Dt-s)))-my5*(step(s-tau5)*step(tau5+Dt-s))" symbol="my5" overwrite="yes"/>
+
+<!--  6  -->
+<FParticleScalar forceName="BlochMX6" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my6-mx6/t2)" scalar="mx6"/>
+<FParticleScalar forceName="BlochMY6" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx6-my6/t2)" scalar="my6"/>
+<FParticleScalar forceName="BlochMZ6" species="H" expression="(-(mz6-m0)/t1)" scalar="mz6"/>
+<ParticleScalar species="H" expression="mx6" symbol="echox6"/>
+<ParticleScalar species="H" expression="my6" symbol="echoy6"/>
+<ParticleScalar species="H" expression="my6*(1.0-(step(s-tau6)*step(tau6+Dt-s)))-my6*(step(s-tau6)*step(tau6+Dt-s))" symbol="my6" overwrite="yes"/>
+
+<!--  7  -->
+<FParticleScalar forceName="BlochMX7" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my7-mx7/t2)" scalar="mx7"/>
+<FParticleScalar forceName="BlochMY7" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx7-my7/t2)" scalar="my7"/>
+<FParticleScalar forceName="BlochMZ7" species="H" expression="(-(mz7-m0)/t1)" scalar="mz7"/>
+<ParticleScalar species="H" expression="mx7" symbol="echox7"/>
+<ParticleScalar species="H" expression="my7" symbol="echoy7"/>
+<ParticleScalar species="H" expression="my7*(1.0-(step(s-tau7)*step(tau7+Dt-s)))-my7*(step(s-tau7)*step(tau7+Dt-s))" symbol="my7" overwrite="yes"/>
+
+<!--  8  -->
+<FParticleScalar forceName="BlochMX8" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my8-mx8/t2)" scalar="mx8"/>
+<FParticleScalar forceName="BlochMY8" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx8-my8/t2)" scalar="my8"/>
+<FParticleScalar forceName="BlochMZ8" species="H" expression="(-(mz8-m0)/t1)" scalar="mz8"/>
+<ParticleScalar species="H" expression="mx8" symbol="echox8"/>
+<ParticleScalar species="H" expression="my8" symbol="echoy8"/>
+<ParticleScalar species="H" expression="my8*(1.0-(step(s-tau8)*step(tau8+Dt-s)))-my8*(step(s-tau8)*step(tau8+Dt-s))" symbol="my8" overwrite="yes"/>
+
+<!--  9  -->
+<FParticleScalar forceName="BlochMX9" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my9-mx9/t2)" scalar="mx9"/>
+<FParticleScalar forceName="BlochMY9" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx9-my9/t2)" scalar="my9"/>
+<FParticleScalar forceName="BlochMZ9" species="H" expression="(-(mz9-m0)/t1)" scalar="mz9"/>
+<ParticleScalar species="H" expression="mx9" symbol="echox9"/>
+<ParticleScalar species="H" expression="my9" symbol="echoy9"/>
+<ParticleScalar species="H" expression="my9*(1.0-(step(s-tau9)*step(tau9+Dt-s)))-my9*(step(s-tau9)*step(tau9+Dt-s))" symbol="my9" overwrite="yes"/>
+
+<!--  10  -->
+<FParticleScalar forceName="BlochMX10" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my10-mx10/t2)" scalar="mx10"/>
+<FParticleScalar forceName="BlochMY10" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx10-my10/t2)" scalar="my10"/>
+<FParticleScalar forceName="BlochMZ10" species="H" expression="(-(mz10-m0)/t1)" scalar="mz10"/>
+<ParticleScalar species="H" expression="mx10" symbol="echox10"/>
+<ParticleScalar species="H" expression="my10" symbol="echoy10"/>
+<ParticleScalar species="H" expression="my10*(1.0-(step(s-tau10)*step(tau10+Dt-s)))-my10*(step(s-tau10)*step(tau10+Dt-s))" symbol="my10" overwrite="yes"/>
+
+<!--  11  -->
+<FParticleScalar forceName="BlochMX11" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my11-mx11/t2)" scalar="mx11"/>
+<FParticleScalar forceName="BlochMY11" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx11-my11/t2)" scalar="my11"/>
+<FParticleScalar forceName="BlochMZ11" species="H" expression="(-(mz11-m0)/t1)" scalar="mz11"/>
+<ParticleScalar species="H" expression="mx11" symbol="echox11"/>
+<ParticleScalar species="H" expression="my11" symbol="echoy11"/>
+<ParticleScalar species="H" expression="my11*(1.0-(step(s-tau11)*step(tau11+Dt-s)))-my11*(step(s-tau11)*step(tau11+Dt-s))" symbol="my11" overwrite="yes"/>
+
+<!--  12  -->
+<FParticleScalar forceName="BlochMX12" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my12-mx12/t2)" scalar="mx12"/>
+<FParticleScalar forceName="BlochMY12" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx12-my12/t2)" scalar="my12"/>
+<FParticleScalar forceName="BlochMZ12" species="H" expression="(-(mz12-m0)/t1)" scalar="mz12"/>
+<ParticleScalar species="H" expression="mx12" symbol="echox12"/>
+<ParticleScalar species="H" expression="my12" symbol="echoy12"/>
+<ParticleScalar species="H" expression="my12*(1.0-(step(s-tau12)*step(tau12+Dt-s)))-my12*(step(s-tau12)*step(tau12+Dt-s))" symbol="my12" overwrite="yes"/>
+
+<!--  13  -->
+<FParticleScalar forceName="BlochMX13" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my13-mx13/t2)" scalar="mx13"/>
+<FParticleScalar forceName="BlochMY13" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx13-my13/t2)" scalar="my13"/>
+<FParticleScalar forceName="BlochMZ13" species="H" expression="(-(mz13-m0)/t1)" scalar="mz13"/>
+<ParticleScalar species="H" expression="mx13" symbol="echox13"/>
+<ParticleScalar species="H" expression="my13" symbol="echoy13"/>
+<ParticleScalar species="H" expression="my13*(1.0-(step(s-tau13)*step(tau13+Dt-s)))-my13*(step(s-tau13)*step(tau13+Dt-s))" symbol="my13" overwrite="yes"/>
+
+<!--  14  -->
+<FParticleScalar forceName="BlochMX14" species="H" expression="((DwM*1+gG*zCoord([r])*1)*my14-mx14/t2)" scalar="mx14"/>
+<FParticleScalar forceName="BlochMY14" species="H" expression="(-(DwM*1+gG*zCoord([r])*1)*mx14-my14/t2)" scalar="my14"/>
+<FParticleScalar forceName="BlochMZ14" species="H" expression="(-(mz14-m0)/t1)" scalar="mz14"/>
+<ParticleScalar species="H" expression="mx14" symbol="echox14"/>
+<ParticleScalar species="H" expression="my14" symbol="echoy14"/>
+<ParticleScalar species="H" expression="my14*(1.0-(step(s-tau14)*step(tau14+Dt-s)))-my14*(step(s-tau14)*step(tau14+Dt-s))" symbol="my14" overwrite="yes"/>
+
+<!--  x-component of velocity: its random initial distribution according to Maxwell-Boltzmann is used below in the ParticleCreatorRandom to generate random Larmor frequency offsets 'DwM' -->
+<ParticleScalar species="H" expression="xCoord([v])" symbol="velx"/>
+<!--  Fluid-fluid, repulsive  -->
+<FPairVels species1="H" species2="H" pairFactor="25*(1-rij)*[rij]/rij" cutoff="1"/>
+<!--  Isothermal Peters Thermostat  -->
+<ThermostatPetersIso kBToverM="1" dissipation="400000" species1="H" species2="H" weightingFunction="L1"/>
+<!--  Phase manages the particle information and initializes the simulation -->
+<Phase smartCells="1">
+<LinkedListCreator/>
+<!--  It defines the boundary of a cuboid simulation region  -->
+<BoundaryCuboid boxX="10" boxY="10" boxZ="10" periodicX="yes" periodicY="yes" periodicZ="yes">
+<!--  Reflect particles back with a random angle of 90 degree on average  -->
+<ReflectorThermalize/>
+<!-- 
+	Particle creator random creates randomly distributed particles before the simulation starts, with chosen density and temperature. 'my' and 'mz' define the initial value of the magnetization. The 'tau' define the time of the pi-pulse. The 'DwM' expression provides the offset frequency for the particles. The random velocities get capped for 'DwM' by using the former as an argument to a 'sin' function. 't1' and 't2' are spin relaxation constants while 'gG' defines the gradient times the gyromagnetic ratio.  
+-->
+<ParticleCreatorRandom density="3" species="H" kBToverM="1" randomize="yes" velZ="velZ" my="1.24*step(posZ-1)*step(9-posZ)" mz="(1-step(posZ-1)*step(9-posZ))*1.24" my2="1.24*step(posZ-1)*step(9-posZ)" mz2="(1-step(posZ-1)*step(9-posZ))*1.24" my3="1.24*step(posZ-1)*step(9-posZ)" mz3="(1-step(posZ-1)*step(9-posZ))*1.24" my4="1.24*step(posZ-1)*step(9-posZ)" mz4="(1-step(posZ-1)*step(9-posZ))*1.24" my5="1.24*step(posZ-1)*step(9-posZ)" mz5="(1-step(posZ-1)*step(9-posZ))*1.24" my6="1.24*step(posZ-1)*step(9-posZ)" mz6="(1-step(posZ-1)*step(9-posZ))*1.24" my7="1.24*step(posZ-1)*step(9-posZ)" mz7="(1-step(posZ-1)*step(9-posZ))*1.24" my8="1.24*step(posZ-1)*step(9-posZ)" mz8="(1-step(posZ-1)*step(9-posZ))*1.24" my9="1.24*step(posZ-1)*step(9-posZ)" mz9="(1-step(posZ-1)*step(9-posZ))*1.24" my10="1.24*step(posZ-1)*step(9-posZ)" mz10="(1-step(posZ-1)*step(9-posZ))*1.24" my11="1.24*step(posZ-1)*step(9-posZ)" mz11="(1-step(posZ-1)*step(9-posZ))*1.24" my12="1.24*step(posZ-1)*step(9-posZ)" mz12="(1-step(posZ-1)*step(9-posZ))*1.24" my13="1.24*step(posZ-1)*step(9-posZ)" mz13="(1-step(posZ-1)*step(9-posZ))*1.24" my14="1.24*step(posZ-1)*step(9-posZ)" mz14="(1-step(posZ-1)*step(9-posZ))*1.24" s="0" Dt="0.0001" gG="3.465" DwM="9+9*sin(velX)" t1="20" t2="20" tau1="1.11" tau2="2.22" tau3="3.33" tau4="4.44" tau5="5.55" tau6="6.66" tau7="7.778" tau8="8.889" tau9="10" tau10="11.11" tau11="12.22" tau12="13.333" tau13="14.44" tau14="15.555" m0="1.0"/>
+</BoundaryCuboid>
+</Phase>
+<!-- 'GridAveragerStructured' is a Meter, which measures quantities at runtime by means of the GridMeters 'Scalar' it contains. Then it passes the measurements to its PostProcessor object 'OutputFile'. Data is saved in a folder named "results1" in ".dat" files, which contain three columns: time, echox and echoy. "^1" denotes the first moment (average), which is measured by 'Scalar' by default. If desired, the attributes 'nX', 'nY', 'nZ' can be set to larger values in order to subdivide the domain into grid-cells and to compute local avarages. -->
+<GridAveragerStructured nX="1" nY="1" nZ="1" avgOver="1" fromStepOn="1" measureEvery="1">
+<!--  1 -->
+<Scalar species="H" symbol="echox1"/>
+<Scalar species="H" symbol="echoy1"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq1.dat" columns="time|H_echox1^1|H_echoy1^1" writeHead="yes"/>
+<!--  2  -->
+<Scalar species="H" symbol="echox2"/>
+<Scalar species="H" symbol="echoy2"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq2.dat" columns="time|H_echox2^1|H_echoy2^1" writeHead="yes"/>
+<!--  3  -->
+<Scalar species="H" symbol="echox3"/>
+<Scalar species="H" symbol="echoy3"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq3.dat" columns="time|H_echox3^1|H_echoy3^1" writeHead="yes"/>
+<!--  4  -->
+<Scalar species="H" symbol="echox4"/>
+<Scalar species="H" symbol="echoy4"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq4.dat" columns="time|H_echox4^1|H_echoy4^1" writeHead="yes"/>
+<!--  5  -->
+<Scalar species="H" symbol="echox5"/>
+<Scalar species="H" symbol="echoy5"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq5.dat" columns="time|H_echox5^1|H_echoy5^1" writeHead="yes"/>
+<!--  6  -->
+<Scalar species="H" symbol="echox6"/>
+<Scalar species="H" symbol="echoy6"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq6.dat" columns="time|H_echox6^1|H_echoy6^1" writeHead="yes"/>
+<!--  7  -->
+<Scalar species="H" symbol="echox7"/>
+<Scalar species="H" symbol="echoy7"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq7.dat" columns="time|H_echox7^1|H_echoy7^1" writeHead="yes"/>
+<!--  8  -->
+<Scalar species="H" symbol="echox8"/>
+<Scalar species="H" symbol="echoy8"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq8.dat" columns="time|H_echox8^1|H_echoy8^1" writeHead="yes"/>
+<!--  9  -->
+<Scalar species="H" symbol="echox9"/>
+<Scalar species="H" symbol="echoy9"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq9.dat" columns="time|H_echox9^1|H_echoy9^1" writeHead="yes"/>
+<!--  10  -->
+<Scalar species="H" symbol="echox10"/>
+<Scalar species="H" symbol="echoy10"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq10.dat" columns="time|H_echox10^1|H_echoy10^1" writeHead="yes"/>
+<!--  11  -->
+<Scalar species="H" symbol="echox11"/>
+<Scalar species="H" symbol="echoy11"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq11.dat" columns="time|H_echox11^1|H_echoy11^1" writeHead="yes"/>
+<!--  12  -->
+<Scalar species="H" symbol="echox12"/>
+<Scalar species="H" symbol="echoy12"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq12.dat" columns="time|H_echox12^1|H_echoy12^1" writeHead="yes"/>
+<!--  13  -->
+<Scalar species="H" symbol="echox13"/>
+<Scalar species="H" symbol="echoy13"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq13.dat" columns="time|H_echox13^1|H_echoy13^1" writeHead="yes"/>
+<!--  14  -->
+<Scalar species="H" symbol="echox14"/>
+<Scalar species="H" symbol="echoy14"/>
+<OutputFile multipleFiles="no" nameOutputFile="results1/EchoSeq14.dat" columns="time|H_echox14^1|H_echoy14^1" writeHead="yes"/>
+</GridAveragerStructured>
+</Simulation>

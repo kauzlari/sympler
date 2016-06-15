@@ -1,6 +1,7 @@
 This directory contains example input for SYMPLER.
 
-Check the specific READMEs for individual input files.
+Check the specific READMEs for individual input files. More complex or topicly 
+grouped examples can be found in separate subdirectories.
 
 Note that there are further examples in the testsuite directory.
 

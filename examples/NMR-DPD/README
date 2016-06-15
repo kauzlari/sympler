@@ -1,0 +1,13 @@
+
+1) MethodA.xml is used to simulate 14 spin echo experiments at a constant gradient by using 14 virtual magnetizations, each subject to a different pulse sequence. This simulation took 3 hours and 47 minutes on an Intel Xeon X5560 machine. 
+The generated data-files contain the x-magnetization (Mx) and the y-magnetization (My) over time for each pulse sequence. Usually, they are plotted in the form sqrt(Mx^2+My^2). See also figure 5b in the paper [1] and the directory 'resultsA' containing sample results and a generated graph. Note that the simulation attempts to write into a subdirectory 'results1', assuming it exists.
+
+2) MethodB.xml is used to simulate the effect of pulsed field gradients on spin echoes. 9 spin echo experiments are simulated, with 9 virtual magnetizations, each subject to different gradients. This simulation took 1hour and 56 minutes on an Intel Xeon X5560 machine. The generated data-files contain the x-magnetization (Mx) and the y-magnetization (My) over time for each pulse sequence. Usually, they are plotted in the form sqrt(Mx^2+My^2). See also figure 8 in the paper [1] and the directory 'resultsB' containing sample results and a generated graph where the echo maxima have been extracted. Note that the simulation attempts to write into a subdirectory 'results2', assuming it exists.
+
+Note that, together with the source code, only a PDF-plot is provided as reference result of the simulations in the subdirectories 'resultsA' and 'resultsB'. Reference simulation-data can be accessed via the supplementary material of reference [1].
+
+Reference:
+
+[1] Mueed Azhar, Andreas Greiner, Jan G. Korvink, David Kauzlaric
+Dissipative particle dynamics of diffusion-NMR requires high Schmidt-numbers, J. Chem. Phys., submitted
+
