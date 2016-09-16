@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2015, 
+ * Copyright 2002-2016, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -115,7 +115,11 @@ int main(int argc, char *argv[])
 
 	MSG_INFO("main", "Total number of reflector hits: " << Reflector::s_n_hits);
       } catch (gError &err) {
-        cout << "The following ERROR occured: " << endl << err.message() << endl;
+        cout << "The following ERROR occured: " << endl 
+	     << err.message() << endl 
+	     << "---------------------" << endl
+	     << "Aborted with ERROR-message." << endl
+	     << "The ERROR-message might have been lengthy, so please search for the first keyword 'ERROR' occurring above." << endl;
         exitValue = err.exitValue();
       }
     } else
@@ -167,6 +171,7 @@ void sayHello() {
 #include "ie_heat_conduction.h"
 #include "ie_wall_heat_conduction.h"
 #include "f_angular.h"
+#include "f_curvature.h"
 #include "f_centrifugal.h"
 #include "f_coriolis.h"
 #include "f_dpd.h"
@@ -198,6 +203,7 @@ void sayHello() {
 // #include "viscosity_migration.h"
 #include "gen_connector.h"
 #include "gen_triplet.h"
+#include "gen_quintet.h"
 #include "gm_array_attr.h"
 #include "gm_density.h"
 #include "gm_ekin.h"
@@ -348,7 +354,10 @@ void sayHello() {
 #include "pair_vector.h"
 #include "triplet_calc_angular_dt2f.h"
 #include "triplet_calc_angular_f.h"
+#include "triplet_calc_angular_falpha.h"
 #include "triplet_calc_central_part_scalar.h"
+#include "quintet_calc_curvature.h"
+#include "quintet_calc_curvature_f.h"
 // #include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_vels.h"
 #include "val_calculator_kernel.h"
@@ -389,6 +398,7 @@ void link_all_properly()
   new IEHeatConduction(NULL);
   new IEWallHeatConduction(NULL);
   new FAngular(NULL);
+  new FCurvature(NULL);
   new FCentrifugal(NULL);
   new FCoriolis(NULL);
   new FDPD(NULL);
@@ -576,7 +586,10 @@ void link_all_properly()
   new PairParticleVector(NULL);
   new TripletCalcAngularDt2F(NULL);
   new TripletCalcAngularF(NULL);
+  new TripletCalcAngularFalpha(NULL);
   new TripletCalcCentralPartScalar(NULL);
+  new QuintetCalcCurvatureF(NULL);
+  new QuintetCalcCurvature(NULL);
 //   new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCVels(NULL);
   new ValCalculatorKernel(NULL);

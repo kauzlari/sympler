@@ -72,6 +72,9 @@ libbasic_la_SOURCES = \
 	phase.cpp \
 	postprocessor.cpp \
 	property_list.cpp \
+	quintet_calculator.cpp \
+	quintet_calc_curvature.cpp \
+	quintet_calc_curvature_f.cpp \
 	random.cpp \
 	reflector.cpp \
 	simulation.cpp \
@@ -83,6 +86,7 @@ libbasic_la_SOURCES = \
 	triplet_calculator.cpp \
 	triplet_calc_angular_dt2f.cpp \
 	triplet_calc_angular_f.cpp \
+	triplet_calc_angular_falpha.cpp \
 	vel_constraints.cpp\
 	triplet_calc_central_part_scalar.cpp \
 	val_calculator.cpp \

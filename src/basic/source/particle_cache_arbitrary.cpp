@@ -33,8 +33,9 @@
 #include "manager_cell.h"
 #include "simulation.h"
 #include "colour_pair.h"
+#include "triplet_calculator.h"
+#include "quintet_calculator.h"
 
-#include "triplet_calc_angular_f.h"
 
 #define M_SIMULATION ((Simulation *) m_parent)
 #define M_PHASE M_SIMULATION->phase()
@@ -417,6 +418,39 @@ bool ParticleCacheArbitrary::findStage()
 	  
 	} // end of if(!tooEarly) (for loop over triplet calculators)
 
+          if(!tooEarly) {
+	    // we have to search now in the QuintetCalculators
+	    vector<QuintetCalculator*>* tCs;
+	    tCs = M_PHASE->bondedQuintetCalculatorsFlat();
+	    // MSG_DEBUG("BondedPairArbitrary::findStage", "loop over quintet calculators START");
+            FOR_EACH
+	      (
+	       vector<QuintetCalculator*>, (*tCs),              
+	       list<string> symbols = (*__iFE)->mySymbolNames();            
+	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+		 if(*symIt == name) {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) {
+		     MSG_DEBUG("ParticleCacheArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     tooEarly = true;
+		     m_stage = -1;
+		   }
+		   else {
+		     if(stage >= m_stage) m_stage = stage+1;
+		   }
+		 }
+	       }
+	       // may we abort the loop over the QuintetCalculators?
+	       if(tooEarly) {
+		 __iFE = __end;
+		 // important because there still comes the ++__iFE from the loop
+		 --__iFE; 
+	       }
+	       );	    
+          } // end if(!tooEarly) (for search in QuintetCalculators)
+
+
     } // end loop over symbols
     if(tooEarly)
     {
@@ -660,6 +694,38 @@ bool ParticleCacheArbitrary::findStage_0()
 	  
 	} // end of if(!tooEarly) (for loop over triplet calculators)
 
+
+          if(!tooEarly) {
+	    // we have to search now in the QuintetCalculators
+	    vector<QuintetCalculator*>* tCs;
+	    tCs = M_PHASE->bondedQuintetCalculatorsFlat_0();
+	    // MSG_DEBUG("BondedPairArbitrary::findStage_0", "loop over QuintetCalculators START");
+            FOR_EACH
+	      (
+	       vector<QuintetCalculator*>, (*tCs),
+	       list<string> symbols = (*__iFE)->mySymbolNames();
+	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+		 if(*symIt == name) {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) {
+		     MSG_DEBUG("ParticleCacheArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     tooEarly = true;
+		     m_stage = -1;
+		   }
+		   else {
+		     if(stage >= m_stage) m_stage = stage+1;
+		   }
+		 }
+	       }
+	       // may we abort the loop over the QuintetCalculators?
+	       if(tooEarly) {
+		 __iFE = __end;
+		 // important because there still comes the ++__iFE from the loop
+		 --__iFE; 
+	       }
+	       );	    
+          } // end if(!tooEarly) (for search in QuintetCalculators)
 
 
     } // end loop over symbols

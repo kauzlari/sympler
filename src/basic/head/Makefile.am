@@ -73,6 +73,10 @@ include_HEADERS = \
 	phase.h \
 	postprocessor.h \
 	property_list.h \
+	quintet.h \
+	quintet_calculator.h \
+	quintet_calc_curvature.h \
+	quintet_calc_curvature_f.h \
 	random.h \
 	reflector.h \
 	simulation.h \
@@ -88,6 +92,7 @@ include_HEADERS = \
 	triplet_calculator.h \
 	triplet_calc_angular_dt2f.h \
 	triplet_calc_angular_f.h \
+	triplet_calc_angular_falpha.h \
 	triplet_calc_central_part_scalar.h \
 	vel_constraints.h\
 	val_calculator.h \

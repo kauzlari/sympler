@@ -65,8 +65,9 @@ void ThermostatPetersEnergyConserving::init()
   m_properties.setClassName("ThermostatPetersEnergyConserving");
 
   m_properties.setDescription(
-    "Modified Peters thermostat. It includes energy conservation. "
-    "See: E. A. J. F. Peters, Europhys. Lett. 66 (3), pp. 311."
+    "Modified Peters thermostat including energy conservation. \n"
+    "See: Pastewka, L.; Kauzlaric, D.; Greiner, A. & Korvink, J. G.; Phys. Rev. E, 2006, 73, 037701\n"
+    "NOTE: Equal masses m=1 are assumed for all thermalised particles!"
   );
 }
 

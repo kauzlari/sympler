@@ -9,6 +9,11 @@ _______________________________________________
 
 Applications of SYMPLER:
 
+M. Azhar, A. Greiner, J. G. Korvink, D. Kauzlaric, Dissipative particle 
+dynamics of diffusion-NMR requires high Schmidt-numbers, J. Chem. Phys. 144 
+(2016) 244101 
+http://dx.doi.org/10.1063/1.4953912.
+
 D. Kauzlaric, J. T. Meier, P. Espanol, A. Greiner, S. Succi, Markovian 
 equations of motion for non-Markovian coarse-graining and properties for
 graphene blobs, New J. Phys. 15 (2013) 125015 
@@ -73,7 +78,7 @@ R. Heldele, M. Schulz, D. Kauzlaric, J. G. Korvink, J. Hausselt, Micro powder
 injection molding: process characterization and modeling, Microsys. Technol. 12 
 (2006) 941-946. http://dx.doi.org/10.1007/s00542-006-0117-z 
 
-L. Pastewka, D. Kauzlarix , A. Greiner, J. G. Korvink, Thermostat with a local 
+L. Pastewka, D. Kauzlaric , A. Greiner, J. G. Korvink, Thermostat with a local 
 heat-bath coupling for exact energy conservation in dissipative particle 
 dynamics, Phys. Rev. E 73 (2006) 037701. 
 http://dx.doi.org/10.1103/PhysRevE.73.037701.
