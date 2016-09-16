@@ -31,7 +31,7 @@
      cutoff = "2.5"
   />
 <!--     weightingFunction="dummy" -->
-  <Phase>
+  <Phase halfCutoffCells = "0">
     <VerletCreator
       displacement = "d"
       skinSize = "0.3"

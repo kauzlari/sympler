@@ -158,7 +158,7 @@ void IntegratorTensor::integrateStep1()
        for(size_t j = 0; j < SPACE_DIMS; ++j)
          for(size_t k = 0; k < SPACE_DIMS; ++k)
        {
-         if (isnan(i->tag.tensorByOffset(((IntegratorTensor*) data)->m_force_offset[/*m_*/force_index])(j, k))) {
+         if (std::isnan(i->tag.tensorByOffset(((IntegratorTensor*) data)->m_force_offset[/*m_*/force_index])(j, k))) {
            cout << "slot = " << i->mySlot << ", "
                << ((IntegratorTensor*) data)->m_tensor_name << " = "
                << i->tag.tensorByOffset(((IntegratorTensor*) data)->m_tensor_offset) << ", "

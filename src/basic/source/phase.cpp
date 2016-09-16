@@ -35,6 +35,7 @@
 
 #include "phase.h"
 #include "simulation.h"
+#include "cell.h"
 #include "manager_cell.h"
 #include "pair_creator.h"
 #include "triplet.h"
@@ -201,28 +202,36 @@ void Phase::init()
   STRINGPC
     (cellFileName, m_cell_filename,
      "Filename of the VTK file holding information about the cell subdivision.");
-    
+   
+  BOOLPC(halfCutoffCells, m_halfCutoff, "Specifies whether to create half cutoff width cells.");
+ 
   m_smartCells = false;
   m_randomPairs = false;
   m_cell_filename = "cells.vtk";
   m_particles_assigned = false;
+  m_halfCutoff = false;
 }
 
 
 void Phase::read(const xmlNode *xmln)
 {
   NodeManyChildren::read(xmln);
-		
-  m_manager = new ManagerCell(this);
+  
+  if (m_halfCutoff)		
+    m_manager = new ManagerCell2x(this);
+  else
+    m_manager = new ManagerCell(this);
+  
+  MSG_DEBUG("Phase::read", m_manager->c_offsets(1) << " " << m_halfCutoff);
 }
 
 
 void Phase::setup()
 {
   NodeManyChildren::setup();
-
   if(!m_boundary)
     throw gError("Phase::setup", "No boundary defined.");
+  MSG_DEBUG("Phase::setup", "Boundary defined");
   if(!m_pairCreator)
     throw gError("Phase::setup", "No pair creator defined.");
 

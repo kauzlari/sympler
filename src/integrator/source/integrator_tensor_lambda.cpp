@@ -132,7 +132,7 @@ void IntegratorTensorLambda::integrateStep1()
            for(size_t k = 0; k < SPACE_DIMS; ++k)
          {  
          // Debugging
-           if (isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
+           if (std::isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
                -> m_force_offset[force_index])(j, k))) 
            {
              cout << "slot = " << i->mySlot << ", "
@@ -147,7 +147,7 @@ void IntegratorTensorLambda::integrateStep1()
              throw gError("IntegratorTensorLambda::integrateStep1", "Force was not-a-number!");
            }
   
-           if (isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
+           if (std::isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
                -> m_force_offset[other_force_index])(j, k))) 
            {
              cout << "slot = " << i->mySlot << ", "
@@ -214,7 +214,7 @@ void IntegratorTensorLambda::integrateStep1()
            for(size_t k = 0; k < SPACE_DIMS; ++k)
          {
          // Debugging
-           if (isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
+           if (std::isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
                -> m_force_offset[force_index])(j, k))) 
            {
              cout << "slot = " << i->mySlot << ", "

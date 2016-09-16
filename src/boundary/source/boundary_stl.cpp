@@ -444,7 +444,7 @@ void BoundarySTL::setup(Simulation* sim, ManagerCell *mgr)
 
 //        ManagerCell::connect
 //            ((int) m_inlet_normal[dir]*dir-(m_inlet_normal[dir] < 0 ? 1 : 0), inlet, r, periodic, OUTLET);
-        ManagerCell::connect
+        mgr->connect
             ((int) m_inlet_normal[dir]*dir-(m_inlet_normal[dir] < 0 ? 1 : 0), inlet, r, periodic, NEIGHBOR);
     } else {
         m_proposedSize = m_container->boundingBox().corner2;

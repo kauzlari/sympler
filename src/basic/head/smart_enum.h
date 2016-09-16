@@ -155,7 +155,7 @@ protected:
     fName = name;
     fOrdinal = cardinality();
 
-    if (!mapF().insert(make_pair<const string, const T*>(name, (T*) this)).second) {
+    if (!mapF().insert(std::pair<const string, const T*>(name, (T*) this)).second) {
       throw gError("SmartEnum::SmartEnum", "Unable to register object " + name + " .");
     }
 

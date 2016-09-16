@@ -87,7 +87,7 @@ DataFormat::attribute_t DataFormat::addAttribute
     if (s == "")
       s = name;
     attribute_t attr = {
-      name, m_attr_by_index.size(), m_size, datatype, persistent, s
+      name, static_cast<int> (m_attr_by_index.size()), m_size, datatype, persistent, s
     };
       
     m_size += c_size_of_datatype[datatype];

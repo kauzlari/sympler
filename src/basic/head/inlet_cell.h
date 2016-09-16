@@ -38,10 +38,10 @@
 
 
 /*!
- * This specialization of a \a Cell does create particles in the inlet whenever
+ * This specialization of a \a BoundaryCell does create particles in the inlet whenever
  * a particle leaves this cell through a certain side.
  */
-class InletCell_Create: public Cell
+class InletCell_Create: public BoundaryCell
 {
 protected:
   /*!
@@ -81,7 +81,7 @@ public:
    * @param dir Direction
    * @param group Group of the cell
    */
-  InletCell_Create(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, int group = 0);
+  InletCell_Create(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, region_t *r, int group = 0);
 
   /*!
    * Constructor
@@ -94,7 +94,7 @@ public:
    * @param group Group of the cell
    */
   InletCell_Create(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir,
-            const point_t &c1, const point_t &c2, int group = 0);
+            cuboid_t cuboid, int_point_t cell_pos, region_t *r, int group = 0);
 
   /*!
    * Destructor
@@ -107,7 +107,7 @@ public:
  * This specialization of a \a Cell does delete particles in the outlet whenever
  * a particle leaves this cell through a certain side (which means enters the oulet).
  */
-class InletCell_Delete: public Cell
+class InletCell_Delete: public BoundaryCell
 {
 protected:
   /*!
@@ -147,7 +147,7 @@ public:
    * @param dir Direction
    * @param group Group of the cell
    */ 
- InletCell_Delete(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, int group = 0);
+ InletCell_Delete(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, region_t *r, int group = 0);
 
   /*!
    * Constructor
@@ -160,7 +160,7 @@ public:
    * @param group Group of the cell
    */
   InletCell_Delete(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir,
-            const point_t &c1, const point_t &c2, int group = 0);
+            cuboid_t cuboid, int_point_t cell_pos, region_t *r, int group = 0);
 
   /*!
    * Destructor

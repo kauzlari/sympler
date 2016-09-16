@@ -157,7 +157,7 @@ void IntegratorVector::integrateStep1()
 
        for(size_t j = 0; j < SPACE_DIMS; ++j)
        {
-        if (isnan(i->tag.pointByOffset(((IntegratorVector*) data)->m_force_offset[/*m_*/force_index])[j])) {
+        if (std::isnan(i->tag.pointByOffset(((IntegratorVector*) data)->m_force_offset[/*m_*/force_index])[j])) {
           cout << "slot = " << i->mySlot << ", "
               << ((IntegratorVector*) data)->m_vector_name << " = "
               << i->tag.pointByOffset(((IntegratorVector*) data)->m_vector_offset) << ", "

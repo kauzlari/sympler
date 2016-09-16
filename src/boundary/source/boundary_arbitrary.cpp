@@ -130,10 +130,11 @@ void BoundaryArbitrary::setup(Simulation *sim, ManagerCell *mgr)
 		m_container->addVertex(new_bounds.corner1);  
 
 	if(addEndPoint)
-    m_container->addVertex(new_bounds.corner2);
+                m_container->addVertex(new_bounds.corner2);
 			
-	m_container->updateBoundingBox();  
- MSG_DEBUG("BoundaryArbitrary::setup", "end: newBounds = " << new_bounds.corner1 << ", " << new_bounds.corner2);
+        m_container->updateBoundingBox();
+     
+        MSG_DEBUG("BoundaryArbitrary::setup", "end: newBounds = " << new_bounds.corner1 << ", " << new_bounds.corner2);
 }
 
 

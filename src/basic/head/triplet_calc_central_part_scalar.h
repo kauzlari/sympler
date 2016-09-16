@@ -32,6 +32,7 @@
 #ifndef __TRIPLET_CALC_CENTRAL_PART_SCALAR_F_H
 #define __TRIPLET_CALC_CENTRAL_PART_SCALAR_F_H
 
+#include "function_fixed.h"
 #include "triplet_calculator.h"
 
 class Pairdist;

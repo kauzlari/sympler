@@ -33,7 +33,7 @@
 
 #include "simulation.h"
 #include "manager_cell.h"
-
+#include "wall_triangle.h"
 #include "triangle_CGMD_interpolation.h"
 
 using namespace std;
