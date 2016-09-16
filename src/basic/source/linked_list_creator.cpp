@@ -127,7 +127,7 @@ void LinkedListCreator::createDistances()
 
 #else
   LL_FOR_EACH__PARALLEL
-  (CellLink,
+  (AbstractCellLink,
    M_MANAGER->firstLink(),
    M_MANAGER->activeLinks(),
    NULL,

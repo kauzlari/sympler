@@ -193,6 +193,14 @@ void VerletCreator::setupAfterParticleCreation()
 	 );
     }
   }
+  
+  point_t boundingBoxSize = M_PHASE->boundary()->boundingBox().size();
+  double minBoxDimSize = boundingBoxSize[0];
+  for (int i=1; i<SPACE_DIMS; i++)
+    if (boundingBoxSize[i]<minBoxDimSize)
+      minBoxDimSize = boundingBoxSize[i];
+  if (M_SIMULATION->maxCutoff + m_skin_size > minBoxDimSize)
+    throw gError("VerletCreator::setupAfterParticleCreation", "BoundingBox size must be larger than the maximal cutoff + 2*skinSize");
 }
 
 
@@ -314,7 +322,7 @@ void VerletCreator::createDistances()
       
 #else
       LL_FOR_EACH__PARALLEL
-	(CellLink,
+	(AbstractCellLink,
 	 manager->firstLink(),
 	 manager->activeLinks(),
 	 NULL,
@@ -348,6 +356,7 @@ void VerletCreator::createDistances()
 	      
 	      pair->calculateCartDistance();
 	      // periodic BCs
+	      // checking periodicity in the direction of the walls (i.e. non-periodic directions) because
 	      point_t& cartesian = pair->m_distance.cartesian;
 	      for(size_t dir = 0; dir < SPACE_DIMS; ++dir) {
 		size = boxSize[dir];

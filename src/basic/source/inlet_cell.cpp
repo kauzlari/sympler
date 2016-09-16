@@ -32,15 +32,15 @@
 #include "inlet_cell.h"
 
 
-InletCell_Create::InletCell_Create(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, int group)
-  : Cell(mgr, group), m_pc(pc), m_axis(axis), m_dir(dir)
+InletCell_Create::InletCell_Create(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, region_t *r, int group)
+  : BoundaryCell(mgr, r, group), m_pc(pc), m_axis(axis), m_dir(dir)
 {
 }
 
 
 InletCell_Create::InletCell_Create(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir,
-                     const point_t &c1, const point_t &c2, int group)
-  : Cell(mgr, c1, c2, group), m_pc(pc), m_axis(axis), m_dir(dir)
+                     cuboid_t cuboid, int_point_t cell_pos, region_t *r, int group)
+  : BoundaryCell(mgr, cuboid, cell_pos, r, group), m_pc(pc), m_axis(axis), m_dir(dir)
 {
 }
 
@@ -52,15 +52,15 @@ InletCell_Create::~InletCell_Create()
 
 
 
-InletCell_Delete::InletCell_Delete(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, int group)
-  : Cell(mgr, group), m_pc(pc), m_axis(axis), m_dir(dir)
+InletCell_Delete::InletCell_Delete(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir, region_t *r, int group)
+  : BoundaryCell(mgr, r, group), m_pc(pc), m_axis(axis), m_dir(dir)
 {
 }
 
 
 InletCell_Delete::InletCell_Delete(ManagerCell *mgr, ParticleCreator *pc, int axis, int dir,
-                     const point_t &c1, const point_t &c2, int group)
-  : Cell(mgr, c1, c2, group), m_pc(pc), m_axis(axis), m_dir(dir)
+                     cuboid_t cuboid, int_point_t cell_pos, region_t *r, int group)
+  : BoundaryCell(mgr, cuboid, cell_pos, r, group), m_pc(pc), m_axis(axis), m_dir(dir)
 {
 }
 

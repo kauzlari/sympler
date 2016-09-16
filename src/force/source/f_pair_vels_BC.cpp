@@ -37,6 +37,7 @@ using namespace std;
 #include "threads.h"
 #include "particle.h"
 #include "simulation.h"
+#include "cell.h"
 
 #define M_SIMULATION ((Simulation*) m_parent)
 #define M_CONTROLLER M_SIMULATION->controller()

@@ -40,6 +40,8 @@
 #include "particle_cache.h"
 #include "threads.h"
 #include "triplet.h"
+#include "pair_creator.h"
+#include <iomanip>
 #include "quintet.h"
 
 #ifdef _OPENMP
@@ -375,6 +377,7 @@ void Controller::run() {
   /* --- MAIN LOOP -------------------------------------------------------------------------- */
 
   for(int current = 0; current < m_timesteps; current++) {
+//    MSG_DEBUG("Controller::run", "timestep = " << current);
     
     timestep = current*m_dt;
     m_t = timestep;

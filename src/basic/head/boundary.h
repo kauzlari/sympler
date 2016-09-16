@@ -31,7 +31,6 @@
 
 
 // Boundary only for 3D !!!
-// this Boundary has periodic boundary conditions at all six walls of a cuboid 
 
 #ifndef __BOUNDARY_H
 #define __BOUNDARY_H

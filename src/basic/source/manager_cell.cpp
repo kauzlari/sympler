@@ -41,7 +41,7 @@
 #include "particle_creator.h"
 // #include "colour_pair.h"
 #include "pair_creator.h"
-
+//#include "cell.h"
 // necessary for arguments that are pointers to Phase
 #include "phase.h"
 
@@ -53,10 +53,7 @@ int ManagerCell::thread_counter = 0;
 //---- Constructors/Destructor ----
 
 #ifdef _OPENMP
-ManagerCell::ManagerCell(Phase* p)
-  : m_first_cell(NULL), m_n_active_cells(0),
-    /*m_n_active_links(0), m_first_link(NULL),*/
-    m_phase(p)/* m_distances_valid(false), m_pairsValid(false) */
+void ManagerCell::init()
 {
 //    MSG_DEBUG("ManagerCell::ManagerCell", "Constructor.");
   m_first_link.resize(global::n_threads);
@@ -73,20 +70,51 @@ ManagerCell::ManagerCell(Phase* p)
 #endif
 }
 
-
-#else
 ManagerCell::ManagerCell(Phase* p)
   : m_first_cell(NULL), m_n_active_cells(0),
-    m_n_active_links(0), m_first_link(NULL),
-    m_phase(p)
-{
-//    MSG_DEBUG("ManagerCell::ManagerCell", "Constructor.");
+    /*m_n_active_links(0), m_first_link(NULL),*/
+    m_phase(p)/* m_distances_valid(false), m_pairsValid(false) */,
+    m_divby(1)
+{ 
+  init();
+}
 
+ManagerCell::ManagerCell(Phase* p, int divby)
+  : m_first_cell(NULL), m_n_active_cells(0),
+    /*m_n_active_links(0), m_first_link(NULL),*/
+    m_phase(p), /* m_distances_valid(false), m_pairsValid(false) */,
+    m_divby(divby)
+{
+  init();
+}
+
+#else
+void ManagerCell::init()
+{
 #ifdef ENABLE_PTHREADS
   pthread_mutex_init(&m_cells__mutex, &g_mutex_attr);
   pthread_mutex_init(&m_links__mutex, &g_mutex_attr);
 #endif
 }
+
+ManagerCell::ManagerCell(Phase* p)
+  : m_first_cell(NULL), m_n_active_cells(0),
+    m_n_active_links(0), m_first_link(NULL),
+    m_phase(p),m_divby(1)
+{
+//    MSG_DEBUG("ManagerCell::ManagerCell", "Constructor.");
+  init();
+}
+
+ManagerCell::ManagerCell(Phase* p, int divby)
+  : m_first_cell(NULL), m_n_active_cells(0),
+    m_n_active_links(0), m_first_link(NULL),
+    m_phase(p),m_divby(divby)
+{
+//  MSG_DEBUG("ManagerCell::ManagerCell", "Constructor.");
+  init();
+}
+
 #endif
 
 
@@ -99,7 +127,7 @@ ManagerCell::~ManagerCell()
   pthread_mutex_destroy(&m_links__mutex);
 #endif
 
-  for (vector<CellLink*>::iterator i = m_links.begin(); i != m_links.end(); i++)
+  for (vector<AbstractCellLink*>::iterator i = m_links.begin(); i != m_links.end(); i++)
     delete *i;
 
   for (vector<Cell*>::iterator i = m_cells.begin(); i != m_cells.end(); i++)
@@ -112,6 +140,32 @@ ManagerCell::~ManagerCell()
     delete *i;
 }
 
+inline void ManagerCell::cellDist(Cell *first, Cell *second, int alignment, int orderTarget, int orderInter)
+{
+  point_t dist;
+  assert(orderInter == 0);
+  int s = 0;
+  for (int_point_t off = c_offsets(alignment); s < SPACE_DIMS; s++)
+    if (off[s] == 1)
+      dist[s] = first->corner2[s] - first->corner1[s];
+    else if (off[s] == -1)
+      dist[s] = second->corner1[s] - second->corner2[s]; //dist[s] = -(second->corner2[s] - second->corner1[s]);
+    else
+      dist[s] = 0;
+
+  first->m_cell_dist[alignment][orderTarget] = dist;
+  second->m_cell_dist[num_neighbors()-alignment-1][orderTarget] = -dist;
+}
+
+inline void ManagerCell2x::cellDist2x(Cell *first, Cell *second, int alignment, int orderTarget, int orderInter)
+{
+  pair<int, int> interAlStep = interMap[alignment];
+
+  Cell *inter = first->m_outlets[interAlStep.first][orderInter];
+  //TODO either prev or next
+  first->m_cell_dist[alignment][orderTarget] = first->m_cell_dist[m_direct_neighbors[interAlStep.first]][orderInter] + inter->m_cell_dist[m_direct_neighbors[interAlStep.second]][(orderTarget)?1-orderInter:0];
+  second->m_cell_dist[num_neighbors()-alignment-1][orderTarget] = -first->m_cell_dist[alignment][orderTarget];
+}
 
 void ManagerCell::invalidatePositions(IntegratorPosition *integrator)
 {
@@ -160,7 +214,8 @@ void ManagerCell::invalidatePositions(IntegratorPosition *integrator)
      m_first_cell,
      m_n_active_cells,
      integrator,
-     i->updatePositions((IntegratorPosition*) data);
+//     i->updatePositions((IntegratorPosition*) data);
+     ((BoundaryCell *) i)->updatePositions((IntegratorPosition*) data);
     );
 
   /*Tell the ParticleCreators to create additional particles if they plan to*/
@@ -182,7 +237,7 @@ void ManagerCell::invalidatePositions(IntegratorPosition *integrator)
 void ManagerCell::cellSubdivisionFinished()
 {
   MSG_DEBUG("ManagerCell::cellSubdivisionFinished", m_links.size() << " cell links established.");
-  MSG_DEBUG("ManagerCell::cellSubdivisionFinished", "APPROX. MEM USED. cells: " << m_cells.size() * (sizeof(Cell) + NUM_NEIGHBORS * 20) << ", links: " << m_links.size() * sizeof(CellLink));
+  MSG_DEBUG("ManagerCell::cellSubdivisionFinished", "APPROX. MEM USED. cells: " << m_cells.size() * (sizeof(Cell) + num_neighbors() * 20) << ", links: " << m_links.size() * sizeof(AbstractCellLink));
 }
 
 
@@ -204,13 +259,14 @@ Cell *ManagerCell::findCell(const point_t &pos, region_t **region)
 
       if (cell) {
         if (!cell->isInsideEps(pos, g_geom_eps)) {
-          cout << "pos = " << pos << endl;
-          cout << "c1 = " << cell->corner1 << ", c2 = " << cell->corner2 << endl;
-          throw gError("ManagerCell::findCell", "FATAL: Point is not inside.");
+          cout << "pos = " << pos << ", p = " << p << ", " << TOCELLINDEX(p, (*r)->n_cells) << ", inv_width = " << (*r)->inv_width << endl;
+          cout << cell->tag << " " << TOCELLINDEX(cell->tag, (*r)->n_cells) << " c1 = " << cell->corner1 << ", c2 = " << cell->corner2 << endl;
+          cout << "r->corner1 = " << (*r)->corner1 << endl;
+          throw gError("ManagerCell::findCell", "FATAL: Point is not inside. ");
         }
 
-      if (region)
-        *region = *r;
+        if (region)
+          *region = *r;
       }
 
       return cell;
@@ -382,8 +438,121 @@ void ManagerCell::assignContainer(WallContainer *container)
   );
 }
 
-
 /* cell subdivision tools */
+
+/* Look for neighbors (which means periodicities) and connect
+   cells appropriately
+*/
+void ManagerCell::findRegionCellDirectNeighbors(region_t *r, bool_point_t periodic, bool oneCellPeriodicDims)
+{ 
+  AbstractCellLink *(Cell::*p_addNeighbor)(Cell*, int, bool);
+  if (!oneCellPeriodicDims)
+    p_addNeighbor = &Cell::addNeighbor<AddPairCheck_Regular>;
+  else
+    p_addNeighbor = &Cell::addNeighbor<AddPairCheck_OneCellDims>;
+      
+  for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
+    for (int j = 0, n; j < NUM_HALF_DIRECT_NEIGHBORS; j++) {
+      n = m_direct_neighbors[j];
+//      MSG_DEBUG("ManagerCell::findRegionCellDirectNeighbors", j << " -> " << n);
+      if ((*i)->neighbors(n).empty()) {
+      //if (!((*i)->neighbors(n)[0])) {
+	/* No neighbor on this side? Find one! */
+
+	int_point_t neighbor;
+
+//        MSG_DEBUG("ManagerCell::", "c_offsets("<<n<<") = " << this->c_offsets(n));
+	bool neighbourFound = true;
+
+	for (int dim = 0; dim < SPACE_DIMS; dim++) {
+	  neighbor[dim] = (*i)->tag[dim] + c_offsets(n, dim);
+
+	  if (periodic[dim])
+	    neighbor[dim] = (neighbor[dim] + r->n_cells[dim]) % r->n_cells[dim];
+
+	  if (r->n_cells[dim] == 1 && c_offsets(n,dim) != 0) neighbourFound = false;
+        }
+//
+//	MSG_DEBUG("ManagerCell::findRegionCellDirectNeighbors", "this = " << (*i)->tag);
+	if (neighbor.x >= 0 && neighbor.x < r->n_cells.x &&
+	    neighbor.y >= 0 && neighbor.y < r->n_cells.y &&
+	    neighbor.z >= 0 && neighbor.z < r->n_cells.z) {// && !(neighbor == (*i)->tag)) {
+
+//	  MSG_DEBUG("ManagerCell::findRegionCellDirectNeighbors", "neighbor = " << neighbor );
+	  if (Cell *c = r->cellByPos(neighbor)){
+            cellDist(*i, c, n, 0);
+            if (neighbourFound){
+              m_links.push_back(((*i)->*p_addNeighbor)(c, n, false));
+            }else{ 
+              (*i)->addPeriodic(c, n);
+              int inv_direct_neighbor = num_neighbors() - n - 1;
+              (*i)->m_cell_dist[inv_direct_neighbor][0] = -(*i)->m_cell_dist[n][0];
+              (*i)->addPeriodic(c, inv_direct_neighbor);
+            }
+          }
+	}
+      }
+    }
+  }
+}
+
+/* Look for neighbors (which means periodicities) and connect
+   cells appropriately
+*/
+void ManagerCell2x::findRegionCellIndirectNeighbors(region_t *r, bool_point_t periodic, bool oneCellPeriodicDims)
+{
+  AbstractCellLink *(Cell::*p_establishLink)(Cell*, int, bool, bool, bool);
+  if (!oneCellPeriodicDims)
+    p_establishLink = &Cell::establishLink<AddPairCheck_Regular>;
+  else
+    p_establishLink = &Cell::establishLink<AddPairCheck_OneCellDims>;
+
+  for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
+    for (int j = 0, n=0; j < NUM_HALF_2X_INDIRECT_NEIGHBORS;j++) {
+      n= c_indirect_neighbors[j];
+//      MSG_DEBUG("ManagerCell::findRegionCellInDirectNeighbors", j << " -> " << n);
+      int_point_t off = c_offsets(n);
+//      if ((*i)->neighbors(n).empty()) {
+//      No neighbor on this side? Find one!
+
+      int_point_t neighbor;
+
+      //MSG_DEBUG("ManagerCell::cellSubdivide", "in neighbour loop");
+      bool neighbourFound = true;
+//      bool directNeighbour = true;
+
+      for (int dim = 0; dim < SPACE_DIMS; dim++) {
+        neighbor[dim] = (*i)->tag[dim] + off[dim];
+
+        if (periodic[dim])
+          neighbor[dim] = (neighbor[dim] + r->n_cells[dim]) % r->n_cells[dim];
+
+        if(r->n_cells[dim] == 1 && off[dim] != 0) neighbourFound = false;
+//        if(c_offsets(n,dim) > 1 || c_offsets(n,dim) < -1) directNeighbour = false;
+      }
+
+//	MSG_DEBUG("ManagerCell::findRegionCellIndirectNeighbors", "this = " << (*i)->tag);
+      if (neighbourFound &&
+          neighbor.x >= 0 && neighbor.x < r->n_cells.x &&
+          neighbor.y >= 0 && neighbor.y < r->n_cells.y &&
+          neighbor.z >= 0 && neighbor.z < r->n_cells.z) {
+
+        if (Cell *c = r->cellByPos(neighbor)){
+//	  MSG_DEBUG("ManagerCell::findRegionCellIndirectNeighbors", "neighbor = " << neighbor );
+          cellDist2x(*i, c, n, 0, 0);
+            m_links.push_back(((*i)->*p_establishLink)(c, n, true, true, false));
+        }
+      }
+    }
+  }
+}
+
+void ManagerCell::addBoundaryCell(region_t *r, cuboid_t cuboid, int_point_t cell_pos, int cellIndex, int group)
+{
+  BoundaryCell *bc = new BoundaryCell(this, cuboid.corner1, cuboid.corner2, cell_pos, r, group);
+  r->cells.push_back(bc);
+  r->cells_by_pos[cellIndex] += r->cells.size();
+}
 
 region_t *ManagerCell::cellSubdivide
 (double cutoff, point_t corner1, point_t corner2, bool_point_t periodic,
@@ -397,6 +566,9 @@ region_t *ManagerCell::cellSubdivide
      "corner1 = " << corner1 << ", corner2 = " << corner2);
 
   MSG_DEBUG("ManagerCell::cellSubdivide", "cutoff = " << cutoff);
+  MSG_DEBUG("ManagerCell::cellSubdivide", "m_divby = " << m_divby);
+  MSG_DEBUG("ManagerCell::cellSubdivide", "periodic = " << periodic);
+  MSG_DEBUG("ManagerCell::cellSubdivide", "pc = " << (pc != NULL));
 
   /* Setup the region information */
   r->corner1 = corner1;
@@ -411,153 +583,159 @@ region_t *ManagerCell::cellSubdivide
   for (int i = 0; i < SPACE_DIMS; i++) {
     // 2010-05-04: the if-else attempts to avoid the abort when no cutoff is needed
     if(cutoff > 0)
-      r->n_cells[i] = (int) (d[i] / cutoff);
-    else 
-      r->n_cells[i] = 2;
-    // 2010-05-04: if the attempt above works, the following won't happen anymore
-    if (r->n_cells[i] < 2) {
-
-      // it follows some old code...
-
-      /* If we have less than three cells we have to make sure
-      pairs are not counted twice. */
-      //      if (periodic[i])
-	//        throw gError("ManagerCell::cellSubdivide", string(1, 'X'+i) + "-direction: Currently, box dimensions for periodic directions are not allowed to decrease 3*cutoff = " + ObjToString(3*cutoff));
-	// 	r->n_cells[i] = 2;
-      //      else {
-      //        if (r->n_cells[i] <= 1)
-	  //          throw gError("ManagerCell::cellSubdivide", string(1, 'X'+i) + "-direction: Currently, box dimensions for non-periodic directions are not allowed to decrease 2*cutoff = " + ObjToString(2*cutoff));
-      //      }
-      //      r->n_cells[i] = 2;
-
-      // end of old code
-
-      throw gError
-	("ManagerCell::cellSubdivide",
-  "Box length too small! No room, for at least two cells! Cells are always >= cutoff. Creating less than two cells is currently not allowed. Current cutoff is " + ObjToString(cutoff) + ". Does this make sense?");
-    }
+      r->n_cells[i] = (int) (d[i] / (cutoff / m_divby));
+    if (cutoff == 0 || r->n_cells[i] <= (2*m_divby + 1))
+      r->n_cells[i] = 1;
 
     r->inv_width[i] = r->n_cells[i] / d[i];
     width[i] = d[i] / r->n_cells[i];
   }
 
   /* Currently only works for 3 space dimensions. */
-
-  int intervalSize = r->n_cells.z * r->n_cells.y * r->n_cells.x / 20;
+  const int xyPlane = r->n_cells.y*r->n_cells.x;
+  int intervalSize = r->n_cells.z * r->n_cells.y * r->n_cells.x;
   int intervalCounter = 1;
 
-  for (int z = 0; z < r->n_cells.z; z++)
-    for (int y = 0; y < r->n_cells.y; y++)
-      for (int x = 0; x < r->n_cells.x; x++) {
-	if((1+x)*(1+y)*(1+z) > intervalCounter*intervalSize)
+  //r->boundaryCells.reserve(m_divby * 2 * (r->n_cells.z*(r->n_cells.y-1) + (r->n_cells.z-1) * r->n_cells.x + (r->n_cells.x-1)*r->n_cells.y));
+  r->cells.reserve(intervalSize);
+  r->cells_by_pos.resize(intervalSize,-2);
+
+  bool oneCellPeriodicDims = false;
+  for (int dim = 0; dim < SPACE_DIMS; dim++)//{
+    oneCellPeriodicDims |= (r->m_oneCellPeriodicDims[dim] = (periodic[dim] && r->n_cells[dim] == 1));
+  MSG_DEBUG("ManagerCell::cellSubdivide", "r->n_cells = " << r->n_cells);
+  if (pc) {
+    int_point_t axes = {(axis+1)%3, (axis+2)%3, axis};
+    int_point_t cell_pos = {0,0,0}; cell_pos[axis] = (dir==1)?r->n_cells[axis]-1:0;//Note: assuming that dir==1 is always for InletCell_Create and dir==-1 is always for InletCell_Delete
+    cuboid_t cuboid; cuboid.corner1[axis] = cell_pos[axis] * width[axis];
+
+    for (cell_pos[axes[1]] = 0; cell_pos[axes[1]] < r->n_cells[axes[1]]; cell_pos[axes[1]]++, cuboid.corner1[axes[1]] += width[axes[1]])
+      for (cell_pos[axes[0]] = 0; cell_pos[axes[0]] < r->n_cells[axes[0]]; cell_pos[axes[0]]++, cuboid.corner1[axes[0]] += width[axes[0]]){
+        Cell *c;
+        const int cellIndex = cell_pos[2]*xyPlane+cell_pos[1]*r->n_cells.y+cell_pos[0];
+        cuboid.corner2 = cuboid.corner1 + width;
+        if (!m_phase->smartCells() || m_phase->boundary()->isInside \
+            (cuboid, m_phase -> pairCreator() -> interactionCutoff())){
+          if (action == P_CREATE)//Note: assuming that dir==1 is always for InletCell_Create and dir==-1 is always for InletCell_Delete
+              c = new InletCell_Create(this, pc, axis, dir, cuboid, cell_pos, r, group);
+          else 
+              c = new InletCell_Delete(this, pc, axis, dir, cuboid, cell_pos, r, group);
+          r->cells.push_back(c);
+          r->cells_by_pos[cellIndex] = r->cells.size()-1;
+	  //MSG_DEBUG("ManagerCell::cellSubdivide::pc", "cellIndex = " << cellIndex);
+        }else /* no cell was created. */
+          r->cells_by_pos[cellIndex] = -1;
+      }
+  }
+
+  for (int i=0; i<2; i++)
+  {
+    int_point_t pos;
+    int lo=i*(r->n_cells.z-m_divby);
+    int cellIndex = lo*xyPlane;
+    cuboid_t cuboid; 
+    for (pos.z = lo, cuboid.corner1.z = corner1.z + lo*width.z; pos.z < lo+m_divby; pos.z++, cuboid.corner1.z += width.z)
+      for (pos.y = 0, cuboid.corner1.y = corner1.y; pos.y < r->n_cells.y; pos.y++, cuboid.corner1.y += width.y)
+        for (pos.x = 0, cuboid.corner1.x = corner1.x; pos.x < r->n_cells.x; pos.x++, cellIndex++, cuboid.corner1.x += width.x)
+          if (r->cells_by_pos[cellIndex] == -2){
+            cuboid.corner2 = cuboid.corner1 + width;
+            r->cells_by_pos[cellIndex] = -1;
+            if (!m_phase->smartCells() || 
+                m_phase->boundary()->isInside
+                (cuboid, m_phase -> pairCreator() -> interactionCutoff()))
+              addBoundaryCell(r, cuboid, pos, cellIndex, group);
+	    //MSG_DEBUG("ManagerCell::cellSubdivide::z_planes", "cellIndex = " << cellIndex);
+	    //MSG_DEBUG("ManagerCell::cellSubdivide::z_planes", "cuboid.corner1 = " << cuboid.corner1);
+          }
+  }
+  int cellIndex, cellIndex2;
+  cellIndex = m_divby*xyPlane;
+
+  int_point_t pos;
+  cuboid_t cuboid; 
+  for (pos.z = m_divby, cuboid.corner1.z = corner1.z + m_divby*width.z; pos.z < r->n_cells.z-m_divby; pos.z++, cuboid.corner1.z += width.z)
+  {
+    for (int i=0; i<2; i++)
+    {
+      int lo=i*(r->n_cells.y-m_divby);
+      cellIndex += (lo-m_divby*i)*r->n_cells.x;
+      for (pos.y = lo, cuboid.corner1.y = corner1.y + lo*width.y; pos.y < lo+m_divby; pos.y++, cuboid.corner1.y += width.y)
+        for (pos.x = 0, cuboid.corner1.x = corner1.x; pos.x < r->n_cells.x; pos.x++, cellIndex++, cuboid.corner1.x += width.x){
+          if (r->cells_by_pos[cellIndex] == -2){
+            cuboid.corner2 = cuboid.corner1 + width;
+            r->cells_by_pos[cellIndex] = -1;
+            if (!m_phase->smartCells() ||
+                m_phase->boundary()->isInside
+                (cuboid, m_phase -> pairCreator() -> interactionCutoff()))
+              addBoundaryCell(r, cuboid, pos, cellIndex, group);
+	    //MSG_DEBUG("ManagerCell::cellSubdivide::y_planes", "cellIndex = " << cellIndex);
+	    //MSG_DEBUG("ManagerCell::cellSubdivide::y_planes", "cuboid.corner1 = " << cuboid.corner1);
+          }
+        }
+    }
+    cellIndex2 = pos.z*xyPlane + m_divby*r->n_cells.x;
+    for (pos.y = m_divby, cuboid.corner1.y = corner1.y + m_divby * width.y; pos.y < r->n_cells.y-m_divby; pos.y++, cuboid.corner1.y += width.y)
+      for (int i=0; i<2; i++)
+      { 
+        int lo=i*(r->n_cells.x-m_divby);
+        cellIndex2 += i*(r->n_cells.x-2*m_divby);
+        for (pos.x = lo, cuboid.corner1.x = corner1.x + lo*width.x; pos.x < lo+m_divby; pos.x++, cellIndex2++, cuboid.corner1.x += width.x){
+          if (r->cells_by_pos[cellIndex2] == -2){
+            cuboid.corner2 = cuboid.corner1 + width;
+              r->cells_by_pos[cellIndex2] = -1;
+            if (!m_phase->smartCells() ||
+                m_phase->boundary()->isInside
+                (cuboid, m_phase -> pairCreator() -> interactionCutoff()))
+              addBoundaryCell(r, cuboid, pos, cellIndex2, group);
+	    //MSG_DEBUG("ManagerCell::cellSubdivide::x_planes", "cellIndex2 = " << cellIndex2);
+	    //MSG_DEBUG("ManagerCell::cellSubdivide::x_planes", "cuboid.corner1 = " << cuboid.corner1);
+          }
+        }
+      }
+  }
+
+//  intervalSize /= 20;
+  cellIndex = m_divby*(xyPlane + r->n_cells.x + 1);
+  int_point_t cell_pos;
+  cuboid.corner1 = corner1 + m_divby*width;
+  for (cell_pos.z = m_divby, cuboid.corner1.z = corner1.z + m_divby*width.z; cell_pos.z < r->n_cells.z - m_divby; cell_pos.z++, cuboid.corner1[2] += width[2], cellIndex += 2*m_divby*r->n_cells.x)
+    for (cell_pos.y = m_divby, cuboid.corner1.y = corner1.y + m_divby*width.y; cell_pos.y < r->n_cells.y - m_divby; cell_pos.y++, cuboid.corner1[1] += width[1], cellIndex += 2*m_divby)
+      for (cell_pos.x = m_divby, cuboid.corner1.x = corner1.x + m_divby*width.x; cell_pos.x < r->n_cells.x - m_divby; cell_pos.x++, cuboid.corner1[0] += width[0],\
+					     cuboid.corner2 = cuboid.corner1 + width, cellIndex++) {
+	if((1+cell_pos.x)*(1+cell_pos.y)*(1+cell_pos.z) > intervalCounter*intervalSize)
 	  {
 	    cout << "done: " << intervalCounter*5 << "%" << endl;
 	    ++intervalCounter;
 	  }
-	Cell *c = NULL;
-	cuboid_t cuboid;
-	int_point_t cell_pos;
-
-	cell_pos.x = x;
-	cell_pos.y = y;
-	cell_pos.z = z;
-
-	for (int i = 0; i < SPACE_DIMS; i++)
-	  cuboid.corner1[i] = corner1[i] + cell_pos[i] * width[i];
 
 	cuboid.corner2 = cuboid.corner1 + width;
+        r->cells_by_pos[cellIndex] = -1;
 
 	if (!m_phase->smartCells() ||
 	    m_phase->boundary()->isInside
 	    (cuboid, m_phase -> pairCreator() -> interactionCutoff())
 // 	    (cuboid, ((Simulation*) (m_phase -> parent())) -> maxCutoff)
 	    )
-	  {
-
-	    /* If a particle creator is given, determine which kind of
-	       cell to create.
-
-	       Right at the wall -> Inlet or Outlet
-	    */
-
-	    if (pc) {
-	      if (dir == 1 && cell_pos[axis] == r->n_cells[axis]-1) {
-		if (action == P_CREATE)
-		  c = new InletCell_Create(this, pc, axis, dir, group);
-		else
-		  c = new InletCell_Delete(this, pc, axis, dir, group);
-	      } else if (dir == -1 && cell_pos[axis] == 0) {
-		if (action == P_CREATE)
-		  c = new InletCell_Create(this, pc, axis, dir, group);
-		else
-		  c = new InletCell_Delete(this, pc, axis, dir, group);
-	      } else
-		c = new Cell(this, group);
-	    } else
-	      c = new Cell(this, group);
-
-	    c->tag = cell_pos;
-	    c->corner1 = cuboid.corner1;
-	    c->corner2 = cuboid.corner2;
-	  }
-
-	/* If entry is NULL, cell does not exist. */
-	if (c) {
-	  r->cells.push_back(c);
-	  r->cells_by_pos.push_back(r->cells.size()-1);
-	} else
-	  r->cells_by_pos.push_back(-1);
+	{ 
+          r->cells.push_back(new Cell(this, cuboid, cell_pos, group));
+          r->cells_by_pos[cellIndex] += r->cells.size();
+        }
       }
 
-  MSG_DEBUG("ManagerCell::cellSubdivide", "Initializing cells.");
-
-  for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
-    (*i)->init();
-  }
-
-//   MSG_DEBUG("ManagerCell::cellSubdivide", "Looking for neighbors.");
-
-  /* Look for neighbors (which means periodicities) and connect
-     cells appropriately
-  */
-  for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
-    for (int n = 0; n < NUM_NEIGHBORS; n++) {
-      if ((*i)->neighbors(n).empty()) {
-	/* No neighbor on this side? Find one! */
-
-	int_point_t neighbor;
-
-	Cell *c;
-//MSG_DEBUG("ManagerCell::cellSubdivide", "in neighbour loop");
-	bool noNeighbour = false;
-
-	for (int dim = 0; dim < SPACE_DIMS; dim++) {
-	  neighbor[dim] = (*i)->tag[dim] + Cell::c_offsets[n][dim];
-
-	  if (periodic[dim])
-	    neighbor[dim] = (neighbor[dim] + r->n_cells[dim]) % r->n_cells[dim];
-	  if(r->n_cells[dim] == 1 && Cell::c_offsets[n][dim] != 0) noNeighbour = true;
-	}
-
-
-	if (neighbor.x >= 0 && neighbor.x < r->n_cells.x &&
-	    neighbor.y >= 0 && neighbor.y < r->n_cells.y &&
-	    neighbor.z >= 0 && neighbor.z < r->n_cells.z) {
-
-	  c = r->cellByPos(neighbor);
-//MSG_DEBUG("ManagerCell::cellSubdivide", "if periodic");
-	  if (c) {
-	    if (noNeighbour) {
-	      (*i)->addPeriodic(c, n);
-	    } else {
-	      (*i)->addNeighbor(c, n);
-	    }
-	  }
-	}
-      }
+  
+    for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
+      if (!oneCellPeriodicDims)  
+        (*i)->init<AddPairCheck_Regular>();
+     else
+        (*i)->init<AddPairCheck_OneCellDims>();
     }
-  }
+  
+ 
+  
+  // MSG_DEBUG("ManagerCell::cellSubdivide", "Looking for neighbors.");
 
+  findRegionCellDirectNeighbors(r, periodic, oneCellPeriodicDims);
+  findRegionCellIndirectNeighbors(r, periodic, oneCellPeriodicDims);
 //  MSG_DEBUG("ManagerCell::cellSubdivide", r->cells.size() << " cells created.");
 
   /* Done... Insert into m_cells and m_regions. */
@@ -580,72 +758,112 @@ region_t *ManagerCell::cellSubdivide
   return r;
 }
 
-
-/* Fixme!!! a has to lie to the right of b. */
-void ManagerCell::connect(int dir, region_t *a, region_t *b, bool_point_t periodic, int t)
+/* Fixme!!! a has to lie to the right of b. */ //migth be already fixed
+void ManagerCell::connect(int adir, region_t *a, region_t *b, bool_point_t periodic, int t)
 {
-    int_point_t p, q, off;
-    int dir2, dir3;
+    int_point_t p, q, off, dir;
 
-    if (dir >= 0) {
-        p[dir] = a->n_cells[dir]-1;
-        q[dir] = 0;
-        off[dir] = 1;
+    if (adir >= 0) {
+        dir[0] = adir;
+        p[dir[0]] = a->n_cells[dir[0]]-1;
+        q[dir[0]] = 0;
+        off[dir[0]] = 1;
     } else {
-        dir = -dir-1;
-        p[dir] = 0;
-        q[dir] = b->n_cells[dir]-1;
-        off[dir] = -1;
+        dir[0] = -adir-1;
+        p[dir[0]] = 0;
+        q[dir[0]] = b->n_cells[dir[0]]-1;
+        off[dir[0]] = -1;
     }
+    dir[1] = (dir[0]+1)%SPACE_DIMS;
+    dir[2] = (dir[0]+2)%SPACE_DIMS;
 
-    dir2 = (dir+1)%SPACE_DIMS;
-    dir3 = (dir+2)%SPACE_DIMS;
+    MSG_DEBUG("ManagerCell::connect", (t==OUTLET) << " dir " << dir[1] << ": N(a)=" << a->n_cells[dir[1]] << ", N(b)=" << b->n_cells[dir[1]]);
+    MSG_DEBUG("ManagerCell::connect", (t==OUTLET) << " dir " << dir[2] << ": N(a)=" << a->n_cells[dir[2]] << ", N(b)=" << b->n_cells[dir[2]]);
 
-    MSG_DEBUG("ManagerCell::connect", "dir " << dir2 << ": N(a)=" << a->n_cells[dir2] << ", N(b)=" << b->n_cells[dir2]);
-    MSG_DEBUG("ManagerCell::connect", "dir " << dir3 << ": N(a)=" << a->n_cells[dir3] << ", N(b)=" << b->n_cells[dir3]);
+    assert(a->n_cells[dir[1]] == b->n_cells[dir[1]]);
+    assert(a->n_cells[dir[2]] == b->n_cells[dir[2]]);
 
-    assert(a->n_cells[dir2] == b->n_cells[dir2]);
-    assert(a->n_cells[dir3] == b->n_cells[dir3]);
+/*    if (t == OUTLET){
+        acts_on_first = false;
+    }else{
+        acts_on_first = true;
+    }*/
+    if (t == OUTLET)
+      if (a->n_cells[dir[1]] != 1 && a->n_cells[dir[2]] != 1)
+        connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_Regular>, &ManagerCell::cellDist, 1, p, q, off, dir); 
+      else
+        connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_OneCellDims>, &ManagerCell::cellDist, 1, p, q, off, dir); 
+    else {
+      AbstractCellLink *(Cell::*est)(Cell *, int, bool);
+      if (a->n_cells[dir[1]] != 1 && a->n_cells[dir[2]] != 1){
+        connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_Regular>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
+        est = &Cell::establishLink<AddPairCheck_Regular>;
+      }else{
+        connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_OneCellDims>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
+        est = &Cell::establishLink<AddPairCheck_OneCellDims>;
+      }
+      if (m_divby > 1) {
+        if (adir >= 0) {
+          off[dir[0]]++;
+          connectPlanePair(a, b, periodic, est, &ManagerCell::cellDist2x, m_divby, p, q, off, dir, 1); //m_divby
+          p[dir[0]]--;
+        } else {
+          off[dir[0]]--;
+          connectPlanePair(a, b, periodic, est, &ManagerCell::cellDist2x, m_divby, p, q, off, dir, 1); //m_divby
+          q[dir[0]]--;
+        }
+        connectPlanePair(a, b, periodic, est, &ManagerCell::cellDist2x, m_divby, p, q, off, dir, 0); 
+      }
+    }
+}
+/*
+virtual void ManagerCell2x::ConnectTwoCells(Cell *c, region_t *b, int_point_t q, int_point_t off, bool acts_on_first)
+{                         
+  int where = offset2neighbor(off);
 
-    for (p[dir2] = 0; p[dir2] < a->n_cells[dir2]; p[dir2]++) {
-        for (p[dir3] = 0; p[dir3] < a->n_cells[dir3]; p[dir3]++) {
-            Cell *c = a->cellByPos(p);
+  if (Cell *d = b->cellByPos(q)){
+    ManagerCell2x::cellDist(c, d, where, 1);
+    c->establishLink(d, where, acts_on_first, true);
+  }
+}*/
 
-            if (c) {
-                for (int k = -1; k <= 1; k++) {
-                    for (int l = -1; l <= 1; l++) {
-                        int where;
+void ManagerCell::connectPlanePair(region_t *a, region_t *b, bool_point_t periodic, AbstractCellLink *(Cell::*add)(Cell *, int, bool), void (ManagerCell::*dist)(Cell *, Cell*, int, int, int), int klbound, int_point_t p, int_point_t q, int_point_t off, int_point_t dir, int orderInter)
+{
+    int dir1 = dir[1]; int dir2 = dir[2];
+    for (p[dir1] = 0; p[dir1] < a->n_cells[dir1]; p[dir1]++) {
+        for (p[dir2] = 0; p[dir2] < a->n_cells[dir2]; p[dir2]++) {
+            if (Cell *c = a->cellByPos(p)) {
+                for (int k = -klbound; k <= klbound; k++) {
+                    for (int l = -klbound; l <= klbound; l++) {
+                        bool neighbourFound = true;
+                        q[dir1] = p[dir1] + k;
+                        q[dir2] = p[dir2] + l;
 
-                        off[dir2] = k;
-                        off[dir3] = l;
-                        OFFSET2NEIGHBOR(off, where);
-
-                        q[dir2] = p[dir2] + k;
-                        q[dir3] = p[dir3] + l;
-
+                        MSG_DEBUG("ManagerCell::connectPlanePair", q << " " << b->n_cells);
+                        if (periodic[dir1])
+                            q[dir1] = (q[dir1] + a->n_cells[dir1]) % a->n_cells[dir1];
                         if (periodic[dir2])
                             q[dir2] = (q[dir2] + a->n_cells[dir2]) % a->n_cells[dir2];
-                        if (periodic[dir3])
-                            q[dir3] = (q[dir3] + a->n_cells[dir3]) % a->n_cells[dir3];
-
-
+                        MSG_DEBUG("ManagerCell::connectPlanePair", q << " " << b->n_cells);
+//deal with indirect neighbour, should call only establishlink, two meanings of word indirectoutlet, outlet over periodic end of region, another is outlet due to half cutoff cell width.
                         // if (neighbor_index >= 0 && neighbor_index < b->cells.size()) {
                         if (q.x >= 0 && q.x < b->n_cells.x &&
                             q.y >= 0 && q.y < b->n_cells.y &&
-                            q.z >= 0 && q.z < b->n_cells.z) {
+                            q.z >= 0 && q.z < b->n_cells.z){
+                            off[dir1] = k; off[dir2] = l;
+                            int where = offset2neighbor(off);
+                            MSG_DEBUG("ManagerCell::connectPlanePair", off << " " << where);
+                            if(a->n_cells[dir1] == 1 && c_offsets(where,dir1) != 0 || a->n_cells[dir2] == 1 && c_offsets(where, dir2) != 0) neighbourFound = false;
 
-                            Cell *d;
-
-                            d = b->cellByPos(q);
-
-                            if (d) {
-                                if (t == OUTLET)
-                                    c->addOutlet(d, where);
-                                else
-                                    c->addNeighbor(d, where);
+                            if (Cell *d = b->cellByPos(q)){
+                              (this ->* dist)(c, d, where, 1, orderInter);
+                              if (neighbourFound)
+                                  m_links.push_back((c ->* add)(d, where, true));
+                              else if (abs(c_offsets(where,dir1)) <= 1 && abs(c_offsets(where,dir2)) <= 1)
+                                c->addPeriodic(d, where, true);
                             }
-                        }
-                    }
+                       }
+                   }
                 }
             }
         }
@@ -997,7 +1215,7 @@ void ManagerCell::deactivateCell(Cell *c)
 }
 
 
-void ManagerCell::activateCellLink(CellLink *c)
+void ManagerCell::activateCellLink(AbstractCellLink *c)
 {
 #ifdef ENABLE_PTHREADS
   pthread_mutex_lock(&m_links__mutex);
@@ -1046,7 +1264,7 @@ void ManagerCell::activateCellLink(CellLink *c)
 }
 
 
-void ManagerCell::deactivateCellLink(CellLink *c)
+void ManagerCell::deactivateCellLink(AbstractCellLink *c)
 {
 #ifdef ENABLE_PTHREADS
   pthread_mutex_lock(&m_links__mutex);

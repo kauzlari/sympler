@@ -291,7 +291,10 @@ class Phase: public NodeManyChildren
    */
   bool m_randomPairs;
 
-
+  /*!
+   * Should half cutoff width cells be created?
+   */
+  bool m_halfCutoff;
   /*!
    * This Calculators are for 
    * bonded triplets. An additional vector-layer is used for distinguishing 

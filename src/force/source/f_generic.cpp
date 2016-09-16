@@ -132,7 +132,7 @@ void FGeneric::computeForces(Pairdist* pair, int force_index, int thread_no)
        dAdni = this->m_pcee->de_dn(pair->firstPart()) - Tdsdni;
        dAdnj = this->m_pcee->de_dn(pair->secondPart()) - Tdsdnj;
 
-       assert(!(isnan(Tdsdni) || isnan(Tdsdnj)));
+       assert(!(std::isnan(Tdsdni) || std::isnan(Tdsdnj)));
 
        f = (dAdni*weightj + dAdnj*weighti)*rij;
        fi = f + dAdnj*ui;

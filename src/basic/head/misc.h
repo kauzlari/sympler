@@ -35,8 +35,6 @@
 
 #include "geometric_primitives.h"
 
-typedef math_vector_t<int> int_point_t;
-typedef math_vector_t<bool> bool_point_t;
 
 #define MAX_COLOURS 10
 
@@ -62,5 +60,7 @@ typedef math_vector_t<bool> bool_point_t;
   }                                             \
 }
 
-
+template <typename T> int sign(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 #endif

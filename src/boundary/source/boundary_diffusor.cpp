@@ -344,7 +344,7 @@ void BoundaryDiffusor::setup(Simulation* sim, ManagerCell *mgr)
             
     /* Connect inlet to diffusor */
     
-    ManagerCell::connect(2, inlet, diffusor, periodicity, NEIGHBOR);
+    mgr->connect(2, inlet, diffusor, periodicity, NEIGHBOR);
     
   }
   else

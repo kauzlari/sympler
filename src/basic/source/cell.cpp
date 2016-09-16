@@ -42,6 +42,7 @@ using namespace std;
 #include "manager_cell.h"
 #include "wall_triangle.h"
 #include "colour_pair.h"
+#include <iomanip>
 // #include "pair_creator.h"
 
 
@@ -54,15 +55,6 @@ using namespace std;
 //   { {1}, {1},{-1}}, { {1}, {1}, {0}}, { {1}, {1}, {1}}
 // };
 
-const int_point_t Cell::c_offsets[NUM_NEIGHBORS] = {
-    {-1,-1,-1}, {-1,-1, 0}, {-1,-1, 1}, {-1, 0,-1}, {-1, 0, 0}, {-1, 0, 1},
-    {-1, 1,-1}, {-1, 1, 0}, {-1, 1, 1},
-    { 0,-1,-1}, { 0,-1, 0}, { 0,-1, 1}, { 0, 0,-1}, /*{0, 0, 0},*/ { 0, 0, 1},
-    { 0, 1,-1}, { 0, 1, 0}, { 0, 1, 1},
-    { 1,-1,-1}, { 1,-1, 0}, { 1,-1, 1}, { 1, 0,-1}, { 1, 0, 0}, { 1, 0, 1},
-    { 1, 1,-1}, { 1, 1, 0}, { 1, 1, 1}
-};
-
 
 // const int_point_t Cell::c_half_offsets[NUM_HALF_NEIGHBORS] = {
 //     {-1,-1, 1}, {-1, 0, 1},
@@ -74,37 +66,35 @@ const int_point_t Cell::c_offsets[NUM_NEIGHBORS] = {
 // };
 
 
-/*---- Class CellLink ----*/
+/*---- Class AbstractCellLink ----*/
 
-CellLink::CellLink()
+AbstractCellLink::AbstractCellLink()
 {
-  throw gError("CellLink::CellLink(default)", "Should not be called. Contact the programmer.");
+  throw gError("AbstractCellLink::AbstractCellLink(default)", "Should not be called. Contact the programmer.");
 
   set(NULL, NULL, -1, true, true);
 }
 
 
-CellLink::CellLink(Cell *first, Cell *second, int alignment, bool acts_on_first, bool acts_on_second)
-  : m_n_active_cells(0), next(NULL), prev(NULL)/*, m_linkUsed(false)*/
+AbstractCellLink::AbstractCellLink(Cell *first, Cell *second, int alignment, bool acts_on_first, bool acts_on_second, bool cross_regions)
+  : m_n_active_cells(0), m_cross_regions(cross_regions), next(NULL), prev(NULL)/*, m_linkUsed(false)*/
 {
 #ifdef ENABLE_PTHREADS
   pthread_mutex_init(&m_activation__mutex, &g_mutex_attr);
 #endif
-
   set(first, second, alignment, acts_on_first, acts_on_second);
 }
 
-
-CellLink::CellLink(const CellLink &copy)
+AbstractCellLink::AbstractCellLink(const AbstractCellLink &copy)
   : m_n_active_cells(copy.m_n_active_cells), next(NULL), prev(NULL)/*, m_linkUsed(false)*/
 {
-  throw gError("CellLink::CellLink(copy)", "Should not be called. Contact the programmer.");
+  throw gError("AbstractCellLink::AbstractCellLink(copy)", "Should not be called. Contact the programmer.");
 
   set(copy.m_first, copy.m_second, copy.m_alignment, copy.m_acts_on.first, copy.m_acts_on.second);
 }
 
 
-CellLink::~CellLink()
+AbstractCellLink::~AbstractCellLink()
 {
 #ifdef ENABLE_PTHREADS
   pthread_mutex_destroy(&m_activation__mutex);
@@ -123,28 +113,7 @@ CellLink::~CellLink()
             first.corner1 - second.corner2
 */
 
-inline void cellDist(Cell *first, Cell *second, int alignment, point_t &dist)
-{
-  int_point_t off;
-  point_t width1, width2;
-
-  off = Cell::c_offsets[alignment];
-  width1 = first->corner2 - first->corner1;
-  width2 = second->corner2 - second->corner1;
-
-  for (int s = 0; s < SPACE_DIMS; s++) {
-    if (off[s] == 1)
-      dist[s] = width1[s];
-    else if (off[s] == -1)
-      dist[s] = -width2[s];
-    else
-      dist[s] = 0;
-  }
-
-}
-
-
-void CellLink::set(Cell *first, Cell *second, int alignment, bool acts_on_first, bool acts_on_second)
+void AbstractCellLink::set(Cell *first, Cell *second, int alignment, bool acts_on_first, bool acts_on_second)
 {
   m_first = first;
   m_second = second;
@@ -153,35 +122,29 @@ void CellLink::set(Cell *first, Cell *second, int alignment, bool acts_on_first,
   m_acts_on.second = acts_on_second;
 
   assert(first && second && ((alignment != -1) || (first == second)) );
-
-  if (first == second) {
-    for (int s = 0; s < SPACE_DIMS; s++)
-      m_cell_dist[s] = 0;
-  } else {
-    cellDist(m_first, m_second, m_alignment, m_cell_dist);
-  }
 }
 
 
 /* One of the two cells connected by a cell link is activated.
    If both links are activated, activate this link
 */
-void CellLink::cellActivated() {
+void AbstractCellLink::cellActivated() {
 #ifdef ENABLE_PTHREADS
   pthread_mutex_lock(&m_activation__mutex);
 #endif
 
   ++m_n_active_cells;
+//    MSG_DEBUG ("AbstractCellLink::cellActivated","start");
 
 //    assert(m_n_active_cells >= 0 && m_n_active_cells <= 2);
   if (!(m_n_active_cells >= 0 && m_n_active_cells <= 2)) {
     MSG_DEBUG
-      ("CellLink::cellActivated",
+      ("AbstractCellLink::cellActivated",
        "m_n_active_cells = " << m_n_active_cells);
     abort();
   }
 
-// Assigning the activated CellLink in the proper thread list
+// Assigning the activated AbstractCellLink in the proper thread list
   if (m_n_active_cells == 2) 
     m_first->manager()->activateCellLink(this);
 
@@ -195,7 +158,7 @@ void CellLink::cellActivated() {
 /* One of the two cells connected by a cell link is deactivated.
    If link is active, deactivate link.
 */
-void CellLink::cellDeactivated() {
+void AbstractCellLink::cellDeactivated() {
 #ifdef ENABLE_PTHREADS
   pthread_mutex_lock(&m_activation__mutex);
 #endif
@@ -205,7 +168,7 @@ void CellLink::cellDeactivated() {
 //    assert(m_n_active_cells >= 0 && m_n_active_cells <= 2);
   if (!(m_n_active_cells >= 0 && m_n_active_cells <= 2)) {
     MSG_DEBUG
-      ("CellLink::cellDeactivated",
+      ("AbstractCellLink::cellDeactivated",
        "m_n_active_cells = " << m_n_active_cells << " ! Aborting.");
     abort();
   }
@@ -231,7 +194,7 @@ void CellLink::cellDeactivated() {
 //                     int dir, Cell *first_c, Cell *second_c,
 //                     Particle *first_p, Particle *second_p,
 //                     bool ao_f, bool ao_s,
-//                     point_t &cell_dist,
+//                     point_t cell_dist,
 //                     int thread_no)
 // {
 // #else
@@ -239,7 +202,7 @@ void CellLink::cellDeactivated() {
 //                     int dir, Cell *first_c, Cell *second_c,
 //                     Particle *first_p, Particle *second_p,
 //                     bool ao_f, bool ao_s,
-//                     point_t &cell_dist)
+//                     point_t cell_dist)
 // {
 // #endif
 //   dist_t d;
@@ -263,428 +226,60 @@ void CellLink::cellDeactivated() {
 //   }
 // }
 
-#ifdef _OPENMP
-inline void createDistancesForSame
-  (vector<PairList> &distances,
-   double cutoff_sq,
-   int dir,
-   Cell *c,
-   list<Particle*> &p,
-   point_t &cell_dist,
-   int thread_no)
+
+
+
+/*
+void CellLink::addPair_(vector<PairList> &distances, double cutoff_sq,
+                    Cell *first_c, Cell *second_c,
+                    Particle *first_p, Particle *second_p,
+                    bool ao_f, bool ao_s,
+                    point_t &cell_dist,
+                    int thread_no)
 {
-#else
-inline void createDistancesForSame
-  (vector<PairList> &distances,
-   double cutoff_sq,
-   int dir,
-   Cell *c,
-   list<Particle*> &p,
-   point_t &cell_dist)
-{
-#endif
-  list<Particle*>::iterator p_end = p.end();
+  dist_t d;
+  d.abs_square = 0;
+  for (int _i = 0; _i < SPACE_DIMS; _i++) {
+      d.cartesian[_i] = cell_dist[_i]
+        + first_p -> r[_i] - first_c -> corner1[_i]
+        - second_p -> r[_i] + second_c -> corner1[_i];
+      d.abs_square += d.cartesian[_i]*d.cartesian[_i];
+    }*/
+  /* Take care: The order of *j, *i defines the direction d \
+     is pointing to. */
+//    else if 
+//    if (first_p->mySlot == 46 || second_p->mySlot == 46)// || first_p->mySlot == 554 || second_p->mySlot == 554)
+//    MSG_DEBUG("addPair", first_p->mySlot << " " << first_p->r << " " << first_c->tag << " " << second_p->mySlot << " " << second_p->r << " " << second_c->tag << " " << cell_dist << " " << d.cartesian << " " << first_c->corner1 << " " << second_c->corner1 << " " << d.abs_square << " " << cutoff_sq);
+/*  if (d.abs_square < cutoff_sq) {
+//    if (first_p->mySlot == 46 || second_p->mySlot == 46)// || first_p->mySlot == 554 || second_p->mySlot == 554)
+//            MSG_DEBUG("addPair", first_p->mySlot << " " << first_p->r << " " << first_c->tag << " " << second_p->mySlot << " " << second_p->r << " " << second_c->tag << " " << cell_dist << " " << d.cartesian << " " << first_c->corner1 << " " << second_c->corner1 << " " << d.abs_square << " " << cutoff_sq);
+    int _i = 2; 
+//      d.cartesian[_i] = cell_dist[_i] + first_p->r[_i] - first_c->corner1[_i] - second_p->r[_i] + second_c->corner1[_i];
+//    if (first_p->mySlot == 567){
+//      MSG_DEBUG("addPair", cell_dist[_i] << " + " << first_p->r[_i] << " = " << cell_dist[_i] + first_p->r[_i]);
+//      MSG_DEBUG("addPair", cell_dist[_i] + first_p->r[_i] << " - " << first_c->corner1[_i] << " - " << second_p->r[_i] << " = " << cell_dist[_i] + first_p->r[_i] -first_c->corner1[_i] - second_p->r[_i]);
+//      MSG_DEBUG("addPair", cell_dist[_i] + first_p->r[_i] -first_c->corner1[_i] - second_p->r[_i] <<  " + " << second_c->corner1[_i] << " = " <<  cell_dist[_i] + first_p->r[_i] - first_c->corner1[_i] - second_p->r[_i] + second_c->corner1[_i]);
+//      MSG_DEBUG("addPair",  d.cartesian[2] << " = " <<  cell_dist[_i] + first_p->r[_i] - first_c->corner1[_i] - second_p->r[_i] + second_c->corner1[_i]);
+//}
+    //if (second_p->mySlot == 564)
+    //        MSG_DEBUG("addPair(", &distances<<",...) " << second_p->mySlot << " " << second_p->r  << " " << first_p->mySlot << " " << first_p->r << " " << -cell_dist << " " << -d.cartesian << " " << second_c->corner1 << " " << first_c->corner1 << " " << d.abs_square << " " << cutoff_sq);
+    //else if (first_p->mySlot == 564)
+    //        MSG_DEBUG("addPair(", &distances<<",...) " << first_p->mySlot << " " << first_p->r  << " " << second_p->mySlot << " " << second_p->r << " " << cell_dist << " " << d.cartesian << " " << first_c->corner1 << " " << second_c->corner1 << " " << d.abs_square << " " << cutoff_sq);
+    d.abs = sqrt(d.abs_square);
+//#ifdef _OPENMP    
+    distances[thread_no].newPair().set(d, first_p, second_p, ao_f, ao_s);*/
+/*#else    
+    distances[PairCreator::counterTN].newPair().set(d, first_p, second_p, ao_f, ao_s);
+#endif*/
+//  }
+//}
 
-  for (list<Particle*>::iterator i = p.begin(); i != p_end; ++i) {
-    list<Particle*>::iterator j = i;
-    for (++j; j != p_end; ++j) {
-//    	      MSG_DEBUG("CellLink::createDistancesForDifferent", "adding for CP " << (*i)->c << (*j)->c);
-#ifdef _OPENMP
-      addPair
-        (distances, cutoff_sq,
-         dir, c, c,
-         *i, *j,
-         true, true,
-         cell_dist,
-         thread_no);
-#else
-      addPair
-        (distances, cutoff_sq,
-         dir, c, c,
-         *i, *j,
-         true, true,
-         cell_dist);
-#endif         
-    }
-  }
-}
-
-#ifdef _OPENMP
-inline void createDistancesForDifferent
-  (vector<PairList> &distances,
-   double cutoff_sq,
-   int dir,
-   Cell *first_c,
-   Cell *second_c,
-   list<Particle*> &first_p,
-   list<Particle*> &second_p,
-   bool ao_f,
-   bool ao_s,
-   point_t &cell_dist, 
-   int thread_no)
-{
-#else
-inline void createDistancesForDifferent
-  (vector<PairList> &distances,
-   double cutoff_sq,
-   int dir,
-   Cell *first_c,
-   Cell *second_c,
-   list<Particle*> &first_p,
-   list<Particle*> &second_p,
-   bool ao_f,
-   bool ao_s,
-   point_t &cell_dist)
-{	
-#endif
-//   MSG_DEBUG("CellLink::createDistancesForDifferent", "START: firstsize = " << first_p.size() << ", secondsize = " << second_p.size() << ", first corner = " << first_c->corner1 << ", second corner = " << second_c->corner1);
-
-
-  list<Particle*>::iterator p1_end = first_p.end();
-  list<Particle*>::iterator p2_end = second_p.end();
-
-  for (list<Particle*>::iterator i = first_p.begin(); i != p1_end; ++i) {
-    for (list<Particle*>::iterator j = second_p.begin(); j != p2_end; ++j) {
-//       MSG_DEBUG("CellLink::createDistancesForDifferent", "adding for CP " << (*i)->c << (*j)->c);
-#ifdef _OPENMP       
-      addPair
-        (distances, cutoff_sq,
-         dir, first_c, second_c,
-         *i, *j,
-         ao_f, ao_s,
-         cell_dist,
-         thread_no);
-#else
-      addPair
-        (distances, cutoff_sq,
-         dir, first_c, second_c,
-         *i, *j,
-         ao_f, ao_s,
-         cell_dist);
-#endif         
-    }
-  }
-}
-
-
-/* Creating the pair distances, using the cell linked-list method */
-
-#ifdef _OPENMP
-void CellLink::createDistances(int thread_no)
-{
-// MSG_DEBUG("CellLink::createDistances", "start");
- ManagerCell *manager = m_first->manager();
-  size_t n_colours = manager->nColours();
-  /* Are we calculating pairs within the same cell? */
-  if (m_first == m_second) {
-    /* Loop over the first colour */
-    for (size_t c1 = 0; c1 < n_colours; ++c1) {
-      /* --- Pairs of the same colour -------------------------------------------------------------- */
-      ColourPair *cp = manager->cp(c1, c1);
-
-
-//       MSG_DEBUG("CellLink::createDistances", "same Cell: now CP " << c1 << c1);
-      if (cp->needPairs()) {
-	double cutoff_sq = cp->cutoff() * cp->cutoff();
-//  MSG_DEBUG("CellLink::createDistances", "now CP " << c1 << c1 << "needPair = TRUE");
-
-	createDistancesForSame
-	  (cp->freePairs(),
-	   cutoff_sq,
-	   0,
-	   m_first,
-	   m_first->particles(c1),
-	   m_cell_dist,
-	   thread_no);
-
-	createDistancesForDifferent
-	  (cp->frozenPairs(),
-	   cutoff_sq,
-	   0,
-	   m_first, m_first,
-	   m_first->particles(c1), m_first->frozenParticles(c1),
-	   true, false,
-	   m_cell_dist,
-	   thread_no);
-      }
-
-      for (size_t c2 = c1+1; c2 < n_colours; ++c2) {
-	/* --- Pairs of different colour -------------------------------------------------------------- */
-	cp = manager->cp(c1, c2);
-
-	if (cp->needPairs()) {
-	  double cutoff_sq = cp->cutoff() * cp->cutoff();
-//MSG_DEBUG("CellLink::createDistances", "now CP " << c1 << c2 << "needPair = TRUE");
-	  createDistancesForDifferent
-	    (cp->freePairs(),
-	     cutoff_sq,
-	     0,
-	     m_first, m_first,
-	     m_first->particles(c1), m_first->particles(c2),
-	     true, true,
-	     m_cell_dist,
-	     thread_no);
-
-	  createDistancesForDifferent
-	    (cp->frozenPairs(),
-	     cutoff_sq,
-	     0,
-	     m_first, m_first,
-	     m_first->particles(c1), m_first->frozenParticles(c2),
-	     true, false,
-	     m_cell_dist,
-	     thread_no);
-
-	  createDistancesForDifferent
-	    (cp->frozenPairs(),
-	     cutoff_sq,
-	     0,
-	     m_first, m_first,
-	     m_first->frozenParticles(c1), m_first->particles(c2),
-	     false, true,
-	     m_cell_dist,
-	     thread_no);
-	}
-      } /* Loop over c2 */
-    } /* Loop over c1 */
-  } else { /* We have different cells. */
-
-    for (size_t c1 = 0; c1 < n_colours; ++c1) {
-      for (size_t c2 = 0; c2 < n_colours; ++c2) {
-	ColourPair *cp = manager->cp(c1, c2);
-//  MSG_DEBUG("CellLink::createDistances", "different Cells: now CP " << c1 << c2 << ", needPairs = " << cp->needPairs());
-
-	if (cp->needPairs()) {
-	  double cutoff_sq = cp->cutoff() * cp->cutoff();
-//    MSG_DEBUG("CellLink::createDistances", "TRUE: different Cells: now CP " << c1 << c2);
-
-	  if (c1 < c2) {
-//	  	MSG_DEBUG("CellLink::createDistances", "c1 < c2");
-	    createDistancesForDifferent
-	      (cp->freePairs(),
-	       cutoff_sq,
-	       1,
-	       m_first, m_second,
-	       m_first->particles(c1), m_second->particles(c2),
-	       m_acts_on.first, m_acts_on.second,
-	       m_cell_dist,
-	       thread_no);
-	    if (m_acts_on.first)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 1,
-		 m_first, m_second,
-		 m_first->particles(c1), m_second->frozenParticles(c2),
-		 true, false,
-		 m_cell_dist,
-		 thread_no);
-	    if (m_acts_on.second)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 1,
-		 m_first, m_second,
-		 m_first->frozenParticles(c1), m_second->particles(c2),
-		 false, true,
-		 m_cell_dist,
-		 thread_no);
-	  } else {
-//      MSG_DEBUG("CellLink::createDistances", "ELSE: different Cells: CP " << c1 << c2);
-     createDistancesForDifferent
-	      (cp->freePairs(),
-	       cutoff_sq,
-	       -1,
-	       m_second, m_first,
-	       m_second->particles(c2), m_first->particles(c1),
-	       m_acts_on.second, m_acts_on.first,
-	       m_cell_dist,
-	       thread_no);
-
-	    if (m_acts_on.first)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 -1,
-		 m_second, m_first,
-		 m_second->frozenParticles(c2), m_first->particles(c1),
-		 false, true,
-		 m_cell_dist,
-		 thread_no);
-
-	    if (m_acts_on.second)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 -1,
-		 m_second, m_first,
-		 m_second->particles(c2), m_first->frozenParticles(c1),
-		 true, false,
-		 m_cell_dist,
-		 thread_no);
-	  }
-	}
-      }
-    }
-  }
-}
-#else
-void CellLink::createDistances()
-{
-// MSG_DEBUG("CellLink::createDistances", "start");
- ManagerCell *manager = m_first->manager();
-  size_t n_colours = manager->nColours();
-  /* Are we calculating pairs within the same cell? */
-  if (m_first == m_second) {
-    /* Loop over the first colour */
-    for (size_t c1 = 0; c1 < n_colours; ++c1) {
-      /* --- Pairs of the same colour -------------------------------------------------------------- */
-      ColourPair *cp = manager->cp(c1, c1);
-
-
-//       MSG_DEBUG("CellLink::createDistances", "same Cell: now CP " << c1 << c1 << ", needPAirs=" << cp->needPairs() << ", cp-cutoff=" << cp->cutoff());
-      if (cp->needPairs()) {
-	double cutoff_sq = cp->cutoff() * cp->cutoff();
-//  MSG_DEBUG("CellLink::createDistances", "now CP " << c1 << c1 << "needPair = TRUE");
-
-	createDistancesForSame
-	  (cp->freePairs(),
-	   cutoff_sq,
-	   0,
-	   m_first,
-	   m_first->particles(c1),
-	   m_cell_dist);
-
-	createDistancesForDifferent
-	  (cp->frozenPairs(),
-	   cutoff_sq,
-	   0,
-	   m_first, m_first,
-	   m_first->particles(c1), m_first->frozenParticles(c1),
-	   true, false,
-	   m_cell_dist);
-      }
-
-      for (size_t c2 = c1+1; c2 < n_colours; ++c2) {
-	/* --- Pairs of different colour -------------------------------------------------------------- */
-	cp = manager->cp(c1, c2);
-
-//       MSG_DEBUG("CellLink::createDistances", "same Cell: now CP " << c1 << c2 << ", needPairs=" << cp->needPairs() << ", cp-cutoff=" << cp->cutoff());
-
-	if (cp->needPairs()) {
-	  double cutoff_sq = cp->cutoff() * cp->cutoff();
-//MSG_DEBUG("CellLink::createDistances", "now CP " << c1 << c2 << "needPair = TRUE");
-	  createDistancesForDifferent
-	    (cp->freePairs(),
-	     cutoff_sq,
-	     0,
-	     m_first, m_first,
-	     m_first->particles(c1), m_first->particles(c2),
-	     true, true,
-	     m_cell_dist);
-
-	  createDistancesForDifferent
-	    (cp->frozenPairs(),
-	     cutoff_sq,
-	     0,
-	     m_first, m_first,
-	     m_first->particles(c1), m_first->frozenParticles(c2),
-	     true, false,
-	     m_cell_dist);
-
-	  createDistancesForDifferent
-	    (cp->frozenPairs(),
-	     cutoff_sq,
-	     0,
-	     m_first, m_first,
-	     m_first->frozenParticles(c1), m_first->particles(c2),
-	     false, true,
-	     m_cell_dist);
-	}
-      } /* Loop over c2 */
-    } /* Loop over c1 */
-  } else { /* We have different cells. */
-
-    for (size_t c1 = 0; c1 < n_colours; ++c1) {
-      for (size_t c2 = 0; c2 < n_colours; ++c2) {
-	ColourPair *cp = manager->cp(c1, c2);
-// 	MSG_DEBUG("CellLink::createDistances", "different Cells: now CP " << c1 << c2 << ", needPairs = " << cp->needPairs() << ", cp-cutoff=" << cp->cutoff());
-
-	if (cp->needPairs()) {
-	  double cutoff_sq = cp->cutoff() * cp->cutoff();
-//    MSG_DEBUG("CellLink::createDistances", "TRUE: different Cells: now CP " << c1 << c2);
-
-	  if (c1 < c2) {
-//	  	MSG_DEBUG("CellLink::createDistances", "c1 < c2");
-	    createDistancesForDifferent
-	      (cp->freePairs(),
-	       cutoff_sq,
-	       1,
-	       m_first, m_second,
-	       m_first->particles(c1), m_second->particles(c2),
-	       m_acts_on.first, m_acts_on.second,
-	       m_cell_dist);
-	    if (m_acts_on.first)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 1,
-		 m_first, m_second,
-		 m_first->particles(c1), m_second->frozenParticles(c2),
-		 true, false,
-		 m_cell_dist);
-	    if (m_acts_on.second)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 1,
-		 m_first, m_second,
-		 m_first->frozenParticles(c1), m_second->particles(c2),
-		 false, true,
-		 m_cell_dist);
-	  } else {
-//      MSG_DEBUG("CellLink::createDistances", "ELSE: different Cells: CP " << c1 << c2);
-     createDistancesForDifferent
-	      (cp->freePairs(),
-	       cutoff_sq,
-	       -1,
-	       m_second, m_first,
-	       m_second->particles(c2), m_first->particles(c1),
-	       m_acts_on.second, m_acts_on.first,
-	       m_cell_dist);
-
-	    if (m_acts_on.first)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 -1,
-		 m_second, m_first,
-		 m_second->frozenParticles(c2), m_first->particles(c1),
-		 false, true,
-		 m_cell_dist);
-
-	    if (m_acts_on.second)
-	      createDistancesForDifferent
-		(cp->frozenPairs(),
-		 cutoff_sq,
-		 -1,
-		 m_second, m_first,
-		 m_second->particles(c2), m_first->frozenParticles(c1),
-		 true, false,
-		 m_cell_dist);
-	  }
-	}
-      }
-    }
-  }
-}
-#endif
 
 /*---- Class Cell ----*/
 
 //---- Constructors/Destructor ----
 
-Cell::Cell(ManagerCell *mgr, int group)
+Cell::Cell(ManagerCell *mgr, int group, int sameDirOutlets)
   : m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
     m_injected_particles(mgr->nColours()), m_n_particles(0), m_manager(mgr), m_group(group), m_cellUsed(false),
 #ifdef ENABLE_PTHREADS
@@ -692,15 +287,12 @@ Cell::Cell(ManagerCell *mgr, int group)
 #endif
     next(NULL), prev(NULL)
 {
-#ifdef ENABLE_PTHREADS
-  for (size_t i = 0; i < m_injected_particles__mutex.size(); i++)
-    pthread_mutex_init(&m_injected_particles__mutex[i], &g_mutex_attr);
-#endif
+  commonConstructor(mgr, sameDirOutlets);
 }
 
 
-Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int group)
-  : m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
+Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int group, int sameDirOutlets)
+  : cuboid_t(c1, c2), m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
     m_injected_particles(mgr->nColours()),
     m_n_particles(0),
     m_manager(mgr), m_group(group), m_cellUsed(false),
@@ -709,15 +301,70 @@ Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int group)
 #endif
     next(NULL), prev(NULL)
 {
+  commonConstructor(mgr, sameDirOutlets);
+}
+
+Cell::Cell(ManagerCell *mgr, cuboid_t cuboid, int_point_t a_tag, int group, int sameDirOutlets)
+  : cuboid_t(cuboid), tag(a_tag), m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
+    m_injected_particles(mgr->nColours()),
+    m_n_particles(0),
+    m_manager(mgr), m_group(group), m_cellUsed(false),
+#ifdef ENABLE_PTHREADS
+    m_injected_particles__mutex(mgr->nColours()),
+#endif
+    next(NULL), prev(NULL)
+{
+  commonConstructor(mgr, sameDirOutlets, a_tag);
+}
+
+
+Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t a_tag, int group, int sameDirOutlets)
+  : cuboid_t(c1, c2), tag(a_tag), m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
+    m_injected_particles(mgr->nColours()),
+    m_n_particles(0),
+    m_manager(mgr), m_group(group), m_cellUsed(false),
+#ifdef ENABLE_PTHREADS
+    m_injected_particles__mutex(mgr->nColours()),
+#endif
+    next(NULL), prev(NULL)
+{
+  commonConstructor(mgr, sameDirOutlets, a_tag);
+}
+
+BoundaryCell::BoundaryCell(ManagerCell *mgr, region_t *r, int group) : Cell(mgr, group, 2) {m_region = r;}
+
+BoundaryCell::BoundaryCell(ManagerCell *mgr, cuboid_t cuboid, int_point_t a_tag, region_t *r, int group) : Cell(mgr, cuboid, a_tag, group, 2) {m_region = r;}
+
+BoundaryCell::BoundaryCell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t a_tag, region_t *r, int group): Cell(mgr, c1, c2, a_tag, group, 2) {m_region = r;}
+
+
+void Cell::commonConstructor(ManagerCell *mgr, int sameDirOutlets, int_point_t a_tag)//TODO: change sameDirOutlets to sameDir
+{
+  const int num_neighbors = m_manager->num_neighbors();
+  m_neighbors.reserve(num_neighbors);
+  m_neighbors.resize(num_neighbors);
+
+  m_cell_dist.reserve(num_neighbors);
+  m_cell_dist.resize(num_neighbors);
+  for (int i=0; i < num_neighbors; i++)
+  {
+    m_cell_dist[i].reserve(sameDirOutlets);
+    m_cell_dist[i].resize(sameDirOutlets);
+  }
+  m_outlets.reserve(NUM_DIRECT_NEIGHBORS);
+  m_outlets.resize(NUM_DIRECT_NEIGHBORS);
+  for (int i=0; i < NUM_DIRECT_NEIGHBORS; i++)
+  {
+    m_outlets[i].reserve(sameDirOutlets);
+    m_outlets[i].resize(sameDirOutlets);
+  }
+  tag = a_tag;
 #ifdef ENABLE_PTHREADS
   for (size_t i = 0; i < m_injected_particles__mutex.size(); i++)
     pthread_mutex_init(&m_injected_particles__mutex[i], &g_mutex_attr);
 #endif
-
-  corner1 = c1;
-  corner2 = c2;
 }
-
+  
 
 Cell::~Cell()
 {
@@ -727,66 +374,31 @@ Cell::~Cell()
 #endif
 }
 
+int Cell::whichNeighbor(const point_t &r)
+{
+  int_point_t off;
 
+  for (int j = 0; j < SPACE_DIMS; j++)
+    if (r[j] < corner1[j])
+      off[j] = -1;
+    else if (r[j] >= corner2[j])
+      off[j] = 1;
+  return m_manager->offset2neighbor(off);
+}
 
 //--- Methods ---
 
-void Cell::establishLink(Cell *neighbor, int where, bool first, bool second)
+
+
+
+void Cell::addPeriodic(Cell *neighbor, int where, bool cross_regions)
 {
-  list<CellLink*>::iterator cur = m_neighbors[where].begin();
-
-  while (cur != m_neighbors[where].end() && (*cur)->other(this) != neighbor)
-    ++cur;
-
-  //    if (m_links.find(neighbor) == m_links.end()) {
-  //  if (m_neighbors[where].find(neighbor) == m_neighbors[where].end()) {
-  if (cur == m_neighbors[where].end()) {
-    CellLink *link;
-
-    link = new CellLink(this, neighbor, where, first, second);
-
-    //    m_links[neighbor] = link;
-    //    neighbor->m_links[this] = link;
-//LINK->mThread()!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    m_neighbors[where].push_back(link);
-    neighbor->m_neighbors[INV_NEIGHBOR(where)].push_back(link);
-
-    /* Links are being deleted when the manager gets out of scope. */
-      m_manager->m_links.push_back(link);
-  }
-}
-
-void Cell::addNeighbor(Cell *neighbor, int where)
-{
-    establishLink(neighbor, where, true, true);
-
-    if (find(m_outlets[where].begin(), m_outlets[where].end(), neighbor) == m_outlets[where].end())
-        m_outlets[where].push_back(neighbor);
-
-    where = INV_NEIGHBOR(where);
-
-    if (find(neighbor->m_outlets[where].begin(), neighbor->m_outlets[where].end(), this)
-        == neighbor->m_outlets[where].end())
-        neighbor->m_outlets[where].push_back(this);
-}
-
-
-void Cell::addOutlet(Cell *neighbor, int where)
-{
-    establishLink(neighbor, where, false, true);
-    //    establishLink(neighbor, where, true, false);
-
-    if (find(m_outlets[where].begin(), m_outlets[where].end(), neighbor) == m_outlets[where].end())
-        m_outlets[where].push_back(neighbor);
-}
-
-void Cell::addPeriodic(Cell *neighbor, int where)
-{
-    if (find(m_outlets[where].begin(), m_outlets[where].end(), neighbor) == m_outlets[where].end())
-        m_outlets[where].push_back(neighbor);
+    if (m_manager->m_divby > 1) where = m_manager->c_2x_1x(where);
+    addToMOutlets(this, neighbor, where, cross_regions);
 }
 
 // #define TRACK_PARTICLE 438
+#define TRACK_PARTICLE_COLOUR 0
 
 void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force, IntegratorPosition *integratorP)
 {
@@ -816,50 +428,20 @@ void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force
 
 #ifdef TRACK_PARTICLE
 
-    if (p->mySlot == TRACK_PARTICLE && hit) {
+    if (p->mySlot == TRACK_PARTICLE && p->c == TRACK_PARTICLE_COLOUR && hit) {
       cout << "--> hit @ " << hit_pos << " after time " << t_travelled << " on wall:" << endl;
       cout << wall->toString() << endl;
     }
 
 #endif
-    // this checks for the indirect outlets = "far neighbours" due to, e.g., periodic BCs
-    for (list< pair<int, Cell*> >::iterator c = m_indirect_outlets.begin();
-         c != m_indirect_outlets.end(); c++) {
-      point_t dist;
-      bool new_hit = false;
-
-      cellDist(this, c->second, c->first, dist);
-
-
-      /* Update position in case this is periodic, etc. */
-      /*p->*/r = old_r + c->second->corner1 - corner1 - dist;
-
-      c->second->checkForHit(p, force, new_hit, t_travelled, hit_pos, wall, integratorP);
-
-#ifdef TRACK_PARTICLE
-
-      if (p->mySlot == TRACK_PARTICLE && hit) {
-        cout << "--> new hit @ " << hit_pos << " after time " << t_travelled << " on wall:" << endl;
-        cout << wall->toString() << endl;
-      }
-
-#endif
-
-
-      if (new_hit) {
-
-        hit = true;
-        hit_pos = hit_pos - c->second->corner1 + corner1 + dist;
-//         MSG_DEBUG("Cell::doCollision", "new_hit = true for " << p -> r << ", " << p->mySlot << ", " << p->c);
-      }
-    }
+  hit = hit || doCollisionIndirectOutlets(p, force, r, t_travelled, hit_pos, wall, integratorP);
 
     if (hit) {
 
 //       MSG_DEBUG("Cell::doCollision", "hit = true for " << p->r << ", " << p->mySlot << ", " << p->c << "wall = " << wall->toString());
 #ifdef TRACK_PARTICLE
 
-      if (p->mySlot == TRACK_PARTICLE) {
+      if (p->mySlot == TRACK_PARTICLE && p->c == TRACK_PARTICLE_COLOUR) {
         cout << "--> reflecting" << endl;
         cout << "before: p->r = " << p->r << ", p->v = " << /*p->*/v << ", p->dt = " << p->dt << endl;
       }
@@ -877,7 +459,7 @@ void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force
 
 #ifdef TRACK_PARTICLE
 
-      if (p->mySlot == TRACK_PARTICLE) {
+      if (p->mySlot == TRACK_PARTICLE && p->c == TRACK_PARTICLE_COLOUR) {
         cout << "after: p->r = " << p->r << ", p->v = " << /*p->*/v << ", p->dt = " << p->dt << endl;
       }
 
@@ -889,14 +471,145 @@ void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force
 	}
 }
 
+bool Cell::emitIntoOutlets(Particle *p, size_t colour, int_point_t off, int n, IntegratorPosition *integrator, Phase *phase)
+{
+  if (Cell *c = m_outlets[n][0]) {
+    if (c->isInside(p->r)) {
+      c->injectFree(colour, p);
+
+      /* Notify any subclass that a particle has left the cell in a certain direction. */
+      particleLeftCell(off, n);
+#ifdef TRACK_PARTICLE
+      if (p->mySlot == TRACK_PARTICLE){
+        int force_index = ((Controller*) integrator->parent())->forceIndex();
+        cout << "particle id (slot)               = " << p->mySlot << endl;
+        cout << "current position                 = " << p->r << endl;
+        cout << "current velocity                 = " << p->v << endl;
+        cout << "offset                           = " << off << endl;
+        cout << "emission direction               = " << n << endl;
+        cout << "force                            = " << p->force[force_index] << endl;
+        cout << "=== tag ===" << endl;
+        cout << p->tag.toString();
+        MSG_DEBUG("Cell::emitIntoOutlets", "Particle entered neighboring cell:");
+        cout << "=== DEBUGING INFORMATION: CELLS ===" << endl;
+        cout << "current cell: tag                        = " << tag << endl;
+        cout << "current cell: corner 1                   = " << corner1 << endl;
+        cout << "current cell: corner 2                   = " << corner2 << endl;
+        cout << "entering cell: tag                       = " << c->tag << endl;
+        cout << "entering cell: corner 1                  = " << c->corner1 << endl;
+        cout << "entering cell: corner 2                  = " << c->corner2 << endl;
+        cout << "offset between cells (current->entering) = " << off << endl;
+      }
+#endif
+    } else {
+        int force_index = ((Controller*) integrator->parent())->forceIndex();
+        cout << "particle id (slot)               = " << p->mySlot << endl;
+        cout << "current position                 = " << p->r << endl;
+        cout << "current velocity                 = " << p->v << endl;
+        cout << "offset                           = " << off << endl;
+        cout << "emission direction               = " << n << endl;
+        cout << "force                            = " << p->force[force_index] << endl;
+        cout << "=== tag ===" << endl;
+        cout << p->tag.toString();
+        MSG_DEBUG("Cell::emitIntoOutlets", "Particle did not enter neighboring cell:");
+        cout << "=== DEBUGING INFORMATION: CELLS ===" << endl;
+        cout << "current cell: tag                        = " << tag << endl;
+        cout << "current cell: corner 1                   = " << corner1 << endl;
+        cout << "current cell: corner 2                   = " << corner2 << endl;
+        cout << "entering cell: tag                       = " << c->tag << endl;
+        cout << "entering cell: corner 1                  = " << c->corner1 << endl;
+        cout << "entering cell: corner 2                  = " << c->corner2 << endl;
+        cout << "offset between cells (current->entering) = " << off << endl;
+     throw gError("Cell::emitIntoOutlets", "Particle flew farther than "
+                   "a cell in one timestep. Please check the correctness of your forces, decrease dt or "
+                   "increase the cut-off radius.", gError::PARTICLEFLEWTOOFAR);
+    }
+    return false;
+  }else
+    return true;
+}
+
+bool BoundaryCell::emitIntoOutlets(Particle *p, size_t colour, int_point_t off, int n, IntegratorPosition *integrator, Phase *phase)
+{
+  point_t old_r = p->r;
+  Particle *new_p = p;
+  int i=0;
+  bool total_erase = true;
+  for (vector<Cell*>::iterator c = m_outlets[n].begin(); c != m_outlets[n].end(); c++, i++) if (*c){ total_erase = false;
+
+    if (!new_p) new_p = phase->addParticle(*p);
+
+    /* Update position in case this is periodic, etc. */
+    new_p->r = old_r + (*c)->corner1 - corner1 - m_cell_dist[((m_manager->m_divby == 2)?c_2x_direct_neighbors[n]:n)][i];//[c_2x_direct_neighbors[n]][i];
+    
+    if ((*c)->isInside(new_p->r)) {
+      (*c)->injectFree(colour, new_p);
+
+      /* Notify any subclass that a particle has left the cell in a certain direction. */
+      particleLeftCell(off, n);
+#ifdef TRACK_PARTICLE
+      if (p->mySlot == TRACK_PARTICLE && p->c == TRACK_PARTICLE_COLOUR) {
+        int force_index = ((Controller*) integrator->parent())->forceIndex();
+        MSG_DEBUG("BoundaryCell::emitIntoOutlets", "Particle entered neighboring cell:");
+        cout << "particle id (slot)               = " << p->mySlot << endl;
+        cout << "position before update/collision = " << old_r << endl;
+        cout << "current position                 = " << new_p->r << endl;
+        cout << "current velocity                 = " << p->v << endl;
+        cout << "force                            = " << p->force[force_index] << endl;
+        cout << "=== tag ===" << endl;
+        cout << p->tag.toString();
+
+        cout << "=== DEBUGING INFORMATION: CELLS ===" << endl;
+        cout << "current cell: tag                        = " << tag << endl;
+        cout << "current cell: corner 1                   = " << corner1 << endl;
+        cout << "current cell: corner 2                   = " << corner2 << endl;
+        cout << "entering cell: tag                       = " << (*c)->tag << endl;
+        cout << "entering cell: corner 1                  = " << (*c)->corner1 << endl;
+        cout << "entering cell: corner 2                  = " << (*c)->corner2 << endl;
+        cout << "offset between cells (current->entering) = " << off << " " << n << " " << m_cell_dist[n][i] << endl;
+      }
+#endif
+
+    } else {
+      MSG_DEBUG("BoundaryCell::emitIntoOutlets", "Particle did not enter neighboring cell:");
+      int force_index = ((Controller*) integrator->parent())->forceIndex();
+
+      cout << "=== DEBUGING INFORMATION: PARTICLE ===" << endl;
+      cout << "particle id (slot)               = " << p->mySlot << endl;
+      cout << "position before update/collision = " << old_r << endl;
+      cout << "current position                 = " << new_p->r << endl;
+      cout << "current velocity                 = " << p->v << endl;
+      cout << "force                            = " << p->force[force_index] << endl;
+      cout << "region n_cells                   = " << m_region->n_cells << endl;
+      cout << "=== tag ===" << endl;
+      cout << p->tag.toString();
+
+      cout << "=== DEBUGING INFORMATION: CELLS ===" << endl;
+      cout << "current cell: tag                        = " << tag << endl;
+      cout << "current cell: corner 1                   = " << corner1 << endl;
+      cout << "current cell: corner 2                   = " << corner2 << endl;
+      cout << "entering cell: tag                       = " << (*c)->tag << endl;
+      cout << "entering cell: corner 1                  = " << (*c)->corner1 << endl;
+      cout << "entering cell: corner 2                  = " << (*c)->corner2 << endl;
+      cout << "offset between cells (current->entering) = " << off << endl;
+      cout << "neigbor index                            = " << n << endl;
+      cout << "region n_cells                   = " << m_region->n_cells << endl;
+
+      throw gError("BoundaryCell::emitIntoOutlets", "Particle flew farther than "
+                   "a cell in one timestep. Please check the correctness of your forces, decrease dt or "
+                   "increase the cut-off radius.", gError::PARTICLEFLEWTOOFAR);
+    }
+      new_p = NULL;
+  }
+  return total_erase;
+}
 
 /* Main integration and collision detection logic. */
 void Cell::updatePositions(IntegratorPosition *integrator)
 {
   Phase *phase = m_manager->phase();
 
-	double dt, dt_div_mass, dt_div2_mass;
-  int force_index;
+  double dt, dt_div_mass, dt_div2_mass;
   size_t colour;
   //	forces_t *forces;
 
@@ -911,7 +624,6 @@ void Cell::updatePositions(IntegratorPosition *integrator)
   for (list<Particle*>::iterator i = m_particles[colour].begin(); i != m_particles_end; ) {
 
 //     MSG_DEBUG("Cell::updatePositions", "now at p =  " << (*i)->mySlot << ", c = " << (*i)->c);
-
 /*    if((*i)->mySlot == 52)
     {
       if(phase->boundary()->isInside((*i)->r))
@@ -922,10 +634,6 @@ void Cell::updatePositions(IntegratorPosition *integrator)
     bool erase = false;
     bool total_erase = false;
     Particle *p = *i;
-
-    int_point_t off = {0, 0, 0};
-    int n;
-
     point_t startr = p->r;
 
     p->dt = dt;
@@ -934,83 +642,42 @@ void Cell::updatePositions(IntegratorPosition *integrator)
     integrator->integrateVelocity(p);
 
 
-//     if((*i)->mySlot == 52)
-//     {
-//       if(phase->boundary()->isInside((*i)->r))
-//         MSG_DEBUG("Cell::updatePositions", "after doCollision: 52 INSIDE:" << endl << "p->r = " << p->r << endl << "p->v = " << p->v << endl << "p->dt = " <<  p->dt << endl << "force = " <<  p->force[force_index]);
-//       else MSG_DEBUG("Cell::updatePositionsSTART", "after doCollision: 52 NOT INSIDE");
-//     }
+#ifdef TRACK_PARTICLE
+      if (p->mySlot == TRACK_PARTICLE && p->c == TRACK_PARTICLE_COLOUR) {
+        int force_index = ((Controller*) integrator->parent())->forceIndex();
+        MSG_DEBUG("Cell::updatePositions", "");
+        cout << "particle id (slot)               = " << p->mySlot << endl;
+        cout << "position before update/collision = " << startr << endl;
+        cout << "current position                 = " << p->r << endl;
+        cout << "current velocity                 = " << p->v << endl;
+        cout << "force                            = " << p->force[force_index] << endl;
+        cout << "=== tag ===" << endl;
+        cout << p->tag.toString();
 
+        cout << "=== DEBUGING INFORMATION: CELLS ===" << endl;
+        cout << "current cell: tag                        = " << tag << endl;
+        cout << "current cell: corner 1                   = " << corner1 << endl;
+        cout << "current cell: corner 2                   = " << corner2 << endl;
+      }
+#endif
 
     // Last modified: 2007-12-27: changed from isInside to isInsideEps due to problem with geometrical epsilons. There was an inconsistency due to a small epsilon between the isInside of the cell the particle is leaving and isInside of the cell the particle should enter (see below)
     if (!isInsideEps(p->r, g_geom_eps)) {
+//        MSG_DEBUG("Cell::updatePositionsSTART", "52 INSIDE");
+      int_point_t off = {0, 0, 0};
+      int n;
 
-//       if((*i)->mySlot == 52) MSG_DEBUG("Cell::updatePositions", "particle 52 left cell");
-
-      for (int j = 0; j < SPACE_DIMS; j++)
+       for (int j = 0; j < SPACE_DIMS; j++)
         if (p->r[j] < corner1[j])
           off[j] = -1;
         else if (p->r[j] >= corner2[j])
           off[j] = 1;
 
-      OFFSET2NEIGHBOR(off, n);
+      OFFSET2DIRECTNEIGHBOR(off, n);
 
-      if (m_outlets[n].empty()) {
-        erase = true;
-        total_erase = true;
-      } else {
-        point_t old_r = p->r;
-        Particle *new_p = p;
-
-        for (list<Cell*>::iterator c = m_outlets[n].begin(); c != m_outlets[n].end(); c++) {
-          point_t dist;
-
-          cellDist(this, *c, n, dist);
-
-          if (!new_p) {
-            new_p = phase->addParticle(*p);
-          }
-
-          /* Update position in case this is periodic, etc. */
-          new_p->r = old_r + (*c)->corner1 - corner1 - dist;
-          if ((*c)->isInside(new_p->r)) {
-            (*c)->injectFree(colour, new_p);
-            erase = true;
-
-            /* Notify any subclass that a particle has left the cell in a certain direction. */
-            particleLeftCell(off, n);
-          } else {
-            MSG_DEBUG("Cell::updatePositions", "Particle did not enter neighboring cell:");
-		force_index = ((Controller*) integrator->parent())->forceIndex();
-
-	    cout << "=== DEBUGING INFORMATION: PARTICLE ===" << endl;
-            cout << "particle id (slot)               = " << p->mySlot << endl;
-            cout << "position before update/collision = " << old_r << endl;
-            cout << "current position                 = " << p->r << endl;
-	    cout << "current velocity                 = " << p->v << endl;
-            cout << "force                            = " << p->force[force_index] << endl;
-	    cout << "=== tag ===" << endl;
-	    cout << p->tag.toString();
-
-	    cout << "=== DEBUGING INFORMATION: CELLS ===" << endl;
-            cout << "current cell: corner 1                   = " << corner1 << endl;
-	    cout << "current cell: corner 2                   = " << corner2 << endl;
-            cout << "entering cell: corner 1                  = " << (*c)->corner1 << endl;
-	    cout << "entering cell: corner 2                  = " << (*c)->corner2 << endl;
-            cout << "offset between cells (current->entering) = " << off << endl;
-	    cout << "neigbor index                            = " << n << endl;
-            cout << "distance between cells                   = " << dist << endl;
-
-            throw gError("Cell::updatePositions", "Particle flew farther than "
-                         "a cell in one timestep. Please check the correctness of your forces, decrease dt or "
-                         "increase the cut-off radius.", gError::PARTICLEFLEWTOOFAR);
-          }
-
-          new_p = NULL;
-        }
-      }
-    }
-
+      erase = true;
+      total_erase = emitIntoOutlets(p, colour, off, n, integrator, phase);
+    } 
 //     if((*i)->mySlot == 52)
 //     {
 //       if(phase->boundary()->isInside((*i)->r))
@@ -1056,18 +723,12 @@ void Cell::createDistances(int t)
 {
   m_local_link->createDistances(t);
 
-  map<Cell*, CellLink*>::iterator m_links_end = m_links.end();
-  for (map<Cell*, CellLink*>::iterator i = m_links.begin(); i != m_links_end; i++)
+  map<Cell*, AbstractCellLink*>::iterator m_links_end = m_links.end();
+  for (map<Cell*, AbstractCellLink*>::iterator i = m_links.begin(); i != m_links_end; i++)
     i->second->createDistances(t);
 }
 */
 
-void Cell::init()
-{
-  m_local_link = new CellLink(this, this, -1);
-
-  m_manager->m_links.push_back(m_local_link);
-}
 
 /*
 void Cell::addColour(size_t colour) {
@@ -1158,9 +819,9 @@ void Cell::clearOutlets(int where)
 #if 0
 void Cell::clearNeighbors(int where)
 {
-  for (list<CellLink*>::iterator i = m_neighbors[where].begin();
+  for (list<AbstractCellLink*>::iterator i = m_neighbors[where].begin();
        i != m_neighbors[where].end(); i++) {
-    vector<CellLink*>::iterator help;
+    vector<AbstractCellLink*>::iterator help;
 
     // Fixme!!! Slow as crap.
     help = find(m_manager->m_links.begin(), m_manager->m_links.end(), *i);
@@ -1212,12 +873,10 @@ void Cell::assignContainer(WallContainer *container)
 
 void Cell::setupWalls()
 {
-//   MSG_DEBUG("Cell::setupWalls", "START");
-
   copy(m_walls.begin(), m_walls.end(), inserter(m_all_walls, m_all_walls.begin()));
 
-   size_t counter = 0;
-   for (list<Wall*>::iterator ii = m_all_walls.begin(); ii != m_all_walls.end(); ii++) ++counter;
+  // size_t counter = ;
+  // for (list<Wall*>::iterator ii = m_all_walls.begin(); ii != m_all_walls.end(); ii++) ++counter;
 //   if(
 //      corner1.x > 19.5 && corner1.x < 19.52 &&
 //      corner1.y > -0.1 && corner1.y < 0.1 &&
@@ -1226,47 +885,25 @@ void Cell::setupWalls()
 //     corner2.y > 1.2 && corner2.y < 1.3 &&
 //     corner2.z > 7.6 && corner2.z < 7.8
 // 		   )
-//     MSG_DEBUG("Cell::setupWalls", "elements in m_all_walls before outlet-loop = " << counter << ", NUM_NEIGHBORS= " << NUM_NEIGHBORS);
+ //    MSG_DEBUG("Cell::setupWalls", "elements in m_all_walls before outlet-loop = " << ", NUM_NEIGHBORS= ");
 
   /* Loop over all outlets. */
-  for (int n = 0; n < NUM_NEIGHBORS; n++) {
-    for (list<Cell*>::iterator i = m_outlets[n].begin(); i != m_outlets[n].end(); i++) {
+  for (int n = 0; n < NUM_DIRECT_NEIGHBORS; n++) {
+  //  for (list<Cell*>::iterator i = m_outlets[n].begin(); i != m_outlets[n].end(); i++) {
+    if (Cell *i = m_outlets[n][0]){
+  //       if(
+  // 	 corner1.x > 19.5 && corner1.x < 19.52 &&
+  // 	 corner1.y > -0.1 && corner1.y < 0.1 &&
+  // 	corner1.z > 6.59 && corner1.z < 6.6 &&
+  // 	corner2.x > 20.5 && corner2.x < 20.6 &&
+  // 	corner2.y > 1.2 && corner2.y < 1.3 &&
+  // 	corner2.z > 7.6 && corner2.z < 7.8
+  // 		       )
+   //   MSG_DEBUG("Cell::setupWalls", "direct outlet " << n << ": " << i->corner1 << " " << i->corner2);
 
-      point_t dist;
-
-      /* Check whether cell is a direct or an indirect outlet. */
-      cellDist(this, *i, n, dist);
-
-      if ((corner1+dist - (*i)->corner1).abs() < g_geom_eps) {
-
-//       if(
-// 	 corner1.x > 19.5 && corner1.x < 19.52 &&
-// 	 corner1.y > -0.1 && corner1.y < 0.1 &&
-// 	corner1.z > 6.59 && corner1.z < 6.6 &&
-// 	corner2.x > 20.5 && corner2.x < 20.6 &&
-// 	corner2.y > 1.2 && corner2.y < 1.3 &&
-// 	corner2.z > 7.6 && corner2.z < 7.8
-// 		       )
-//       MSG_DEBUG("Cell::setupWalls", "direct outlet: " << (*i)->corner1 << ", " << (*i)->corner2);
-
-        for (list<Wall*>::iterator j = (*i)->m_walls.begin(); j != (*i)->m_walls.end(); j++) {
-          if (find(m_all_walls.begin(), m_all_walls.end(), *j) == m_all_walls.end())
-            m_all_walls.push_back(*j);
-        }
-      } 
-      else {
-
-// 	if(
-// 	   corner1.x > 19.5 && corner1.x < 19.52 &&
-// 	   corner1.y > -0.1 && corner1.y < 0.1 &&
-// 	  corner1.z > 6.59 && corner1.z < 6.6 &&
-// 	  corner2.x > 20.5 && corner2.x < 20.6 &&
-// 	  corner2.y > 1.2 && corner2.y < 1.3 &&
-// 	  corner2.z > 7.6 && corner2.z < 7.8
-// 			 )
-// 	MSG_DEBUG("Cell::setupWalls", "INdirect outlet: " << (*i)->corner1 << ", " << (*i)->corner2);
-
-        m_indirect_outlets.push_back(pair<int, Cell*>(n, *i));
+      for (list<Wall*>::iterator j = i->m_walls.begin(); j != i->m_walls.end(); j++) {
+        if (find(m_all_walls.begin(), m_all_walls.end(), *j) == m_all_walls.end())
+          m_all_walls.push_back(*j);
       }
     }
   }
@@ -1304,7 +941,7 @@ bool Cell::hasFrozenParticles() const
 
 
 
-typedef map<Cell*, CellLink*> my_map_t;
+typedef map<Cell*, AbstractCellLink*> my_map_t;
 void Cell::activate()
 {
   /* Update cell list. */
@@ -1314,10 +951,25 @@ void Cell::activate()
   m_local_link->cellActivated();
   m_local_link->cellActivated();
 
-  for (int j = 0; j < NUM_NEIGHBORS; ++j) {
+  for (int j = 0; j < m_manager->num_neighbors(); ++j) {
+     m_neighbors[j][0]->cellActivated();
+     //MSG_DEBUG("Cell::activate", "neighbor activation" << (m_neighbors[j][1]==NULL));
+  }
+}
+void BoundaryCell::activate()
+{
+  /* Update cell list. */
+  m_manager->activateCell(this);
+
+  /* Notify local cell link. */
+  m_local_link->cellActivated();
+  m_local_link->cellActivated();//why two?
+
+  for (int j = 0; j < m_manager->num_neighbors(); ++j) {
     FOR_EACH
-      (list<CellLink*>,
+      (vector<AbstractCellLink*>,
        m_neighbors[j],
+//       MSG_DEBUG("BoundaryCell::activate", "neighbor activation " << j << " " << (m_neighbors[j][1]));
        (*__iFE)->cellActivated();
        );
   }
@@ -1333,11 +985,126 @@ void Cell::deactivate()
   m_local_link->cellDeactivated();
   m_local_link->cellDeactivated();
 
-  for (int j = 0; j < NUM_NEIGHBORS; ++j) {
+  for (int j = 0; j < m_manager->num_neighbors(); ++j) {
     FOR_EACH
-      (list<CellLink*>,
+      (vector<AbstractCellLink*>,
        m_neighbors[j],
        (*__iFE)->cellDeactivated();
        );
   }
 }
+
+void BoundaryCell::deactivate()
+{
+  /* Update cell list. */
+  m_manager->deactivateCell(this);
+
+  /* Notify cell links. */
+  m_local_link->cellDeactivated();
+  m_local_link->cellDeactivated();
+
+  for (int j = 0; j < m_manager->num_neighbors(); ++j) {
+    FOR_EACH
+      (vector<AbstractCellLink*>,
+       m_neighbors[j],
+       (*__iFE)->cellDeactivated();
+       );
+  }
+}
+
+void BoundaryCell::setupWalls()
+{
+  copy(m_walls.begin(), m_walls.end(), inserter(m_all_walls, m_all_walls.begin()));
+
+  // size_t counter = ;
+  // for (list<Wall*>::iterator ii = m_all_walls.begin(); ii != m_all_walls.end(); ii++) ++counter;
+//   if(
+//      corner1.x > 19.5 && corner1.x < 19.52 &&
+//      corner1.y > -0.1 && corner1.y < 0.1 &&
+//     corner1.z > 6.59 && corner1.z < 6.6 &&
+//     corner2.x > 20.5 && corner2.x < 20.6 &&
+//     corner2.y > 1.2 && corner2.y < 1.3 &&
+//     corner2.z > 7.6 && corner2.z < 7.8
+// 		   )
+//     MSG_DEBUG("Cell::setupWalls", "elements in m_all_walls before outlet-loop = " << ", NUM_NEIGHBORS= ");
+
+  /* Loop over all outlets. */
+  for (int n = 0; n < NUM_DIRECT_NEIGHBORS; n++) {
+    for (int i=0; i < m_outlets[n].size(); i++){ if (Cell *c = m_outlets[n][i]){
+//		   MSG_DEBUG("Cell::setupWalls", "n= " << n << ", i= " << i);
+//		   MSG_DEBUG("Cell::setupWalls", "m_cell_dist[n][i]= " << m_cell_dist[n][i] << ", i= " << i);
+	      /* Check whether cell is a direct or an indirect outlet. */
+	      if ((corner1 + m_cell_dist[n][i] - c->corner1).abs() < g_geom_eps) {
+
+	    //       if(
+	    // 	 corner1.x > 19.5 && corner1.x < 19.52 &&
+	    // 	 corner1.y > -0.1 && corner1.y < 0.1 &&
+	    // 	corner1.z > 6.59 && corner1.z < 6.6 &&
+	    // 	corner2.x > 20.5 && corner2.x < 20.6 &&
+	    // 	corner2.y > 1.2 && corner2.y < 1.3 &&
+	    // 	corner2.z > 7.6 && corner2.z < 7.8
+	    // 		       )
+//		   MSG_DEBUG("Cell::setupWalls", "direct outlet: " << c->corner1 << ", " << c->corner2);
+
+		for (list<Wall*>::iterator j = c->m_walls.begin(); j != c->m_walls.end(); j++) {
+		  if (find(m_all_walls.begin(), m_all_walls.end(), *j) == m_all_walls.end())
+		    m_all_walls.push_back(*j);
+		  }
+	      }else {
+
+	    // 	if(
+	    // 	   corner1.x > 19.5 && corner1.x < 19.52 &&
+	    // 	   corner1.y > -0.1 && corner1.y < 0.1 &&
+	    // 	  corner1.z > 6.59 && corner1.z < 6.6 &&
+	    // 	  corner2.x > 20.5 && corner2.x < 20.6 &&
+	    // 	  corner2.y > 1.2 && corner2.y < 1.3 &&
+	    // 	  corner2.z > 7.6 && corner2.z < 7.8
+	    // 			 )
+
+//		   MSG_DEBUG("Cell::setupWalls", "this cell: " << corner1 << ", " << corner2);
+//		   MSG_DEBUG("Cell::setupWalls", "indirect outlet: " << c->corner1 << ", " << c->corner2);
+		m_indirect_outlets.push_back(pair< vector<int>, Cell*> ({n,i}, c));
+	      }
+      }
+    }
+  }
+}
+
+
+// this checks for the indirect outlets = "far neighbours" due to, e.g., periodic BCs
+bool BoundaryCell::doCollisionIndirectOutlets(Particle *p, const point_t &force, point_t &r, double &t_travelled, point_t &hit_pos, Wall *&wall, IntegratorPosition *integratorP)
+{
+  bool hit = false;
+  point_t old_r = r;
+  for (list<pair< vector<int>, Cell*> >::iterator c = m_indirect_outlets.begin();
+       c != m_indirect_outlets.end(); c++) {
+    int n = c->first[0]; int i = c->first[1];
+    Cell *outlet = m_outlets[n][i];
+    point_t dist = m_cell_dist[n][i];
+    bool new_hit = false;
+
+    /* Update position in case this is periodic, etc. */
+    /*p->*/r = old_r + outlet->corner1 - corner1 - dist;
+
+    outlet->checkForHit(p, force, new_hit, t_travelled, hit_pos, wall, integratorP);
+
+#ifdef TRACK_PARTICLE
+
+    if (p->mySlot == TRACK_PARTICLE && p->c == TRACK_PARTICLE_COLOUR && hit) {
+      cout << "--> new hit @ " << hit_pos << " after time " << t_travelled << " on wall:" << endl;
+      cout << wall->toString() << endl;
+    }
+
+#endif
+
+
+    if (new_hit) {
+
+      hit = true;
+
+      hit_pos = hit_pos - outlet->corner1 + corner1 + dist;
+    }
+  }
+  return hit;
+}
+

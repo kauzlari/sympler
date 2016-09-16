@@ -36,7 +36,7 @@
 #include "phase.h"
 #include "reflector.h"
 #include "particle_creator.h"
-
+#include "pair_creator.h"
 // #include "valgrind/memcheck.h"
 
 using namespace std;

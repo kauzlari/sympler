@@ -160,7 +160,7 @@ void IntegratorScalar::integrateStep1()
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
       (phase, m_colour, this,
 
-       if (isnan(i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset[/*m_*/force_index]))) {
+       if (std::isnan(i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset[/*m_*/force_index]))) {
          cout << "slot = " << i->mySlot << ", "
              << ((IntegratorScalar*) data)->m_scalar_name << " = "
              << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) << ", "

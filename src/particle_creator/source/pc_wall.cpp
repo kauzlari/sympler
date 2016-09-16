@@ -36,6 +36,7 @@
 #include "boundary.h"
 #include "simulation.h"
 #include "manager_cell.h"
+#include "pair_creator.h"
 
 #define M_BOUNDARY ((Boundary*) m_parent)
 #define M_PHASE ((Phase*) M_BOUNDARY->parent())

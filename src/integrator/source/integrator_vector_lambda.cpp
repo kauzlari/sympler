@@ -123,7 +123,7 @@ void IntegratorVectorLambda::integrateStep1()
          for(size_t j = 0; j < SPACE_DIMS; ++j)
          {  
          // Debugging
-         if (isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
+         if (std::isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
              -> m_force_offset[force_index])[j])) 
          {
            cout << "slot = " << i->mySlot << ", "
@@ -138,7 +138,7 @@ void IntegratorVectorLambda::integrateStep1()
            throw gError("IntegratorVectorLambda::integrateStep1", "Force was not-a-number!");
          }
   
-         if (isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
+         if (std::isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
              -> m_force_offset[other_force_index])[j])) 
          {
            cout << "slot = " << i->mySlot << ", "
@@ -202,7 +202,7 @@ void IntegratorVectorLambda::integrateStep1()
          for(size_t j = 0; j < SPACE_DIMS; ++j)
          {
          // Debugging
-         if (isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
+         if (std::isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
              -> m_force_offset[force_index])[j])) 
          {
            cout << "slot = " << i->mySlot << ", "

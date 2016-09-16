@@ -323,10 +323,11 @@ void BoundaryStep::setup(Simulation* sim, ManagerCell *mgr)
   //    ManagerCell::removePeriodicity(m_flow_dir, middle);
             
   /* Connect inlet to middle */
-  ManagerCell::connect(m_flow_dir, inlet, middle, p, OUTLET);
+  mgr->connect(m_flow_dir, inlet, middle, p, OUTLET);
             
   /* Connect outlet to middle */
-  ManagerCell::connect(-m_flow_dir-1, outlet, middle, p, OUTLET);
+  mgr->connect(-m_flow_dir-1, outlet, middle, p, OUTLET);
+//  mgr->connect(m_flow_dir, middle, outlet, p, OUTLET);
 
   mgr->cellSubdivisionFinished();
 

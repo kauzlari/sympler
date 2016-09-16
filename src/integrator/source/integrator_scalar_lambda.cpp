@@ -121,7 +121,7 @@ void IntegratorScalarLambda::integrateStep1()
         (phase, m_colour, this,
 
          // Debugging
-         if (isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
+         if (std::isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
               -> m_force_offset[force_index])))
           {
             cout << "slot = " << i->mySlot << ", "
@@ -136,7 +136,7 @@ void IntegratorScalarLambda::integrateStep1()
             throw gError("IntegratorScalarLambda::integrateStep1", "Force was not-a-number!");
           }
 
-          if (isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
+          if (std::isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
               -> m_force_offset[other_force_index])))
           {
             cout << "slot = " << i->mySlot << ", "
@@ -197,7 +197,7 @@ void IntegratorScalarLambda::integrateStep1()
         (phase, m_colour, this,
 
          // Debugging
-         if (isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
+         if (std::isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
              -> m_force_offset[force_index])))
          {
            cout << "slot = " << i->mySlot << ", "

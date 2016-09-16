@@ -40,7 +40,6 @@
 
 #include <ostream>
 #include <iostream>
-
 // for gcc4.3
 #include "string.h"
 
@@ -48,10 +47,13 @@
 
 using namespace std;
 
+#include "misc.h"
 //---- Defines ----
 
 #define SPACE_DIMS 3
 
+#define TOCELLINDEX(p, n)  ((p.z * n.y) + p.y) * n.x + p.x
+#define TOCELLINDEXD(x, y, z, n)  ((z * n.y) + y) * n.x + x
 
 /* Epsilon value for geometry calculations. */
 extern double g_geom_eps;
@@ -268,6 +270,8 @@ struct math_vector_t {
 
 };
 
+typedef math_vector_t<int> int_point_t;
+typedef math_vector_t<bool> bool_point_t;
 // GLOBAL FUNCTIONS
 
 /* << operator */
@@ -362,7 +366,7 @@ struct line_t {
 
 
 struct cuboid_t {
-    /* All coordinates of corner1 have to less than
+    /* All coordinates of corner1 have to be smaller than
     those of corner2. */
 	union {
 		point_t corners[2];
@@ -370,6 +374,14 @@ struct cuboid_t {
 			point_t corner1, corner2;
 		};
 	};
+
+    cuboid_t(){}
+
+    cuboid_t(point_t a_c1, point_t a_c2)
+    {
+        corner1 = a_c1;
+        corner2 = a_c2;
+    }
 	
 	/* [] access */
     inline point_t &operator[](int i) {

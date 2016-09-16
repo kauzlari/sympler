@@ -105,7 +105,7 @@ PropertyList::property_t PropertyList::addProperty
    void *ptr, PropertyListConstraint *constraint, string description)
 {
   property_t prop = {
-      name, m_prop_by_index.size(), datatype, ptr, constraint, description
+      name, static_cast<int> (m_prop_by_index.size()), datatype, ptr, constraint, description
   };
 
   if (exists(name)) {
