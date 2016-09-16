@@ -120,16 +120,10 @@ Then, assuming the directory where you want to compile SYMPLER is $BUILD-DIR (it
 from $SOURCE-DIR):
 
 $ cd $BUILD-DIR
-$ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
+$ $SOURCE-DIR/configure [options] CXXFLAGS="-std=c++0x"
 $ make -j[1 to roughly the number of available cores]
 
-After successful compilation the executable "sympler" will be created in the directory src/ 
-Useful [cxxflags] are (for more see the g++ documentation):
-
--O3: for optimised compilation with g++
--fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)
-
-and useful [options] are:
+Useful [options] are:
 
 --with-tnt: use tnt library and jama libraries
 --with-superlu: use superlu 
@@ -137,6 +131,20 @@ and useful [options] are:
 (except the runtime compiled expressions of course). Unfortunately this option currently causes SYMPLER to crash very
 often. We have this bug on our list. Further bug reports on this issue are welcome. A bug-fix is even more welcome. 
 
+CXXFLAGS:
+
+-std=c++0x is mandatory.
+
+Optional, but useful CXXFLAGS are (for more see the g++ documentation):
+
+-O3: for optimised compilation with g++
+-fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)
+
+A complete example:
+$ $SOURCE-DIR/configure --with-tnt CXXFLAGS="-O3 -std=c++0x"
+
+
+After successful compilation the executable "sympler" will be created in the directory src/ 
 
 ++ Configuration and Compilation for MacOS
 

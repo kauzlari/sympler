@@ -269,7 +269,7 @@ public:
  */
 
 template <typename AddPairCheck_x>
-AbstractCellLink *establishLinkTemplate(ManagerCell *a_manager, Cell *first, Cell *second, int where, bool acts_on_first, bool acts_on_second, bool cross_regions);
+AbstractCellLink *establishLinkTemplate(ManagerCell *a_manager, Cell *first, Cell *second, int where, bool acts_on_first, bool acts_on_second, bool cross_regions =  false);
 template <typename AddPairCheck_x>
 class CellSelfLink;
 template <typename AddPairCheck_x>
@@ -1044,7 +1044,7 @@ class CellLink: public AbstractCellLink
 };
 
 template <typename AddPairCheck_x>
-AbstractCellLink *establishLinkTemplate(ManagerCell *a_manager, Cell *first, Cell *second, int where, bool acts_on_first, bool acts_on_second, bool cross_regions = false)
+AbstractCellLink *establishLinkTemplate(ManagerCell *a_manager, Cell *first, Cell *second, int where, bool acts_on_first, bool acts_on_second, bool cross_regions)
 {
 
     auto *link = new CellLink<AddPairCheck_x>(first, second, where, acts_on_first, acts_on_second, cross_regions);
