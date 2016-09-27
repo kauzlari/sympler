@@ -48,6 +48,12 @@ RandomNumberGenerator::~RandomNumberGenerator()
 }
 
 
+int RandomNumberGenerator::integer(size_t n)
+{
+  return gsl_rng_uniform_int(m_rng, n);
+}
+
+
 int RandomNumberGenerator::binary()
 {
   return gsl_rng_uniform_int(m_rng, 2);

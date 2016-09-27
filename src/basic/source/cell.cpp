@@ -910,7 +910,7 @@ void Cell::updatePositions(IntegratorPosition *integrator)
   list<Particle*>::iterator m_particles_end = m_particles[colour].end();
   for (list<Particle*>::iterator i = m_particles[colour].begin(); i != m_particles_end; ) {
 
-//     MSG_DEBUG("Cell::updatePositions", "now at p =  " << (*i)->mySlot << ", c = " << (*i)->c);
+//    MSG_DEBUG("Cell::updatePositions", "now at p =  " << (*i)->mySlot << ", c = " << (*i)->c);
 
 /*    if((*i)->mySlot == 52)
     {
@@ -932,6 +932,7 @@ void Cell::updatePositions(IntegratorPosition *integrator)
 
     integrator->integratePosition(p, this);
     integrator->integrateVelocity(p);
+//    MSG_DEBUG("Cell::updatePositions", "now at p =  " << (*i)->mySlot << ", c = " << (*i)->c);
 
 
 //     if((*i)->mySlot == 52)
@@ -944,8 +945,6 @@ void Cell::updatePositions(IntegratorPosition *integrator)
 
     // Last modified: 2007-12-27: changed from isInside to isInsideEps due to problem with geometrical epsilons. There was an inconsistency due to a small epsilon between the isInside of the cell the particle is leaving and isInside of the cell the particle should enter (see below)
     if (!isInsideEps(p->r, g_geom_eps)) {
-
-//       if((*i)->mySlot == 52) MSG_DEBUG("Cell::updatePositions", "particle 52 left cell");
 
       for (int j = 0; j < SPACE_DIMS; j++)
         if (p->r[j] < corner1[j])
@@ -972,6 +971,8 @@ void Cell::updatePositions(IntegratorPosition *integrator)
           }
 
           /* Update position in case this is periodic, etc. */
+          /* Here is where it is calculated if the particle */
+          /* is off. Check here				    */
           new_p->r = old_r + (*c)->corner1 - corner1 - dist;
           if ((*c)->isInside(new_p->r)) {
             (*c)->injectFree(colour, new_p);
@@ -985,8 +986,8 @@ void Cell::updatePositions(IntegratorPosition *integrator)
 
 	    cout << "=== DEBUGING INFORMATION: PARTICLE ===" << endl;
             cout << "particle id (slot)               = " << p->mySlot << endl;
-            cout << "position before update/collision = " << old_r << endl;
-            cout << "current position                 = " << p->r << endl;
+            cout << "position before cell switch      = " << old_r << endl;
+            cout << "current position                 = " << new_p->r << endl;  // Achtung hier new_ eingefügt
 	    cout << "current velocity                 = " << p->v << endl;
             cout << "force                            = " << p->force[force_index] << endl;
 	    cout << "=== tag ===" << endl;
