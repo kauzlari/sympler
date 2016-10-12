@@ -40,10 +40,15 @@ sympler_LDADD = \
 	-ldl \
 	\
         @GSL_LIBS@ @SDL_LIBS@ @XML_LIBS@ \
-        -lpthread -lz
+	-llzma -licui18n -licuuc -licudata
+#	-lz -lpthread -llzma -licui18n -licuuc -licudata
+# -lz seems to be automatically added by XML_LIBS
+# -lpthread was replaced by -pthread in sympler_LDFLAGS below
+# -llzma...-licudata are required for but not added by XML_LIBS when linking with --enable-all-static. In fact this is the output of 'icu-config --ldflags', but currently no idea how to include this in a more automated way
+
 
 sympler_LDFLAGS = \
-	@LT_LDFLAGS@
+	@LT_LDFLAGS@ -pthread
 
 # from good old subversion times
 #sympler_CXXFLAGS = \

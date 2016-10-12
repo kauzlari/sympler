@@ -1,6 +1,6 @@
 
 
-- The "degrees-symbol", at least if used in the help-text, is not displayed correctly in some terminals (e.g. mine from Ubuntu 12.04LTS)
+- The "degrees-symbol", at least if used in the help-text, is not displayed correctly in some terminals (e.g. bash in Ubuntu 12.04LTS and 16.04LTS). Can't we use "." for the matrix-matrix-product?
 
 - Remove the callback stuff like FunctionPairCallback from the runtime compiled functions! It isn't necessary anymore, right? It checks by hand for symbols such as "ni" and then it creates a ValCalculatorRho. I think we don't need this feature anymore and just complicates things a lot.
 
@@ -17,7 +17,7 @@
      ONE free 3.615 5.000 5.000 0 0 0 1 0 0 0
      !!!
 
-- testsuite: If configuration fails, this is not reportes in test_sympler.pl. You can check this, e.g., by changing to a wrong directory.
+- testsuite: If configuration fails, this is not reported in test_sympler.pl. You can check this, e.g., by changing to a wrong directory.
 
 - Using an arbitrary quantity computed by a PairCalculator or ParticleCalculator, but no Integrator changing positions leads to zero after the first timestep (probably because the symbol is not persistent). This is stupid behaviour! Find a consistent behaviour! How about including a check whether the positions change? Then make it possible that the symbols are computed only once.
 
