@@ -218,18 +218,15 @@ Useful [cxxflags] are (for more see the g++ documentation):</p>
 <ul>          
   <li>-O3: for optimised compilation with g++</li>
   <li>-fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)</li>
-</ul>
-
-<p>-O3: for optimised compilation with g++
--fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)</p>
-
-          
+</ul>          
           
 <p>and useful [options] are:</p>
 
-<p>--with-tnt: use tnt library and jama libraries
---with-superlu: use superlu 
---enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries (except for the glibc used during linking after compilation of SYMPLER; and the runtime compiled expressions of course). NOTE the required library liblzma-dev (listed under optional libraries above). Also libicu should be installed, but this is usually the case by default (for example libicu-dev and libicu55 on Ubuntu 16.04). Further note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome. </p>
+<ul>
+  <li>--with-tnt: use tnt library and jama libraries</li>
+  <li>--with-superlu: use superlu </li>
+  <li>--enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries (except for the glibc used during linking after compilation of SYMPLER; and the runtime compiled expressions of course). NOTE the required library liblzma-dev (listed under optional libraries above). Also libicu should be installed, but this is usually the case by default (for example libicu-dev and libicu55 on Ubuntu 16.04). Further note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome.</li>
+</ul>
 
 <h3>
 <a name="configuration-and-compilation-for-macos" class="anchor" href="#configuration-and-compilation-for-macos"><span class="octicon octicon-link"></span></a>Configuration and Compilation for MacOS</h3>
