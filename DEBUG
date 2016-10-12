@@ -38,7 +38,7 @@
 - FNPower::toC(): If the second argument of the "^"-operator contains an expression with  variables like, e.g., [rij]:[rij], the function will usually boil out with a seg.-fault, and, if not, the results will be bullshit, because, in any case it reads not correctly initialised memory. That's because of the line "Variant vValB = m_b->value();" which we need to check whether the argument is an integer. Is there a way to catch this case and to use the pow()-function like in the case when it is a floating-point number? 
 Currently, we have at least a MSG_DEBUG, which says that it could boil out after the next line of code.
 
-- old question: currently, it is forbidden, to have box-dimensions < 3* cutoff in a periodic direction and < 2*cutoff in a non-periodic direction. Isn't it (Wasn't it once?) possible to have the old rule of > 1*cutoff, i.e., the possibility of having one cell in a direction?
+- TASK TAKEN: old question: currently, it is forbidden, to have box-dimensions < 3* cutoff in a periodic direction and < 2*cutoff in a non-periodic direction. Isn't it (Wasn't it once?) possible to have the old rule of > 1*cutoff, i.e., the possibility of having one cell in a direction?
 
 - let OS throw exception if nans occur -> catch that and write s.th. like "Does the initial setup of your simulation parameters make sense? If you don't know, feel free to ask the programmers."
 
