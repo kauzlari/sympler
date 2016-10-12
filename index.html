@@ -178,7 +178,7 @@
 <li>liblzma-dev: For the configure-option --enable-all-static (see below).</li>
 <li>libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.</li>
 <li>OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during configuration (CXXFLAGS="... -fopenmp").</li>
-<li>libtnt, libjama, libsuperlu: Use the options --with-tnt --with-superlu during configuration. This allows for: 
+<li>libtnt, libjama, libsuperlu: Use the options --with-superlu during configuration. This allows for: 
 
 <ul>
 <li>coupling of particles to a linear system of equations solver with module IntegratorLSE</li>
@@ -215,9 +215,16 @@ $ make -j[1 to roughly the number of available cores]
 <p>After successful compilation the executable "sympler" will be created in the directory src/ 
 Useful [cxxflags] are (for more see the g++ documentation):</p>
 
+<ul>          
+  <li>-O3: for optimised compilation with g++</li>
+  <li>-fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)</li>
+</ul>
+
 <p>-O3: for optimised compilation with g++
 -fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)</p>
 
+          
+          
 <p>and useful [options] are:</p>
 
 <p>--with-tnt: use tnt library and jama libraries
