@@ -362,7 +362,7 @@ void VerletCreator::createDistances()
 		size = boxSize[dir];
 
 		if(cartesian[dir] > 0.5*size) cartesian[dir] -= size; 
-		if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
+		else if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
 	      }
 	      // absolute values
 	      pair->m_distance.calcAbs();
@@ -381,7 +381,7 @@ void VerletCreator::createDistances()
 		size = boxSize[dir];
 
 		if(cartesian[dir] > 0.5*size) cartesian[dir] -= size; 
-		if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
+		else if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
 	      }
 	      // absolute values
 	      pair->m_distance.calcAbs();
@@ -400,7 +400,7 @@ void VerletCreator::createDistances()
 		size = boxSize[dir];
 
 		if(cartesian[dir] > 0.5*size) cartesian[dir] -= size; 
-		if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
+		else if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
 	      }
 	      // absolute values
 	      pair->m_distance.calcAbs();
@@ -418,7 +418,7 @@ void VerletCreator::createDistances()
 		size = boxSize[dir];
 
 		if(cartesian[dir] > 0.5*size) cartesian[dir] -= size; 
-		if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
+		else if(cartesian[dir] < -0.5*size) cartesian[dir] += size; 
 	      }
 	      // absolute values
 	      pair->m_distance.calcAbs();

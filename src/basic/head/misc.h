@@ -63,4 +63,11 @@
 template <typename T> int sign(T val) {
     return (T(0) < val) - (val < T(0));
 }
+
+#define RED_ABS_BY(from, by) do { \
+  int signFrom = sign(from); \
+  if (signFrom*from > by/2)  \
+    from -= signFrom * by; } while (0)
+
+
 #endif

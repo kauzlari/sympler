@@ -345,7 +345,7 @@ void ValCalculatorBC::setupAfterParticleCreation()
 	   // (list<pair<int, Cell* > > *indOutlets = cell->indirectOutlets());
 	   // for a wall particle far away from periodic boundaries, 
 	   // the cell shouldn't contain any indirect outlets, so nothing is done
-	   for(list<pair< vector<int>, Cell*> >::iterator cellIt = cell->indirectOutlets()->begin(); cellIt != cell->indirectOutlets()->end(); ++cellIt) {
+	   for(list<pair< point_t, Cell*> >::iterator cellIt = cell->indirectOutlets()->begin(); cellIt != cell->indirectOutlets()->end(); ++cellIt) {
 
 	     walls = cellIt->second->allWalls();
 	     for(list<Wall*>::iterator wallIt = walls->begin(); wallIt != walls->end(); ++wallIt) {
