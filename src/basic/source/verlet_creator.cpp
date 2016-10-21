@@ -319,16 +319,40 @@ void VerletCreator::createDistances()
 	}
       }
       //  MSG_DEBUG("VerletCreator::createDistances", "count = " << count << " active links = " << M_MANAGER->activeLinks()[t]);
-      
+
 #else
-      LL_FOR_EACH__PARALLEL
-	(AbstractCellLink,
-	 manager->firstLink(),
-	 manager->activeLinks(),
-	 NULL,
-	 
-	 i->createDistances();
-	 );
+    size_t n_colours = manager->nColours();
+    // We have different cells.
+    for (size_t c1 = 0; c1 < n_colours; ++c1) {
+      ColourPair *cp = manager->cp(c1, c1);
+
+      if (cp->needPairs()) {
+        double cutoff_sq = cp->cutoff() * cp->cutoff();
+
+        LL_FOR_EACH__PARALLEL
+          (AbstractCellLink,
+           manager->firstLink(),
+           manager->activeLinks(),
+           NULL,
+           i->doForSameColors(cp, c1, cutoff_sq);
+           );
+      }
+      for (size_t c2 = c1+1; c2 < n_colours; ++c2) {
+	ColourPair *cp = manager->cp(c1, c2);
+
+	if (cp->needPairs()) {
+	  double cutoff_sq = cp->cutoff() * cp->cutoff();
+
+          LL_FOR_EACH__PARALLEL
+            (AbstractCellLink,
+             manager->firstLink(),
+             manager->activeLinks(),
+             NULL,
+             i->doForDiffColors(cp, c1, c2, cutoff_sq);
+             );
+        }
+      }
+    }
       // MSG_DEBUG("VerletCreator::createDistances", "number of links = " << M_MANAGER->activeLinks());
 #endif
       

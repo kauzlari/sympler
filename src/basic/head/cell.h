@@ -223,11 +223,22 @@ public:
    * @param t Thread number of this call to createDistances. For multithreaded compilation.
    */
 #ifdef _OPENMP   
+  virtual void doForSameColors(ColourPair* cp, int colour, double cutoff_sq, int thread_no) = 0;
+#else
+  virtual void doForSameColors(ColourPair* cp, int colour, double cutoff_sq) = 0;
+#endif
+
+#ifdef _OPENMP   
+  virtual void doForDiffColors(ColourPair* cp, int c1, int c2, double cutoff_sq, int thread_no) = 0; 
+#else
+  virtual void doForDiffColors(ColourPair* cp, int c1, int c2, double cutoff_sq) = 0;
+#endif  
+
+#ifdef _OPENMP   
   virtual void createDistances(int thread_no) = 0;
 #else
   virtual void createDistances() = 0;
 #endif  
-
   /*!
    * Create the verlet pair list.
    * @param t Thread number of this call to createDistances. For multithreaded compilation.
@@ -521,9 +532,9 @@ public:
   }
 
   /*!
-   * Adds an unidirectional neighbor, that means
+   * Adds a unidirectional neighbor, that means
    * particles can fly into \a neighbor and particles in
-   * \a neighbor feels forces from particles in this cell,
+   * \a neighbor feel forces from particles in this cell,
    * but not the other way round.
    * @param neighbor Neighboring cell
    * @param where Alignment of the neighboring cell
@@ -878,7 +889,7 @@ inline static void createDistancesForSameParticleList_
   }
 }
 
-#define CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist) do { \
+#define CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist) { \
               list<Particle*>::iterator p1_end = first_p.end(); \
               list<Particle*>::iterator p2_end = second_p.end(); \
               for (list<Particle*>::iterator i = first_p.begin(); i != p1_end; ++i) {point_t precomputed = cell_dist + (*i) -> r - first_c -> corner1; \
@@ -947,6 +958,72 @@ class CellSelfLink: public AbstractCellLink
    * Create the pair list.
    * @param t Thread number of this call to createDistances. For multithreaded compilation.
    */
+
+#ifdef _OPENMP   
+  virtual void doForSameColors(ColourPair* cp, int colour, double cutoff_sq, int thread_no) final override {
+#else
+  virtual void doForSameColors(ColourPair* cp, int colour, double cutoff_sq) final override {
+    int thread_no = PairCreator::counterTN;
+#endif
+    CREATE_DISTANCES_FOR_SAME_PARTICLE_LIST//<AddPairCheck_x>
+      (cp->freePairs(),
+       cutoff_sq,
+       m_first,
+       m_first->particles(colour));
+//	   m_first->particles(c1), thread_no);
+
+    CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+      (cp->frozenPairs(),
+       cutoff_sq,
+       m_first, m_first,
+       m_first->particles(colour), m_first->frozenParticles(colour),
+       true, false,
+//	   ((point_t) {0,0,0}));
+//	   ((point_t) {0,0,0}), thread_no);
+//	   zero_cell_dist, thread_no);
+       m_zero_cell_dist);
+  }
+
+#ifdef _OPENMP   
+  virtual void doForDiffColors(ColourPair* cp, int c1, int c2, double cutoff_sq, int thread_no) final override {
+#else
+  virtual void doForDiffColors(ColourPair* cp, int c1, int c2, double cutoff_sq) final override {
+    int thread_no = PairCreator::counterTN;
+#endif
+    CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+      (cp->freePairs(),
+       cutoff_sq,
+       m_first, m_first,
+       m_first->particles(c1), m_first->particles(c2),
+       true, true,
+  //             ((point_t) {0,0,0}));
+  //	     ((point_t) {0,0,0}), thread_no);
+  //             zero_cell_dist, thread_no);
+       m_zero_cell_dist);
+
+    CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+      (cp->frozenPairs(),
+       cutoff_sq,
+       m_first, m_first,
+       m_first->particles(c1), m_first->frozenParticles(c2),
+       true, false,
+  //             ((point_t) {0,0,0}));
+  //	     ((point_t) {0,0,0}), thread_no);
+  //             zero_cell_dist, thread_no);
+       m_zero_cell_dist);
+
+    CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+      (cp->frozenPairs(),
+       cutoff_sq,
+       m_first, m_first,
+       m_first->frozenParticles(c1), m_first->particles(c2),
+       false, true,
+  //             ((point_t) {0,0,0}));
+  //	     ((point_t) {0,0,0}), thread_no);
+  //             zero_cell_dist, thread_no);
+       m_zero_cell_dist);
+  }
+
 #ifdef _OPENMP   
   virtual void createDistances(int thread_no) final override {
 #else
@@ -1024,6 +1101,7 @@ class CellSelfLink: public AbstractCellLink
       } /* Loop over c2 */
     } /* Loop over c1 */
   }
+
 };
 
 /*!
@@ -1043,6 +1121,116 @@ class CellLink: public AbstractCellLink
    * Create the pair list.
    * @param t Thread number of this call to createDistances. For multithreaded compilation.
    */
+#ifdef _OPENMP   
+  virtual void doForSameColors(ColourPair* cp, int colour, double cutoff_sq, int thread_no) final override {
+#else
+  virtual void doForSameColors(ColourPair* cp, int colour, double cutoff_sq) final override {
+    int thread_no = PairCreator::counterTN;
+#endif
+    CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+      (cp->freePairs(),
+       cutoff_sq,
+       m_second, m_first,
+       m_second->particles(colour), m_first->particles(colour),
+       m_acts_on.second, m_acts_on.first,
+//               m_cell_dist, thread_no);
+       m_cell_dist);
+//               m_first->m_cell_dist[m_alignment][m_cross_regions]);
+    if (m_acts_on.first)
+      CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+        (cp->frozenPairs(),
+         cutoff_sq,
+         m_second, m_first,
+         m_second->frozenParticles(colour), m_first->particles(colour),
+         false, true,
+//                 m_cell_dist, thread_no);
+         m_cell_dist);
+//               m_first->m_cell_dist[m_alignment][m_cross_regions]);
+    if (m_acts_on.second)
+      CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+        (cp->frozenPairs(),
+         cutoff_sq,
+         m_second, m_first,
+         m_second->particles(colour), m_first->frozenParticles(colour),
+         true, false,
+//                 m_cell_dist, thread_no);
+         m_cell_dist);
+//               m_first->m_cell_dist[m_alignment][m_cross_regions]);
+  }
+
+#ifdef _OPENMP   
+  virtual void doForDiffColors(ColourPair* cp, int c1, int c2, double cutoff_sq, int thread_no) final override {
+#else
+  virtual void doForDiffColors(ColourPair* cp, int c1, int c2, double cutoff_sq) final override {
+    int thread_no = PairCreator::counterTN;
+#endif
+    CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+      (cp->freePairs(),
+       cutoff_sq,
+       m_first, m_second,
+       m_first->particles(c1), m_second->particles(c2),
+       m_acts_on.first, m_acts_on.second,
+//               minus_m_cell_dist, thread_no);
+//	       -m_cell_dist, thread_no);
+       m_minus_cell_dist);
+//             -m_first->m_cell_dist[m_alignment][m_cross_regions]);
+    CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+      (cp->freePairs(),
+       cutoff_sq,
+       m_second, m_first,
+       m_second->particles(c1), m_first->particles(c2),
+       m_acts_on.second, m_acts_on.first,
+//               m_cell_dist, thread_no);
+       m_cell_dist);
+//               m_first->m_cell_dist[m_alignment][m_cross_regions]);
+
+    if (m_acts_on.first){
+      CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+        (cp->frozenPairs(),
+         cutoff_sq,
+         m_first, m_second,
+         m_first->particles(c1), m_second->frozenParticles(c2),
+         true, false,
+         m_minus_cell_dist);
+//                 m_minus_cell_dist, thread_no);
+//                -m_cell_dist, thread_no);
+//                -m_cell_dist);
+//                -m_first->m_cell_dist[m_alignment][m_cross_regions]);
+      CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+        (cp->frozenPairs(),
+         cutoff_sq,
+         m_second, m_first,
+         m_second->frozenParticles(c1), m_first->particles(c2),
+         false, true,
+//                 m_cell_dist, thread_no);
+         m_cell_dist);
+//               m_first->m_cell_dist[m_alignment][m_cross_regions]);
+    }
+
+    if (m_acts_on.second){
+      CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+        (cp->frozenPairs(),
+         cutoff_sq,
+         m_first, m_second,
+         m_first->frozenParticles(c1), m_second->particles(c2),
+         false, true,
+         m_minus_cell_dist);
+//                 m_minus_cell_dist, thread_no);
+//                 -m_cell_dist, thread_no);
+//                 -m_cell_dist);
+//               -m_first->m_cell_dist[m_alignment][m_cross_regions]);
+      CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
+        (cp->frozenPairs(),
+         cutoff_sq,
+         m_second, m_first,
+         m_second->particles(c1), m_first->frozenParticles(c2),
+         true, false,
+//                 m_cell_dist, thread_no);
+         m_cell_dist);
+//               m_first->m_cell_dist[m_alignment][m_cross_regions]);
+    }
+  }
+
 #ifdef _OPENMP   
   virtual void createDistances(int thread_no) final override {
 #else
@@ -1133,6 +1321,7 @@ class CellLink: public AbstractCellLink
       }
     }
   }
+
 };
 
 template <typename AddPairCheck_x>
@@ -1190,7 +1379,7 @@ void addPair(vector<PairList> &distances, double cutoff_sq,
     d.abs = sqrt(d.abs_square);
       distances[thread_no].newPair().set(d, first_p, second_p, ao_f, ao_s);
   }
-}
+};
 
 
 
