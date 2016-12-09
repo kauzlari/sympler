@@ -31,11 +31,12 @@
      cutoff = "2.5"
   />
 <!--     weightingFunction="dummy" -->
-  <Phase halfCutoffCells = "0">
+  <Phase halfCutoffCells = "1">
     <VerletCreator
       displacement = "d"
       skinSize = "0.3"
       every = "0"
+      checkForFarNeighbors = "0"
     />
     <BoundaryCuboid
 	boxX = "1"

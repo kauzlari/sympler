@@ -85,12 +85,6 @@ protected:
    */
   Cell *m_second;
 
-  /*!
-   * Alignment information for the two cells.
-   * E.g. m_alignment = 4 means the second lies to the left in x-direction
-   * of first.
-   */
-  int m_alignment;
 
   /*!
    *
@@ -149,7 +143,7 @@ public:
    * @param acts_on_second Determines whether forces act on particles in the second cell
    * @see set()
    */
-  AbstractCellLink(Cell *first, Cell *second, int alignment,
+  AbstractCellLink(Cell *first, Cell *second,
            bool acts_on_first = true, bool acts_on_second = true, bool cross_regions = false);
 
   /*!
@@ -157,11 +151,6 @@ public:
    * @param copy Link to be copied.
    */
   AbstractCellLink(const AbstractCellLink &copy);
-
-  /*!
-   * A pointer to the manager.
-   */
-  ManagerCell *m_manager;
 
   /*!
    * Destructor
@@ -278,11 +267,11 @@ public:
  * the creation of the pair list.
  */
 
-template <typename AddPairCheck_x>
+template <typename AddPairCheck_x, typename FarNeighborCheck_x>
 AbstractCellLink *establishLinkTemplate(ManagerCell *a_manager, Cell *first, Cell *second, int where, bool acts_on_first, bool acts_on_second, bool cross_regions =  false);
 template <typename AddPairCheck_x>
 class CellSelfLink;
-template <typename AddPairCheck_x>
+template <typename AddPairCheck_x, typename FarNeighborCheck_x>
 class CellLink;
 /*!
  * A cell represents one simulation cell for cell subdivision.
@@ -291,7 +280,7 @@ class Cell: public cuboid_t
 {
 friend class ManagerCell;
 friend class ManagerCell2x;
-template <typename AddPairCheck_x> friend class CellLink;
+template <typename AddPairCheck_x, typename FarNeighborCheck_x>friend class CellLink;
 template <typename AddPairCheck_x> friend class CellSelfLink;
 friend class BoundaryCell; //for accessing m_walls in setupwalls
 protected:
@@ -399,23 +388,23 @@ protected:
    * @param first Determines whether forces act on particles in the first cell
    * @param second Determines whether forcee act on particle in the second cell (the one given by \a neighbor)
    */
-  template<typename AddPairCheck_x>
+  template <typename AddPairCheck_x, typename FarNeighborCheck_x>
   AbstractCellLink *establishLink(Cell *neighbor, int where, bool first, bool second, bool cross_regions = false)
   {
-    return establishLinkTemplate<AddPairCheck_x>(m_manager, this, neighbor, where, first, second, cross_regions);
+    return establishLinkTemplate<AddPairCheck_x, FarNeighborCheck_x>(m_manager, this, neighbor, where, first, second, cross_regions);
   }
 
-  template<typename AddPairCheck_x>
+  template <typename AddPairCheck_x, typename FarNeighborCheck_x>
   AbstractCellLink *establishLink(Cell *neighbor, int where, bool cross_regions = false)
   {
-    return establishLinkTemplate<AddPairCheck_x>(m_manager, this, neighbor, where, true, true, cross_regions);
+    return establishLinkTemplate<AddPairCheck_x, FarNeighborCheck_x>(m_manager, this, neighbor, where, true, true, cross_regions);
   }
 
 
 
   virtual bool doCollisionIndirectOutlets(Particle *p, const point_t &force, point_t &r, double &t_travelled, point_t &hit_pos, Wall *&wall, IntegratorPosition *integratorP) {return false;}; 
 
-  inline void commonConstructor(int sameDirOutlets, int_point_t a_tag = {0,0,0});
+  inline void commonConstructor(int sameDirOutlets, const int_point_t &a_tag = {0,0,0});
 public:
 
   /*!
@@ -452,7 +441,7 @@ public:
    * @param a_tag Position of the cell
    * @param group Group all particles in this cell belong to
    */
-  Cell(ManagerCell *mgr, cuboid_t cuboid, int_point_t a_tag, int group = 0, int sameDirOutlets = 1);
+  Cell(ManagerCell *mgr, cuboid_t cuboid, const int_point_t &a_tag, int group = 0, int sameDirOutlets = 1);
 
 
   /*!
@@ -463,7 +452,7 @@ public:
    * @param a_tag Position of the cell
    * @param group Group all particles in this cell belong to
    */
-  Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t a_tag, int group = 0, int sameDirOutlets = 1);
+  Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, const int_point_t &a_tag, int group = 0, int sameDirOutlets = 1);
 
   /*!
    * Destructor.
@@ -516,11 +505,11 @@ public:
    * @param neighbor Neighboring cell
    * @param where Alignment of the neighboring cell
    */
-  template<typename AddPairCheck_x>
+  template <typename AddPairCheck_x, typename FarNeighborCheck_x>
   AbstractCellLink *addNeighbor(Cell *neighbor, int where, bool cross_regions = false)
   {
       
-      AbstractCellLink *link = this->establishLink<AddPairCheck_x>(neighbor, where, true, true, cross_regions);
+      AbstractCellLink *link = this->establishLink<AddPairCheck_x, FarNeighborCheck_x>(neighbor, where, true, true, cross_regions);
       if (m_manager->m_divby > 1) where = m_manager->c_2x_1x(where);
 
     //    MSG_DEBUG("addNeighbor", where << " " << " " <<  neighbor);
@@ -539,10 +528,10 @@ public:
    * @param neighbor Neighboring cell
    * @param where Alignment of the neighboring cell
    */
-  template<typename AddPairCheck_x>
+  template <typename AddPairCheck_x, typename FarNeighborCheck_x>
   AbstractCellLink *addOutlet(Cell *neighbor, int where, bool cross_regions = false)
   {
-      AbstractCellLink *link = establishLink<AddPairCheck_x>(neighbor, where, false, true, cross_regions);
+      AbstractCellLink *link = establishLink<AddPairCheck_x, FarNeighborCheck_x>(neighbor, where, false, true, cross_regions);
        
       if (m_manager->m_divby > 1) where = m_manager->c_2x_1x(where);
       addToMOutlets(this, neighbor, where, cross_regions);
@@ -590,7 +579,7 @@ public:
    */
   virtual void assignContainer(WallContainer *container);
 
-  virtual bool emitIntoOutlets(Particle* p, size_t colour, int_point_t off, int n, IntegratorPosition *integrator, Phase *phase = NULL);
+  virtual bool emitIntoOutlets(Particle* p, size_t colour, int_point_t &off, int n, IntegratorPosition *integrator, Phase *phase = NULL);
 
   /*!
    * Advance positions of the particle within this cell using
@@ -788,12 +777,12 @@ class BoundaryCell : public Cell
   const struct region_t *m_region;
 
 	  BoundaryCell(ManagerCell *mgr, region_t *r, int group = 0);
-	  BoundaryCell(ManagerCell *mgr, cuboid_t cuboid, int_point_t a_tag, region_t *r, int group = 0);
-	  BoundaryCell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t a_tag, region_t *r, int group = 0);
+	  BoundaryCell(ManagerCell *mgr, cuboid_t cuboid, int_point_t &a_tag, region_t *r, int group = 0);
+	  BoundaryCell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t &a_tag, region_t *r, int group = 0);
   
   virtual bool doCollisionIndirectOutlets(Particle *p, const point_t &force, point_t &r, double &t_travelled, point_t &hit_pos, Wall *&wall, IntegratorPosition *integratorP) override; 
   virtual void setupWalls();
-  virtual bool emitIntoOutlets(Particle* p, size_t colour, int_point_t off, int n, IntegratorPosition *integrator, Phase *phase);
+  virtual bool emitIntoOutlets(Particle* p, size_t colour, int_point_t &off, int n, IntegratorPosition *integrator, Phase *phase);
    /*!
    * Handles cell activation,
    * i.e. the cell is added to the
@@ -814,7 +803,7 @@ inline static void addPair(vector<PairList> &distances, double cutoff_sq,
   Cell *first_c, Cell *second_c,
   Particle *first_p, Particle *second_p,
   bool ao_f, bool ao_s,
-  point_t &cell_dist,
+  point_t &precomputed,
   int thread_no);
 
 //#define ADDPAIR(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist) do { dist_t d; \
@@ -834,7 +823,7 @@ inline static void addPair(vector<PairList> &distances, double cutoff_sq,
 
 
 //#ifdef _OPENMP
-  #define ADDPAIR(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist) do addPair<AddPairCheck_x>(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist, thread_no); while(0)
+  #define ADDPAIR(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, precomputed) do addPair<AddPairCheck_x>(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, precomputed, thread_no); while(0)
 //#else
 //  #define ADDPAIR(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist) do addPair<AddPairCheck_x>(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist, thread_no); while(0) //PairCreator::counterTN); while(0)
 //#endif
@@ -842,7 +831,8 @@ inline static void addPair(vector<PairList> &distances, double cutoff_sq,
 //#define CREATE_DISTANCES_FOR_SAME_PARTICLE_LIST(distances, cutoff_sq, c, p, thread_no) do {
 #define CREATE_DISTANCES_FOR_SAME_PARTICLE_LIST(distances, cutoff_sq, c, p) do { \
   list<Particle*>::iterator p_end = p.end(); \
-  for (list<Particle*>::iterator i = p.begin(); i != p_end; ++i) { point_t precomputed = (*i) -> r - c -> corner1; \
+  for (list<Particle*>::iterator i = p.begin(); i != p_end; ++i) { \
+    point_t precomputed = (*i) -> r - c -> corner1; \
     list<Particle*>::iterator j = i; \
     for (++j; j != p_end; ++j) { \
       ADDPAIR \
@@ -859,7 +849,7 @@ inline static void addPair(vector<PairList> &distances, double cutoff_sq,
 //#else
 //  #define CREATE_DISTANCES_FOR_SAME_PARTICLE_LIST(distances, cutoff_sq, c, p) do createDistancesForSameParticleList_<AddPairCheck_x>(distances, cutoff_sq, c, p); while (0)
 //#endif
-template<typename AddPairCheck_x>
+/*template<typename AddPairCheck_x>
 inline static void createDistancesForSameParticleList_
   (vector<PairList> &distances,
    double cutoff_sq,
@@ -874,7 +864,6 @@ inline static void createDistancesForSameParticleList_
   int thread_no = PairCreator::counterTN;
 #endif
   list<Particle*>::iterator p_end = p.end();
-  point_t zero_cell_dist = {0,0,0};
   for (list<Particle*>::iterator i = p.begin(); i != p_end; ++i) {
     list<Particle*>::iterator j = i;
     for (++j; j != p_end; ++j) {
@@ -884,23 +873,24 @@ inline static void createDistancesForSameParticleList_
          *i, *j,
          true, true,
 //         zero_cell_dist, thread_no);
-         zero_cell_dist);
+         )
     }
   }
-}
-
-#define CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, cell_dist) { \
+}*/
+ // 
+#undef  CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS
+#define CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s) { \
               list<Particle*>::iterator p1_end = first_p.end(); \
               list<Particle*>::iterator p2_end = second_p.end(); \
-              for (list<Particle*>::iterator i = first_p.begin(); i != p1_end; ++i) {point_t precomputed = cell_dist + (*i) -> r - first_c -> corner1; \
-                for (list<Particle*>::iterator j = second_p.begin(); j != p2_end; ++j) { \
+              for (list<Particle*>::iterator i = first_p.begin(); i != p1_end; ++i) { \
+                point_t precomputed = (*i) -> r - first_c -> corner1; \
+                for (list<Particle*>::iterator j = second_p.begin(); j != p2_end; ++j) \
                   ADDPAIR \
                     (distances, cutoff_sq, \
                      first_c, second_c, \
                      *i, *j, \
                      ao_f, ao_s, \
                      precomputed); \
-                } \
               }}while(0)
 
 //#ifdef _OPENMP
@@ -951,9 +941,9 @@ class CellSelfLink: public AbstractCellLink
   private:
     point_t m_zero_cell_dist;
   public:
-  CellSelfLink(Cell *first, Cell *second, int alignment, \
+  CellSelfLink(Cell *first, Cell *second, \
     bool acts_on_first = true, bool acts_on_second = true/*, bool cross_regions = false*/): \
-      AbstractCellLink(first, second, alignment, acts_on_first, acts_on_second, false){ m_zero_cell_dist = {0,0,0};};
+      AbstractCellLink(first, second, acts_on_first, acts_on_second, false){ m_zero_cell_dist = {0,0,0};};
   /*!
    * Create the pair list.
    * @param t Thread number of this call to createDistances. For multithreaded compilation.
@@ -977,11 +967,11 @@ class CellSelfLink: public AbstractCellLink
        cutoff_sq,
        m_first, m_first,
        m_first->particles(colour), m_first->frozenParticles(colour),
-       true, false,
+       true, false);
 //	   ((point_t) {0,0,0}));
 //	   ((point_t) {0,0,0}), thread_no);
 //	   zero_cell_dist, thread_no);
-       m_zero_cell_dist);
+//       m_zero_cell_dist);
   }
 
 #ifdef _OPENMP   
@@ -995,33 +985,33 @@ class CellSelfLink: public AbstractCellLink
        cutoff_sq,
        m_first, m_first,
        m_first->particles(c1), m_first->particles(c2),
-       true, true,
+       true, true);
   //             ((point_t) {0,0,0}));
   //	     ((point_t) {0,0,0}), thread_no);
   //             zero_cell_dist, thread_no);
-       m_zero_cell_dist);
+  //     m_zero_cell_dist);
 
     CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
       (cp->frozenPairs(),
        cutoff_sq,
        m_first, m_first,
        m_first->particles(c1), m_first->frozenParticles(c2),
-       true, false,
+       true, false);
   //             ((point_t) {0,0,0}));
   //	     ((point_t) {0,0,0}), thread_no);
   //             zero_cell_dist, thread_no);
-       m_zero_cell_dist);
+  //     m_zero_cell_dist);
 
     CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
       (cp->frozenPairs(),
        cutoff_sq,
        m_first, m_first,
        m_first->frozenParticles(c1), m_first->particles(c2),
-       false, true,
+       false, true);
   //             ((point_t) {0,0,0}));
   //	     ((point_t) {0,0,0}), thread_no);
   //             zero_cell_dist, thread_no);
-       m_zero_cell_dist);
+  //     m_zero_cell_dist);
   }
 
 #ifdef _OPENMP   
@@ -1052,11 +1042,11 @@ class CellSelfLink: public AbstractCellLink
 	   cutoff_sq,
 	   m_first, m_first,
 	   m_first->particles(c1), m_first->frozenParticles(c1),
-	   true, false,
+	   true, false);
 //	   ((point_t) {0,0,0}));
 //	   ((point_t) {0,0,0}), thread_no);
 //	   zero_cell_dist, thread_no);
-	   m_zero_cell_dist);
+//	   m_zero_cell_dist);
       } 
 
       for (size_t c2 = c1+1; c2 < n_colours; ++c2) {
@@ -1070,53 +1060,97 @@ class CellSelfLink: public AbstractCellLink
 	     cutoff_sq,
 	     m_first, m_first,
 	     m_first->particles(c1), m_first->particles(c2),
-	     true, true,
+	     true, true);
 //             ((point_t) {0,0,0}));
 //	     ((point_t) {0,0,0}), thread_no);
 //             zero_cell_dist, thread_no);
-             m_zero_cell_dist);
+//             m_zero_cell_dist);
 
           CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
 	    (cp->frozenPairs(),
 	     cutoff_sq,
 	     m_first, m_first,
 	     m_first->particles(c1), m_first->frozenParticles(c2),
-	     true, false,
+	     true, false);
 //             ((point_t) {0,0,0}));
 //	     ((point_t) {0,0,0}), thread_no);
 //             zero_cell_dist, thread_no);
-             m_zero_cell_dist);
+//             m_zero_cell_dist);
 
           CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
 	    (cp->frozenPairs(),
 	     cutoff_sq,
 	     m_first, m_first,
 	     m_first->frozenParticles(c1), m_first->particles(c2),
-	     false, true,
+	     false, true);
 //             ((point_t) {0,0,0}));
 //	     ((point_t) {0,0,0}), thread_no);
 //             zero_cell_dist, thread_no);
-             m_zero_cell_dist);
+//             m_zero_cell_dist);
 	}
       } /* Loop over c2 */
     } /* Loop over c1 */
   }
 
 };
+#undef  CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS
+#define CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS(distances, cutoff_sq, first_c, second_c, first_p, second_p, ao_f, ao_s, offset, cell_dist) { \
+              list<Particle*>::iterator p1_end = first_p.end(); \
+              list<Particle*>::iterator p2_end = second_p.end(); \
+              for (list<Particle*>::iterator i = first_p.begin(); i != p1_end; ++i) { \
+                point_t precomputed = (*i) -> r - first_c -> corner1; \
+                if (FarNeighborCheck_x::withinCutoff(cell_dist, precomputed, offset, cutoff_sq)){\
+                  precomputed += cell_dist; \
+                  for (list<Particle*>::iterator j = second_p.begin(); j != p2_end; ++j) { \
+                      ADDPAIR \
+                        (distances, cutoff_sq, \
+                         first_c, second_c, \
+                         *i, *j, \
+                         ao_f, ao_s, \
+                         precomputed); \
+                  }\
+                }\
+              }\
+            }while(0)
 
+//else{int ddd=0;\
+                  for (list<Particle*>::iterator j = second_p.begin(); j != p2_end; ++j) ddd++; \
+                    MSG_DEBUG("parallel", ddd);}
+//                double nearestDist_sq=0; \
+//                for (int _i = 0; _i < SPACE_DIMS; _i++){ \
+                  if (offset[_i] < -1) nearestDist_sq += (cell_dist[_i]/offset[_i]+precomputed[_i]); else\
+                  if (offset[_i] == -1) nearestDist_sq += pow(precomputed[_i], 2); else\
+                  if (offset[_i] > 0) nearestDist_sq += pow(-cell_dist[_i]-precomputed[_i], 2);} \
+                  if (nearestDist_sq < cutoff_sq){\
+                    precomputed += cell_dist;
+
+                    //  if((*i)->mySlot == 418 || (*j)->mySlot == 418) MSG_DEBUG("CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS", (*i)->r << " " << (*j)->r << " " << (*i)->c<<"."<<(*i)->mySlot << " " << (*j)->c<<"."<<(*j)->mySlot << " " << precomputed<< " " << offset << " " << cell_dist \
+                           << " " << (*i)->r-first_c->corner1 << " " << (*j)->r-second_c->corner1 << " " << cell_dist + (*i)->r-first_c->corner1 - (*j)->r+second_c->corner1);\
+//                if (nearestDist_sq < cutoff_sq){\
+//                    if ((*i)->mySlot == 825) MSG_DEBUG("CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS", (*j)->mySlot << " " << precomputed); \
+//                  if (nearestDist_sq >= cutoff_sq && m_offset[_i] != 0 &&
+//                if (nearestDist_sq < cutoff_sq)
+//                  if ((*i)->mySlot == 825) MSG_DEBUG("CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS", (nearestDist_sq<cutoff_sq) << " " << nearestDist_sq << " " << abs(cell_dist[_i])-precomputed[_i] << " "<< m_offset << " " << cell_dist << " "<<precomputed[_i]);}
 /*!
  * This class connects two cells for cell subdivision. It handles
  * the creation of the pair list.
  */
-template <typename AddPairCheck_x>
+//avoid_far_neighbors
+template <typename AddPairCheck_x, typename FarNeighborCheck_x>
 class CellLink: public AbstractCellLink
 { 
   private:
-    point_t m_cell_dist, m_minus_cell_dist; 
+    point_t m_cell_dist, m_minus_cell_dist;
+
+    /*!
+     * Alignment information for the two cells.
+     */
+    int_point_t m_offset;
+
   public:
-    CellLink(Cell *first, Cell *second, int alignment, \
+    CellLink(Cell *first, Cell *second, int alignment, const int_point_t &offset, \
       bool acts_on_first = true, bool acts_on_second = true, bool cross_regions = false): \
-        AbstractCellLink(first, second, alignment, acts_on_first, acts_on_second, cross_regions){m_cell_dist = first->m_cell_dist[alignment][cross_regions]; m_minus_cell_dist = -m_cell_dist;};
+        AbstractCellLink(first, second, acts_on_first, acts_on_second, cross_regions){m_offset = offset; m_cell_dist = first->m_cell_dist[alignment][cross_regions]; m_minus_cell_dist = -m_cell_dist;};
   /*!
    * Create the pair list.
    * @param t Thread number of this call to createDistances. For multithreaded compilation.
@@ -1132,7 +1166,7 @@ class CellLink: public AbstractCellLink
        cutoff_sq,
        m_second, m_first,
        m_second->particles(colour), m_first->particles(colour),
-       m_acts_on.second, m_acts_on.first,
+       m_acts_on.second, m_acts_on.first, -m_offset,
 //               m_cell_dist, thread_no);
        m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1142,7 +1176,7 @@ class CellLink: public AbstractCellLink
          cutoff_sq,
          m_second, m_first,
          m_second->frozenParticles(colour), m_first->particles(colour),
-         false, true,
+         false, true, -m_offset,
 //                 m_cell_dist, thread_no);
          m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1152,7 +1186,7 @@ class CellLink: public AbstractCellLink
          cutoff_sq,
          m_second, m_first,
          m_second->particles(colour), m_first->frozenParticles(colour),
-         true, false,
+         true, false, -m_offset,
 //                 m_cell_dist, thread_no);
          m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1169,17 +1203,18 @@ class CellLink: public AbstractCellLink
        cutoff_sq,
        m_first, m_second,
        m_first->particles(c1), m_second->particles(c2),
-       m_acts_on.first, m_acts_on.second,
+       m_acts_on.first, m_acts_on.second, m_offset,
 //               minus_m_cell_dist, thread_no);
 //	       -m_cell_dist, thread_no);
        m_minus_cell_dist);
 //             -m_first->m_cell_dist[m_alignment][m_cross_regions]);
+    
     CREATE_DISTANCES_FOR_DIFFERENT_PARTICLE_LISTS//<AddPairCheck_x>
       (cp->freePairs(),
        cutoff_sq,
        m_second, m_first,
        m_second->particles(c1), m_first->particles(c2),
-       m_acts_on.second, m_acts_on.first,
+       m_acts_on.second, m_acts_on.first, -m_offset,
 //               m_cell_dist, thread_no);
        m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1190,7 +1225,7 @@ class CellLink: public AbstractCellLink
          cutoff_sq,
          m_first, m_second,
          m_first->particles(c1), m_second->frozenParticles(c2),
-         true, false,
+         true, false, m_offset,
          m_minus_cell_dist);
 //                 m_minus_cell_dist, thread_no);
 //                -m_cell_dist, thread_no);
@@ -1201,7 +1236,7 @@ class CellLink: public AbstractCellLink
          cutoff_sq,
          m_second, m_first,
          m_second->frozenParticles(c1), m_first->particles(c2),
-         false, true,
+         false, true, -m_offset,
 //                 m_cell_dist, thread_no);
          m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1213,7 +1248,7 @@ class CellLink: public AbstractCellLink
          cutoff_sq,
          m_first, m_second,
          m_first->frozenParticles(c1), m_second->particles(c2),
-         false, true,
+         false, true, m_offset,
          m_minus_cell_dist);
 //                 m_minus_cell_dist, thread_no);
 //                 -m_cell_dist, thread_no);
@@ -1224,7 +1259,7 @@ class CellLink: public AbstractCellLink
          cutoff_sq,
          m_second, m_first,
          m_second->particles(c1), m_first->frozenParticles(c2),
-         true, false,
+         true, false, -m_offset,
 //                 m_cell_dist, thread_no);
          m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1253,7 +1288,7 @@ class CellLink: public AbstractCellLink
 	       cutoff_sq,
 	       m_first, m_second,
 	       m_first->particles(c1), m_second->particles(c2),
-	       m_acts_on.first, m_acts_on.second,
+	       m_acts_on.first, m_acts_on.second, m_offset,
 //               minus_m_cell_dist, thread_no);
 //	       -m_cell_dist, thread_no);
 	       m_minus_cell_dist);
@@ -1265,7 +1300,7 @@ class CellLink: public AbstractCellLink
 		 cutoff_sq,
 		 m_first, m_second,
 		 m_first->particles(c1), m_second->frozenParticles(c2),
-		 true, false,
+		 true, false, m_offset,
                  m_minus_cell_dist);
 //                 m_minus_cell_dist, thread_no);
 //                -m_cell_dist, thread_no);
@@ -1278,7 +1313,7 @@ class CellLink: public AbstractCellLink
 		 cutoff_sq,
 		 m_first, m_second,
 		 m_first->frozenParticles(c1), m_second->particles(c2),
-		 false, true,
+		 false, true, m_offset,
                  m_minus_cell_dist);
 //                 m_minus_cell_dist, thread_no);
 //                 -m_cell_dist, thread_no);
@@ -1290,7 +1325,7 @@ class CellLink: public AbstractCellLink
 	       cutoff_sq,
 	       m_second, m_first,
 	       m_second->particles(c2), m_first->particles(c1),
-	       m_acts_on.second, m_acts_on.first,
+	       m_acts_on.second, m_acts_on.first, -m_offset,
 //               m_cell_dist, thread_no);
                m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1301,7 +1336,7 @@ class CellLink: public AbstractCellLink
 		 cutoff_sq,
 		 m_second, m_first,
 		 m_second->frozenParticles(c2), m_first->particles(c1),
-		 false, true,
+		 false, true, -m_offset,
 //                 m_cell_dist, thread_no);
                  m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1312,7 +1347,7 @@ class CellLink: public AbstractCellLink
 		 cutoff_sq,
 		 m_second, m_first,
 		 m_second->particles(c2), m_first->frozenParticles(c1),
-		 true, false,
+		 true, false, -m_offset,
 //                 m_cell_dist, thread_no);
                  m_cell_dist);
 //               m_first->m_cell_dist[m_alignment][m_cross_regions]);
@@ -1324,16 +1359,37 @@ class CellLink: public AbstractCellLink
 
 };
 
-template <typename AddPairCheck_x>
+template <typename AddPairCheck_x, typename FarNeighborCheck_x>
 AbstractCellLink *establishLinkTemplate(ManagerCell *a_manager, Cell *first, Cell *second, int where, bool acts_on_first, bool acts_on_second, bool cross_regions)
 {
-
-    auto *link = new CellLink<AddPairCheck_x>(first, second, where, acts_on_first, acts_on_second, cross_regions);
+//    int_point_t offset = {0,0,0};
+    auto *link = new CellLink<AddPairCheck_x, FarNeighborCheck_x>(first, second, where, a_manager->c_offsets(where), acts_on_first, acts_on_second, cross_regions); //a_manager->c_offsets(where),
 
     first->neighbors(where).push_back(link);
     second->neighbors(a_manager->num_neighbors()-where-1).push_back(link);
     return link;
 }
+
+struct FarNeighborCheck_Off {
+  static bool withinCutoff(point_t &cell_dist, point_t &precomputed, int_point_t offset, double cutoff_sq){return true;};
+};
+
+struct FarNeighborCheck_On {
+  static bool withinCutoff(point_t &cell_dist, point_t &precomputed, int_point_t offset, double cutoff_sq)
+  {
+    double nearestDist_sq=0;
+    for (int _i = 0; _i < SPACE_DIMS; _i++)
+      if (offset[_i] < -1) nearestDist_sq += (-cell_dist[_i]/2+precomputed[_i])*(-cell_dist[_i]/2+precomputed[_i]); else
+      if (offset[_i] == -1) nearestDist_sq += precomputed[_i]*precomputed[_i]; else
+      if (offset[_i] > 0) nearestDist_sq += (-cell_dist[_i]-precomputed[_i])*(-cell_dist[_i]-precomputed[_i]);
+    if (nearestDist_sq < cutoff_sq)
+      return true;
+    else
+      return false;
+  };
+};
+
+
 
 struct AddPairCheck_Regular {
   static void check(Cell *c, int i, double &cartesian, double width){};
@@ -1377,8 +1433,11 @@ void addPair(vector<PairList> &distances, double cutoff_sq,
      is pointing to. */
   if (d.abs_square < cutoff_sq) {
     d.abs = sqrt(d.abs_square);
+//    MSG_DEBUG("AddPair+", second_p->mySlot << " " << d.abs);
       distances[thread_no].newPair().set(d, first_p, second_p, ao_f, ao_s);
-  }
+    }
+//  }else
+ //   MSG_DEBUG("AddPair-", second_p->mySlot << " " << sqrt(d.abs_square));
 };
 
 
