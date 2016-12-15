@@ -38,8 +38,6 @@
 
 // #include <utility>
 
-const SymbolRegister<ValCalculatorDirichletBC> val_calc_dirichletBC("ValCalculatorDirichletBCVels");
-
 #define M_SIMULATION  ((Simulation*) m_parent)
 #define M_PHASE  M_SIMULATION->phase()
 #define M_MANAGER  M_PHASE->manager()
@@ -65,17 +63,6 @@ void ValCalculatorDirichletBC::init()
 {
   m_properties.setClassName("DirichletBCVels");
 
-  m_properties.setDescription("Saves the pair-specific value of the velocity of the boundary particle used for applying a Dirichlet boundary condition (BC) in each pair of particles. This calculator uses a linear approximation.");
-
-//   STRINGPC
-//       (symbol, m_symbolName,
-//        "Name of the symbol for the boundary value.");
-  
-//   STRINGPC(wallSpecies, m_wallSpecies, 
-//            "Species of the wall particles."
-//           );
-
-  m_symbolName = "vBC";
   m_wallSpecies = "undefined";
 #ifdef _OPENMP
   m_particleCalculator = false;
@@ -101,7 +88,7 @@ void ValCalculatorDirichletBC::setup()
 
 //   m_wallColour = M_MANAGER->getColour(m_wallSpecies);
 
-  m_datatype = DataFormat::POINT;
+  // m_datatype = DataFormat::POINT;
 
   ValCalculatorBC::setup();
 
@@ -114,7 +101,10 @@ void ValCalculatorDirichletBC::setup()
 //       ("ValCalculator_" + myName() + "_" + cp->toString(), DataFormat::POINT, false, m_symbolName).offset;
 // }
 
-// FIXME: inline ?
+
+// Commented out because this is just the specific velocity case, hence useless in an abstract parent class
+#if 0
+
 #ifndef _OPENMP
 void ValCalculatorDirichletBC::compute(Pairdist* pD)
 #else
@@ -154,3 +144,4 @@ void ValCalculatorDirichletBC::compute(Pairdist* pD, int thread_no)
 //     //   } // this is the closing of the commented out if(m_cutoff > ...)                                                                      
 }
 
+#endif // end of #if 0

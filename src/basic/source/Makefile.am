@@ -92,7 +92,7 @@ libbasic_la_SOURCES = \
 	val_calculator.cpp \
 	val_calculator_arbitrary.cpp \
 	val_calculator_BC.cpp \
-	val_calculator_dirichletBC.cpp \
+	val_calculator_dirichlet_BC_scalar.cpp \
 	val_calculator_dirichlet_BC_vels.cpp \
 	val_calculator_kernel.cpp \
 	val_calculator_neg_dkernel_divr.cpp \

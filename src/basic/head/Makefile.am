@@ -98,7 +98,7 @@ include_HEADERS = \
 	val_calculator.h \
 	val_calculator_arbitrary.h \
 	val_calculator_BC.h \
-	val_calculator_dirichletBC.h \
+	val_calculator_dirichlet_BC_scalar.h \
 	val_calculator_dirichlet_BC_vels.h \
 	val_calculator_kernel.h \
 	val_calculator_neg_dkernel_divr.h \

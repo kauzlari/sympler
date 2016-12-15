@@ -65,7 +65,7 @@ void ValCalculatorDirichletBCVels::init()
 {
   m_properties.setClassName("DirichletBCVels");
 
-  m_properties.setDescription("Saves the pair-specific value of the velocity of the boundary particle used for applying a Dirichlet boundary condition (BC) in each pair of particles. This calculator uses a linear approximation.");
+  m_properties.setDescription("Saves the pair-specific value of the velocity of the boundary particle used for applying a Dirichlet boundary condition (BC) in each pair of particles. This calculator uses a linear approximation. The actual value of the Dirichlet boundary condition is assumed to be stored in the velocity field of the respective boundary particle.");
   
 //   STRINGPC
 //       (symbol, m_symbolName,
