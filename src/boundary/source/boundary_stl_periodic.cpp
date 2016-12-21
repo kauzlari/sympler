@@ -81,7 +81,10 @@ void BoundaryStlPeriodic::init()
   
   STRINGPCINF
     (name, m_filename,
-     "Name of the .STL geometry file to be loaded. Geometry must have inflow and outflow defined by extremal points. Inflow and outflow must be at same height and have same shape.");
+     "Name of the .STL geometry file to be loaded. Geometry must completely lie "
+     "in positive XYZ directions. Geometry must have inflow and outflow defined "
+     "by extremal points. Inflow and outflow must be at same height and have"
+     " same shape.");
 
   BOOLPC
     (invertNormals, m_invert_normals,
@@ -156,10 +159,12 @@ void BoundaryStlPeriodic::setup()
                 for(int p =0; p<3;p++){  
                     temp= (*i)->returnCorner(p)[j];
                     
-                    if(temp > max)
+                    //if(temp > max)
+                    if((temp-max)>=g_geom_eps)
                         max= temp;                        
                     
-                    if(temp< min)
+                    //if(temp< min)
+                    if((temp-min) <= g_geom_eps)
                         min= temp;                       
                      
                 }   
@@ -171,10 +176,12 @@ void BoundaryStlPeriodic::setup()
                 for(int p =0; p<3;p++){ 
                     temp= (*i)->returnCorner(p)[j];
                                       
-                    if(temp==min) 
-                        ++countermin;                
+                    //if(temp==min) 
+                    if((temp-min)<= g_geom_eps)  
+                         ++countermin;                
                 
-                    if(temp==max)
+                    //if(temp==max)
+                    if((temp-max)<=g_geom_eps)
                         ++countermax;    
                 }
 
