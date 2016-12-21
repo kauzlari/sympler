@@ -127,16 +127,11 @@ void BoundaryStlPeriodic::setup()
     m_container = loader.read(m_filename);
     }
  
-/*  bool_point_t periodicFrontandBack = { { { m_periodic[0], m_periodic[1], m_periodic[2] } } };
-  m_container->setPeriodicityFront(periodicFrontandBack);
-  m_container->setPeriodicityBack(periodicFrontandBack);
 
- */
     m_container->setPeriodicityFront(m_periodic);
     m_container->setPeriodicityBack(m_periodic);  
     m_container->stretchBy(m_scale);
     m_container->updateBoundingBox();
-//MSG_DEBUG("BoundaryStlPeriodic::read", "box: " << m_container->boundingBox().corner1 << " - " << m_container->boundingBox().corner2);
 
   
 
@@ -159,7 +154,7 @@ void BoundaryStlPeriodic::setup()
                
             for (list<Wall*>::iterator i = m_container->walls().begin(); i != m_container->walls().end(); i++) { 
                 for(int p =0; p<3;p++){  
-                    temp= (*i)->findcorner(p)[j];
+                    temp= (*i)->returnCorner(p)[j];
                     
                     if(temp > max)
                         max= temp;                        
@@ -174,7 +169,7 @@ void BoundaryStlPeriodic::setup()
                 countermin =0; countermax=0; 
                 
                 for(int p =0; p<3;p++){ 
-                    temp= (*i)->findcorner(p)[j];
+                    temp= (*i)->returnCorner(p)[j];
                                       
                     if(temp==min) 
                         ++countermin;                
@@ -195,7 +190,7 @@ void BoundaryStlPeriodic::setup()
   
         }  
     } 
-     MSG_DEBUG("Boundary Stl Periodic", "Setup completed.");
+     MSG_DEBUG("BoundaryStlPeriodic::setup", "Setup completed.");
 }
 
 
@@ -204,9 +199,6 @@ void BoundaryStlPeriodic::setup()
 
 //---- Cell subdivision ----
 
-
-#define OUTLET 0
-#define NEIGHBOR 1
 
 void BoundaryStlPeriodic::setup(Simulation* sim, ManagerCell *mgr)
 {

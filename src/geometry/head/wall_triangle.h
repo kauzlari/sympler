@@ -515,7 +515,7 @@ class WallTriangle: public Wall
   /*!
    * Returns m_corner[i] of wall
    */
-  virtual point_t findcorner(int i){
+  virtual point_t returnCorner(int i){
       return (m_corners[i]);
   }
   
