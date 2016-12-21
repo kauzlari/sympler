@@ -164,7 +164,7 @@ void BoundaryStlPeriodic::setup()
                         max= temp;                        
                     
                     //if(temp< min)
-                    if((temp-min) <= g_geom_eps)
+                    if((min-temp) <= g_geom_eps)
                         min= temp;                       
                      
                 }   
@@ -177,7 +177,7 @@ void BoundaryStlPeriodic::setup()
                     temp= (*i)->returnCorner(p)[j];
                                       
                     //if(temp==min) 
-                    if((temp-min)<= g_geom_eps)  
+                    if((min-temp)<= g_geom_eps)  
                          ++countermin;                
                 
                     //if(temp==max)
