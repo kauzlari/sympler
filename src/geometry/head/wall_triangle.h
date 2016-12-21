@@ -512,6 +512,13 @@ class WallTriangle: public Wall
    */
   void initHelpers();
   
+  /*!
+   * Returns m_corner[i] of wall
+   */
+  virtual point_t findcorner(int i){
+      return (m_corners[i]);
+  }
+  
 };
 
 #endif
