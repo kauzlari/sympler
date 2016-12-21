@@ -9,8 +9,10 @@ libboundary_la_SOURCES = \
 	boundary_diffusor.cpp \
 	boundary_step.cpp \
 	boundary_stl.cpp \
+	boundary_stl_periodic.cpp\
 	boundary_obstacle.cpp \
 	boundary_with_inlet.cpp
+	
 
 libboundary_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@
 
