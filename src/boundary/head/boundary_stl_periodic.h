@@ -28,8 +28,8 @@
  * 
  */
 
-#ifndef BOUNDARY_STL_PERIODIC_H
-#define	BOUNDARY_STL_PERIODIC_H
+#ifndef __BOUNDARY_STL_PERIODIC_H
+#define	__BOUNDARY_STL_PERIODIC_H
 /*!
  * Description of a boundary conditions to be used with stl files when
  * periodicity is desired.  
