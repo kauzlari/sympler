@@ -159,12 +159,12 @@ void BoundaryStlPeriodic::setup()
                 for(int p =0; p<3;p++){  
                     temp= (*i)->returnCorner(p)[j];
                     
-                    //if(temp > max)
-                    if((temp-max)>=g_geom_eps)
+                    if(temp > max)
+                    //if((temp-max)>=g_geom_eps)
                         max= temp;                        
                     
-                    //if(temp< min)
-                    if((temp-min) <= g_geom_eps)
+                    if(temp< min)
+                    //if((temp-min) <= g_geom_eps)
                         min= temp;                       
                      
                 }   
@@ -176,12 +176,12 @@ void BoundaryStlPeriodic::setup()
                 for(int p =0; p<3;p++){ 
                     temp= (*i)->returnCorner(p)[j];
                                       
-                    //if(temp==min) 
-                    if((temp-min)<= g_geom_eps)  
+                    if(temp==min) 
+                    //if((temp-min)<= g_geom_eps)  
                          ++countermin;                
                 
-                    //if(temp==max)
-                    if((temp-max)<=g_geom_eps)
+                    if(temp==max)
+                    //if((temp-max)<=g_geom_eps)
                         ++countermax;    
                 }
 
