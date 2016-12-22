@@ -57,7 +57,7 @@ BoundaryStlPeriodic::~BoundaryStlPeriodic()
 
 void BoundaryStlPeriodic::init()
 {
-  MSG_DEBUG("BoundaryStlPeriodic", "Initializing boundary.");  
+  MSG_DEBUG("BoundaryStlPeriodic::init()", "Initializing boundary.");  
   m_properties.setClassName("BoundaryStlPeriodic");
   m_properties.setName("BoundaryStlPeriodic");
   m_properties.setDescription("A Boundary with periodic stl geometry. ");
@@ -148,48 +148,56 @@ void BoundaryStlPeriodic::setup()
  * If this condition is met the wall will be deleted and with it, its associated reflectors.  
  */
     for (int j=0 ; j<3; j++){
-   
+        
         if(m_periodic[j] == true){
-      
+            
             double min, max, temp;
             list<Wall*>::iterator d; 
             int countermax, countermin; 
-               
+            
+            
+            //initialize min, max
+     
+            min =(*m_container ->walls().front()).returnCorner(1)[j];
+            max = (*m_container ->walls().back()).returnCorner(1)[j];
+           
+            //find inflow outflow surfaces
             for (list<Wall*>::iterator i = m_container->walls().begin(); i != m_container->walls().end(); i++) { 
                 for(int p =0; p<3;p++){  
                     temp= (*i)->returnCorner(p)[j];
-                    
-                    if(temp > max)
-                    //if((temp-max)>=g_geom_eps)
-                        max= temp;                        
-                    
-                    if(temp< min)
-                    //if((temp-min) <= g_geom_eps)
-                        min= temp;                       
+                                       
+                    //if(temp > max)
+                    if((temp-max)>g_geom_eps)
+                        max= temp;
+                                       
+                    //if(temp< min)
+                    if((min-temp) > g_geom_eps)
+                        min= temp;
                      
                 }   
             }
-     
+            //delete inflow outflow walls
             for (list<Wall*>::iterator i = m_container->walls().begin(); i != m_container->walls().end(); ) { 
                 countermin =0; countermax=0; 
                 
                 for(int p =0; p<3;p++){ 
                     temp= (*i)->returnCorner(p)[j];
                                       
-                    if(temp==min) 
-                    //if((temp-min)<= g_geom_eps)  
+                   // if(temp==min) 
+                    if(abs(min-temp)<= g_geom_eps)  
                          ++countermin;                
                 
-                    if(temp==max)
-                    //if((temp-max)<=g_geom_eps)
+                    //if(temp==max)
+                                       
+                    if(abs(temp-max)<=g_geom_eps)
                         ++countermax;    
                 }
-
+           
                 if (countermin == 3 || countermax ==3 ){  
                     d=i; 
                     i++;
                     m_container->deleteWall(d);
-              
+             
                 }
                 else i++;
             }
