@@ -65,7 +65,14 @@ void ValCalculatorVolume::init()
   m_properties.setClassName("ValCalculatorPart");
   m_properties.setName("ValCalculatorVolume");
 
-  m_properties.setDescription("Calculates the local volume.");
+  m_properties.setDescription
+    ("Calculates the local volume V_i according to the formula\n"
+     "\n"
+     "V_i=sum_j(W_ij/n_j)\n"
+     "\n"
+     "where W_ij is the value for particle pair (i,j) of the weighting "
+     "function provided by the user, and n_j is a previously computed "
+     "local density also provided by the user.");
 
   STRINGPC
       (symbol, m_symbolName,
