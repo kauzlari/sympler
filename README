@@ -140,13 +140,23 @@ often. We have this bug on our list. Further bug reports on this issue are welco
 
 ++ Configuration and Compilation for MacOS
 
-The following instructions were last successfully tested with Mac OS X Yosemite 10.10.5 and have been provided by Tobias Wondratsch (based on older instructions by Oliver Grünert and Andreas Greiner).
+The following instructions were last successfully tested om Mac OS X El Capitan
+10.11.5 and have been provided by Andreas Greiner (based on older instructions
+by Oliver Grünert, Andreas Greiner, and Tobias Wondratsch).
 
-The libxml2 library comes already preinstalled by Apple but caused trouble during the SYMPLER installation. You may give the preinstalled libxml2 a try or immediately go and get an alternative version and the two remaining libraries by using one of the packaging-systems for Mac OS.
+The libxml2 library comes already preinstalled by Apple but caused trouble
+during the SYMPLER installation. You may give the preinstalled libxml2 a try or
+immediately go and get an alternative version and the two remaining libraries
+by using one of the packaging-systems for Mac OS.
 
-One of the best packaging-systems is homebrew. How to install homebrew is described on https://brew.sh. Two nice properties of homebrew are, that it is easy to install and very easy to UNINSTALL, meaning that your operating system will be the same as before, without any old header or binary files lying around.
+One of the best packaging-systems is homebrew. How to install homebrew is
+described on https://brew.sh. Two nice properties of homebrew are, that it is
+easy to install and very easy to UNINSTALL, meaning that your operating system
+will be the same as before, without any old header or binary files lying
+around.
 
-After homebrew is installed, you are ready to install the GSL and the SDL library. But first, on a fresh system, you might still be lacking
+After homebrew is installed, you are ready to install the GSL library, the SDL
+library, and the ICU4C library. But first, on a fresh system, you might still be lacking
 
 $ brew install gcc
 $ brew install libtool
@@ -167,9 +177,23 @@ If you have to, also install libxml2
 
 $ brew install libxml2 
 
-Try first to skip this paragraph because the next step is only necessary if you run into trouble with your already preinstalled command-line tool gm4 (a macro processor used by aclocal). Then you need to replace it with a newer version, since the old version which came from Apple was broken. This was the case for example in MacOS 10.6.2. You can grab the most recent version from http://ftp.gnu.org/gnu/m4/. Now drag the old gm4 tool in /usr/bin to a backup folder (for example your Desktop) and replace it with the newer version (you will be asked to enter your root password).
+Now install the icu4c
 
-Now you are ready to compile sympler! So grab the SYMPLER source code into a code directory (called $CODE-DIR here) and create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal (adapt the paths to your needs):
+$ brew install icu4c
+
+Try first to skip this paragraph because the next step is only necessary if you
+run into trouble with your already preinstalled command-line tool gm4 (a macro
+processor used by aclocal). Then you need to replace it with a newer version,
+since the old version which came from Apple was broken. This was the case for
+example in MacOS 10.6.2. You can grab the most recent version from
+http://ftp.gnu.org/gnu/m4/. Now drag the old gm4 tool in /usr/bin to a backup
+folder (for example your Desktop) and replace it with the newer version (you
+will be asked to enter your root password).
+
+Now you are ready to compile sympler! So grab the SYMPLER source code into a
+code directory (called $CODE-DIR here) and create a new build directory (called
+$BUILD-DIR here) into which you will compile. Then in your terminal (adapt the
+paths to your needs):
 
 $ cd $CODE-DIR
 $ glibtoolize --force
@@ -177,7 +201,8 @@ $ aclocal -I /usr/local/Cellar/gsl/1.16/share/aclocal -I /usr/local/Cellar/sdl/1
 $ autoconf
 $ automake --add-missing
 $ cd $BUILD-DIR
-$ $CODE-DIR/configure CXXFLAGS="-O3"
+$ $CODE-DIR/configure CXXFLAGS="-O3 -I/usr/local/opt/isu4c/include" LDFLAGS="-L/usr/local/opt/icu4c/lib"
+
 $ make -j[1 to roughly the number of available cores]
 
 After successful compilation the executable "sympler" will be created in the directory src/
