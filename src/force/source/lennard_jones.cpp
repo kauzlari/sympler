@@ -34,8 +34,6 @@
 
 #include "phase.h"
 #include "simulation.h"
-#include "val_calculator_r_i6.h"
-#include "val_calculator_r_i.h"
 #include "pair_creator.h"
 #include "threads.h"
 
