@@ -361,6 +361,7 @@ void sayHello() {
 #include "quintet_calc_curvature.h"
 #include "quintet_calc_curvature_f.h"
 // #include "val_calculator_dirichlet_BC_scalar.h"
+#include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_vels.h"
 #include "val_calculator_kernel.h"
 #include "val_calculator_neg_dkernel_divr.h"
@@ -595,6 +596,7 @@ void link_all_properly()
   new QuintetCalcCurvatureF(NULL);
   new QuintetCalcCurvature(NULL);
 //   new ValCalculatorDirichletBCScalar(NULL);
+  new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCVels(NULL);
   new ValCalculatorKernel(NULL);
   new ValCalculatorNegDKernelDivr(NULL);

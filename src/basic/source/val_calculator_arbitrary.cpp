@@ -656,7 +656,7 @@ bool ValCalculatorArbitrary::findStage()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ParticleCacheArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -687,7 +687,7 @@ bool ValCalculatorArbitrary::findStage()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ParticleCacheArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -831,9 +831,9 @@ bool ValCalculatorArbitrary::findStage_0()
 	(
 	 M_MANAGER, 
 	 assert(m_phaseUser == 2 || m_phaseUser == 0);
+	 // loop over non-bonded ValCalculators
 	 vector<ValCalculator*>* vCs;
-	 //       if(m_phaseUser == 1) vCs = &(cp->valCalculatorsFlat());
-	 /*if(m_phaseUser == 0)*/ vCs = &(cp->valCalculatorsFlat_0());
+	 vCs = &(cp->valCalculatorsFlat_0());
 	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
 	     (vCIt != vCs->end() && !tooEarly); ++vCIt)
 	   {
@@ -867,8 +867,7 @@ bool ValCalculatorArbitrary::findStage_0()
 		       }
 		   }
 	       }       
-	   }
-
+	   } // end loop over non-bonded ValCalculators
 
 	 // loop over bonded ValCalculators
 	 vCs = &(cp->bondedValCalculatorsFlat_0());
@@ -915,7 +914,8 @@ bool ValCalculatorArbitrary::findStage_0()
 	     // important because there still comes the ++__cp from the loop
 	     --__cp;
 	   }
-	 );
+	 
+	 ); // end loop over ColourPairs
         
           if(!tooEarly)
           {
@@ -935,7 +935,7 @@ bool ValCalculatorArbitrary::findStage_0()
 		       int stage = (*__iFE)->stage();
 		       if(stage == -1) 
 			 {
-			   MSG_DEBUG("ParticleCacheArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+			   MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 			   tooEarly = true;
 			   m_stage = -1;
 			 }
@@ -970,7 +970,7 @@ bool ValCalculatorArbitrary::findStage_0()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ParticleCacheArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -1002,7 +1002,7 @@ bool ValCalculatorArbitrary::findStage_0()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ParticleCacheArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
