@@ -83,12 +83,13 @@ Compiling SYMPLER:
 ++ GNU scientific library (GSL)
 ++ libxml2
 
-Note that you usually also have to install the libraries for development. They have names such as libgsl*-dev,
+NOTE: You usually also have to install the libraries for development. They have names such as libgsl*-dev,
 libsdl*-dev, and so on.
 
 
 + Optional libraries: 
 
+++ liblzma-dev: For the configure-option --enable-all-static (see below)
 ++ libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.
 ++ OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during
 configuration (CXXFLAGS="... -fopenmp").
@@ -102,8 +103,8 @@ configuration (CXXFLAGS="... -fopenmp").
 + Configuration and Compilation:
 
 All the commands invoked in the following have their own documentation. Please refer to it for more information.
-It follows first a standard method working on standard Linux systems such as Ubuntu 12.04. Below you find special
-instructions for MacOS and Intel compilers.
+It follows first a standard method working on standard Linux systems such as Ubuntu 12.04 or newer. Below you
+find special instructions for MacOS and Intel compilers.
 
 ++ Configuration and Compilation for standard Linux-systems:
 
@@ -134,8 +135,11 @@ and useful [options] are:
 --with-tnt: use tnt library and jama libraries
 --with-superlu: use superlu 
 --enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries
-(except the runtime compiled expressions of course). Unfortunately this option currently causes SYMPLER to crash very
-often. We have this bug on our list. Further bug reports on this issue are welcome. A bug-fix is even more welcome. 
+(except for the glibc used during linking after compilation of SYMPLER; and the runtime compiled expressions of
+course). NOTE the required library liblzma-dev (listed under optional libraries above). Also libicu should be
+installed, but this is usually the case by default (for example libicu-dev and libicu55 on Ubuntu 16.04). Further
+note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash
+very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome.
 
 
 ++ Configuration and Compilation for MacOS

@@ -1,6 +1,6 @@
 
 
-- The "degrees-symbol", at least if used in the help-text, is not displayed correctly in some terminals (e.g. mine from Ubuntu 12.04LTS)
+- The "degrees-symbol", at least if used in the help-text, is not displayed correctly in some terminals (e.g. bash in Ubuntu 12.04LTS and 16.04LTS). Can't we use "." for the matrix-matrix-product?
 
 - Remove the callback stuff like FunctionPairCallback from the runtime compiled functions! It isn't necessary anymore, right? It checks by hand for symbols such as "ni" and then it creates a ValCalculatorRho. I think we don't need this feature anymore and just complicates things a lot.
 
@@ -17,7 +17,7 @@
      ONE free 3.615 5.000 5.000 0 0 0 1 0 0 0
      !!!
 
-- testsuite: If configuration fails, this is not reportes in test_sympler.pl. You can check this, e.g., by changing to a wrong directory.
+- testsuite: If configuration fails, this is not reported in test_sympler.pl. You can check this, e.g., by changing to a wrong directory.
 
 - Using an arbitrary quantity computed by a PairCalculator or ParticleCalculator, but no Integrator changing positions leads to zero after the first timestep (probably because the symbol is not persistent). This is stupid behaviour! Find a consistent behaviour! How about including a check whether the positions change? Then make it possible that the symbols are computed only once.
 
@@ -38,7 +38,7 @@
 - FNPower::toC(): If the second argument of the "^"-operator contains an expression with  variables like, e.g., [rij]:[rij], the function will usually boil out with a seg.-fault, and, if not, the results will be bullshit, because, in any case it reads not correctly initialised memory. That's because of the line "Variant vValB = m_b->value();" which we need to check whether the argument is an integer. Is there a way to catch this case and to use the pow()-function like in the case when it is a floating-point number? 
 Currently, we have at least a MSG_DEBUG, which says that it could boil out after the next line of code.
 
-- old question: currently, it is forbidden, to have box-dimensions < 3* cutoff in a periodic direction and < 2*cutoff in a non-periodic direction. Isn't it (Wasn't it once?) possible to have the old rule of > 1*cutoff, i.e., the possibility of having one cell in a direction?
+- TASK TAKEN: old question: currently, it is forbidden, to have box-dimensions < 3* cutoff in a periodic direction and < 2*cutoff in a non-periodic direction. Isn't it (Wasn't it once?) possible to have the old rule of > 1*cutoff, i.e., the possibility of having one cell in a direction?
 
 - let OS throw exception if nans occur -> catch that and write s.th. like "Does the initial setup of your simulation parameters make sense? If you don't know, feel free to ask the programmers."
 

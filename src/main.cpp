@@ -159,6 +159,7 @@ void sayHello() {
 #include "boundary_diffusor.h"
 #include "boundary_obstacle.h"
 #include "boundary_stl.h"
+#include "boundary_stl_periodic.h"
 #include "boundary_step.h"
 
 #include "pair_creator.h"
@@ -387,6 +388,7 @@ void link_all_properly()
   new BoundaryDiffusor(NULL);
   new BoundaryObstacle(NULL);
   new BoundarySTL(NULL);
+  new BoundaryStlPeriodic(NULL);
   new BoundaryStep(NULL);
 
   new PairCreator(NULL);
