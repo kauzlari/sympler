@@ -58,7 +58,8 @@ void ManagerCell::init()
 //    MSG_DEBUG("ManagerCell::ManagerCell", "Constructor.");
   m_first_link.resize(global::n_threads);
   m_n_active_links.resize(global::n_threads);
-  
+  m_checkForFarNeighbors = m_phase->pairCreator()->checkForFarNeighbors();
+
   for (int t = 0; t < global::n_threads; ++t) {
     m_first_link[t]= NULL;
     m_n_active_links[t] = 0;
@@ -95,6 +96,7 @@ void ManagerCell::init()
   pthread_mutex_init(&m_cells__mutex, &g_mutex_attr);
   pthread_mutex_init(&m_links__mutex, &g_mutex_attr);
 #endif
+  m_checkForFarNeighbors = m_phase->pairCreator()->checkForFarNeighbors();
 }
 
 ManagerCell::ManagerCell(Phase* p)
@@ -443,14 +445,8 @@ void ManagerCell::assignContainer(WallContainer *container)
 /* Look for neighbors (which means periodicities) and connect
    cells appropriately
 */
-void ManagerCell::findRegionCellDirectNeighbors(region_t *r, bool_point_t periodic, bool oneCellPeriodicDims)
+void ManagerCell::findRegionCellDirectNeighbors(region_t *r, bool_point_t periodic, AbstractCellLink *(Cell::*ap_addNeighbor)(Cell*, int, bool))
 { 
-  AbstractCellLink *(Cell::*p_addNeighbor)(Cell*, int, bool);
-  if (!oneCellPeriodicDims)
-    p_addNeighbor = &Cell::addNeighbor<AddPairCheck_Regular>;
-  else
-    p_addNeighbor = &Cell::addNeighbor<AddPairCheck_OneCellDims>;
-      
   for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
     for (int j = 0, n; j < NUM_HALF_DIRECT_NEIGHBORS; j++) {
       n = m_direct_neighbors[j];
@@ -482,7 +478,7 @@ void ManagerCell::findRegionCellDirectNeighbors(region_t *r, bool_point_t period
 	  if (Cell *c = r->cellByPos(neighbor)){
             cellDist(*i, c, n, 0);
             if (neighbourFound){
-              m_links.push_back(((*i)->*p_addNeighbor)(c, n, false));
+              m_links.push_back(((*i)->*ap_addNeighbor)(c, n, false));
             }else{ 
               (*i)->addPeriodic(c, n);
               int inv_direct_neighbor = num_neighbors() - n - 1;
@@ -499,14 +495,8 @@ void ManagerCell::findRegionCellDirectNeighbors(region_t *r, bool_point_t period
 /* Look for neighbors (which means periodicities) and connect
    cells appropriately
 */
-void ManagerCell2x::findRegionCellIndirectNeighbors(region_t *r, bool_point_t periodic, bool oneCellPeriodicDims)
+void ManagerCell2x::findRegionCellIndirectNeighbors(region_t *r, bool_point_t periodic, AbstractCellLink *(Cell::*p_establishLink)(Cell*, int, bool, bool, bool))
 {
-  AbstractCellLink *(Cell::*p_establishLink)(Cell*, int, bool, bool, bool);
-  if (!oneCellPeriodicDims)
-    p_establishLink = &Cell::establishLink<AddPairCheck_Regular>;
-  else
-    p_establishLink = &Cell::establishLink<AddPairCheck_OneCellDims>;
-
   for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
     for (int j = 0, n=0; j < NUM_HALF_2X_INDIRECT_NEIGHBORS;j++) {
       n= c_indirect_neighbors[j];
@@ -723,19 +713,33 @@ region_t *ManagerCell::cellSubdivide
       }
 
   
-    for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)  {
-      if (!oneCellPeriodicDims)  
-        (*i)->init<AddPairCheck_Regular>();
-     else
-        (*i)->init<AddPairCheck_OneCellDims>();
+  AbstractCellLink *(Cell::*p_addNeighbor)(Cell*, int, bool);
+  AbstractCellLink *(Cell::*p_establishLink)(Cell*, int, bool, bool, bool);
+  if (!oneCellPeriodicDims){
+    if (m_checkForFarNeighbors){
+      p_addNeighbor = &Cell::addNeighbor<AddPairCheck_Regular, FarNeighborCheck_On>;
+      p_establishLink = &Cell::establishLink<AddPairCheck_Regular, FarNeighborCheck_On>;
+    }else{
+      p_addNeighbor = &Cell::addNeighbor<AddPairCheck_Regular, FarNeighborCheck_Off>;
+      p_establishLink = &Cell::establishLink<AddPairCheck_Regular, FarNeighborCheck_Off>;
     }
-  
- 
-  
+    for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)
+      (*i)->init<AddPairCheck_Regular>();
+  }else{
+    for (vector<Cell*>::iterator i = r->cells.begin(); i != r->cells.end(); i++)
+      (*i)->init<AddPairCheck_OneCellDims>();
+    if (m_checkForFarNeighbors){
+      p_addNeighbor = &Cell::addNeighbor<AddPairCheck_OneCellDims, FarNeighborCheck_On>;
+      p_establishLink = &Cell::establishLink<AddPairCheck_OneCellDims, FarNeighborCheck_On>;
+    }else{
+      p_addNeighbor = &Cell::addNeighbor<AddPairCheck_OneCellDims, FarNeighborCheck_Off>;
+      p_establishLink = &Cell::establishLink<AddPairCheck_OneCellDims, FarNeighborCheck_Off>;
+    }
+  }
   // MSG_DEBUG("ManagerCell::cellSubdivide", "Looking for neighbors.");
 
-  findRegionCellDirectNeighbors(r, periodic, oneCellPeriodicDims);
-  findRegionCellIndirectNeighbors(r, periodic, oneCellPeriodicDims);
+  findRegionCellDirectNeighbors(r, periodic, p_addNeighbor);
+  findRegionCellIndirectNeighbors(r, periodic, p_establishLink);
 //  MSG_DEBUG("ManagerCell::cellSubdivide", r->cells.size() << " cells created.");
 
   /* Done... Insert into m_cells and m_regions. */
@@ -789,18 +793,34 @@ void ManagerCell::connect(int adir, region_t *a, region_t *b, bool_point_t perio
         acts_on_first = true;
     }*/
     if (t == OUTLET)
-      if (a->n_cells[dir[1]] != 1 && a->n_cells[dir[2]] != 1)
-        connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_Regular>, &ManagerCell::cellDist, 1, p, q, off, dir); 
+      if (a->n_cells[dir[1]] != 1)
+        if (m_checkForFarNeighbors)
+          connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_Regular, FarNeighborCheck_On>, &ManagerCell::cellDist, 1, p, q, off, dir);
+        else
+          connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_Regular, FarNeighborCheck_Off>, &ManagerCell::cellDist, 1, p, q, off, dir);
       else
-        connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_OneCellDims>, &ManagerCell::cellDist, 1, p, q, off, dir); 
+        if (m_checkForFarNeighbors)
+          connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_OneCellDims, FarNeighborCheck_On>, &ManagerCell::cellDist, 1, p, q, off, dir);
+        else
+          connectPlanePair(a, b, periodic, &Cell::addOutlet<AddPairCheck_OneCellDims, FarNeighborCheck_Off>, &ManagerCell::cellDist, 1, p, q, off, dir); 
     else {
       AbstractCellLink *(Cell::*est)(Cell *, int, bool);
-      if (a->n_cells[dir[1]] != 1 && a->n_cells[dir[2]] != 1){
-        connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_Regular>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
-        est = &Cell::establishLink<AddPairCheck_Regular>;
+      if (a->n_cells[dir[1]] != 1){
+        if (m_checkForFarNeighbors){
+          connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_Regular, FarNeighborCheck_On>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
+          est = &Cell::establishLink<AddPairCheck_Regular, FarNeighborCheck_On>;
+        }else{
+          connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_Regular, FarNeighborCheck_On>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
+          est = &Cell::establishLink<AddPairCheck_Regular, FarNeighborCheck_On>;
+        }
       }else{
-        connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_OneCellDims>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
-        est = &Cell::establishLink<AddPairCheck_OneCellDims>;
+        if (m_checkForFarNeighbors){
+          connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_OneCellDims, FarNeighborCheck_On>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
+          est = &Cell::establishLink<AddPairCheck_OneCellDims, FarNeighborCheck_On>;
+        }else{
+          connectPlanePair(a, b, periodic, &Cell::addNeighbor<AddPairCheck_OneCellDims, FarNeighborCheck_Off>, &ManagerCell::cellDist, m_divby, p, q, off, dir);
+          est = &Cell::establishLink<AddPairCheck_OneCellDims, FarNeighborCheck_Off>;
+        }
       }
       if (m_divby > 1) {
         if (adir >= 0) {

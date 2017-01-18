@@ -74,6 +74,8 @@ void PairCreator::init()
   m_properties.setClassName("PairCreator");
 
   m_properties.setDescription("Determines the way the pairDistances are created.");
+
+  BOOLPC(checkForFarNeighbors, m_checkForFarNeighbors, "Specifies whether to check if the nearest point of the cell is further than cutoff.");
 }
 
 

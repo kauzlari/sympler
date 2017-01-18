@@ -76,13 +76,13 @@ AbstractCellLink::AbstractCellLink()
 }
 
 
-AbstractCellLink::AbstractCellLink(Cell *first, Cell *second, int alignment, bool acts_on_first, bool acts_on_second, bool cross_regions)
+AbstractCellLink::AbstractCellLink(Cell *first, Cell *second, bool acts_on_first, bool acts_on_second, bool cross_regions)
   : m_n_active_cells(0), m_cross_regions(cross_regions), next(NULL), prev(NULL)/*, m_linkUsed(false)*/
 {
 #ifdef ENABLE_PTHREADS
   pthread_mutex_init(&m_activation__mutex, &g_mutex_attr);
 #endif
-  set(first, second, alignment, acts_on_first, acts_on_second);
+  set(first, second, acts_on_first, acts_on_second);
 }
 
 AbstractCellLink::AbstractCellLink(const AbstractCellLink &copy)
@@ -90,7 +90,7 @@ AbstractCellLink::AbstractCellLink(const AbstractCellLink &copy)
 {
   throw gError("AbstractCellLink::AbstractCellLink(copy)", "Should not be called. Contact the programmer.");
 
-  set(copy.m_first, copy.m_second, copy.m_alignment, copy.m_acts_on.first, copy.m_acts_on.second);
+  set(copy.m_first, copy.m_second, copy.m_acts_on.first, copy.m_acts_on.second);
 }
 
 
@@ -117,7 +117,6 @@ void AbstractCellLink::set(Cell *first, Cell *second, int alignment, bool acts_o
 {
   m_first = first;
   m_second = second;
-  m_alignment = alignment;
   m_acts_on.first = acts_on_first;
   m_acts_on.second = acts_on_second;
 
@@ -287,7 +286,7 @@ Cell::Cell(ManagerCell *mgr, int group, int sameDirOutlets)
 #endif
     next(NULL), prev(NULL)
 {
-  commonConstructor(mgr, sameDirOutlets);
+  commonConstructor(sameDirOutlets);
 }
 
 
@@ -301,10 +300,10 @@ Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int group, in
 #endif
     next(NULL), prev(NULL)
 {
-  commonConstructor(mgr, sameDirOutlets);
+  commonConstructor(sameDirOutlets);
 }
 
-Cell::Cell(ManagerCell *mgr, cuboid_t cuboid, int_point_t a_tag, int group, int sameDirOutlets)
+Cell::Cell(ManagerCell *mgr, cuboid_t cuboid, const int_point_t &a_tag, int group, int sameDirOutlets)
   : cuboid_t(cuboid), tag(a_tag), m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
     m_injected_particles(mgr->nColours()),
     m_n_particles(0),
@@ -314,11 +313,11 @@ Cell::Cell(ManagerCell *mgr, cuboid_t cuboid, int_point_t a_tag, int group, int 
 #endif
     next(NULL), prev(NULL)
 {
-  commonConstructor(mgr, sameDirOutlets, a_tag);
+  commonConstructor(sameDirOutlets, a_tag);
 }
 
 
-Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t a_tag, int group, int sameDirOutlets)
+Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, const int_point_t &a_tag, int group, int sameDirOutlets)
   : cuboid_t(c1, c2), tag(a_tag), m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
     m_injected_particles(mgr->nColours()),
     m_n_particles(0),
@@ -328,17 +327,17 @@ Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t a
 #endif
     next(NULL), prev(NULL)
 {
-  commonConstructor(mgr, sameDirOutlets, a_tag);
+  commonConstructor(sameDirOutlets, a_tag);
 }
 
 BoundaryCell::BoundaryCell(ManagerCell *mgr, region_t *r, int group) : Cell(mgr, group, 2) {m_region = r;}
 
-BoundaryCell::BoundaryCell(ManagerCell *mgr, cuboid_t cuboid, int_point_t a_tag, region_t *r, int group) : Cell(mgr, cuboid, a_tag, group, 2) {m_region = r;}
+BoundaryCell::BoundaryCell(ManagerCell *mgr, cuboid_t cuboid, int_point_t &a_tag, region_t *r, int group) : Cell(mgr, cuboid, a_tag, group, 2) {m_region = r;}
 
-BoundaryCell::BoundaryCell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t a_tag, region_t *r, int group): Cell(mgr, c1, c2, a_tag, group, 2) {m_region = r;}
+BoundaryCell::BoundaryCell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int_point_t &a_tag, region_t *r, int group): Cell(mgr, c1, c2, a_tag, group, 2) {m_region = r;}
 
 
-void Cell::commonConstructor(ManagerCell *mgr, int sameDirOutlets, int_point_t a_tag)//TODO: change sameDirOutlets to sameDir
+void Cell::commonConstructor(int sameDirOutlets, const int_point_t &a_tag)//TODO: change sameDirOutlets to sameDir
 {
   const int num_neighbors = m_manager->num_neighbors();
   m_neighbors.reserve(num_neighbors);
@@ -397,7 +396,7 @@ void Cell::addPeriodic(Cell *neighbor, int where, bool cross_regions)
     addToMOutlets(this, neighbor, where, cross_regions);
 }
 
-// #define TRACK_PARTICLE 438
+//#define TRACK_PARTICLE 825 
 #define TRACK_PARTICLE_COLOUR 0
 
 void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force, IntegratorPosition *integratorP)
@@ -471,7 +470,7 @@ void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force
 	}
 }
 
-bool Cell::emitIntoOutlets(Particle *p, size_t colour, int_point_t off, int n, IntegratorPosition *integrator, Phase *phase)
+bool Cell::emitIntoOutlets(Particle *p, size_t colour, int_point_t &off, int n, IntegratorPosition *integrator, Phase *phase)
 {
   if (Cell *c = m_outlets[n][0]) {
     if (c->isInside(p->r)) {
@@ -529,7 +528,7 @@ bool Cell::emitIntoOutlets(Particle *p, size_t colour, int_point_t off, int n, I
     return true;
 }
 
-bool BoundaryCell::emitIntoOutlets(Particle *p, size_t colour, int_point_t off, int n, IntegratorPosition *integrator, Phase *phase)
+bool BoundaryCell::emitIntoOutlets(Particle *p, size_t colour, int_point_t &off, int n, IntegratorPosition *integrator, Phase *phase)
 {
   point_t old_r = p->r;
   Particle *new_p = p;
@@ -540,7 +539,8 @@ bool BoundaryCell::emitIntoOutlets(Particle *p, size_t colour, int_point_t off, 
     if (!new_p) new_p = phase->addParticle(*p);
 
     /* Update position in case this is periodic, etc. */
-    new_p->r = old_r + (*c)->corner1 - corner1 - m_cell_dist[((m_manager->m_divby == 2)?c_2x_direct_neighbors[n]:n)][i];//[c_2x_direct_neighbors[n]][i];
+//old style    new_p->r = old_r + (*c)->corner1 - corner1 - m_cell_dist[((m_manager->m_divby == 2)?c_2x_direct_neighbors[n]:n)][i];
+    new_p->r = old_r + (*c)->corner1 - corner1 - m_cell_dist[m_manager->m_direct_neighbors[n]][i];
     
     if ((*c)->isInside(new_p->r)) {
       (*c)->injectFree(colour, new_p);
@@ -566,7 +566,7 @@ bool BoundaryCell::emitIntoOutlets(Particle *p, size_t colour, int_point_t off, 
         cout << "entering cell: tag                       = " << (*c)->tag << endl;
         cout << "entering cell: corner 1                  = " << (*c)->corner1 << endl;
         cout << "entering cell: corner 2                  = " << (*c)->corner2 << endl;
-        cout << "offset between cells (current->entering) = " << off << " " << n << " " << m_cell_dist[n][i] << endl;
+        cout << "offset between cells (current->entering) = " << off << " " << n << " " << m_cell_dist[m_manager->m_direct_neighbors[n]][i] << endl;
       }
 #endif
 
@@ -1030,11 +1030,9 @@ void BoundaryCell::setupWalls()
 
   /* Loop over all outlets. */
   for (int n = 0; n < NUM_DIRECT_NEIGHBORS; n++) {
-    for (int i=0; i < m_outlets[n].size(); i++){ if (Cell *c = m_outlets[n][i]){
-//		   MSG_DEBUG("Cell::setupWalls", "n= " << n << ", i= " << i);
-//		   MSG_DEBUG("Cell::setupWalls", "m_cell_dist[n][i]= " << m_cell_dist[n][i] << ", i= " << i);
+    for (int i=0; i < m_outlets[n].size(); i++){ if (Cell *c = m_outlets[n][i]){int n_1x_2x = m_manager->m_direct_neighbors[n]; 
 	      /* Check whether cell is a direct or an indirect outlet. */
-	      if ((corner1 + m_cell_dist[n][i] - c->corner1).abs() < g_geom_eps) {
+	      if ((corner1 + m_cell_dist[n_1x_2x][i] - c->corner1).abs() < g_geom_eps) {
 
 	    //       if(
 	    // 	 corner1.x > 19.5 && corner1.x < 19.52 &&
@@ -1051,7 +1049,6 @@ void BoundaryCell::setupWalls()
 		    m_all_walls.push_back(*j);
 		  }
 	      }else {
-
 	    // 	if(
 	    // 	   corner1.x > 19.5 && corner1.x < 19.52 &&
 	    // 	   corner1.y > -0.1 && corner1.y < 0.1 &&
@@ -1063,7 +1060,7 @@ void BoundaryCell::setupWalls()
 
 //		   MSG_DEBUG("Cell::setupWalls", "this cell: " << corner1 << ", " << corner2);
 //		   MSG_DEBUG("Cell::setupWalls", "indirect outlet: " << c->corner1 << ", " << c->corner2);
-		m_indirect_outlets.push_back(pair< vector<int>, Cell*> ({n,i}, c));
+		m_indirect_outlets.push_back(pair< point_t, Cell*> (m_cell_dist[n_1x_2x][i], c));
 	      }
       }
     }
@@ -1076,17 +1073,16 @@ bool BoundaryCell::doCollisionIndirectOutlets(Particle *p, const point_t &force,
 {
   bool hit = false;
   point_t old_r = r;
-  for (list<pair< vector<int>, Cell*> >::iterator c = m_indirect_outlets.begin();
+//  int i = 0;
+  for (list<pair< point_t, Cell*> >::iterator c = m_indirect_outlets.begin();
        c != m_indirect_outlets.end(); c++) {
-    int n = c->first[0]; int i = c->first[1];
-    Cell *outlet = m_outlets[n][i];
-    point_t dist = m_cell_dist[n][i];
     bool new_hit = false;
+//    MSG_DEBUG("BoundaryCell::doCollisionIndirectOutlets", i++);
 
     /* Update position in case this is periodic, etc. */
-    /*p->*/r = old_r + outlet->corner1 - corner1 - dist;
+    /*p->*/r = old_r + c->second->corner1 - corner1 - c->first;
 
-    outlet->checkForHit(p, force, new_hit, t_travelled, hit_pos, wall, integratorP);
+    c->second->checkForHit(p, force, new_hit, t_travelled, hit_pos, wall, integratorP);
 
 #ifdef TRACK_PARTICLE
 
@@ -1102,7 +1098,7 @@ bool BoundaryCell::doCollisionIndirectOutlets(Particle *p, const point_t &force,
 
       hit = true;
 
-      hit_pos = hit_pos - outlet->corner1 + corner1 + dist;
+      hit_pos = hit_pos - c->second->corner1 + corner1 + c->first;
     }
   }
   return hit;

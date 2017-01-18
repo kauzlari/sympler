@@ -179,6 +179,7 @@ const int c_2x_direct_neighbors[NUM_DIRECT_NEIGHBORS] = {
 #define TOCELLINDEXD(x, y, z, n)  ((z * n.y) + y) * n.x + x
 
 class Cell;
+
 /*!
  * This structure holds information about a region in space. A region
  * is a cuboid which is in return subdivided by cells.
@@ -350,6 +351,7 @@ protected:
    */
   Phase *m_phase;
 
+  bool m_checkForFarNeighbors;
   /*!
    * Name <-> Colour correspondence table.
    */
@@ -464,7 +466,7 @@ public:
    * Returns the 3-coord offset vector of a specified neighbour \e a.
    * @param a Index of neighbour
    */
-  virtual int_point_t c_offsets(int a) { return c_direct_offsets[a]; };
+  virtual const int_point_t& c_offsets(int a) { return c_direct_offsets[a]; };
   virtual int c_2x_1x(int a) { return a; };
 
   /*!
@@ -511,8 +513,8 @@ public:
    * Create the pair list
    */
   //virtual void createDistances();
-  void findRegionCellDirectNeighbors(region_t *r, bool_point_t periodic, bool oneCellPeriodicDims);
-  virtual void findRegionCellIndirectNeighbors(region_t *r, bool_point_t periodic, bool oneCellPeriodicDims) {};
+  void findRegionCellDirectNeighbors(region_t *r, bool_point_t periodics, AbstractCellLink *(Cell::*ap_addNeighbor)(Cell*, int, bool));
+  virtual void findRegionCellIndirectNeighbors(region_t *r, bool_point_t periodic, AbstractCellLink *(Cell::*p_establishLink)(Cell*, int, bool, bool, bool)){};
   /*!
    * Create a new cell subdivided region
    * @param cutoff Cut-off radius (i.e., cell size)
@@ -782,12 +784,12 @@ class ManagerCell2x: public ManagerCell
      */
     virtual inline int num_neighbors() { return NUM_2X_NEIGHBORS; };
 
-    virtual void findRegionCellIndirectNeighbors(region_t *r, bool_point_t periodic, bool oneCellPeriodicDims);
+    virtual void findRegionCellIndirectNeighbors(region_t *r, bool_point_t periodic, AbstractCellLink *(Cell::*p_establishLink)(Cell*, int, bool, bool, bool));
     /*!
      * Returns the 3-coord offset vector of a specified neighbour \e a.
      * @param a Index of neighbour
      */
-    virtual int_point_t c_offsets(int a) { return c_2x_offsets[a].second; };
+    virtual const int_point_t& c_offsets(int a) override final { return c_2x_offsets[a].second; };
     virtual int c_2x_1x(int a) { return c_2x_offsets[a].first; };
 
     /*!

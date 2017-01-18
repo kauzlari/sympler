@@ -69,6 +69,8 @@ protected:
    */
   bool m_valid_dist;
 
+  bool m_checkForFarNeighbors;
+
   /*!
    * Initialise the property list
    */
@@ -132,6 +134,10 @@ public:
    */
   virtual double interactionCutoff() const {
     return ((Simulation*) ((Phase*) m_parent)->parent())->maxCutoff;
+  }
+
+  bool checkForFarNeighbors() const {
+    return m_checkForFarNeighbors;
   }
 
 };
