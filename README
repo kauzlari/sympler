@@ -89,6 +89,7 @@ libsdl*-dev, and so on.
 
 + Optional libraries: 
 
+++ liblzma-dev: For the configure-option --enable-all-static (see below)
 ++ libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.
 ++ OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during
 configuration (CXXFLAGS="... -fopenmp").
@@ -142,7 +143,7 @@ often. We have this bug on our list. Further bug reports on this issue are welco
 
 The following instructions were last successfully tested om Mac OS X El Capitan
 10.11.5 and have been provided by Andreas Greiner (based on older instructions
-by Oliver Grünert, Andreas Greiner, and Tobias Wondratsch).
+by Oliver GrÃ¼nert, Andreas Greiner, and Tobias Wondratsch).
 
 The libxml2 library comes already preinstalled by Apple but caused trouble
 during the SYMPLER installation. You may give the preinstalled libxml2 a try or
