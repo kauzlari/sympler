@@ -3,6 +3,7 @@ include_HEADERS = \
 	integrator_energy.h \
 	integrator_lse.h \
 	integrator_position.h \
+	integrator_rigidbodyMC.h \
 	integrator_scalar.h \
 	integrator_scalar_lambda.h \
 	integrator_static.h \

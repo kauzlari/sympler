@@ -159,6 +159,7 @@ void sayHello() {
 #include "boundary_diffusor.h"
 #include "boundary_obstacle.h"
 #include "boundary_stl.h"
+#include "boundary_stl_periodic.h"
 #include "boundary_step.h"
 
 #include "pair_creator.h"
@@ -232,6 +233,7 @@ void sayHello() {
 #include "integrator_omelyan.h"
 #include "integrator_omelyan_NR.h"
 #include "integrator_position.h"
+#include "integrator_rigidbodyMC.h"
 #include "integrator_scalar.h"
 #include "integrator_scalar_lambda.h"
 #include "integrator_static.h"
@@ -387,6 +389,7 @@ void link_all_properly()
   new BoundaryDiffusor(NULL);
   new BoundaryObstacle(NULL);
   new BoundarySTL(NULL);
+  new BoundaryStlPeriodic(NULL);
   new BoundaryStep(NULL);
 
   new PairCreator(NULL);
@@ -464,6 +467,7 @@ void link_all_properly()
 #endif
 #endif
   new IntegratorPosition(NULL);
+  new IntegratorRigidBodyMC(NULL);
   new IntegratorScalar(NULL);
   new IntegratorScalarLambda(NULL);
   new IntegratorStatic(NULL);
