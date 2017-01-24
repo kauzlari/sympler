@@ -60,7 +60,12 @@ void BoundaryStlPeriodic::init()
   MSG_DEBUG("BoundaryStlPeriodic::init()", "Initializing boundary.");  
   m_properties.setClassName("BoundaryStlPeriodic");
   m_properties.setName("BoundaryStlPeriodic");
-  m_properties.setDescription("A Boundary with periodic stl geometry. ");
+  m_properties.setDescription("A Boundary with periodic stl geometry."
+     " IMPORTANT: Geometry must only consist of positive XYZ values. Geometry "
+     "must have inflow and outflow defined by extremal points. Inflow and "
+     "outflow must be at same height and have same shape. Furthermore, it is"
+     " advised that the surfaces in the direction of periodicity have no off-set. "
+     " That means, they either start at XY=0,XZ=0 or the YZ=0 plane.");
   
   for (int i = 0; i < 3; i++) {
     /* Register all properties */
@@ -81,10 +86,7 @@ void BoundaryStlPeriodic::init()
   
   STRINGPCINF
     (name, m_filename,
-     "Name of the .STL geometry file to be loaded. Geometry must completely lie "
-     "in positive XYZ directions. Geometry must have inflow and outflow defined "
-     "by extremal points. Inflow and outflow must be at same height and have"
-     " same shape.");
+     "Name of the .STL geometry file to be loaded. ");
 
   BOOLPC
     (invertNormals, m_invert_normals,
