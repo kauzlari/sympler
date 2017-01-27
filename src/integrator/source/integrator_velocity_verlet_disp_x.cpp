@@ -130,7 +130,7 @@ void IntegratorVelocityVerletDispX::integratePosition(Particle* p, Cell* cell)
   point_t& vel = p->tag.pointByOffset(m_v_offset);
   point_t oldVel = vel;
 
-  const point_t& a = p->force[force_index]/m_mass;
+  point_t a = p->force[force_index]/m_mass;
 
   cell->doCollision(p, p->r, vel, a, (IntegratorPosition*) this); 
 

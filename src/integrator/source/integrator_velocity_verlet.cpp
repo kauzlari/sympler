@@ -154,11 +154,11 @@ void IntegratorVelocityVerlet::integratePosition(Particle* p, Cell* cell)
   size_t force_index;
   force_index = ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
 
-  const point_t& pt = p->force[force_index]/m_mass;
+  point_t accel = p->force[force_index]/m_mass;
   // Currently (2010-05-05), pt is a const point& argument, so using it in the p->r += ... line is safe
-  cell->doCollision(p, p->r, p->v, pt, (IntegratorPosition*) this);
+  cell->doCollision(p, p->r, p->v, accel, (IntegratorPosition*) this);
 
-  p->r += p->dt * (p->v + 0.5 * p->dt * pt/* p->force[force_index]/m_mass*/);
+  p->r += p->dt * (p->v + 0.5 * p->dt * accel);
   //MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "pos_force= " <<  p->force[force_index]);
   //MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "position= " <<  p->r);
 

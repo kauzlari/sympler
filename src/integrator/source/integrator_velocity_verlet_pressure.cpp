@@ -503,18 +503,16 @@ void IntegratorVelocityVerletPressure::integrateStep2() {
 
 }
 
-void IntegratorVelocityVerletPressure::integratePosition(Particle* p,
-		Cell* cell) {
-	size_t force_index;
-	force_index
-			= ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
+void IntegratorVelocityVerletPressure::integratePosition(Particle* p, Cell* cell) {
+  size_t force_index;
+  force_index = ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
 
-	point_t pt = p->force[force_index] / m_mass;
-	cell->doCollision(p, p->r, p->v, pt, (IntegratorPosition*) this);
-
-	p->r += p->dt * (p->v + 0.5 * p->dt * p->force[force_index] / m_mass);
-	//MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "pos_force= " <<  p->force[force_index]);
-	//MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "position= " <<  p->r);
+  point_t pt = p->force[force_index] / m_mass;
+  cell->doCollision(p, p->r, p->v, pt, (IntegratorPosition*) this);
+  
+  p->r += p->dt * (p->v + 0.5 * p->dt * pt);
+  //MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "pos_force= " <<  p->force[force_index]);
+  //MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "position= " <<  p->r);
 
 }
 

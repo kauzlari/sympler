@@ -110,14 +110,14 @@ void IntegratorVelocityVerletDisp::integratePosition(Particle* p, Cell* cell)
 {
   size_t force_index; 
   force_index = ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
+
+  point_t accel = p->force[force_index]/m_mass;
   
-
-
-  cell->doCollision(p, p->r, p->v, p->force[force_index]/m_mass, (IntegratorPosition*) this); 
+  cell->doCollision(p, p->r, p->v, accel, (IntegratorPosition*) this); 
 
   p->tag.pointByOffset(this->m_displacement_offset) += m_disp - p->r;
 
-  p->r += p->dt * (p->v + 0.5 * p->dt * p->force[force_index]/m_mass);  
+  p->r += p->dt * (p->v + 0.5 * p->dt * accel);  
 
   p->tag.pointByOffset(this->m_displacement_offset) += p->r;
   // for next usage
