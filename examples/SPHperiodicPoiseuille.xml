@@ -79,13 +79,6 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
       />
   -->
 
-  <!-- Computes the symbol 'F' which is usually used as 'Fij' below. As the name indicates, Fij = -(dW(rij)/drij)/rij -->
-  <ValCalculatorNegDKernelDivr
-      allPairs = "yes"
-      symbol = "F"
-      weightingFunction="M5"
-      />
-
   <!-- This provides the symbol with default name 'vBC' (usable as 'vBCij' in pair expressions), which allows to enforce no-slip boundary conditions by replacing the velocity of the wall-particle with this one. The word 'Dirichlet' is a bit misleading and too general. For each pair of fluid and wall particles, 'vBC' is an extrapolation of the fluid-particle velocity onto the wall particle, such that the velocity at the intersection-point of the line connecting the two particles with the wall is zero. -->
   <DirichletBCVels
       wallSpecies = "wall"
