@@ -76,13 +76,6 @@ void IntegratorStatic::init()
     "Integrates the position coordinates of each particle according to the user-defined particle velocity.."
   );
 
-//   DOUBLEPC
-//     (lambda,
-//      m_lambda,
-//      0,
-//      "Lambda parameter for modified algorithm.");
-
-  m_lambda = 0.5;
 
   FUNCTIONFIXEDPC(velX, m_velocity_x,
                   "The x-component of the velocity. You can include time dependency with the variable 't' and spatial dependency with 'x', 'y', 'z'.");

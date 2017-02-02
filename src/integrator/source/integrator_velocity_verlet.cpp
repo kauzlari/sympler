@@ -76,6 +76,15 @@ void IntegratorVelocityVerlet::init()
   	     "Mass of the species this integrator is intended for. Default mass = 1. Pay attention the mass is only "
   	     "effective for the integrator and does not affect the thermostat for instance");
   m_mass = 1;
+
+    DOUBLEPC
+    (lambda,
+     m_lambda,
+     0,
+     "Lambda parameter for modified velocity verlet algorithm.");
+
+  m_lambda = 0.5;
+
 }
 
 
