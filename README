@@ -124,7 +124,6 @@ $ cd $BUILD-DIR
 $ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
 $ make -j[1 to roughly the number of available cores]
 
-After successful compilation the executable "sympler" will be created in the directory src/ 
 Useful [cxxflags] are (for more see the g++ documentation):
 
 -O3: for optimised compilation with g++
@@ -141,10 +140,12 @@ installed, but this is usually the case by default (for example libicu-dev and l
 note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash
 very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome.
 
+After successful compilation the executable "sympler" will be created in the directory src/. 
+
 
 ++ Configuration and Compilation for MacOS
 
-The following instructions were last successfully tested with Mac OS X Yosemite 10.10.5 and have been provided by Tobias Wondratsch (based on older instructions by Oliver Grünert and Andreas Greiner).
+The following instructions were last successfully tested with Mac OS X Yosemite 10.10.5 and have been provided by Tobias Wondratsch (based on older instructions by Oliver GrÃ¼nert and Andreas Greiner).
 
 The libxml2 library comes already preinstalled by Apple but caused trouble during the SYMPLER installation. You may give the preinstalled libxml2 a try or immediately go and get an alternative version and the two remaining libraries by using one of the packaging-systems for Mac OS.
 
