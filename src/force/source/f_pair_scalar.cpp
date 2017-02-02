@@ -187,10 +187,10 @@ void FPairScalar::setup()
   for(size_t i = 0; i < FORCE_HIST_SIZE; ++i)
   {
     m_force_offset[i].first =
-      Particle::s_tag_format[m_cp->firstColour()].attrByName(string("force_"
+      Particle::s_tag_format[cp->firstColour()].attrByName(string("force_"
         + m_scalar_name + "_" + ObjToString(i))).offset;
     m_force_offset[i].second =
-      Particle::s_tag_format[m_cp->secondColour()].attrByName(string("force_"
+      Particle::s_tag_format[cp->secondColour()].attrByName(string("force_"
         + m_scalar_name + "_" + ObjToString(i))).offset;
   }
   
