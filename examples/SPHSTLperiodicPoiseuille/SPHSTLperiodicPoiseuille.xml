@@ -1,3 +1,20 @@
+<!-- Minimal weakly compressible SPH-simulation of Poiseuille flow.
+Note that further documentation can be found above many of the modules used below. For References such as [1] see the end of this file.
+    
+    Note that the setup below is "minimal" in the following sense: Minimal particle resolution, minimal effort for implementing boundary conditions, no stabilisation mechanisms such as artificial viscosity or other. Any improvement of the above or other aspects will lead to improved accuracy and prolonged stablity.
+    
+    Further note that you should create the subdirectories grid, pos and posFrozen before running the simulation. The directories must be created in the directory where you issue the command to run the simulation.
+    
+    The simulation-box has cuboid shape (for sizes see module BoundaryStlPeriodic) with periodic boundary conditions in y-direction and in z-direction. This means that the walls at the minimal and maximal extremal points in these directions will be removed. As a result, only the walls in x-directions will remain. In x-direction, at x=0 and at x=boxX (for value of boxX seemodule BoundaryStlPeriodic), there is a wall with assumed no-slip boundary condition for the velocity (vx=vy=vz=0), which is implemented by the module DirichletBCVels and one of the modules FPairVelsWF (see below). 
+For the fluid, approximate properties of water are taken. The units used in the simulation are:
+- length: [l] = lcross/lcrossSPH ~ 2.95e-4 m
+where lcross = 1.00e-3 m is the length of the simulated channel cross-section in SI-units and lcrossSPH ~ 3.38 is the chosen same length in the SPH-unit [l]. See attribute boxX in module BoundaryCuboid below, where also the requirements for the choice of boxX are mentioned.
+- mass: [m] = [rho]*[l]^3 = (rho/rhoSPH)*[l]^3 ~ 1.47e-9 kg 
+where [rho] is the unit of mass density, rho = 1000 kg/m^3 is the real density, and rhoSPH = 2.6^3 = 17.576 is the chosen same density in the SPH-unit [rho] ~ 56.90 kg/m^3  
+- time: [t] = [m]/([l]*[eta]) = [m]*etaSPH/([l]*eta) ~ 4.97e-3 s
+where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear viscosity, and etaSPH = 1 is the chosen same shear visosity in the SPH-unit [eta] = eta.
+-->
+
 <Simulation
     simName = "Poiseuille"
     inputFromResults = "1"
@@ -139,7 +156,28 @@ where we choose for the maximum allowed flow velocity v0 = 0.1 m/s ~ 1.68*[l]/[t
     <LinkedListCreator/>
     
     <!-- We try 8 particles in the cross-section: It has been tested, e.g., in Phys. Rev. E 67 (2003) 026705, that >=6 cutoffs are required to resolve a given wavelength properly. If we approximate the expected parabolic velocity profile of Poiseuille flow by a half-wave, then we need >=3cutoffs = 3. For our choice of 2.6 particles per cutoff (in a simple cubic lattice), this means that we need 3x2.6=7.8, i.e. a minimum of 8 particles. The box-sizes result from that. In y-direction and in z-direction, they just result from the periodicity. In z-direction, we take the absolute minimum of >= 2 cutoffs such that the particles don't see their periodic image. In the laminar regime, all particles in z-direction should behave the same (periodic) way. In the simulation this is true as long as no instabilities occur.
-	 In x-direction, we additionally enforce, that the wall particles on the "left" and on the "right" have equal distance to the wall-boundary. This is currently a bit cumbersome since the wall particles are created (in a cubic lattice), by extending the bounding box by 1 cutoff beyond each wall and then starting with the first wall particle at 0.5*d from the "lower end" of the bounding box. Only for cutoffs which are multiples of 0.5*d, this does not require any manual adjustment. But here we have a nearest particle-distance in a cubic lattice of d = 1/2.6. In fact, this even complicates the adjustment of the channel width in real units (see above for units). Therefore, the TODO-list for the SYMPLER-code already contains a simplification of this issue.-->
+	 In x-direction, we additionally enforce, that the wall particles on the "left" and on the "right" have equal distance to the wall-boundary. This is currently a bit cumbersome since the wall particles are created (in a cubic lattice), by extending the bounding box by 1 cutoff beyond each wall and then starting with the first wall particle at 0.5*d from the "lower end" of the bounding box. Only for cutoffs which are multiples of 0.5*d, this does not require any manual adjustment. But here we have a nearest particle-distance in a cubic lattice of d = 1/2.6. In fact, this even complicates the adjustment of the channel width in real units (see above for units). Therefore, the TODO-list for the SYMPLER-code already contains a simplification of this issue.
+-->
+
+<!-- 
+BoundaryStlPeriodic
+'PATH' needs to be replaced by the user. Example : '/home/username/documents/simulation1/'
+
+The aspect ratio of the cuboid can be changed by the scaleX/Y/Z attributes. For example, if sympler complains that the geometry is too small to create at least two cells, expanding the geometry will help. 
+
+invertNormals can be used to set on which side of a wall reflectors or frozen particles are created. Reflectors will only work if particles approach them from a certain side.  If one observes that particles fly through walls and dont get back into the domain try changing the value of invertNormals. The normals of each wall should be facing into the geometry, but at least some software packages create stl files with the normals facing out.   
+
+Format should be either "ascii" or "binary". In case of doubt, text editors like gedit can open ascii files without any problems, but will fail to output anything readable from binary files. 
+-->
+
+<!--
+Current size of the box, after applying the scaling factor, is approximately equal to the box used in SPHperiodicPoiseuille.xml 
+
+x= 3.384615
+y= 3.076923
+z= 2.307692
+-->
+
 <BoundaryStlPeriodic
 					geometryFileName="PATH/Geo.vtk"
 					periodicX = "false"
