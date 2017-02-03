@@ -1,4 +1,0 @@
-Replica of SPHperiodicPoiseuille example using periodic stl boundary conditions instead of a cuboid boundary. 
-
-From SPHperiodicPoiseuille : 
-Minimal weakly compressible SPH-simulation of Poiseuille flow. The input file is heavily commented. Please continue reading there for further documentation.
