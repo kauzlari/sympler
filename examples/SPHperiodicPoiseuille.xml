@@ -123,7 +123,6 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
       particleFactor_i = "-2*1*([vi]-[vBCij])/(nj*nj)"
       particleFactor_j = "idVec(0)"
       weightingFunction = "M5"
-      symmetry = "1"
       />
   
   <!-- Pressure gradient forces for weakly compressible SPH. We use here for the pressure the linear artificial equation of state P = c^2*(rho-rho0), where c is the artificial speed of sound and rho_0 = 17.576 is the equilibrium density. This choice is not typical but possible and does not make a huge difference to the usual (also artificial) choice P = P0*((rho/rho0)^7-1) with P0 = c^2*rho0/7. In both cases, c^2 must be chosen as
