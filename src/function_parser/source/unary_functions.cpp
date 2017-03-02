@@ -126,9 +126,9 @@ MAKE_UNARY_FUNCTION(cos, cos, 6);
 MAKE_UNARY_FUNCTION(tan, tan, 6);
 MAKE_UNARY_FUNCTION(atan, atan, 6);
 
-MAKE_UNARY_FUNCTION(sinh, sinh, 6);
-MAKE_UNARY_FUNCTION(cosh, cosh, 6);
-MAKE_UNARY_FUNCTION(tanh, tanh, 6);
+MAKE_UNARY_FUNCTION(hsin, sinh, 6);
+MAKE_UNARY_FUNCTION(hcos, cosh, 6);
+MAKE_UNARY_FUNCTION(htan, tanh, 6);
 
 // MAKE_UNARY_FUNCTION(step, , 6);
 MAKE_UNARY_FUNCTION(abs, fabs, 6);
