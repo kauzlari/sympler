@@ -36,10 +36,12 @@
 #include "colour_pair.h"
 #include "wall.h"
 #include "particle_cache.h"
+#include "triplet_calculator.h"
+#include "quintet_calculator.h"
 
 // #include <utility>
 
-const SymbolRegister<ValCalculatorDirichletBCScalar> val_calc_dirichlet_BC_scalar("ValCalculatorDirichletBCScalar");
+const SymbolRegister<ValCalculatorDirichletBCScalar> val_calc_dirichlet_BC_scalar("DirichletBCScalar");
 
 #define M_SIMULATION  ((Simulation*) m_parent)
 #define M_PHASE  M_SIMULATION->phase()
@@ -64,21 +66,22 @@ ValCalculatorDirichletBCScalar::ValCalculatorDirichletBCScalar(/*Node*/Simulatio
 
 void ValCalculatorDirichletBCScalar::init()
 {
-  m_properties.setClassName("DirichletBCVels");
+  m_properties.setClassName("DirichletBCScalar");
 
-  m_properties.setDescription("Saves the pair-specific value of an arbitrary scalar of the boundary particle used for applying a Dirichlet boundary condition (BC) in each pair of particles. This calculator uses a linear approximation.");
+  m_properties.setDescription("Saves the pair-specific value of an arbitrary scalar of the boundary particle used for applying a Dirichlet boundary condition (BC) in each pair of particles. This calculator uses a linear approximation. The actual value of the Dirichlet boundary condition is assumed to be stored in the symbol of the respective boundary particle given by the attribute 'scalar'.");
   
    STRINGPC
        (scalar, m_scalarName,
         "Name of the scalar the BC should be applied to.");
+  
   
 //   STRINGPC(wallSpecies, m_wallSpecies, 
 //            "Species of the wall particles."
 //           );
 
    m_symbolName = "undefined";
-  m_scalarName = "undefined";
-  m_wallSpecies = "undefined";
+   m_scalarName = "undefined";
+   m_wallSpecies = "undefined";
   
 #ifdef _OPENMP
   m_particleCalculator = false;
@@ -97,41 +100,30 @@ void ValCalculatorDirichletBCScalar::setup()
   
   ValCalculatorBC::setup();  
 
-  // now, ValCalculatorBC::setup() has defined m_species
+  // now (2016-12-14), ValCalculatorBC::setup() has defined m_species
   ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
 
-  size_t freeColour;
-  string freeSpecies;
-  if(m_wallIsSecond)
-    {
-      freeColour = cp->firstColour();
-      freeSpecies = cp->firstSpecies();
-    }
-  else
-    {
-      freeColour = cp->secondColour();
-      freeSpecies = cp->secondSpecies();
-    }
-    
-    
-  if(Particle::s_tag_format[cp->firstColour()].attrExists(m_symbolName))
-    throw gError("ValCalculatorDirichletBCScalar::setup", "Symbol " + m_symbolName + " already exists for species '" + cp->firstSpecies() + "'.");
-    
-  if(Particle::s_tag_format[cp->secondColour()].attrExists(m_symbolName))
-    throw gError("ValCalculatorDirichletBCScalar::setup", "Symbol " + m_symbolName + " already exists for species '" + cp->secondSpecies() + "'.");
-    
-  if(!Particle::s_tag_format[cp->firstColour()].attrExists(m_scalarName))
-    throw gError("ValCalculatorDirichletBCScalar::setup", "Symbol " + m_scalarName + " not found for species '" + cp->firstSpecies() + "'.");
-    
-  if(!Particle::s_tag_format[cp->secondColour()].attrExists(m_scalarName))
-    throw gError("ValCalculatorDirichletBCScalar::setup", "Symbol " + m_scalarName + " not found for species '" + cp->secondSpecies() + "'.");
-    
-  m_scalarOffset.first = 
-    Particle::s_tag_format[cp->firstColour()].offsetByName/*indexOf*/(m_scalarName);
+  DataFormat::attribute_t firstAttr =
+    Particle::s_tag_format[cp->firstColour()].attrByName(m_scalarName);
+  
+  DataFormat::attribute_t secondAttr =
+    Particle::s_tag_format[cp->secondColour()].attrByName(m_scalarName);
+  
+  if(firstAttr.datatype != DataFormat::DOUBLE)
+    throw gError("ValCalculatorDirichletBCScalar::setup", "the symbol " + m_scalarName +
+		 " is registerd as a non-scalar for species " +
+		 cp->manager()->species(cp->firstColour()));
+  
+  if(secondAttr.datatype != DataFormat::DOUBLE)
+    throw gError("ValCalculatorDirichletBCScalar::setup", "the symbol " + m_scalarName +
+		 " is registerd as a non-scalar for species " +
+		 cp->manager()->species(cp->secondColour()));
+     
+   m_scalarOffset.first = 
+     Particle::s_tag_format[cp->firstColour()].offsetByName/*indexOf*/(m_scalarName);
 
-  m_scalarOffset.second = 
-    Particle::s_tag_format[cp->secondColour()].offsetByName/*indexOf*/(m_scalarName);
-
+   m_scalarOffset.second = 
+     Particle::s_tag_format[cp->secondColour()].offsetByName/*indexOf*/(m_scalarName);
   
 }
 
@@ -143,50 +135,9 @@ void ValCalculatorDirichletBCScalar::setup()
 // }
 
 
-// Currently inlined
-#if 0
-
-#ifndef _OPENMP
-    void ValCalculatorDirichletBCScalar::compute(Pairdist* pD)
-#else
-    void ValCalculatorDirichletBCScalar::compute(Pairdist* pD, size_t thread_no)
-#endif
-{
-  double innerDist;
-  double outerDist;
-
-  computeDists(pD, innerDist, outerDist);
-
-    Particle* p1st = pD->firstPart();
-    Particle* p2nd = pD->secondPart();
-
-     if(m_wallIsSecond)
-     {
-
-           // if all worked fine, we may now compute the value of the outer particle
-           // the check for innerDist != HUGE_VAL is done below
-       pD->tag.doubleByOffset(m_slot) =
-	 (outerDist+innerDist)*(p2nd->tag.doubleByOffset(m_scalarOffset.second))/innerDist-(outerDist/innerDist)*p1st->tag.doubleByOffset(m_scalarOffset.first);
-
-     }
-     else // so !m_wallIsSecond
-     {
-
-          // if all worked fine, we may now compute the value of the outer particle
-          // the check for innerDist != HUGE_VAL is done below
-          // the first term is for Dirichlet != 0. We assume the value was assigned 
-          // to the wall particles.
-        pD->tag.doubleByOffset(m_slot) =
-	  (outerDist+innerDist)*(p1st->tag.doubleByOffset(m_scalarOffset.first))/innerDist-(outerDist/innerDist)*p2nd->tag.doubleByOffset(m_scalarOffset.second);
-
-     } // of else of if(m_wallIsSecond)
-
-    if(innerDist == HUGE_VAL)
-      throw gError("ValCalculatorDirichletBCScalar::compute", "No wall found for pair. Check your geometry and other settings. If this doesn't help, contact the programmers. \nDetails: slot1=" + ObjToString(pD->firstPart()->mySlot) + ", slot2=" + ObjToString(pD->secondPart()->mySlot) + "c1=" + ObjToString(pD->firstPart()->c) + ", c2=" + ObjToString(pD->secondPart()->c) + ", r1=" + ObjToString(pD->firstPart()->r) + ", r2=" + ObjToString(pD->secondPart()->r));
-         
-}
-#endif
-
+// FIXME: Generalise and extract the findStage methods. It is a mess that every module must implement them
+// by itself by mainly copy&paste. At the very least, when introducing also ValCalculatorDirichletBCVector etc.
+// You must out this method into a ValCalculatorDirichletBCArbitrary (see e.g., ValCalculatorArbitrary)
 bool ValCalculatorDirichletBCScalar::findStage()
 {
   MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage","START: stage = " << m_stage);
@@ -199,7 +150,8 @@ bool ValCalculatorDirichletBCScalar::findStage()
     bool nothing = true;
          
 
-    
+
+    // LOOP OVER USED SYMBOLS NOT NECESSARY BECAUSE THIS ValCalculator JUST USES ONE!
 //     for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s)
 //     {
       
@@ -216,110 +168,203 @@ bool ValCalculatorDirichletBCScalar::findStage()
       assert(m_phaseUser == 1 || m_phaseUser == 2);
       // first, loop over ColourPairs
       FOR_EACH_COLOUR_PAIR
-          (
-          M_MANAGER, 
-      vector<ValCalculator*>* vCs;
-      vCs = &(cp->valCalculatorsFlat());
-      // loop over ValCalculators
-      for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
-          (vCIt != vCs->end() && !tooEarly); ++vCIt)
-      {
-        // we have to exclude this ValCalculator
-        if((*vCIt) != this)
-        {
-          list<string> symbols = (*vCIt)->mySymbolNames();
-  
-  //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", "symbols of VC: ");
-                
-  //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-  //               cout << *symIt << endl;
-  
-                      
-          for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-          {
-            if(*symIt == m_scalarName)
-            {
-              nothing = false;
-              int stage = (*vCIt)->stage();
-              if(stage == -1) 
-              {
-                MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
-                tooEarly = true;
-                m_stage = -1;
-              }
-              else
-              {
-                if(stage >= m_stage) m_stage = stage+1;
-              }
-            }
-          }
-        }       
-      }
+	(
+	 M_MANAGER,
+	 // loop over non-bonded ValCalculators
+	 vector<ValCalculator*>* vCs;
+	 vCs = &(cp->valCalculatorsFlat());
+	 // loop over ValCalculators
+	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	     (vCIt != vCs->end() && !tooEarly); ++vCIt)
+	   {
+	     // we have to exclude this ValCalculator
+	     if((*vCIt) != this)
+	       {
+		 list<string> symbols = (*vCIt)->mySymbolNames();
+		 
+		 //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", "symbols of VC: ");
+		 
+		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		 //               cout << *symIt << endl;
+		 
+                 
+		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		   {
+		     if(*symIt == m_scalarName)
+		       {
+			 nothing = false;
+			 int stage = (*vCIt)->stage();
+			 if(stage == -1) 
+			   {
+			     MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     tooEarly = true;
+			     m_stage = -1;
+			   }
+			 else
+			   {
+			     if(stage >= m_stage) m_stage = stage+1;
+			   }
+		       }
+		   }
+	       } // end of if((*vCIt) != this)       
+	   } // end of for(vector<ValCalculator*>::iterator...
 
+	 // loop over bonded ValCalculators
+	 vCs = &(cp->bondedValCalculatorsFlat());
+	 // loop over ValCalculators
+	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	     (vCIt != vCs->end() && !tooEarly); ++vCIt)
+	   {
+	     // we have to exclude this ValCalculator
+	     if((*vCIt) != this)
+	       {
+		 list<string> symbols = (*vCIt)->mySymbolNames();
+		 
+		 //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", "symbols of VC: ");
+		 
+		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		 //               cout << *symIt << endl;
+		 
+		 
+		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		   {
+		     if(*symIt == m_scalarName /*name*/)
+		       {
+			 nothing = false;
+			 int stage = (*vCIt)->stage();
+			 if(stage == -1) 
+			   {
+			     MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     tooEarly = true;
+			     m_stage = -1;
+			   }
+			 else
+			   {
+			     if(stage >= m_stage) m_stage = stage+1;
+			   }
+		       }
+		   }
+	       }       
+	   } // end of loop over bonded vCs of current ColourPair
 
-	  CHECK FOR BONDED AND TRIPLET VCs IS MISSING;
+	 // can we stop FOR_EACH_COLOUR_PAIR now?
+	 if(tooEarly) {
+	   __cp = __end;
+	   // important because there still comes the ++__cp from the loop
+	   --__cp;
+	 }
+	 );
+      
+      if(!tooEarly) {
+	// we have to search now in the ParticleCaches
+	vector<ParticleCache*>* pCs;
+	pCs = &(Particle::s_cached_flat_properties);
+	FOR_EACH
+	  (
+	   vector<ParticleCache*>,
+	   (*pCs)/*Particle::s_cached_flat_properties*/,
+	   
+	   list<string> symbols = (*__iFE)->mySymbolNames();
+	   
+	   //               MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", "symbols of Cache: ");
+	   /*              for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+			   cout << *symIt << endl;*/
+	   
+	   for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+	     {
+	       if(*symIt == m_scalarName)
+		 {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) 
+		     {
+		       MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		       tooEarly = true;
+		       m_stage = -1;
+		     }
+		   else
+		     {
+		       if(stage >= m_stage) m_stage = stage+1;
+		     }
+		 }
+	     }
+	   // may we abort the loop over the ParticleCaches?
+	   if(tooEarly)
+	     {
+	       __iFE = __end;
+	       // important because there still comes the ++i from the loop
+	       --__iFE; 
+	     }
+	   );
+	
+      } // end if(!tooEarly) (for search in ParticleCaches)
 
-          // can we stop FOR_EACH_COLOUR_PAIR now?
-      if(tooEarly)
-      {
-        __cp = __end;
-          // important because there still comes the ++__cp from the loop
-        --__cp;
-      }
-      );
-        
-          if(!tooEarly)
-          {
-          // we have to search now in the ParticleCaches
-            vector<ParticleCache*>* pCs;
-            /*if(m_phaseUser == 1)*/ pCs = &(Particle::s_cached_flat_properties);
-//             if(m_phaseUser == 0) pCs = &(Particle::s_cached_flat_properties_0);
-            //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", "loop over ParticleCaches START");
+	        
+          if(!tooEarly) {
+	    // we have to search now in the TripletCalculators
+	    vector<TripletCalculator*>* tCs;
+	    tCs = M_PHASE->bondedTripletCalculatorsFlat();
             FOR_EACH
-                (
-                vector<ParticleCache*>,
-            (*pCs)/*Particle::s_cached_flat_properties*/,
-              
-//               MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", "loop over ParticleCaches. Now at = " << (*i)->mySymbolName() << " for symbol " << name);
+	      (
+	       vector<TripletCalculator*>, (*tCs),
+	       list<string> symbols = (*__iFE)->mySymbolNames();
+	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+		 if(*symIt == m_scalarName /*name*/) {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) {
+		     MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     tooEarly = true;
+		     m_stage = -1;
+		   }
+		   else {
+		     if(stage >= m_stage) m_stage = stage+1;
+		   }
+		 }
+	       }
+	       // may we abort the loop over the triplet Calculators?
+	       if(tooEarly) {
+		 __iFE = __end;
+		 // important because there still comes the ++i from the loop
+		 --__iFE; 
+	       }
+	       );	    
+          } // end if(!tooEarly) (for search in tripletCalculators)
 
-              
-            list<string> symbols = (*i)->mySymbolNames();
-              
-//               MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", "symbols of Cache: ");
-               
-/*              for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-            cout << *symIt << endl;*/
-            
-            for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-            {
-              if(*symIt == m_scalarName)
-              {
-                nothing = false;
-                int stage = (*i)->stage();
-                if(stage == -1) 
-                {
-                  MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*i)->className());
-                  tooEarly = true;
-                  m_stage = -1;
-                }
-                else
-                {
-                  if(stage >= m_stage) m_stage = stage+1;
-                }
-              }
-            }
-              // may we abort the loop over the ParticleCaches?
-            if(tooEarly)
-            {
-              i = __end;
-                // important because there still comes the ++i from the loop
-              --i; 
-            }
-                );
+          if(!tooEarly) {
+	    // we have to search now in the QuintetCalculators
+	    vector<QuintetCalculator*>* tCs;
+	    tCs = M_PHASE->bondedQuintetCalculatorsFlat();
+            FOR_EACH
+	      (
+	       vector<QuintetCalculator*>, (*tCs),
+	       list<string> symbols = (*__iFE)->mySymbolNames();
+	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+		 if(*symIt == m_scalarName /*name*/) {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) {
+		     MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     tooEarly = true;
+		     m_stage = -1;
+		   }
+		   else {
+		     if(stage >= m_stage) m_stage = stage+1;
+		   }
+		 }
+	       }
+	       // may we abort the loop over the QuintetCalculators?
+	       if(tooEarly) {
+		 __iFE = __end;
+		 // important because there still comes the ++i from the loop
+		 --__iFE; 
+	       }
+	       );	    
+          } // end if(!tooEarly) (for search in QuintetCalculators)
 
-          }
 
-//     } // end loop over symbols
+      
+//     } // end loop over symbols WHICH IS NOT NEEDED SINCE THIS VALCALCULATOR JUST USES ONE!
 
     if(tooEarly)
       return false;
@@ -373,110 +418,209 @@ bool ValCalculatorDirichletBCScalar::findStage_0()
       assert(m_phaseUser == 0 || m_phaseUser == 2);
       // first, loop over ColourPairs
       FOR_EACH_COLOUR_PAIR
-          (
-          M_MANAGER, 
-      vector<ValCalculator*>* vCs;
-      vCs = &(cp->valCalculatorsFlat_0());
-      // loop over ValCalculators
-      for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
-          (vCIt != vCs->end() && !tooEarly); ++vCIt)
-      {
-        // we have to exclude this ValCalculator
-        if((*vCIt) != this)
-        {
-          list<string> symbols = (*vCIt)->mySymbolNames();
-  
-  //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "symbols of VC: ");
-                
-  //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-  //               cout << *symIt << endl;
-  
-                      
-          for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-          {
-            if(*symIt == m_scalarName)
-            {
-              nothing = false;
-              int stage = (*vCIt)->stage();
-              if(stage == -1) 
-              {
-                MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
-                tooEarly = true;
-                m_stage = -1;
-              }
-              else
-              {
-                if(stage >= m_stage) m_stage = stage+1;
-              }
-            }
-          }
-        }       
-      }
+	(M_MANAGER, 
+	 vector<ValCalculator*>* vCs;
+	 // loop over non-bonded ValCalculators
+	 vCs = &(cp->valCalculatorsFlat_0());
+	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	     (vCIt != vCs->end() && !tooEarly); ++vCIt)
+	   {
+	     // we have to exclude this ValCalculator
+	     if((*vCIt) != this)
+	       {
+		 list<string> symbols = (*vCIt)->mySymbolNames();
+		 
+		 //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "symbols of VC: ");
+		 
+		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		 //               cout << *symIt << endl;
+		 
+                 
+		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		   {
+		     if(*symIt == m_scalarName)
+		       {
+			 nothing = false;
+			 int stage = (*vCIt)->stage();
+			 if(stage == -1) 
+			   {
+			     MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     tooEarly = true;
+			     m_stage = -1;
+			   }
+			 else
+			   {
+			     if(stage >= m_stage) m_stage = stage+1;
+			   }
+		       }
+		   }
+	       }       
+	   } // end loop over non-bonded ValCalculators
+	 
+	 
+	 // loop over bonded ValCalculators
+	 vCs = &(cp->bondedValCalculatorsFlat_0());
+	 // loop over ValCalculators
+	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	     (vCIt != vCs->end() && !tooEarly); ++vCIt)
+	   {
+	     // we have to exclude this ValCalculator
+	     if((*vCIt) != this)
+	       {
+		 list<string> symbols = (*vCIt)->mySymbolNames();
+		 
+		 //             MSG_DEBUG("ValCalculatorArbitrary::findStage", "symbols of VC: ");
+		 
+		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		 //               cout << *symIt << endl;
+		 
+		 
+		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+		   {
+		     if(*symIt == m_scalarName)
+		       {
+			 nothing = false;
+			 int stage = (*vCIt)->stage();
+			 if(stage == -1) 
+			   {
+			     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     tooEarly = true;
+			     m_stage = -1;
+			   }
+			 else
+			   {
+			     if(stage >= m_stage) m_stage = stage+1;
+			   }
+		       }
+		   }
+	       }       
+	   } // end of loop over bonded vCs of current ColourPair
 
-
-	  CHECK FOR BONDED AND TRIPLET VCs IS MISSING;
-
-
-          // can we stop FOR_EACH_COLOUR_PAIR now?
-      if(tooEarly)
-      {
-        __cp = __end;
-          // important because there still comes the ++__cp from the loop
-        --__cp;
-      }
-      );
-        
-          if(!tooEarly)
-          {
+	 // can we stop FOR_EACH_COLOUR_PAIR now?
+	 if(tooEarly)
+	   {
+	     __cp = __end;
+	     // important because there still comes the ++__cp from the loop
+	     --__cp;
+	   }
+	 ); // end loop over ColourPairs
+      
+      if(!tooEarly)
+	{
           // we have to search now in the ParticleCaches
-            vector<ParticleCache*>* pCs;
-             if(m_phaseUser == 0) pCs = &(Particle::s_cached_flat_properties_0);
-            //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "loop over ParticleCaches START");
+	  vector<ParticleCache*>* pCs;
+	  if(m_phaseUser == 0) pCs = &(Particle::s_cached_flat_properties_0);
+	  //             MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "loop over ParticleCaches START");
+	  FOR_EACH
+	    (
+	     vector<ParticleCache*>,
+	     (*pCs)/*Particle::s_cached_flat_properties*/,
+	     
+	     //               MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "loop over ParticleCaches. Now at = " << (*i)->mySymbolName() << " for symbol " << name);
+	     
+             
+	     list<string> symbols = (*__iFE)->mySymbolNames();
+	     
+	     //               MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "symbols of Cache: ");
+	     
+	     /*              for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+			     cout << *symIt << endl;*/
+	     
+	     for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
+	       {
+		 if(*symIt == m_scalarName)
+		   {
+		     nothing = false;
+		     int stage = (*__iFE)->stage();
+		     if(stage == -1) 
+		       {
+			 MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+			 tooEarly = true;
+			 m_stage = -1;
+		       }
+		     else
+		       {
+			 if(stage >= m_stage) m_stage = stage+1;
+		       }
+		   }
+	       }
+	     // may we abort the loop over the ParticleCaches?
+	     if(tooEarly)
+	       {
+		 __iFE = __end;
+		 // important because there still comes the ++i from the loop
+		 --__iFE; 
+	       }
+	     );
+	} // end if(!tooEarly) (for loop over ParticleCaches)
+
+
+          if(!tooEarly) {
+	    // we have to search now in the TripletCalculators
+	    vector<TripletCalculator*>* tCs;
+	    tCs = M_PHASE->bondedTripletCalculatorsFlat_0();
+	    // MSG_DEBUG("ValCalculatorArbitrary::findStage_0", "loop over triplet calculators START");
             FOR_EACH
-                (
-                vector<ParticleCache*>,
-            (*pCs)/*Particle::s_cached_flat_properties*/,
-              
-//               MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "loop over ParticleCaches. Now at = " << (*i)->mySymbolName() << " for symbol " << name);
+	      (
+	       vector<TripletCalculator*>, (*tCs),
+	       list<string> symbols = (*__iFE)->mySymbolNames();
+	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+		 if(*symIt == m_scalarName) {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) {
+		     MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     tooEarly = true;
+		     m_stage = -1;
+		   }
+		   else {
+		     if(stage >= m_stage) m_stage = stage+1;
+		   }
+		 }
+	       }
+	       // may we abort the loop over the triplet Calculators?
+	       if(tooEarly) {
+		 __iFE = __end;
+		 // important because there still comes the ++__iFE from the loop
+		 --__iFE; 
+	       }
+	       );	    
+          } // end if(!tooEarly) (for search in tripletCalculators)
 
-              
-            list<string> symbols = (*i)->mySymbolNames();
-              
-//               MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", "symbols of Cache: ");
-               
-/*              for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-            cout << *symIt << endl;*/
-            
-            for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-            {
-              if(*symIt == m_scalarName)
-              {
-                nothing = false;
-                int stage = (*i)->stage();
-                if(stage == -1) 
-                {
-                  MSG_DEBUG("ValCalculatorDirichletBCScalar::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*i)->className());
-                  tooEarly = true;
-                  m_stage = -1;
-                }
-                else
-                {
-                  if(stage >= m_stage) m_stage = stage+1;
-                }
-              }
-            }
-              // may we abort the loop over the ParticleCaches?
-            if(tooEarly)
-            {
-              i = __end;
-                // important because there still comes the ++i from the loop
-              --i; 
-            }
-                );
+          if(!tooEarly) {
+	    // we have to search now in the QuintetCalculators
+	    vector<QuintetCalculator*>* tCs;
+	    tCs = M_PHASE->bondedQuintetCalculatorsFlat_0();
+	    // MSG_DEBUG("ValCalculatorArbitrary::findStage_0", "loop over triplet calculators START");
+            FOR_EACH
+	      (
+	       vector<QuintetCalculator*>, (*tCs),
+	       list<string> symbols = (*__iFE)->mySymbolNames();
+	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+		 if(*symIt == m_scalarName) {
+		   nothing = false;
+		   int stage = (*__iFE)->stage();
+		   if(stage == -1) {
+		     MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     tooEarly = true;
+		     m_stage = -1;
+		   }
+		   else {
+		     if(stage >= m_stage) m_stage = stage+1;
+		   }
+		 }
+	       }
+	       // may we abort the loop over the QuintetCalculators?
+	       if(tooEarly) {
+		 __iFE = __end;
+		 // important because there still comes the ++__iFE from the loop
+		 --__iFE; 
+	       }
+	       );	    
+          } // end if(!tooEarly) (for search in QuintetCalculators)
 
-          }
 
-//     } // end loop over symbols
+      //     } // end loop over symbols, which is not necessary because this ValCalculator depends on only one symbol
 
     if(tooEarly)
       return false;

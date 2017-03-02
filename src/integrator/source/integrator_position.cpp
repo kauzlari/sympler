@@ -72,13 +72,6 @@ void IntegratorPosition::init()
     "Integrates the position and momentum coordinates of each particle."
   );
 
-  DOUBLEPC
-    (lambda,
-     m_lambda,
-     0,
-     "Lambda parameter for modified velocity verlet algorithm.");
-
-  m_lambda = 0.5;
 }
 
 void IntegratorPosition::isAboutToStart()
