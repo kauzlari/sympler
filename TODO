@@ -3,7 +3,9 @@ PRIMARY and SECONDARY tells you how important this new feature is. The features 
 
 PRIMARY:
 
-TASK TAKEN: (II) Implement Cell-subdivision with cell-sizes >= 0.5*cutoff. Implement the choice of the factor (0.5 or 1) either as option in current ManagerCell, or in new class. In the latter case you maybe do not have to make the choice between two modules in the XML, but a parent class can decide based on an attribute, which ManagerCell it creates.
+(II) Every ASCII and BINARY output should contain a header with the version number of SYMPLER used for producing the output.
+
+(II) FIRST VERSION in branch improved_neighbor_search, but seems to work more slowly than the cell-sizes >= 1*cutoff case: Implement Cell-subdivision with cell-sizes >= 0.5*cutoff. Implement the choice of the factor (0.5 or 1) either as option in current ManagerCell, or in new class. In the latter case you maybe do not have to make the choice between two modules in the XML, but a parent class can decide based on an attribute, which ManagerCell it creates.
 
 (II) The fact that ParticleCreatorWall creates a cubic lattice of wall particles starting half a lattice spacing "a" from the box-rim extended "outwards" by 1rc complicates the creation of symmetric walls and the easy adjustment of wall spacings for arbitrary rc with mod(rc,a)!=0. Doesn't starting a/2 from the wall and then going with the wall-particle creation 1rc "outwards" solve all the problems? NOTE: This change will most likely require to adapt some of the testsuite and/or example files.
 
