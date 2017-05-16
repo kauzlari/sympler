@@ -1,0 +1,3 @@
+SUBDIRS = \
+	head \
+	source

@@ -14,7 +14,8 @@ EXTRA_DIST = \
 #	SVNREV
 
 SUBDIRS = \
-	src
+	src \
+	srcUnittest
 
 distdir = $(PACKAGE)-$(VERSION)
 
