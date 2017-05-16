@@ -87,4 +87,6 @@ other:
 	- run this sim directly before
 	- or take the coords from an other available output file
 	- repeat the coordinates periodically, if the input system is too small for the desired simulation
+(III) Rename AutocorrelationVectorT to CorrelationVectorT; Autocorrelation by definition means that it calculates the
+correlation function of one variable with itself, but the module allows for two different symbols to be used, symbol1 and symbol2
 
