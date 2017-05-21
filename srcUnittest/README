@@ -1,0 +1,24 @@
+
+Constructions for contributors creating and integrating new UnitTests to sympler:
+
+______________________________________________________________________
+1. step: Write unit tests
+Unit tests always test a specific class ~.cpp in the src-directory.
+To integrate your files ~Test.h and ~Test.cpp, put them into the analogous srcUnittest-directory:
+~Test.h to srcUnittest/.../head and ~Test.cpp to srcUnittest/.../source
+
+______________________________________________________________________
+2. step: Adapt Makefiles
+You need to tell the Makefiles that there is new code required to be compiled:
+Add "~Test.h" to include_HEADERS in srcUnittest/.../head/Makefile.am ("include_HEADERS = ~Test.h")
+Add "~Test.cpp" to lib~Test_la_SOURCES in srcUnittest/.../source/Makefile.am ("lib~Test_la_SOURCES = ~Test.cpp")
+
+______________________________________________________________________
+IMPORTANT
+Every time a new file (e.g. unit tests) is added to the source code,
+the entire sympler need to be configured and compiled all over again.
+
+______________________________________________________________________
+There are two simple unit test examples:
+The structure of an unit test without functionality: srcUnittest/meter/grid_meter/...
+The full unit test of the VertexList-class: src/geometry/...
