@@ -33,9 +33,9 @@
 #include "vertex_listTest.h"
 #include <vector>
 
-CPPUNIT_TEST_SUITE_REGISTRATION (vertex_listTest);
+CPPUNIT_TEST_SUITE_REGISTRATION (VertexListTest);
 
-void vertex_listTest :: setUp (void)
+void VertexListTest :: setUp (void)
 {
   /*!
    * Initialize objects
@@ -44,7 +44,7 @@ void vertex_listTest :: setUp (void)
   b = new VertexList();
 }
 
-void vertex_listTest :: tearDown (void) 
+void VertexListTest :: tearDown (void) 
 {
   /*!
    * Delete objects
@@ -52,7 +52,7 @@ void vertex_listTest :: tearDown (void)
   delete a; delete b;
 }
 
-void vertex_listTest :: addVertexTest (void)
+void VertexListTest :: addVertexTest (void)
 {
   /*!
    * Test adding vertices and returning its index
@@ -64,7 +64,7 @@ void vertex_listTest :: addVertexTest (void)
   CPPUNIT_ASSERT_EQUAL (2, a->addVertex(0, 0, 0));
 }
 
-void vertex_listTest :: findVertexTest (void)
+void VertexListTest :: findVertexTest (void)
 {
   /*!
    * Test finding vertices with eps = 0 and eps != 0 (distance)
@@ -83,7 +83,7 @@ void vertex_listTest :: findVertexTest (void)
   CPPUNIT_ASSERT_EQUAL (0, a->findVertex(x, 1.5));
 }
 
-void vertex_listTest :: needVertexTest (void)
+void VertexListTest :: needVertexTest (void)
 {
   /*!
    * Test creating a new vertex only if it does not yet exist, otherwise returning the existing one
@@ -97,7 +97,7 @@ void vertex_listTest :: needVertexTest (void)
   CPPUNIT_ASSERT_EQUAL (2, a->needVertex(7, 8, 9));
 }
 
-void vertex_listTest :: shiftCoordsTest (void)
+void VertexListTest :: shiftCoordsTest (void)
 {
   /*!
    * Test rotating coordinates

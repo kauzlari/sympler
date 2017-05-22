@@ -39,9 +39,9 @@
 
 using namespace std;
 
-class vertex_listTest : public CPPUNIT_NS :: TestFixture
+class VertexListTest : public CPPUNIT_NS :: TestFixture
 {
-  CPPUNIT_TEST_SUITE (vertex_listTest);
+  CPPUNIT_TEST_SUITE (VertexListTest);
   CPPUNIT_TEST (addVertexTest);
   CPPUNIT_TEST (findVertexTest);
   CPPUNIT_TEST (needVertexTest);
