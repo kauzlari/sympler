@@ -30,37 +30,34 @@
 
 
 
-#ifndef VERTEX_LISTTEST_H
-#define VERTEX_LISTTEST_H
+#include "exampleTest.h"
+#include <vector>
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-#include "vertex_list.h"
+CPPUNIT_TEST_SUITE_REGISTRATION (ExampleTest);
 
-using namespace std;
-
-class VertexListTest : public CPPUNIT_NS :: TestFixture
+void ExampleTest :: setUp (void)
 {
-  CPPUNIT_TEST_SUITE (VertexListTest);
-  CPPUNIT_TEST (addVertexTest);
-  CPPUNIT_TEST (findVertexTest);
-  CPPUNIT_TEST (needVertexTest);
-  CPPUNIT_TEST (shiftCoordsTest);
-  CPPUNIT_TEST_SUITE_END ();
+  /*!
+   * Initialize objects
+   */
+//  a = new Example();
+//  b = new Example();
+}
 
-  public:
-    void setUp (void);
-    void tearDown (void);
+void ExampleTest :: tearDown (void) 
+{
+  /*!
+   * Delete objects
+   */
+//  delete a; delete b;
+}
 
-  protected:
-    void addVertexTest (void);
-    void findVertexTest (void);
-    void needVertexTest (void);
-    void shiftCoordsTest (void);
+void ExampleTest :: functionTest (void)
+{
+  /*!
+   * Test example function
+   */
+//  CPPUNIT_ASSERT_EQUAL (0, a->function(input1));
+//  CPPUNIT_ASSERT_EQUAL (1, b->function(input2));
+}
 
-
-  private:
-    VertexList *a, *b;
-};
-
-#endif

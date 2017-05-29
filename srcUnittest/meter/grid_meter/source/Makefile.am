@@ -1,7 +1,7 @@
 
 noinst_LTLIBRARIES = libgrid_meterTest.la
 
-libgrid_meterTest_la_SOURCES = 
+libgrid_meterTest_la_SOURCES = exampleTest.cpp
 
 libgrid_meterTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@
 

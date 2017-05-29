@@ -30,22 +30,18 @@
 
 
 
-#ifndef VERTEX_LISTTEST_H
-#define VERTEX_LISTTEST_H
+#ifndef EXAMPLETEST_H
+#define EXAMPLETEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "vertex_list.h"
 
 using namespace std;
 
-class VertexListTest : public CPPUNIT_NS :: TestFixture
+class ExampleTest : public CPPUNIT_NS :: TestFixture
 {
-  CPPUNIT_TEST_SUITE (VertexListTest);
-  CPPUNIT_TEST (addVertexTest);
-  CPPUNIT_TEST (findVertexTest);
-  CPPUNIT_TEST (needVertexTest);
-  CPPUNIT_TEST (shiftCoordsTest);
+  CPPUNIT_TEST_SUITE (ExampleTest);
+  CPPUNIT_TEST (functionTest);
   CPPUNIT_TEST_SUITE_END ();
 
   public:
@@ -53,14 +49,10 @@ class VertexListTest : public CPPUNIT_NS :: TestFixture
     void tearDown (void);
 
   protected:
-    void addVertexTest (void);
-    void findVertexTest (void);
-    void needVertexTest (void);
-    void shiftCoordsTest (void);
-
+    void functionTest (void);
 
   private:
-    VertexList *a, *b;
+//    Example *a, *b;
 };
 
 #endif
