@@ -76,13 +76,13 @@ Compiling SYMPLER:
 ++ the GNU autotools (aclocal, libtool, autoconf, automake, etc.)
 ++ a C++ compiler such as GNU g++
 ++ a C compiler such as GNU gcc
-++ CppUnit (provides unit tests; on Ubuntu: sudo apt install libcppunit-dev)
 
 
 + Required libraries: 
 
 ++ GNU scientific library (GSL)
 ++ libxml2
+++ CppUnit (provides unit tests; on Ubuntu: sudo apt install libcppunit-dev)
 
 NOTE: You usually also have to install the libraries for development. They have names such as libgsl*-dev,
 libsdl*-dev, and so on.
