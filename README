@@ -76,6 +76,7 @@ Compiling SYMPLER:
 ++ the GNU autotools (aclocal, libtool, autoconf, automake, etc.)
 ++ a C++ compiler such as GNU g++
 ++ a C compiler such as GNU gcc
+++ CppUnit (provides unit tests; on Ubuntu: sudo apt install libcppunit-dev)
 
 
 + Required libraries: 
