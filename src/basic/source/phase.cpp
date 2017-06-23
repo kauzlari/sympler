@@ -171,9 +171,9 @@ Particle *Phase::addFrozenParticle(const Particle &particle)
         p.setColour(particle.c);
          ++nOfFrozenP;
 
-        if(p.mySlot == 0)
+       /* if(p.mySlot == 0)
             MSG_DEBUG("Phase::addFrozenParticle", "p.tag(0) = " << p.tag.doubleByOffset(0) << ", particle.tag(0) = " << particle.tag.doubleByOffset(0));
-        
+        */
     return &p;
 }
 
