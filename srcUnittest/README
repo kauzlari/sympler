@@ -1,0 +1,32 @@
+
+Instructions for contributors creating and integrating new UnitTests to sympler:
+
+______________________________________________________________________
+1. step: Write unit tests
+Unit tests always test a specific class ClassName, usually implemented 
+in a correspnding class_name.cpp in the src-directory.
+To integrate your files class_nameTest.h and class_nameTest.cpp, put 
+them into the analogous srcUnittest-directory:
+class_nameTest.h to srcUnittest/.../head and class_nameTest.cpp to 
+srcUnittest/.../source
+
+______________________________________________________________________
+2. step: Adapt Makefiles
+You need to tell the Makefiles that there is new code required to be 
+compiled:
+Add "class_nameTest.h" to include_HEADERS in 
+srcUnittest/.../head/Makefile.am ("include_HEADERS = class_nameTest.h")
+Add "class_nameTest.cpp" to lib~Test_la_SOURCES in 
+srcUnittest/.../source/Makefile.am 
+("lib~Test_la_SOURCES = class_nameTest.cpp")
+
+______________________________________________________________________
+IMPORTANT
+Every time a new file (e.g. unit tests) is added to the source code,
+the entire sympler-code need to be re-configured and re-compiled.
+
+______________________________________________________________________
+There are currently two simple unit test examples for your reference:
+The structure of a unit test without functionality can be found in 
+every subdirectory and can be used as a template for new unit tests.
+A complete set of unit tests of the VertexList-class: src/geometry/...

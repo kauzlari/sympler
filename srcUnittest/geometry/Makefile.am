@@ -1,0 +1,4 @@
+SUBDIRS = \
+	head \
+	source \
+	stl

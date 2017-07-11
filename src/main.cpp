@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2016, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
 void sayHello() {
   cout << endl << "SYMPLER: SYMbolic ParticLE simulatoR" << endl
-       << "Copyright 2002-2015, David Kauzlaric and " << endl
+       << "Copyright 2002-2017, David Kauzlaric and " << endl
        << "other authors listed in the AUTHORS file." << endl
        << "This program comes with ABSOLUTELY NO WARRANTY;" << endl
        << "for details see the LICENSE file." << endl
@@ -159,6 +159,7 @@ void sayHello() {
 #include "boundary_diffusor.h"
 #include "boundary_obstacle.h"
 #include "boundary_stl.h"
+#include "boundary_stl_periodic.h"
 #include "boundary_step.h"
 
 #include "pair_creator.h"
@@ -387,6 +388,7 @@ void link_all_properly()
   new BoundaryDiffusor(NULL);
   new BoundaryObstacle(NULL);
   new BoundarySTL(NULL);
+  new BoundaryStlPeriodic(NULL);
   new BoundaryStep(NULL);
 
   new PairCreator(NULL);
