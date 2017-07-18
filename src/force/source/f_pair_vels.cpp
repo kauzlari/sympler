@@ -63,7 +63,7 @@ void FPairVels::init()
   m_properties.setDescription(
     "This is a completely general pair force FPV on a velocity-vector v_i such that:\n"
  "  dv_i = FPV*dt\n"
- "       = Sum_j(particleFactor(i)_ij*pairFactor_ij*weight_ij)*dt\n"
+ "       = Sum_j(particleFactor(i)_ij*pairFactor_ij)*dt\n"
  "where pairFactor_ij includes all (anti-) symmetric pair contributions of the pair ij,"
  " and particleFactor(i)_ij the non-symmetric ones for particle i."
  " Note that the expression has to give a vector in the end,"
