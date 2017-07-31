@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -96,6 +96,8 @@ public:
 template <class T>
 class SmartEnum
 {
+  friend class SmartEnumTest;
+  
 protected:
   /*!
    * Name of this class

@@ -1,7 +1,8 @@
 
 noinst_LTLIBRARIES = libbasicTest.la
 
-libbasicTest_la_SOURCES =
+libbasicTest_la_SOURCES = \
+	smart_enumTest.cpp
 
 libbasicTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@
 
