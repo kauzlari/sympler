@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -37,7 +37,7 @@
 
 #ifdef HAVE_SDL
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 #include "meter.h"
 

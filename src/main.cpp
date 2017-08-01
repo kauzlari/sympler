@@ -46,7 +46,7 @@
 
 #ifdef HAVE_SDL
   // We need to do this, otherwise SDL doesn't work...
-  #include <SDL.h>
+  #include <SDL/SDL.h>
 #endif
 
 #ifdef ENABLE_PTHREADS
