@@ -197,16 +197,13 @@
 <h3>
 <a name="configuration-and-compilation-for-standard-linux-systems" class="anchor" href="#configuration-and-compilation-for-standard-linux-systems"><span class="octicon octicon-link"></span></a>Configuration and Compilation for standard Linux-systems:</h3>
 
-<p>Assuming the directory where you downloaded the SYMPLER source-code is $SOURCE-DIR, then the series of commands that usually works is:</p>
+<p>Assuming the complete path to the directory where you downloaded the SYMPLER source-code is given by $SOURCE-DIR, then the series of commands that usually works is:</p>
 
 <pre><code>$ cd $SOURCE-DIR
-$ libtoolize --force
-$ aclocal
-$ autoconf
-$ automake --add-missing
+$ autoreconf --install --force
 </code></pre>
 
-<p>Then, assuming the directory where you want to compile SYMPLER is $BUILD-DIR (it might be the same as or different from $SOURCE-DIR):</p>
+<p>Then, assuming the complete path to the directory where you want to compile SYMPLER is given by $BUILD-DIR (it might be the same as or different from $SOURCE-DIR)</p>
 
 <pre><code>$ cd $BUILD-DIR
 $ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
