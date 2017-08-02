@@ -109,16 +109,13 @@ find special instructions for MacOS and Intel compilers.
 
 ++ Configuration and Compilation for standard Linux-systems:
 
-Assuming the directory where you downloaded the SYMPLER source-code is $SOURCE-DIR, then the series of commands that
+Assuming the complete path to the directory where you downloaded the SYMPLER source-code is given by $SOURCE-DIR, then the series of commands that
 usually works is:
 
 $ cd $SOURCE-DIR
-$ libtoolize --force
-$ aclocal
-$ autoconf
-$ automake --add-missing
+$ autoreconf --install --force
 
-Then, assuming the directory where you want to compile SYMPLER is $BUILD-DIR (it might be the same as or different
+Then, assuming the complete path to the directory where you want to compile SYMPLER is given by $BUILD-DIR (it might be the same as or different
 from $SOURCE-DIR):
 
 $ cd $BUILD-DIR
