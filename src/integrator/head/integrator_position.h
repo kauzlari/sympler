@@ -60,6 +60,11 @@ protected:
   double m_dt;
 
   /*!
+   * Mass for the species this integrator works for.
+   */
+  double m_mass;
+
+  /*!
    * Timestep divided by particle mass
    */
   double m_dt_div_mass;

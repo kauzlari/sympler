@@ -119,10 +119,6 @@ protected:
 	 */
 	void init();
 	/*!
-	 * Mass for the species this integrator works for.
-	 */
-	double m_mass;
-	/*!
 	 * The color pair belonging to the species combination.
 	 */
 	ColourPair *m_cp;
