@@ -35,7 +35,7 @@
 
 #ifdef WITH_ARRAY_TYPES
 
-#include "integrator_position.h"
+#include "integrator_velocity_verlet.h"
 #include "particle.h"
 #include "MArray2D.h"
 #include <string>
@@ -59,7 +59,7 @@ class Cell;
  * See: R. D. Groot and P. B. Warren, J. Chem. Phys. 107, 4423-4435 (1997)
  */
 
-class IntegratorVelocityVerletPressure: public IntegratorPosition {
+class IntegratorVelocityVerletPressure: public IntegratorVelocityVerlet {
 protected:
 
 	/*Symbol for nabla of the weighting function*/
