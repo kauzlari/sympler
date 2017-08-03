@@ -59,7 +59,7 @@ const Integrator_Register<IntegratorStaticLSE> integrator_static_lse(
 //---- Constructors/Destructor ----
 
 IntegratorStaticLSE::IntegratorStaticLSE(Controller *controller) :
-	Integrator(controller) {
+	IntegratorScalar(controller) {
 	init();
 }
 IntegratorStaticLSE::~IntegratorStaticLSE() {
@@ -70,17 +70,8 @@ void IntegratorStaticLSE::init() {
 
 	m_properties.setDescription(
 			"Integrates the linear equation system built from the "
-				"entries in the colour pairs");;
-	//e.g "potential2ndderiv"
+				"entries in the colour pairs");
 
-
-	//e.g "psi"
-	STRINGPC(scalar, m_scalar_name,
-			"Full name of the additional scalar field, usable as attribute in other modules");
-	STRINGPC
-	(symbol, m_scalar_symbol,
-			"Symbol assigned to the additional scalar field, usable in algebraic expressions")
-	;
 	STRINGPC
 	(pairContribution, m_pairContribution_symbol,
 			"Symbol assigned to the pair interactions, usable in algebraic expressions, for the off-diagonal elements")
@@ -93,49 +84,39 @@ void IntegratorStaticLSE::init() {
 	STRINGPC(boundaryCondition,m_boundary_condition_name,"Boundary condition flag of the equations")
 	;
 
-	//m_species2 = "UNDEF";
-
 }
 
 void IntegratorStaticLSE::setup() {
-	Integrator::setup();
 
+  IntegratorScalar::setup();
 
-	DataFormat::attribute_t tmpAttr;
+  DataFormat::attribute_t tmpAttr;
 
-	m_particle_scalar_offset = Particle::s_tag_format[m_colour].addAttribute(
-			m_scalar_name, DataFormat::DOUBLE, true,
-			m_scalar_symbol).offset;
-	m_boundary_condition_offset
-			= Particle::s_tag_format[m_colour].addAttribute(
-					m_boundary_condition_name, DataFormat::DOUBLE, true,
-					m_boundary_condition_name).offset;
-	MSG_DEBUG("IntegratorStaticLSE::isAboutToStart","The integrator is about to start"<< m_boundary_condition_offset);
-	MSG_DEBUG("IntegratorStaticLSE::isAboutToStart","The integrator is about to start"<< m_boundary_condition_name);
-
-	m_cp = M_MANAGER->cp(M_MANAGER->getColour(m_species), M_MANAGER->getColour(
-			m_species)/*m_species*/);
-	m_cp->setNeedPairs(true);
+  m_boundary_condition_offset
+    = Particle::s_tag_format[m_colour].addAttribute
+    (m_boundary_condition_name, DataFormat::DOUBLE, true, m_boundary_condition_name).offset;
+  
+  m_cp = M_MANAGER->cp(M_MANAGER->getColour(m_species), M_MANAGER->getColour(m_species));
+  
+  m_cp->setNeedPairs(true);
 
 }
 
 void IntegratorStaticLSE::isAboutToStart() {
 
+  IntegratorScalar::isAboutToStart();
+    
 //	MSG_DEBUG(string(CLASSNAME) << "::" << __func__,
 //			"Species: " << m_species <<
 //			", Scalar: " << m_scalar_name <<
 //			", Symbol: " << m_scalar_symbol <<
 //			",BoundaryCondition: "<< m_boundary_condition_name <<".");
 
-	MSG_DEBUG("IntegratorStaticLSE::isAboutToStart","The integrator is about to start");
-
-	m_pairdiagonal_scalar_offset = Particle::s_tag_format[m_colour].attrByName(
+  m_pairdiagonal_scalar_offset = Particle::s_tag_format[m_colour].attrByName(
 			m_pairdiagonal_scalar_name).offset;
 
-
-	MSG_DEBUG("IntegratorStaticLSE::isAboutToStart","Particles no fixed potential"<<nofixedParticles);
-
 }
+
 void IntegratorStaticLSE::integrateStep2() {
 
 	Phase *phase = M_PHASE;
@@ -147,7 +128,7 @@ void IntegratorStaticLSE::integrateStep2() {
 					//<< (m_matrixA->dim1()) << "," << (m_matrixA->dim2()));
 	//MSG_DEBUG("IntegratorStaticLSE::integrateStep2","n_threads=" <<global::n_threads);
 	//Number of free particles
-	nofixedParticles = 0;
+	size_t nofixedParticles = 0;
 		size_t j = 0;
 
 
@@ -155,6 +136,7 @@ void IntegratorStaticLSE::integrateStep2() {
 		  (phase, m_colour,
 		     nofixedParticles++;
 		   );
+		//FIXME!: where is delete? Why not new once and then resizing?
 		DofToMySlot = new size_t[nofixedParticles];
 		mySlotToDof = new size_t[phase->returnNofPartC(m_colour)];
 		FOR_EACH_FREE_PARTICLE_C
@@ -293,14 +275,14 @@ if(mySlotToDof[pair->secondPart()->mySlot]<nofixedParticles-1 && mySlotToDof[pai
 
 			//if the first is defined value,second is free substract from rhs
 			if(firstHasDirichletBC && !secondHasDirichletBC) {
-				rhs[mySlotToDof[secondP->mySlot]]-=(pair->tag.doubleByOffset(m_pairContribution_symbol_offset))*(firstP->tag.doubleByOffset(m_particle_scalar_offset));
-				//cout << "(" << (pair->secondPart()->mySlot) << "->" << (pair->tag.doubleByOffset(m_pair_scalar_symbol_offset)) << "*" << (pair->firstPart()->tag.doubleByOffset(m_particle_scalar_offset)) << endl;
+				rhs[mySlotToDof[secondP->mySlot]]-=(pair->tag.doubleByOffset(m_pairContribution_symbol_offset))*(firstP->tag.doubleByOffset(m_scalar_offset));
+				//cout << "(" << (pair->secondPart()->mySlot) << "->" << (pair->tag.doubleByOffset(m_pair_scalar_symbol_offset)) << "*" << (pair->firstPart()->tag.doubleByOffset(m_scalar_offset)) << endl;
 			}
 
 			//if the second is defined value,substract from rhs
 			if(secondHasDirichletBC && !firstHasDirichletBC) {
-				rhs[mySlotToDof[firstP->mySlot]]-=pair->tag.doubleByOffset(m_pairContribution_symbol_offset)*secondP->tag.doubleByOffset(m_particle_scalar_offset);
-				//cout << "(" << (pair->firstPart()->mySlot) << "->" << (pair->tag.doubleByOffset(m_pair_scalar_symbol_offset)) << "*" << (pair->secondPart()->tag.doubleByOffset(m_particle_scalar_offset)) << endl;
+				rhs[mySlotToDof[firstP->mySlot]]-=pair->tag.doubleByOffset(m_pairContribution_symbol_offset)*secondP->tag.doubleByOffset(m_scalar_offset);
+				//cout << "(" << (pair->firstPart()->mySlot) << "->" << (pair->tag.doubleByOffset(m_pair_scalar_symbol_offset)) << "*" << (pair->secondPart()->tag.doubleByOffset(m_scalar_offset)) << endl;
 			}
 
 			//if both are free in the matrix, means myslot_array_c only free particles
@@ -457,7 +439,7 @@ if(mySlotToDof[pair->secondPart()->mySlot]<nofixedParticles-1 && mySlotToDof[pai
 	  (M_PHASE,m_colour,
 	   if(__iSLFE->tag.doubleByOffset(m_boundary_condition_offset)<=0)
 	     {
-	       __iSLFE->tag.doubleByOffset(m_particle_scalar_offset)=solution_vec[s];
+	       __iSLFE->tag.doubleByOffset(m_scalar_offset)=solution_vec[s];
 	       s++;
 	     }
 	   );
@@ -474,6 +456,7 @@ if(mySlotToDof[pair->secondPart()->mySlot]<nofixedParticles-1 && mySlotToDof[pai
 	//	Destroy_CompCol_Matrix(&U);
 	//	StatFree(&stat);
 }
+
 
 #endif /*WITH_JAMA_JAMA_LU*/
 #endif /*HAVE_ARRAY_TYPES*/

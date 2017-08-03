@@ -201,13 +201,9 @@ public:
 			const Particle* p, point_t &hit_pos, const point_t &force);
 
 #ifdef _OPENMP
-	virtual string dofIntegr();
 
-	/*!
-	 * Merge the copies at the end of every timestep
-	 */
-	virtual void mergeCopies(Particle* p, int thread_no, int force_index);
-
+	// all here inherited from parent 
+	
 #endif
 
 };

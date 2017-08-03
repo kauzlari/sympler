@@ -112,6 +112,9 @@ public:
       return 1;
     }
 
+    /*!
+     * Returns name of integrated degree of freedom ("dof")
+     */
     virtual string dofIntegr();
 
     /*!
