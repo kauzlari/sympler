@@ -141,9 +141,9 @@ very often. On newer distributions this issue has vanished. Further bug reports 
 After successful compilation the executable "sympler" will be created in the directory src/. 
 
 
-++ Configuration and Compilation for MacOS
+++ Configuration and Compilation on MacOS
 
-The following instructions were last successfully tested with Mac OS X Yosemite 10.10.5 and have been provided by Tobias Wondratsch (based on older instructions by Oliver Grünert and Andreas Greiner).
+The following instructions were last successfully tested with Mac OS X 10.11.6 (based on older instructions by Andreas Greiner, Tobias Wondratsch, Oliver Grünert).
 
 The libxml2 library comes already preinstalled by Apple but caused trouble during the SYMPLER installation. You may give the preinstalled libxml2 a try or immediately go and get an alternative version and the two remaining libraries by using one of the packaging-systems for Mac OS.
 
