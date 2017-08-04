@@ -1,14 +1,13 @@
 dnl 
 
 dnl AC_PREREQ(2.57)
-AC_INIT(sympler, 0.1, david.kauzlaric@frias.uni-freiburg.de)
-AM_INIT_AUTOMAKE
+AC_INIT(sympler, 0.1, david.kauzlaric@imtek.uni-freiburg.de)
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_SRCDIR([src/main.cpp])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
-AM_INIT_AUTOMAKE
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
