@@ -1,4 +1,4 @@
 
 include_HEADERS =
 
-INCLUDES = -I$(top_srcdir)/src/postprocessor/head
+AM_CPPFLAGS = -I$(top_srcdir)/src/postprocessor/head

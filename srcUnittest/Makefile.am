@@ -5,7 +5,7 @@ all:
 
 symplerTest_SOURCES = mainTest.cpp
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)/srcUnittest/*/head \
 	-I$(top_srcdir)/srcUnittest/*/*/head \
 	-I$(top_srcdir)/src/*/head \

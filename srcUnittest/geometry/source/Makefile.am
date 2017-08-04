@@ -8,4 +8,4 @@ libgeometryTest_la_CXXFLAGS = @GSL_CFLAGS@ @XML_CFLAGS@
 
 libgeometryTest_la_LDFLAGS = @LT_LDFLAGS@
 
-INCLUDES = -I$(top_srcdir)/srcUnittest/geometry/head -I$(top_srcdir)/src/integrator/head -I$(top_srcdir)/src/basic/head -I$(top_srcdir)/src/function_parser/head -I$(top_srcdir)/src/geometry/head -I$(top_srcdir)/src/calculator/head
+AM_CPPFLAGS = -I$(top_srcdir)/srcUnittest/geometry/head -I$(top_srcdir)/src/integrator/head -I$(top_srcdir)/src/basic/head -I$(top_srcdir)/src/function_parser/head -I$(top_srcdir)/src/geometry/head -I$(top_srcdir)/src/calculator/head

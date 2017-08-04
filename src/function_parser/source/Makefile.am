@@ -15,7 +15,7 @@ libfunction_parser_la_SOURCES = \
 	variant.cpp
 
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)/src/basic/head \
 	-I$(top_srcdir)/src/function_parser/head \
 	-I$(top_srcdir)/src/geometry/head
