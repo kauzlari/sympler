@@ -31,22 +31,18 @@
 
 
 #include <fstream>
-
 #include <iostream>
 #include <cstring>
 #include <string>
-using namespace std;
-
-
 #include "cell.h"
 #include "phase.h"
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
 #include "particle_cache.h"
-
+#include "boundary.h"
 #include "pc_file.h"
-
+using namespace std;
 /* Register this ParticleCreator with the factory. */
 const ParticleCreator_Register<ParticleCreatorFile>
 		particle_creator_file("ParticleCreatorFile");
@@ -565,10 +561,14 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
   // initial read for species of real particle data starting now   
   pos >> skipws >> species;
   // 3rd while (for the real particle data)
+
   while (species != "!!!" && !pos.eof()) {
-    
+       //   MSG_DEBUG("PCF::createParticles","Position : "<< pos.tellg());
+
 //     MSG_DEBUG("ParticleCreatorFile::createParticles", "start of 3rd while (species != \"!!!\" && !pos.eof()); species =  " << species << "; m_species = " << m_species);
-    
+ /************************************************************************************
+  ************************************************************************************
+  ************************************************************************************/
     Particle p;
     Cell *c;
     size_t colour;
@@ -579,7 +579,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
     if (m_species == "UNDEF" || m_species == species) {
       colour = manager->getColour(species);
       //       reallyCreate = true;
-      
+     /* 
       pos >> skipws >> freeOrFrozen;
       //     MSG_DEBUG("ParticleCreatorFile::createParticles", "freeOrFrozen = " << freeOrFrozen);
       if (freeOrFrozen == "free" || freeOrFrozen == "frozen") {
@@ -591,9 +591,14 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 	    >> skipws >> p.v.y >> skipws >> p.v.z;
 	freeOrFrozen = "free";
       }
+      */
+     // point_t offset; 
       
+      readParticle(p,pos,freeOrFrozen);
+  
       p.setColour(colour);
-      
+    
+
       // old (BUGGY! 2013-07-29) style of species checking
       //     if (m_species == "UNDEF" || m_species == species){
       list<bool>::iterator boolIt = writeTags[colour].begin();
@@ -614,12 +619,11 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
       transformPos(p);
       
       c = manager->findCell(p.r);
-      
       if (c) {
           // if-> is inside ::Need to implement based on input from input file. Particles inside or outside?
           //Default = inside (backwards compatible)
 	//
-        if(m_particlesinside){
+        if(m_particlesInside){
          if (M_BOUNDARY->isInside(p.r)) {
            p.g = c->group();
 	  
@@ -629,7 +633,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 	    m_particles[p.g].newEntry() = p;
           }
 	}
-        if(!m_particlesinside){
+        if(!m_particlesInside){        
          if (!(M_BOUNDARY->isInside(p.r))) {
            p.g = c->group();
 	  
@@ -652,16 +656,33 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 //     MSG_DEBUG("ParticleCreatorFile::createParticles", "end of 3rd while(species != \"!!!\" && !pos.eof()); next species = " << species << "; s = " << s << ", p.v.z = " << p.v.z);
   } // end of 3rd while(species != "!!!" ...) (for the real particle data)
   pos.close();
-  
   /* next will call the one in ParticleCreatorFree */
   flushParticles();
 }
 
+void ParticleCreatorFile::readParticle(Particle &p, ifstream &pos, string &freeOrFrozen ){
+    
+      pos >> skipws >> freeOrFrozen;
+      
+      if (freeOrFrozen == "free" || freeOrFrozen == "frozen") {
+	pos >> skipws >> p.r.x >> skipws >> p.r.y >> skipws >> p.r.z
+	    >> skipws >> p.v.x >> skipws >> p.v.y >> skipws >> p.v.z;
+      } else {
+	p.r.x = atof(freeOrFrozen.c_str());
+	pos >> skipws >> p.r.y >> skipws >> p.r.z >> skipws >> p.v.x
+	    >> skipws >> p.v.y >> skipws >> p.v.z;
+	freeOrFrozen = "free";
+      }
+        pos.ignore(HUGE_VAL,'\n');
+    
+ }
 
 void ParticleCreatorFile::setup() {
   //	ParticleCreatorFree::setup();
   // this PC uses m_species as filter for the given input file
-  if (m_species != "UNDEF") {
+ 
+    myCutoff = M_PHASE->pairCreator()->interactionCutoff(); //as in pc_wall for adjustBoxSize()
+      if (m_species != "UNDEF") {
     m_colour = M_MANAGER->getColour/*AndAdd*/(m_species);
   } else {
     //   m_colour = ALL_COLOURS;
@@ -685,7 +706,7 @@ void ParticleCreatorFile::setup() {
     }
     pos.close();
     
-  }
+}
 }
 
 
@@ -725,7 +746,7 @@ void ParticleCreatorFile::init() {
      "After the last particle, the file is terminated by another new line containing '!!!'.\n"
     "STL: \n"
   "If used to add wall particles, in conjunction with an STL geometry, the geometry should have dummy walls on the exterior which make the bounding box artificially bigger."
-  " Otherwise, wall particles can land outside of bounding box leading to errors. These dummy walls should be perpendicular to the walls of your geometry for particlesinside to work properly."
+  " Otherwise, wall particles can land outside of bounding box leading to errors. These dummy walls should be perpendicular to the walls of your geometry for particlesInside to work properly."
      );
 
 	STRINGPCINF
@@ -733,12 +754,12 @@ void ParticleCreatorFile::init() {
 			"File containing the position and velocity information.")
 	;
         BOOLPC
-    (particlesinside, m_particlesinside,
+    (particlesInside, m_particlesInside,
      " true if particles are inside inside of geometry (fluid particles), false"
                 " if they are outside (wall particles). Useful when working with STL geometries. Default is true so that it is backwards compatible. ");
         
 	m_filename = "default.pos";
-        m_particlesinside = "true";
+        m_particlesInside = "true";
 }
 
 void ParticleCreatorFile::flushParticles() {
@@ -771,4 +792,51 @@ void ParticleCreatorFile::flushParticles() {
 	MSG_DEBUG("ParticleCreatorFile::flushParticles" , counter << " particles added");
 	m_particles_frozen.clear();
 	m_particles.clear();
+}
+void ParticleCreatorFile::adjustBoxSize(point_t &size, bool_point_t& frameRCfront,  bool_point_t& frameRCend){
+
+    ifstream pos(m_filename.c_str());
+    string s ;
+    pos >> skipws >> s;
+        while (s != "!!!" && !pos.eof()) {
+
+          pos >> skipws >> s;
+          while (s != "!!!" && !pos.eof()){
+            pos >> skipws >> s;
+          }
+          pos >> skipws >> s;              
+        }
+     Particle p;
+   	point_t addFrame = {{{0, 0, 0}}};
+	bool_point_t periodicityFront = ((Boundary*) m_parent)->periodicityFront();
+	MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "periodicityFront = " << periodicityFront);
+	bool_point_t periodicityBack = ((Boundary*) m_parent)->periodicityBack();
+	MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "periodicityBack = " 
+	<< periodicityBack);
+	
+        string freeOrFrozen = "free";
+        while(!pos.eof() && pos.peek() != 33 ){
+             pos >> skipws >> freeOrFrozen ;  //first species, dismissed.
+           readParticle(p,pos,freeOrFrozen); 
+           if(!m_particlesInside){        
+                if (!(M_BOUNDARY->isInside(p.r))) {
+                    //addFrame in direction of particle
+                    for(int i = 0 ; i< SPACE_DIMS; i++){
+                        if((p.r[i]-size[i]) <=0){ //smaller than box
+                            frameRCfront[i] = frameRCfront[i] || !periodicityFront[i] ;
+                        }
+                        if((size[i]-p.r[i])<=0){ //bigger than box
+                            frameRCend[i] = frameRCend[i] || !periodicityBack[i];
+                        }
+                        if(frameRCfront[i]) addFrame[i] += myCutoff;
+                        if(frameRCend[i]) addFrame[i] += myCutoff;
+                    }
+                }
+            }   
+        
+        }
+  
+        
+        	MSG_DEBUG("ParticleCreatorFile::adjustBoxSize","frameRCfront = " << frameRCfront << ", frameRCend = " << frameRCend);
+
 }
