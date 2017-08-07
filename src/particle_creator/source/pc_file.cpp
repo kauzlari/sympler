@@ -744,9 +744,6 @@ void ParticleCreatorFile::init() {
      "Then, in another new line this section is terminated by another '!!!'.\n"
      "The particles are defined one per row, starting with their species, optionally followed by the label \"free\" or \"frozen\", and then followed by three position-values, three velocity values, and then the values of the additional attributes in the order specified in the header.\n"
      "After the last particle, the file is terminated by another new line containing '!!!'.\n"
-    "STL: \n"
-  "If used to add wall particles, in conjunction with an STL geometry, the geometry should have dummy walls on the exterior which make the bounding box artificially bigger."
-  " Otherwise, wall particles can land outside of bounding box leading to errors. These dummy walls should be perpendicular to the walls of your geometry for particlesInside to work properly."
      );
 
 	STRINGPCINF
