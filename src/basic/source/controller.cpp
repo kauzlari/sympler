@@ -250,7 +250,7 @@ void Controller::run() {
 
 
 #pragma omp parallel for
-  for (int t = 0; t < global::n_threads; ++t) {
+  for (size_t t = 0; t < global::n_threads; ++t) {
     vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();   
     for(vector<ColourPair*>::iterator __cp = M_MANAGER->colourPairs().begin(); __cp != __end; ++__cp) {                                                
       ColourPair *cp = *__cp; 
@@ -322,7 +322,7 @@ void Controller::run() {
   } // end of for (int t = 0; t < global::n_threads; ++t)
 
 #ifdef _OPENMP
-  for (int t = 0; t < global::n_threads; t++) {
+  for (size_t t = 0; t < global::n_threads; t++) {
     list<Node*>::iterator i_begin = m_children.begin();
     list<Node*>::iterator i_end = m_children.end();
     for(list<Node*>::iterator integr = i_begin; integr != i_end; ++integr) {
@@ -573,14 +573,14 @@ void Controller::integrate()
 //   start = clock();
   
 #ifdef _OPENMP 
-  double start_time = omp_get_wtime();
+  // double start_time = omp_get_wtime();
 #endif
   
   tInitStart = clock();
 //   std::time(&tInitStart);
 
 #pragma omp parallel for
-  for (int t = 0; t < global::n_threads; ++t) {
+  for (size_t t = 0; t < global::n_threads; ++t) {
     
     vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();
     for(vector<ColourPair*>::iterator __cp = M_MANAGER->colourPairs().begin(); __cp != __end; ++__cp) {
@@ -665,7 +665,7 @@ void Controller::integrate()
   }
 
 #ifdef _OPENMP
-  for (int t = 0; t < global::n_threads; t++) {
+  for (size_t t = 0; t < global::n_threads; t++) {
     list<Node*>::iterator i_begin = m_children.begin();
     list<Node*>::iterator i_end = m_children.end();
     for(list<Node*>::iterator integr = i_begin; integr != i_end; ++integr) {
@@ -681,8 +681,8 @@ void Controller::integrate()
 #endif
   
 #ifdef _OPENMP
-  double end_time = omp_get_wtime(); 
-  double wtick = omp_get_wtick();
+  // double end_time = omp_get_wtime(); 
+  // double wtick = omp_get_wtick();
   
   // MSG_DEBUG("Controller::run", " time elapsed = " << end_time - start_time);
   // MSG_DEBUG("Controller::run", " ticks elapsed = " << wtick);
@@ -946,7 +946,7 @@ void Controller::runSymbols() {
 //           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                                
 //             if ((*cp)->maxStage() >= stage) {
 #pragma omp parallel for
-        for (int t = 0; t < global::n_threads; ++t) {
+        for (size_t t = 0; t < global::n_threads; ++t) {
           vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();   
           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                            
 //             ColourPair *cp = *__cp; 
@@ -1236,7 +1236,7 @@ void Controller::runSymbols_0() {
 //           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                                
 //             if ((*cp)->maxStage_0() >= stage) {
 #pragma omp parallel for 
-        for (int t = 0; t < global::n_threads; ++t) {
+        for (size_t t = 0; t < global::n_threads; ++t) {
           vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();   
           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                            
 //             ColourPair *cp = *__cp; 

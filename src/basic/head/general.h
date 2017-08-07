@@ -215,7 +215,7 @@ class global
 {
 public:
   static double R;     // R = 8.31441 by default
-  static int n_threads;
+  static size_t n_threads;
 #ifdef _MPI
   static size_t thread_id;
   static size_t n_procs;

@@ -116,7 +116,7 @@ void LinkedListCreator::createDistances()
 // int count =0;
 
 #pragma omp for ordered
-  for (int t = 0; t < global::n_threads; ++t) {
+  for (size_t t = 0; t < global::n_threads; ++t) {
     CellLink* first = M_MANAGER->firstLink()[t];
     for (CellLink* cl = first; cl != NULL; cl = cl->next) {	   
       cl->createDistances(t);

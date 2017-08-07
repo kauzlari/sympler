@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -132,17 +132,15 @@ protected:
    * update the free slot information.
    */
   void expandCapacity() {
-    size_t first_slot, last_slot;
+    /* size_t first_slot, last_slot; */
     T* chunk;
-
-    //printf("expandCapacity\n");
 
 //      MSG_DEBUG("SmartList::expandCapacity", "# chunks now = " << m_chunks.size()+1);
 
-    first_slot = m_chunks.size()*CHUNK_LEN;
+    /* first_slot = m_chunks.size()*CHUNK_LEN; */
     chunk = new T[CHUNK_LEN];
     //        chunk = (T*) malloc(sizeof(T)*CHUNK_LEN);
-    last_slot = (m_chunks.size()+1)*CHUNK_LEN;
+    /* last_slot = (m_chunks.size()+1)*CHUNK_LEN; */
     
     /*
     for (size_t slot = first_slot; slot < last_slot; slot++) {
