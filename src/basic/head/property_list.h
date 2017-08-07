@@ -89,7 +89,7 @@ public:
     /*!
      * Index of this property within the \a PropertyList
      */
-    int index;
+    size_t index;
 
     /*!
      * Type of this property

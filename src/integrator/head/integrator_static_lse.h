@@ -34,14 +34,14 @@
 #define INTEGRATOR_STATIC_LSE_H_
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H
-#include "integrator.h"
+#include "integrator_scalar.h"
 #include "general.h"
 #include "particle.h"
 #include "MArray2D.h"
 #include <string>
 class Controller;
 class Phase;
-class IntegratorStaticLSE : public Integrator {
+class IntegratorStaticLSE : public IntegratorScalar {
 
 protected:
 //
@@ -70,10 +70,6 @@ protected:
 	   * The tag offset of the scalar field
 	   */
 	  size_t m_pairdiagonal_scalar_offset;
-	  /*!
-	   * The tag offset of the scalar field
-	   */
-	  size_t m_particle_scalar_offset;
 
 	  size_t m_pairContribution_symbol_offset;
 	  /*!
@@ -95,7 +91,6 @@ protected:
 //
 //
       vector<PairList> m_freePairs;
-      size_t nofixedParticles;
 
       /*! DofToMySlot tells us, which degree of freedom
        * of the system of equations corresponds to which slot
@@ -129,13 +124,13 @@ public:
 	/*!
 	 * Called right before the simulation will start
 	 */
+	virtual void isAboutToStart();
 
 	/*!
 	 * Add attributes
 	 */
 	virtual void setup();
 
-	virtual void isAboutToStart();
 	/*!
 	 * Time integration step 1
 	 */
@@ -144,20 +139,15 @@ public:
 	 * Time integration step 2
 	 */
 	virtual void integrateStep2();
-	  /*!
-	   * Return the tag offset of the scalar field
-	   */
-	  virtual size_t scalarOffset() const {
-	    return m_particle_scalar_offset;
-	  }
-	  /*!
-	   * Return the name of the scalar field
-	   */
-	  virtual string scalarName() const {
-	    return m_scalar_name;
-	  }
+
+#ifdef _OPENMP
+
+	// all inherited from parent class
+	
+#endif
 
 };
+
 #endif /*WITH_JAMA_JAMA_LU*/
 #endif /*HAVE_ARRAY_TYPES*/
 #endif /*INTEGRATOR_STATIC_LSE_H_*/

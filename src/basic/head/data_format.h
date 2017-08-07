@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -104,15 +104,19 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
 }
 
 #define DATAFORMAT_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
-	case DataFormat::VECTOR_DOUBLE:\
-		oper((attr),(m_data),vector_double_sp); break; \
-	case DataFormat::VECTOR_INT:\
-		oper((attr),(m_data),vector_int_sp); break; \
-	case DataFormat::VECTOR_POINT:\
-		oper((attr),(m_data),vector_point_sp); break; \
-	case DataFormat::VECTOR_TENSOR:\
-		oper((attr),(m_data),vector_tensor_sp); break; \
-	DATAFORMAT_ARRAY_SWITCH((attr),(m_data),oper); \
+  case DataFormat::VECTOR_DOUBLE:				       \
+    oper((attr),(m_data),vector_double_sp); break;		       \
+  case DataFormat::VECTOR_INT:					       \
+    oper((attr),(m_data),vector_int_sp); break;			       \
+  case DataFormat::VECTOR_POINT:				       \
+    oper((attr),(m_data),vector_point_sp); break;		       \
+  case DataFormat::VECTOR_TENSOR:				       \
+    oper((attr),(m_data),vector_tensor_sp); break;		       \
+    DATAFORMAT_ARRAY_SWITCH((attr),(m_data),oper);			\
+  default: \
+    throw gError("DATAFORMAT_SWITCH(attr,m_data,oper)", "FATAL ERROR: \
+usage of this switch statement with wrong DataFormat enumeration value. " \
+		 + ObjToString((attr)->datatype)); break;		\
 }
 
 //---- Classes ----
@@ -165,13 +169,13 @@ public:
     /*!
      * Index of the attribute.
      */
-    int index;
+    size_t index;
 
     /*!
      * Start of the attribute's data from the beginning of the overall data
      * stored in a \a Data.
      */
-    ptrdiff_t offset;
+    size_t offset;
 
     /*!
      * Type of data.

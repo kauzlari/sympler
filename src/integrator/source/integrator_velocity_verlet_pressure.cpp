@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -58,7 +58,7 @@ const Integrator_Register<IntegratorVelocityVerletPressure>
 
 IntegratorVelocityVerletPressure::IntegratorVelocityVerletPressure(
 		Controller *controller) :
-	IntegratorPosition(controller) {
+	IntegratorVelocityVerlet(controller) {
 	init();
 }
 
@@ -75,12 +75,6 @@ void IntegratorVelocityVerletPressure::init() {
 
 	m_properties.setDescription(
 			"Integrates the position and momentum coordinates of each particle according to the Velocity-Verlet Algorithm");
-	DOUBLEPC
-	(mass, m_mass,0,
-			"Mass of the species this integrator is intended for. Default mass = 1. Pay attention the mass is only "
-			"effective for the integrator and does not affect the thermostat for instance")
-		;
-	m_mass = 1;
 
 	STRINGPC
 	(nablaWF, m_nablaWF_symbol,
@@ -119,13 +113,11 @@ void IntegratorVelocityVerletPressure::init() {
 }
 
 void IntegratorVelocityVerletPressure::setup() {
-	Integrator::setup();
+	IntegratorVelocityVerlet::setup();
 
 	m_cp = M_MANAGER->cp(M_MANAGER->getColour(m_species), M_MANAGER->getColour(
 			m_species)/*m_species*/);
 	m_cp->setNeedPairs(true);
-
-	DataFormat::attribute_t tmpAttr;
 
 	m_vector_offset = Particle::s_tag_format[m_colour].addAttribute(
 			m_vector_name, DataFormat::POINT, true, m_vector_symbol).offset;
@@ -135,42 +127,20 @@ void IntegratorVelocityVerletPressure::setup() {
 }
 
 void IntegratorVelocityVerletPressure::isAboutToStart() {
-	Phase *phase = M_PHASE;
-	double invMass;
 
-	m_dt = M_CONTROLLER->dt();
-
-	invMass = 1 / m_mass;
-	m_dt_div_mass = m_dt * invMass;
-	m_dt_div2_mass = m_dt_div_mass / 2;
-	m_lambda_diff = 0.5 - m_lambda;
-
-	MSG_DEBUG("IntegratorVelocityVerletPressure::isAboutToStart", "m_colour = " << m_colour);
-
-	size_t counter = 0;
-	FOR_EACH_FREE_PARTICLE_C
-	  (phase, m_colour,
-	   for (int j = 0; j < FORCE_HIST_SIZE; j++)
-	     __iSLFE->force[j].assign(0);
-	   ++counter;
-	   );
-	if (counter == 0)
-		throw gError(
-				"IntegratorVelocityVerletPressure::isAboutToStart",
-				"no free particles found for species " + m_species
-						+ "! Don't instantiate an Integrator for positions and velocities in that case. Use another module to create the species.");
-	// FIXME: so we need some SpeciesCreator to make it more transparent
-	// FIXME: put all in this function into the general setup for Nodes after the particle creation or into s.th. even more general
-
-	m_rho_offset
-			= Particle::s_tag_format[m_colour].attrByName(m_rho_name).offset;
-
-	m_tensor_offset = Particle::s_tag_format[m_colour].offsetByName(
-			m_tensor_symbol);
-
-	numberOfParticles = M_PHASE->returnNofPartC(m_colour);
-	grad = MArray2D(numberOfParticles, 3, 0);
-
+  IntegratorVelocityVerlet::isAboutToStart();
+  
+  Phase *phase = M_PHASE;
+  
+  m_rho_offset
+    = Particle::s_tag_format[m_colour].attrByName(m_rho_name).offset;
+  
+  m_tensor_offset
+    = Particle::s_tag_format[m_colour].offsetByName(m_tensor_symbol);
+  
+  numberOfParticles = M_PHASE->returnNofPartC(m_colour);
+  grad = MArray2D(numberOfParticles, 3, 0);
+  
 }
 
 void IntegratorVelocityVerletPressure::integrateStep1() {

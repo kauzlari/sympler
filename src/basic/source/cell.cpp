@@ -250,8 +250,8 @@ void CellLink::cellDeactivated() {
 //       - second_p -> r[_i] + second_c -> corner1[_i];
 //     d.abs_square += d.cartesian[_i]*d.cartesian[_i];
 //     }
-//   /* Take care: The order of *j, *i defines the direction d \
-//      is pointing to. */
+/*   Take care: The order of *j, *i defines the direction d	\
+     is pointing to.*/
 //   if (d.abs_square < cutoff_sq) {
 //     d.abs = sqrt(d.abs_square);
 // #ifdef _OPENMP    
@@ -895,17 +895,13 @@ void Cell::updatePositions(IntegratorPosition *integrator)
 {
   Phase *phase = m_manager->phase();
 
-	double dt, dt_div_mass, dt_div2_mass;
+  double dt;
   int force_index;
   size_t colour;
   //	forces_t *forces;
 
   dt = integrator->dt();
-//   lambda = integrator->lambda();
-  dt_div_mass = integrator->dtDivMass();
-  dt_div2_mass = integrator->dtDiv2Mass();
   colour = integrator->colour();
-  //	forces = integrator->forces();
 
   list<Particle*>::iterator m_particles_end = m_particles[colour].end();
   for (list<Particle*>::iterator i = m_particles[colour].begin(); i != m_particles_end; ) {
@@ -925,8 +921,6 @@ void Cell::updatePositions(IntegratorPosition *integrator)
 
     int_point_t off = {0, 0, 0};
     int n;
-
-    point_t startr = p->r;
 
     p->dt = dt;
 

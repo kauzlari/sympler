@@ -59,10 +59,6 @@ protected:
    */
   void init();
   /*!
-   * Mass for the species this integrator works for.
-   */
-  double m_mass;
-  /*!
    * Lambda of Warren and Groot paper
    */
   double m_lambda;

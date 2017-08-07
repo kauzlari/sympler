@@ -5,7 +5,7 @@ all:
 
 symplerTest_SOURCES = mainTest.cpp
 
-INCLUDES = \
+AM_CPPFLAGS = \
 	-I$(top_srcdir)/srcUnittest/*/head \
 	-I$(top_srcdir)/srcUnittest/*/*/head \
 	-I$(top_srcdir)/src/*/head \
@@ -54,6 +54,13 @@ symplerTest_DEPENDENCIES = \
 EXTRA_DIST = README
 
 SUBDIRS = \
+	basic \
+	geometry \
+	integrator \
+	meter
+
+# The following list is complete (2017-08-03). Add directories to upper SUBDIRS as soon as you have at least one compilable test cpp file
+#SUBDIRS = \
 	basic \
 	boundary \
 	calculator \

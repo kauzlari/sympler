@@ -109,16 +109,13 @@ find special instructions for MacOS and Intel compilers.
 
 ++ Configuration and Compilation for standard Linux-systems:
 
-Assuming the directory where you downloaded the SYMPLER source-code is $SOURCE-DIR, then the series of commands that
+Assuming the complete path to the directory where you downloaded the SYMPLER source-code is given by $SOURCE-DIR, then the series of commands that
 usually works is:
 
 $ cd $SOURCE-DIR
-$ libtoolize --force
-$ aclocal
-$ autoconf
-$ automake --add-missing
+$ autoreconf --install --force
 
-Then, assuming the directory where you want to compile SYMPLER is $BUILD-DIR (it might be the same as or different
+Then, assuming the complete path to the directory where you want to compile SYMPLER is given by $BUILD-DIR (it might be the same as or different
 from $SOURCE-DIR):
 
 $ cd $BUILD-DIR
@@ -145,9 +142,9 @@ very often. On newer distributions this issue has vanished. Further bug reports 
 After successful compilation the executable "sympler" will be created in the directory src/. 
 
 
-++ Configuration and Compilation for MacOS
+++ Configuration and Compilation on MacOS
 
-The following instructions were last successfully tested with Mac OS X Yosemite 10.10.5 and have been provided by Tobias Wondratsch (based on older instructions by Oliver Grünert and Andreas Greiner).
+The following instructions were last successfully tested with Mac OS X 10.11.6 (based on older instructions by Andreas Greiner, Tobias Wondratsch, Oliver Grünert).
 
 The libxml2 library comes already preinstalled by Apple but caused trouble during the SYMPLER installation. You may give the preinstalled libxml2 a try or immediately go and get an alternative version and the two remaining libraries by using one of the packaging-systems for Mac OS.
 
@@ -174,22 +171,37 @@ If you have to, also install libxml2
 
 $ brew install libxml2 
 
+Similarly for further libraries which you might need (see Linux section). 
+
+Make sure the symbolic link used to find the libraries is set to your version installed by brew. Usually you use a command
+
+$ brew link ... 
+
+for that.
+
 Try first to skip this paragraph because the next step is only necessary if you run into trouble with your already preinstalled command-line tool gm4 (a macro processor used by aclocal). Then you need to replace it with a newer version, since the old version which came from Apple was broken. This was the case for example in MacOS 10.6.2. You can grab the most recent version from http://ftp.gnu.org/gnu/m4/. Now drag the old gm4 tool in /usr/bin to a backup folder (for example your Desktop) and replace it with the newer version (you will be asked to enter your root password).
 
-Now you are ready to compile sympler! So grab the SYMPLER source code into a code directory (called $CODE-DIR here) and create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal (adapt the paths to your needs):
+Now you are ready to compile SYMPLER! So grab the SYMPLER source code into a code directory (called $CODE-DIR here) and create a new build directory (called $BUILD-DIR here) into which you will compile. Then in your terminal (adapt the paths to your needs):
 
 $ cd $CODE-DIR
-$ glibtoolize --force
-$ aclocal -I /usr/local/Cellar/gsl/1.16/share/aclocal -I /usr/local/Cellar/sdl/1.2.15/share/aclocal -I /usr/local/Cellar/libxml2/2.9.2/share/aclocal
-$ autoconf
-$ automake --add-missing
+$ autoreconf --install --force
 $ cd $BUILD-DIR
 $ $CODE-DIR/configure CXXFLAGS="-O3"
 $ make -j[1 to roughly the number of available cores]
 
 After successful compilation the executable "sympler" will be created in the directory src/
 
-A known problem that may occur is a conflict with a libxml2 version previously installed in MacOS, for example due to a previous installation of Xcode. Just find a way to clean your system from this old libxml2 version and the SYMPLER installation should work fine by using the brew version of libxml2.
+For further compile options see the Linux section.
+
+If you get a compile error related to cppunit, then try to switch in the CXXFLAGS to a different C++ standard than the default one of your compiler. For example
+
+$ $CODE-DIR/configure CXXFLAGS="-O3 -std=c++14"
+
+A known problem that may occur is a conflict with a libxml2 version previously installed in MacOS, for example due to a previous installation of Xcode. Just find a way to clean your system from this old libxml2 version and the SYMPLER installation should work fine by using the brew version of libxml2. Or try the command
+
+$ brew link ...
+
+mentioned above.
 
 
 ++ SYMPLER and Intel compilers:

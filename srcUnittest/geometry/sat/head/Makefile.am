@@ -1,4 +1,4 @@
 
 include_HEADERS =
 
-INCLUDES = -I$(top_srcdir)/src/geometry/sat/head
+AM_CPPFLAGS = -I$(top_srcdir)/src/geometry/sat/head
