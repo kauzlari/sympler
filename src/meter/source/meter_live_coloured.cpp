@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -129,7 +129,7 @@ void MeterLiveColoured::init()
 {
   m_properties.setClassName("MeterLiveColoured");
 
-  m_properties.setDescription("Graphical view of the simulation at runtime. The colour of the particles represents a particle property chosen by 'colourIs'.");
+  m_properties.setDescription("Graphical view of the simulation at runtime. The colour of the particles represents a scalar particle property chosen by 'colourIs'.");
 
   STRINGPC
     (species, m_species,
@@ -163,7 +163,7 @@ void MeterLiveColoured::init()
 
   STRINGPC
     (colourIs, m_colour_is,
-     "The particles colour displays the property given here.");
+     "The particles colour displays the scalar property given here.");
 
   m_properties.addProperty
     ("colourRangeMin", PropertyList::DOUBLE, &m_colour_range_min, NULL,

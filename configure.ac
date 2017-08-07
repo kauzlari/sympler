@@ -37,17 +37,15 @@ AC_CHECK_LIB(z, gzread)
 
 AC_C_BIGENDIAN(ENDIAN="big", ENDIAN="little")
 
-#HAVE_SDL="no"
-
-
 #AC_SUBST(AM_CPPFLAGS)
 
-#SDL_CFLAGS=""
-#AC_SUBST(SDL_CFLAGS)
-#SDL_LIBS=""
-#AC_SUBST(SDL_LIBS)
+SDL_CFLAGS=""
+AC_SUBST(SDL_CFLAGS)
+SDL_LIBS=""
+AC_SUBST(SDL_LIBS)
 
 CHECK_SDL="yes"
+HAVE_SDL="no"
 
 # Static compile??
 AC_ARG_ENABLE(all-static,
@@ -59,16 +57,36 @@ AC_ARG_ENABLE(all-static,
     fi
   ]) 
 
+USER_SDL="no"
+
+# SDL-activation by user (Since I don't understand autotools, this is the only solution I am able to implement)
+AC_ARG_ENABLE(meter-lives,
+  [  --enable-meter-lives     enables 2 MeterLive modules and requires SDL-library >=1.2.0 and <2.0], 
+  [ 
+    if test "$enableval" = "yes" ; then  
+      USER_SDL="yes"
+    fi
+  ]) 
+
 AC_SUBST(LT_LDFLAGS)
 
 if test "${CHECK_SDL}" = "no"; then
    HAVE_SDL="no"
 else
-   AM_PATH_SDL(1.2.0, HAVE_SDL="yes", HAVE_SDL="no")
+   if test "${USER_SDL}" = "yes"; then
+      HAVE_SDL="yes"
+# Since I don't understand autotools, the next does not work if SDL not installed: therefore commented out
+#      AM_PATH_SDL(1.2.0, HAVE_SDL="yes", HAVE_SDL="no")
+      # Next is hopefully true on most systems. Don't know better since I don't understand...
+      SDL_LIBS="-lSDL"
+      AC_SUBST(SDL_LIBS)
+   fi
 fi
 
 if test "${HAVE_SDL}" = "yes"; then
   AC_DEFINE(HAVE_SDL, 1, Is the SDL library present?)
+  AC_MSG_WARN(Compiling with SDL library for modules such as MeterLive.)
+  AC_MSG_WARN(Make sure you have libsdl1.2 or newer but NOT libsdl2.0 or newer!)
 else
   AC_MSG_WARN(Compiling without MeterLive)
 fi

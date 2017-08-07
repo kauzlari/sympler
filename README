@@ -91,7 +91,7 @@ libsdl*-dev, and so on.
 + Optional libraries: 
 
 ++ liblzma-dev: For the configure-option --enable-all-static (see below)
-++ libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.
+++ libsdl (1.2.0 or newer but not 2.0 or newer): If you use configure option --enable-meter-lives (see below). Gives simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found and the modules will be compiled. If not, you will have to modify some include and/or library paths by hand.
 ++ OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during
 configuration (CXXFLAGS="... -fopenmp").
 ++ libtnt, libjama, libsuperlu: Use the options --with-tnt --with-superlu during configuration. This allows for: 
@@ -130,7 +130,8 @@ Useful [cxxflags] are (for more see the g++ documentation):
 and useful [options] are:
 
 --with-tnt: use tnt library and jama libraries
---with-superlu: use superlu 
+--with-superlu: use superlu
+--enable-meter-lives: Compile additional MeterLive modules for runtime visualisation. If you enable this option and get an error message such as "...SDL/SDL.h: No such file or directory", then you have not installed libsdl at all (see optional requirements above) or you must give the correct include and library paths in the CXXFLAGS or elsewhere. Note: It is NOT recommended to use this option on HPC machines. Anyway, most HPC admins will refrain from installing the required SDL-library in an HPC environment.
 --enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries
 (except for the glibc used during linking after compilation of SYMPLER; and the runtime compiled expressions of
 course). NOTE the required library liblzma-dev (listed under optional libraries above). Also libicu should be
