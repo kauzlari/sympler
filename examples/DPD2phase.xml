@@ -1,0 +1,110 @@
+<Simulation
+	simName="emulsion"
+	inputFromResults="1"
+	wtDistEps="-1e-10"
+>							
+<!-- Weighting functions -->
+  <Square
+  	cutoff = "1"
+	name = "L1"
+	/>
+
+<!-- Controller and Integrators -->
+  <Controller
+  	timesteps="2000"
+	statusEvery="100"
+	dt="0.02">
+    <IntegratorVelocityVerlet
+    	species = "W"
+	lambda = "0.5"
+    />
+    <IntegratorVelocityVerlet
+    	species = "O"
+	lambda = "0.5"
+    />
+  </Controller>
+
+<!-- Forces -->
+<!-- Fluid-fluid, repulsive, nothing else -->
+  <FPairVelsWF
+  	species1 = "W"
+	species2 = "W"
+	pairFactor ="20*[rij]"
+	weightingFunction = "L1"
+  />
+  <FPairVelsWF
+  	species1 = "O"
+	species2 = "O"
+	pairFactor ="20*[rij]"
+	weightingFunction = "L1"
+  />
+  <FPairVelsWF
+  	species1 = "W"
+	species2 = "O"
+	pairFactor ="80*[rij]"
+	weightingFunction = "L1"
+  />
+<!-- DPD-Thermostat -->
+  <FDPD
+	kBToverM = "1"
+	species1 = "W"
+	species2 = "W"
+	weightingFunction = "L1"
+	dissipation = "20"
+  />
+  <FDPD
+	kBToverM = "1"
+	species1 = "O"
+	species2 = "O"
+	weightingFunction = "L1"
+	dissipation = "20"
+  />
+  <FDPD
+	kBToverM = "1"
+	species1 = "W"
+	species2 = "O"
+	weightingFunction = "L1"
+	dissipation = "20"
+/>
+ <!-- Phase -->
+   <Phase
+  	smartCells = "0"
+   >
+   <LinkedListCreator/>
+     <!-- Boundary -->
+    <BoundaryCuboid
+    	boxX = "8"
+	boxY = "8"
+	boxZ = "8"
+	periodicX = "yes"
+	periodicY = "yes"
+	periodicZ = "yes"
+    >
+       <ParticleCreatorLattice
+      	density = "2.5"
+	species="W"
+      />
+     <ParticleCreatorLattice
+      	density = "2.5"
+	species="O"
+	x="x-0.34"
+	y="y-0.34"
+	z="z-0.34"
+      />
+      <ReflectorThermalize
+        kBToverM = "1"
+      />
+    </BoundaryCuboid>
+  </Phase>
+<!-- Meters -->
+  <MeterPosVel
+	measureEvery = "10"
+	fromStepOn = "0"
+  >
+    <OutputVTK
+	 nameOutputFile = "results/pos/pos.vtk"
+	  format = "binary"
+    >
+    </OutputVTK>
+  </MeterPosVel>
+</Simulation>

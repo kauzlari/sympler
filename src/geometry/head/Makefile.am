@@ -7,4 +7,4 @@ include_HEADERS = \
 	wall_container.h \
 	wall_triangle.h
 
-INCLUDES = -I$(top_srcdir)/integrator/head
+AM_CPPFLAGS = -I$(top_srcdir)/integrator/head

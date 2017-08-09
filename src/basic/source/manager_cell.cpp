@@ -1064,15 +1064,15 @@ void ManagerCell::deactivateCellLink(CellLink *c)
 
   if (c->prev) {
     c->prev->next = c->next;
-    MSG_DEBUG("ManagerCell::deactivateCellLink", "CELL DEAKTIVATE case 1");
+    // MSG_DEBUG("ManagerCell::deactivateCellLink", "CELL DEACTIVATE case 1");
   } else {
     m_first_link[thread_no] = c->next;
-        MSG_DEBUG("ManagerCell::deactivateCellLink", "CELL DEAKTIVATE case 2");
+        // MSG_DEBUG("ManagerCell::deactivateCellLink", "CELL DEACTIVATE case 2");
   }
   
   if (c->next) {
     c->next->prev = c->prev;
-        MSG_DEBUG("ManagerCell::deactivateCellLink", "CELL DEAKTIVATE case 3");
+        // MSG_DEBUG("ManagerCell::deactivateCellLink", "CELL DEACTIVATE case 3");
   }
 
   c->next = c->prev = NULL; 

@@ -35,7 +35,7 @@
 
 #ifdef WITH_ARRAY_TYPES
 
-#include "integrator_position.h"
+#include "integrator_velocity_verlet.h"
 #include "particle.h"
 #include "MArray2D.h"
 #include <string>
@@ -59,7 +59,7 @@ class Cell;
  * See: R. D. Groot and P. B. Warren, J. Chem. Phys. 107, 4423-4435 (1997)
  */
 
-class IntegratorVelocityVerletPressure: public IntegratorPosition {
+class IntegratorVelocityVerletPressure: public IntegratorVelocityVerlet {
 protected:
 
 	/*Symbol for nabla of the weighting function*/
@@ -118,10 +118,6 @@ protected:
 	 * Initialize the property list
 	 */
 	void init();
-	/*!
-	 * Mass for the species this integrator works for.
-	 */
-	double m_mass;
 	/*!
 	 * The color pair belonging to the species combination.
 	 */
@@ -205,13 +201,9 @@ public:
 			const Particle* p, point_t &hit_pos, const point_t &force);
 
 #ifdef _OPENMP
-	virtual string dofIntegr();
 
-	/*!
-	 * Merge the copies at the end of every timestep
-	 */
-	virtual void mergeCopies(Particle* p, int thread_no, int force_index);
-
+	// all here inherited from parent 
+	
 #endif
 
 };

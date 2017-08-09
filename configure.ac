@@ -1,14 +1,13 @@
 dnl 
 
 dnl AC_PREREQ(2.57)
-AC_INIT(sympler, 0.1, david.kauzlaric@frias.uni-freiburg.de)
-AM_INIT_AUTOMAKE
+AC_INIT(sympler, 0.1, david.kauzlaric@imtek.uni-freiburg.de)
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_SRCDIR([src/main.cpp])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
-AM_INIT_AUTOMAKE
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
@@ -367,5 +366,53 @@ AC_CONFIG_FILES([Makefile
 		 src/weighting_function/Makefile
 		 src/weighting_function/head/Makefile
 		 src/weighting_function/source/Makefile
-		 src/tools/Makefile])
+		 src/tools/Makefile
+
+		 srcUnittest/Makefile
+		 srcUnittest/basic/Makefile
+		 srcUnittest/basic/head/Makefile
+		 srcUnittest/basic/source/Makefile
+		 srcUnittest/boundary/Makefile
+		 srcUnittest/boundary/head/Makefile
+		 srcUnittest/boundary/source/Makefile
+		 srcUnittest/calculator/Makefile
+		 srcUnittest/calculator/head/Makefile
+		 srcUnittest/calculator/source/Makefile
+		 srcUnittest/force/Makefile
+		 srcUnittest/force/head/Makefile
+		 srcUnittest/force/source/Makefile
+		 srcUnittest/function_parser/Makefile
+		 srcUnittest/function_parser/head/Makefile
+		 srcUnittest/function_parser/source/Makefile
+		 srcUnittest/geometry/Makefile
+		 srcUnittest/geometry/head/Makefile
+		 srcUnittest/geometry/source/Makefile
+		 srcUnittest/geometry/stl/Makefile
+		 srcUnittest/geometry/stl/head/Makefile
+		 srcUnittest/geometry/stl/source/Makefile
+		 srcUnittest/integrator/Makefile
+		 srcUnittest/integrator/head/Makefile
+		 srcUnittest/integrator/source/Makefile
+		 srcUnittest/meter/Makefile
+		 srcUnittest/meter/head/Makefile
+		 srcUnittest/meter/source/Makefile
+		 srcUnittest/meter/grid_meter/Makefile
+		 srcUnittest/meter/grid_meter/head/Makefile
+		 srcUnittest/meter/grid_meter/source/Makefile
+		 srcUnittest/particle_creator/Makefile
+		 srcUnittest/particle_creator/head/Makefile
+		 srcUnittest/particle_creator/source/Makefile
+		 srcUnittest/postprocessor/Makefile
+		 srcUnittest/postprocessor/head/Makefile
+		 srcUnittest/postprocessor/source/Makefile
+		 srcUnittest/reflector/Makefile
+		 srcUnittest/reflector/head/Makefile
+		 srcUnittest/reflector/source/Makefile
+		 srcUnittest/thermostat/Makefile
+		 srcUnittest/thermostat/head/Makefile
+		 srcUnittest/thermostat/source/Makefile
+		 srcUnittest/weighting_function/Makefile
+		 srcUnittest/weighting_function/head/Makefile
+		 srcUnittest/weighting_function/source/Makefile
+		 srcUnittest/tools/Makefile])
 AC_OUTPUT

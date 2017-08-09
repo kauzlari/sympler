@@ -123,13 +123,12 @@ class BondedPairArbitrary : public ValCalculatorPair
 	}
 
 #ifndef _OPENMP
-      virtual void compute(Pairdist* pD) = 0;
+
+	virtual void compute(Pairdist* pD) = 0;
+
 #else
-      virtual void compute(Pairdist* pD, int thread_no)/* = 0;*/ {
-	  // does the same as in serial mode at the moment; 
-	  // it writes into pairs, so should work
-	  compute(pD);
-	}
+
+	virtual void compute(Pairdist* pD, int thread_no) = 0;
 
 #endif
     

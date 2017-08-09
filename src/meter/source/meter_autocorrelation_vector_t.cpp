@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -60,14 +60,14 @@ MeterAutocorrelationVectorT::~MeterAutocorrelationVectorT()
 
 void MeterAutocorrelationVectorT::init()
 {
-  m_properties.setClassName("MeterAutocorrelationVectorT");
+  m_properties.setClassName("MeterCorrelationVectorT");
 
   m_properties.setDescription
-    ("This meter computes the tensorial autocorrelation funtion (ACF) for two arbitrary vector-properties V1(t=0) and V2(t) stored in the Particle's tag, i.e. the matrix\n"
+    ("This meter computes the tensorial correlation funtion (CF) for two arbitrary vector-properties V1(t=0) and V2(t) stored in the Particle's tag, i.e. the matrix\n"
 "((<V1xV2x(t)>, <V1xV2y(t)>, <V1xV2z(t)>)\n"
 " (<V1yV2x(t)>, <V1yV2y(t)>, <V1yV2z(t)>)\n"
 " (<V1zV2x(t)>, <V1zV2y(t)>, <V1zV2z(t)>)).\n" 
-"Note that the autocorrelation of an average vector quantity of the WHOLE SYSTEM CANNOT be computed by this Meter.");
+"Note that the correlation function of an average vector quantity of the WHOLE SYSTEM CANNOT be computed by this Meter.");
 
   STRINGPC
     (species,
@@ -79,32 +79,32 @@ void MeterAutocorrelationVectorT::init()
   STRINGPC
     (symbol1,
      m_inputSymbol.first,
-     "Symbol of the input value V1(t=0) for which the ACF should be computed.");
+     "Symbol of the input value V1(t=0) for which the CF should be computed.");
 
   m_inputSymbol.first = "UNDEF";
 
   STRINGPC
     (symbol2,
      m_inputSymbol.second,
-     "Symbol of the input value V2(t) for which the ACF should be computed.");
+     "Symbol of the input value V2(t) for which the CF should be computed.");
 
   m_inputSymbol.second = "UNDEF";
 
   INTPC
     (nOfACFs, m_limitAcfAv, 0,
-     "The number of individual ACFs to average over.");
+     "The number of individual CFs to average over.");
 
   m_limitAcfAv = 0;
 
   INTPC
     (nBuffs, m_nBuffAcf, 0,
-     "The number of buffers for simultaneously accumulated ACFs.");
+     "The number of buffers for simultaneously accumulated CFs.");
 
   m_nBuffAcf = 0;
 
   INTPC
     (nValACF, m_nValAcf, 0,
-     "The length of the ACF.");
+     "The length of the CF.");
 
   m_nValAcf = 0;
 
@@ -134,29 +134,29 @@ void MeterAutocorrelationVectorT::setup()
   Meter::setup();
 
   if(m_limitAcfAv <= 0)
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nOfACFs\"! Current value: " + ObjToString(m_limitAcfAv));
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nOfACFs\"! Current value: " + ObjToString(m_limitAcfAv));
 
   if(m_nBuffAcf <= 0)
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nBuffs\"! Current value: " + ObjToString(m_nBuffAcf));
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nBuffs\"! Current value: " + ObjToString(m_nBuffAcf));
 
   if(m_nValAcf <= 0)
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nValAcf\"! Current value: " + ObjToString(m_nValAcf));
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nValAcf\"! Current value: " + ObjToString(m_nValAcf));
 
   if(m_nValAcf < m_nBuffAcf)
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nBuffs\"! Current value: " + ObjToString(m_nBuffAcf) + ". Attribute \"nBuffs\" must be <= \"nValAcf\" (=" + ObjToString(m_nValAcf) + ").");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Choose other value for attribute \"nBuffs\"! Current value: " + ObjToString(m_nBuffAcf) + ". Attribute \"nBuffs\" must be <= \"nValAcf\" (=" + ObjToString(m_nValAcf) + ").");
 
   int minSteps = m_from_step_on + int((m_measure_every_n*m_nValAcf)*(m_limitAcfAv+m_nBuffAcf-1)/m_nBuffAcf);
   if (M_SIMULATION->controller()->timesteps() < minSteps)
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Increase the number of timesteps (in the Controller) to at least " + ObjToString(minSteps) + "!");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Increase the number of timesteps (in the Controller) to at least " + ObjToString(minSteps) + "!");
 
   if (m_species == "UNDEF")
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "\"species\" undefined.");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "\"species\" undefined.");
 
   if (m_inputSymbol.first == "UNDEF")
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "\"symbol1\" undefined.");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "\"symbol1\" undefined.");
 
   if (m_inputSymbol.second == "UNDEF")
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "\"symbol2\" undefined.");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "\"symbol2\" undefined.");
 
   m_colour = M_MANAGER->getColour(m_species);
 
@@ -175,20 +175,20 @@ void MeterAutocorrelationVectorT::setup()
 //   m_acfOrgOffset.resize(m_nBuffAcf);
 
   if(!Particle::s_tag_format[m_colour].attrExists(m_inputSymbol.first))
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.first + " not found for species '" + M_MANAGER->species(m_colour) + "'!");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.first + " not found for species '" + M_MANAGER->species(m_colour) + "'!");
   if(Particle::s_tag_format[m_colour].attrByName(m_inputSymbol.first).datatype != DataFormat::POINT)
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.first + " of species '" + M_MANAGER->species(m_colour) + "' is not a vector!");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.first + " of species '" + M_MANAGER->species(m_colour) + "' is not a vector!");
 
   m_inputOffset.first = Particle::s_tag_format[m_colour].offsetByName(m_inputSymbol.first);
 
   if(!Particle::s_tag_format[m_colour].attrExists(m_inputSymbol.second))
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.second + " not found for species '" + M_MANAGER->species(m_colour) + "'!");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.second + " not found for species '" + M_MANAGER->species(m_colour) + "'!");
   if(Particle::s_tag_format[m_colour].attrByName(m_inputSymbol.second).datatype != DataFormat::POINT)
-    throw gError("MeterAutocorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.second + " of species '" + M_MANAGER->species(m_colour) + "' is not a vector!");
+    throw gError("MeterCorrelationVectorT::setup"+FILE_INFO, "Symbol " + m_inputSymbol.second + " of species '" + M_MANAGER->species(m_colour) + "' is not a vector!");
 
   m_inputOffset.second = Particle::s_tag_format[m_colour].offsetByName(m_inputSymbol.second);
 
-  string name = "MeterAutoCorrelation" ;
+  string name = "MeterCorrelationVectorT" ;
   name +=  "_" + m_inputSymbol.first + "_" + m_species;
 
 
@@ -199,7 +199,7 @@ void MeterAutocorrelationVectorT::setup()
 
   for(size_t nb = 0; nb < m_nBuffAcf; ++nb) {
     m_indexAcf[nb] = -int((nb)*m_nValAcf / m_nBuffAcf + 1);
-//     MSG_DEBUG("MeterAutocorrelationVectorT::setup", "nb: " << nb << ": m_indexAcf[nb]=" << m_indexAcf[nb]);
+//     MSG_DEBUG("MeterCorrelationVectorT::setup", "nb: " << nb << ": m_indexAcf[nb]=" << m_indexAcf[nb]);
   }
   zeroAcf();
 
@@ -228,7 +228,7 @@ void MeterAutocorrelationVectorT::measureNow(const double& time)
   size_t nOfParticles = phase -> returnNofPartC(m_colour);
   
   for(size_t nb = 0; nb < m_nBuffAcf; ++nb) {
-//     MSG_DEBUG("MeterAutocorrelationVectorT::measureNow", "nb="<< nb << ", before incr: " << m_indexAcf[nb]);
+//     MSG_DEBUG("MeterCorrelationVectorT::measureNow", "nb="<< nb << ", before incr: " << m_indexAcf[nb]);
     ++(m_indexAcf[nb]);
     if(m_indexAcf[nb] < 0) continue;
     if(m_indexAcf[nb] == 0) {

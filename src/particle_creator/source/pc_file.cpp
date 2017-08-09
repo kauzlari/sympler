@@ -623,6 +623,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
           // if-> is inside ::Need to implement based on input from input file. Particles inside or outside?
           //Default = inside (backwards compatible)
 	//
+<<<<<<< HEAD
         if(m_particlesInside){
          if (M_BOUNDARY->isInside(p.r)) {
            p.g = c->group();
@@ -636,12 +637,30 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
         if(!m_particlesInside){        
          if (!(M_BOUNDARY->isInside(p.r))) {
            p.g = c->group();
+=======
+        if(m_particlesinside){
+         if (M_BOUNDARY->isInside(p.r)) {
+           p.g = c->group();
+>>>>>>> upstream/master
 	  
            if (freeOrFrozen == "frozen")
 	    m_particles_frozen[p.g].newEntry() = p;
 	  else
 	    m_particles[p.g].newEntry() = p;
           }
+<<<<<<< HEAD
+=======
+	}
+        if(!m_particlesinside){
+         if (!(M_BOUNDARY->isInside(p.r))) {
+           p.g = c->group();
+	  
+           if (freeOrFrozen == "frozen")
+	    m_particles_frozen[p.g].newEntry() = p;
+	  else
+	    m_particles[p.g].newEntry() = p;
+          }
+>>>>>>> upstream/master
 	}
       }
       //     } // end of if(m_species ...)
@@ -744,6 +763,9 @@ void ParticleCreatorFile::init() {
      "Then, in another new line this section is terminated by another '!!!'.\n"
      "The particles are defined one per row, starting with their species, optionally followed by the label \"free\" or \"frozen\", and then followed by three position-values, three velocity values, and then the values of the additional attributes in the order specified in the header.\n"
      "After the last particle, the file is terminated by another new line containing '!!!'.\n"
+    "STL: \n"
+  "If used to add wall particles, in conjunction with an STL geometry, the geometry should have dummy walls on the exterior which make the bounding box artificially bigger."
+  " Otherwise, wall particles can land outside of bounding box leading to errors. These dummy walls should be perpendicular to the walls of your geometry for particlesinside to work properly."
      );
 
 	STRINGPCINF
@@ -751,12 +773,20 @@ void ParticleCreatorFile::init() {
 			"File containing the position and velocity information.")
 	;
         BOOLPC
+<<<<<<< HEAD
     (particlesInside, m_particlesInside,
+=======
+    (particlesinside, m_particlesinside,
+>>>>>>> upstream/master
      " true if particles are inside inside of geometry (fluid particles), false"
                 " if they are outside (wall particles). Useful when working with STL geometries. Default is true so that it is backwards compatible. ");
         
 	m_filename = "default.pos";
+<<<<<<< HEAD
         m_particlesInside = "true";
+=======
+        m_particlesinside = "true";
+>>>>>>> upstream/master
 }
 
 void ParticleCreatorFile::flushParticles() {

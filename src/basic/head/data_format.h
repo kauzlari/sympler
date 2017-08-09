@@ -165,13 +165,13 @@ public:
     /*!
      * Index of the attribute.
      */
-    int index;
+    size_t index;
 
     /*!
      * Start of the attribute's data from the beginning of the overall data
      * stored in a \a Data.
      */
-    ptrdiff_t offset;
+    size_t offset;
 
     /*!
      * Type of data.
