@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -131,8 +131,6 @@ void FGeneric::computeForces(Pairdist* pair, int force_index, int thread_no)
        Tdsdnj = this->m_pcee->Tds_dn(pair->secondPart());
        dAdni = this->m_pcee->de_dn(pair->firstPart()) - Tdsdni;
        dAdnj = this->m_pcee->de_dn(pair->secondPart()) - Tdsdnj;
-
-       assert(!(isnan(Tdsdni) || isnan(Tdsdnj)));
 
        f = (dAdni*weightj + dAdnj*weighti)*rij;
        fi = f + dAdnj*ui;

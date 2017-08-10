@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -60,12 +60,10 @@ IntegratorScalar::~IntegratorScalar()
 }
 
 
-
 //---- Methods ----
 
 void IntegratorScalar::init()
 {
-//   MSG_DEBUG("IntegratorScalar::init()", "running");
 
   m_properties.setClassName("IntegratorScalar");
 
@@ -102,12 +100,6 @@ void IntegratorScalar::setup()
 
   for(size_t i = 0; i < FORCE_HIST_SIZE; ++i)
   {
-/*    m_force_offset[i] =
-      Particle::s_tag_format[m_colour].addAttribute
-        (STR_FORCE + STR_DELIMITER + m_scalar_name + STR_DELIMITER + ObjToString(i),
-        DataFormat::DOUBLE,
-        false).offset;*/
-
     tmpAttr =
         Particle::s_tag_format[m_colour].addAttribute
         (STR_FORCE + STR_DELIMITER + m_scalar_name + STR_DELIMITER + ObjToString(i),
@@ -119,8 +111,8 @@ void IntegratorScalar::setup()
   }
   m_dt = M_CONTROLLER->dt();
 
-/*  MSG_DEBUG("IntegratorScalar::setup", "m_dt = " << m_dt << ", scalar=" << m_scalar_name << "\n in Particle: " << Particle::s_tag_format[m_colour].toString() << "\nm_colour=" << m_colour);*/
 }
+
 void IntegratorScalar::isAboutToStart()
 {
   Phase *phase = M_PHASE;
@@ -153,76 +145,15 @@ void IntegratorScalar::integrateStep1()
 {
   Phase *phase = M_PHASE;
 
-  //  MSG_DEBUG("IntegratorScalar::integrateStep1", "m_dt = " << m_dt);
-//   m_force_index = M_CONTROLLER->forceIndex();
   size_t force_index = M_CONTROLLER->forceIndex();
 
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
       (phase, m_colour, this,
 
-       if (isnan(i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset[/*m_*/force_index]))) {
-         cout << "slot = " << i->mySlot << ", "
-             << ((IntegratorScalar*) data)->m_scalar_name << " = "
-             << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) << ", "
-             << "force = "
-             << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset[/*m_*/force_index])
-             << endl;
-
-         throw gError("IntegratorScalar::integrateStep1", "Force was not-a-number!");
-       }
-
        i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) +=
-           ((IntegratorScalar*) data)->m_dt * i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset[/*m_*/force_index]);
+           ((IntegratorScalar*) data)->m_dt * i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset[force_index]);
 
-//       if (i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) < 0) {
-//         cout << "slot = " << i->mySlot << ", "
-//             << ((IntegratorScalar*) data)->m_scalar_name << " = "
-//             << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) << ", "
-//             << "force = "
-//             << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset[/*m_*/force_index])
-//             << endl;
-//
-//         i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) = 0.1;
-//
-//       // added next line to check when this happens
-//         throw gError("IntegratorScalar::integrateStep1", "scalar negative !!!");
-//
-//       }
       );
-
-
-/*
-  FOR_EACH_FREE_PARTICLE_C__PARALLEL
-    (phase, m_colour, this,
-     if (isnan(i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset))) {
-       cout << "slot = " << i->mySlot << ", "
-	    << ((IntegratorScalar*) data)->m_scalar_name << " = "
-	    << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) << ", "
-	    << "force = "
-	    << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset)
-	    << endl;
-
-       throw gError("IntegratorScalar::integrateStep1", "Force was not-a-number!");
-     }
-
-     i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) +=
-       ((IntegratorScalar*) data)->m_dt * i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset);
-
-     if (i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) < 0) {
-       cout << "slot = " << i->mySlot << ", "
-	    << ((IntegratorScalar*) data)->m_scalar_name << " = "
-	    << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) << ", "
-	    << "force = "
-	    << i->tag.doubleByOffset(((IntegratorScalar*) data)->m_force_offset)
-	    << endl;
-
-       i->tag.doubleByOffset(((IntegratorScalar*) data)->m_scalar_offset) = 0.1;
-
-       // added next line to check when this happens
-       throw gError("IntegratorScalar::integrateStep1", "scalar negative !!!");
-
-     }
-    );*/
 }
 
 
@@ -239,9 +170,7 @@ string IntegratorScalar::dofIntegr() {
 
 void IntegratorScalar::mergeCopies(Particle* p, int thread_no, int force_index) {
   if (m_merge == true) {
-//  		MSG_DEBUG("IntegratorScalar::mergeCopies", "IN MERGE! force = " << p->tag.doubleByOffset(m_force_offset[force_index]) << " colour = " << p->c << " slot = " << p->mySlot);
     p->tag.doubleByOffset(m_force_offset[force_index]) += (*p->tag.vectorDoubleByOffset(m_vec_offset[thread_no]))[m_vec_pos];
-//    	MSG_DEBUG("IntegratorScalar::mergeCopies", "AFTER MERGE! force = " << p->tag.doubleByOffset(m_force_offset[force_index]) << " colour = " << p->c << " slot = " << p->mySlot);
     (*p->tag.vectorDoubleByOffset(m_vec_offset[thread_no]))[m_vec_pos] = 0;
   }
 }

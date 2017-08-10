@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -109,52 +109,17 @@ void IntegratorVectorLambda::integrateStep1()
 {
   Phase *phase = M_PHASE;
 
-  //  MSG_DEBUG("IntegratorScalar::integrateStep1", "m_dt = " << m_dt);
-
   size_t force_index = M_CONTROLLER->forceIndex();
   size_t other_force_index = (force_index+1)&(FORCE_HIST_SIZE-1);
 
   if(m_laterStep)
   {
-//     MSG_DEBUG("IntegratorVectorLambda::integrateStep1", "later step");
     FOR_EACH_FREE_PARTICLE_C__PARALLEL
         (phase, m_colour, this,
          
-         for(size_t j = 0; j < SPACE_DIMS; ++j)
-         {  
-         // Debugging
-         if (isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-             -> m_force_offset[force_index])[j])) 
-         {
-           cout << "slot = " << i->mySlot << ", "
-               << ((IntegratorVectorLambda*) data)->m_vector_name << " = " 
-               << i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] 
-               << ", "
-               << "new force = "
-               << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-               -> m_force_offset[force_index])[j]
-               << endl;
+	 for(size_t j = 0; j < SPACE_DIMS; ++j) {  
   
-           throw gError("IntegratorVectorLambda::integrateStep1", "Force was not-a-number!");
-         }
-  
-         if (isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-             -> m_force_offset[other_force_index])[j])) 
-         {
-           cout << "slot = " << i->mySlot << ", "
-               << ((IntegratorVectorLambda*) data)->m_vector_name << " = " 
-               << i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] 
-               << ", "
-               << "old force = "
-               << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-               -> m_force_offset[other_force_index])[j]
-               << endl;
-  
-           throw gError("IntegratorVectorLambda::integrateStep1", "Force was not-a-number!");
-         }
-  
-          // Integration
-         i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] += 
+	   i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] += 
              ((IntegratorVectorLambda*) data)->m_dt *
              (
              (m_lambda_diff)*i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
@@ -162,91 +127,24 @@ void IntegratorVectorLambda::integrateStep1()
              (m_lambda_sum)*i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
              -> m_force_offset[force_index])[j]
              );
-
-/*          MSG_DEBUG("IntegratorVectorLambda::integrateStep1", "old_force" << other_force_index << " = " << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-         -> m_force_offset[other_force_index]) << ", new_force" << force_index << " = " << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-         -> m_force_offset[force_index]));*/
-          
-                    
-          // Debugging
-//          if (i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] < 0) 
-//          {
-//            cout << "slot = " << i->mySlot << ", "
-//                << ((IntegratorVectorLambda*) data)->m_vector_name << " = " 
-//                << i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] 
-//                << ", "
-//                << "new force = "
-//                << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-//                -> m_force_offset[force_index])[j]
-//                << endl
-//                << "old force = "
-//                << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-//                -> m_force_offset[other_force_index])[j]
-//                << endl;
-
-// //            i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset) = 0.1;
-       
-//        // added next line to check when this happens
-//            throw gError("IntegratorVectorLambda::integrateStep1", "vector negative !!!");
-//          }
+                              
          }
         );
   }
   else
   {
-//     MSG_DEBUG("IntegratorVectorLambda::integrateStep1", "first step");
     
     FOR_EACH_FREE_PARTICLE_C__PARALLEL
         (phase, m_colour, this,
           
          for(size_t j = 0; j < SPACE_DIMS; ++j)
          {
-         // Debugging
-         if (isnan(i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-             -> m_force_offset[force_index])[j])) 
-         {
-           cout << "slot = " << i->mySlot << ", "
-               << ((IntegratorVectorLambda*) data)->m_vector_name << " = " 
-               << i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] 
-               << ", "
-               << "new force = "
-               << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-               -> m_force_offset[force_index])[j]
-               << endl;
-  
-           throw gError("IntegratorVectorLambda::integrateStep1(first step)", "Force was " 
-               "not-a-number!");
-         }
-         
-          // Integration 
          i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] += 
              ((IntegratorVectorLambda*) data)->m_dt *
              (
              m_lambda*i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_force_offset[force_index])[j]
              );
 
-//          MSG_DEBUG("IntegratorVectorLambda::integrateStep1", "old_force" << other_force_index << " = " << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-//              -> m_force_offset[other_force_index]) << ", new_force" << force_index << " = " << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-//                  -> m_force_offset[force_index]));
-
-                   
-          // Debugging
-//          if (i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] < 0) 
-//          {
-//            cout << "slot = " << i->mySlot << ", "
-//                << ((IntegratorVectorLambda*) data)->m_vector_name << " = " 
-//                << i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] << ", "
-//                << "force = "
-//                << i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-//                -> m_force_offset[force_index])[j]
-//                << endl;
-
-// //            i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset) = 0.1;
-       
-//        // added next line to check when this happens
-//            throw gError("IntegratorVectorLambda::integrateStep1(first step)",
-//                         "vector negative !!!");
-//          }
          }
         );
         m_laterStep = true;

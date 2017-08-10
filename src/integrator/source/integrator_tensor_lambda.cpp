@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -65,7 +65,6 @@ IntegratorTensorLambda::~IntegratorTensorLambda()
 
 void IntegratorTensorLambda::init()
 {
-//   MSG_DEBUG("IntegratorScalar::init()", "running");
 
   m_properties.setClassName("IntegratorTensorLambda");
 
@@ -81,8 +80,7 @@ void IntegratorTensorLambda::init()
       "step is merged into the further predictor steps giving:"
       "\nLater predictor step: new = old + (0.5-lambda)*dt*f_old + " 
       "(0.5+lambda)*dt*f_new"
-      "\nLater corrector step: does nothing"
-      
+      "\nLater corrector step: does nothing"      
                              );
 
   DOUBLEPC
@@ -109,60 +107,19 @@ void IntegratorTensorLambda::integrateStep1()
 {
   Phase *phase = M_PHASE;
 
-  //  MSG_DEBUG("IntegratorScalar::integrateStep1", "m_dt = " << m_dt);
-
   size_t force_index = M_CONTROLLER->forceIndex();
   size_t other_force_index = (force_index+1)&(FORCE_HIST_SIZE-1);
-
-  
-/*  FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_colour, this,
-       size_t j = 3; size_t k = 2;
-       cout << (i->tag.tensorByOffset((((IntegratorTensorLambda*) data)->m_force_offset)[0]))(3, 2) << endl;
-      );*/
   
   if(m_laterStep)
   {
-//     MSG_DEBUG("IntegratorTensorLambda::integrateStep1", "later step");
+
     FOR_EACH_FREE_PARTICLE_C__PARALLEL
         (phase, m_colour, this,
          
          for(size_t j = 0; j < SPACE_DIMS; ++j)
          {
            for(size_t k = 0; k < SPACE_DIMS; ++k)
-         {  
-         // Debugging
-           if (isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-               -> m_force_offset[force_index])(j, k))) 
-           {
-             cout << "slot = " << i->mySlot << ", "
-                 << ((IntegratorTensorLambda*) data)->m_tensor_name << " = " 
-                 << i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) 
-                 << ", "
-                 << "new force = "
-                 << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-                 -> m_force_offset[force_index])(j, k)
-                 << endl;
-  
-             throw gError("IntegratorTensorLambda::integrateStep1", "Force was not-a-number!");
-           }
-  
-           if (isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-               -> m_force_offset[other_force_index])(j, k))) 
-           {
-             cout << "slot = " << i->mySlot << ", "
-                 << ((IntegratorTensorLambda*) data)->m_tensor_name << " = " 
-                 << i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) 
-                 << ", "
-                 << "old force = "
-                 << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-                 -> m_force_offset[other_force_index])(j, k)
-                 << endl;
-  
-             throw gError("IntegratorTensorLambda::integrateStep1", "Force was not-a-number!");
-           }
-  
-          // Integration
+         {    
            i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) += 
                ((IntegratorTensorLambda*) data)->m_dt *
                (
@@ -172,39 +129,12 @@ void IntegratorTensorLambda::integrateStep1()
                -> m_force_offset[force_index])(j, k)
                );
 
-/*          MSG_DEBUG("IntegratorTensorLambda::integrateStep1", "old_force" << other_force_index << " = " << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-           -> m_force_offset[other_force_index]) << ", new_force" << force_index << " = " << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-           -> m_force_offset[force_index]));*/
-          
-                    
-          // Debugging
-//            if (i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) < 0) 
-//            {
-//              cout << "slot = " << i->mySlot << ", "
-//                  << ((IntegratorTensorLambda*) data)->m_tensor_name << " = " 
-//                  << i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) 
-//                  << ", "
-//                  << "new force = "
-//                  << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-//                  -> m_force_offset[force_index])(j, k)
-//                  << endl
-//                  << "old force = "
-//                  << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-//                  -> m_force_offset[other_force_index])(j, k)
-//                  << endl;
-
-//            i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset) = 0.1;
-       
-//        // added next line to check when this happens
-// //             throw gError("IntegratorTensorLambda::integrateStep1", "tensor negative !!!");
-// 		   }
          }
   }
         );
   }
   else
   {
-//     MSG_DEBUG("IntegratorTensorLambda::integrateStep1", "first step");
     
     FOR_EACH_FREE_PARTICLE_C__PARALLEL
         (phase, m_colour, this,
@@ -213,52 +143,12 @@ void IntegratorTensorLambda::integrateStep1()
          {
            for(size_t k = 0; k < SPACE_DIMS; ++k)
          {
-         // Debugging
-           if (isnan(i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-               -> m_force_offset[force_index])(j, k))) 
-           {
-             cout << "slot = " << i->mySlot << ", "
-                 << ((IntegratorTensorLambda*) data)->m_tensor_name << " = " 
-                 << i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) 
-                 << ", "
-                 << "new force = "
-                 << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-                 -> m_force_offset[force_index])(j, k)
-                 << endl;
-  
-             throw gError("IntegratorTensorLambda::integrateStep1(first step)", "Force was " 
-                 "not-a-number!");
-           }
-         
-          // Integration 
            i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) += 
                ((IntegratorTensorLambda*) data)->m_dt *
                (
                m_lambda*i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_force_offset[force_index])(j, k)
                );
 
-//          MSG_DEBUG("IntegratorTensorLambda::integrateStep1", "old_force" << other_force_index << " = " << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-//              -> m_force_offset[other_force_index]) << ", new_force" << force_index << " = " << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-//                  -> m_force_offset[force_index]));
-
-                   
-          // Debugging
-//            if (i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) < 0) 
-//            {
-//              cout << "slot = " << i->mySlot << ", "
-//                  << ((IntegratorTensorLambda*) data)->m_tensor_name << " = " 
-//                  << i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset)(j, k) << ", "
-//                  << "force = "
-//                  << i->tag.tensorByOffset(((IntegratorTensorLambda*) data) 
-//                  -> m_force_offset[force_index])(j, k)
-//                  << endl;
-// 
-// //            i->tag.tensorByOffset(((IntegratorTensorLambda*) data)->m_tensor_offset) = 0.1;
-//        
-//        // added next line to check when this happens
-//              throw gError("IntegratorTensorLambda::integrateStep1(first step)",
-//                           "tensor negative !!!");
-//            }
          }
          }
         );

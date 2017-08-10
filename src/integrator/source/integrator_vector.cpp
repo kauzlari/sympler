@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -65,7 +65,6 @@ IntegratorVector::~IntegratorVector()
 
 void IntegratorVector::init()
 {
-//   MSG_DEBUG("IntegratorVector::init()", "running");
 
   m_properties.setClassName("IntegratorVector");
 
@@ -113,7 +112,6 @@ void IntegratorVector::setup()
   }
   m_dt = M_CONTROLLER->dt();
 
-  /*  MSG_DEBUG("IntegratorVector::setup", "m_dt = " << m_dt << ", vector=" << m_vector_name << "\n in Particle: " << Particle::s_tag_format[m_colour].toString() << "\nm_colour=" << m_colour);*/
 }
 
 void IntegratorVector::isAboutToStart()
@@ -148,8 +146,6 @@ void IntegratorVector::integrateStep1()
 {
   Phase *phase = M_PHASE;
 
-  //  MSG_DEBUG("IntegratorVector::integrateStep1", "m_dt = " << m_dt);
-//   m_force_index = M_CONTROLLER->forceIndex();
   size_t force_index = M_CONTROLLER->forceIndex();
 
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
@@ -157,34 +153,9 @@ void IntegratorVector::integrateStep1()
 
        for(size_t j = 0; j < SPACE_DIMS; ++j)
        {
-        if (isnan(i->tag.pointByOffset(((IntegratorVector*) data)->m_force_offset[/*m_*/force_index])[j])) {
-          cout << "slot = " << i->mySlot << ", "
-              << ((IntegratorVector*) data)->m_vector_name << " = "
-              << i->tag.pointByOffset(((IntegratorVector*) data)->m_vector_offset) << ", "
-              << "force = "
-              << i->tag.pointByOffset(((IntegratorVector*) data)->m_force_offset[/*m_*/force_index])
-              << endl;
-
-          throw gError("IntegratorVector::integrateStep1", "Force was not-a-number!");
-        }
-
        i->tag.pointByOffset(((IntegratorVector*) data)->m_vector_offset)[j] +=
-           ((IntegratorVector*) data)->m_dt * i->tag.pointByOffset(((IntegratorVector*) data)->m_force_offset[/*m_*/force_index])[j];
+           ((IntegratorVector*) data)->m_dt * i->tag.pointByOffset(((IntegratorVector*) data)->m_force_offset[force_index])[j];
 
-//        if (i->tag.pointByOffset(((IntegratorVector*) data)->m_vector_offset)[j] < 0) {
-//          cout << "slot = " << i->mySlot << ", "
-//              << ((IntegratorVector*) data)->m_vector_name << " = " 
-//              << i->tag.pointByOffset(((IntegratorVector*) data)->m_vector_offset) << ", "
-//              << "force = "
-//              << i->tag.pointByOffset(((IntegratorVector*) data)->m_force_offset[/*m_*/force_index])
-//              << endl;
-
-//          i->tag.pointByOffset(((IntegratorVector*) data)->m_vector_offset).assign(0.1);
-
-//        // added next line to check when this happens
-//          throw gError("IntegratorVector::integrateStep1", "vector negative !!!");
-
-//        }
       }
       );
 

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -65,8 +65,6 @@ IntegratorScalarLambda::~IntegratorScalarLambda()
 
 void IntegratorScalarLambda::init()
 {
-//   MSG_DEBUG("IntegratorScalar::init()", "running");
-
   m_properties.setClassName("IntegratorScalarLambda");
 
   m_properties.setDescription(
@@ -82,7 +80,6 @@ void IntegratorScalarLambda::init()
       "\nLater predictor step: new = old + (0.5-lambda)*dt*f_old + "
       "(0.5+lambda)*dt*f_new"
       "\nLater corrector step: does nothing"
-
                              );
 
   DOUBLEPC
@@ -109,49 +106,14 @@ void IntegratorScalarLambda::integrateStep1()
 {
   Phase *phase = M_PHASE;
 
-  //  MSG_DEBUG("IntegratorScalar::integrateStep1", "m_dt = " << m_dt);
-
   size_t force_index = M_CONTROLLER->forceIndex();
   size_t other_force_index = (force_index+1)&(FORCE_HIST_SIZE-1);
 
   if(m_laterStep)
   {
-//     MSG_DEBUG("IntegratorScalarLambda::integrateStep1", "later step");
     FOR_EACH_FREE_PARTICLE_C__PARALLEL
         (phase, m_colour, this,
 
-         // Debugging
-         if (isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-              -> m_force_offset[force_index])))
-          {
-            cout << "slot = " << i->mySlot << ", "
-                << ((IntegratorScalarLambda*) data)->m_scalar_name << " = "
-                << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset)
-                << ", "
-                << "new force = "
-                << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-                -> m_force_offset[force_index])
-                << endl;
-
-            throw gError("IntegratorScalarLambda::integrateStep1", "Force was not-a-number!");
-          }
-
-          if (isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-              -> m_force_offset[other_force_index])))
-          {
-            cout << "slot = " << i->mySlot << ", "
-                << ((IntegratorScalarLambda*) data)->m_scalar_name << " = "
-                << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset)
-                << ", "
-                << "old force = "
-                << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-                -> m_force_offset[other_force_index])
-                << endl;
-
-            throw gError("IntegratorScalarLambda::integrateStep1", "Force was not-a-number!");
-          }
-
-          // Integration
           i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset) +=
               ((IntegratorScalarLambda*) data)->m_dt *
               (
@@ -159,89 +121,20 @@ void IntegratorScalarLambda::integrateStep1()
                   -> m_force_offset[other_force_index]) +
               (m_lambda_sum)*i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
                   -> m_force_offset[force_index])
-              );
-
-/*          MSG_DEBUG("IntegratorScalarLambda::integrateStep1", "old_force" << other_force_index << " = " << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-              -> m_force_offset[other_force_index]) << ", new_force" << force_index << " = " << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-                  -> m_force_offset[force_index]));*/
-
-
-//          // Debugging
-//          if (i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset) < 0)
-//          {
-//            cout << "slot = " << i->mySlot << ", "
-//                << ((IntegratorScalarLambda*) data)->m_scalar_name << " = "
-//                << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset)
-//                << ", "
-//                << "new force = "
-//                << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-//                -> m_force_offset[force_index])
-//                << endl
-//                << "old force = "
-//                << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-//                -> m_force_offset[other_force_index])
-//                << endl;
-//
-//            i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset) = 0.1;
-//
-//       // added next line to check when this happens
-//            throw gError("IntegratorScalarLambda::integrateStep1", "scalar negative !!!");
-//          }
+	       );
         );
   }
   else
   {
-//     MSG_DEBUG("IntegratorScalarLambda::integrateStep1", "first step");
 
     FOR_EACH_FREE_PARTICLE_C__PARALLEL
         (phase, m_colour, this,
 
-         // Debugging
-         if (isnan(i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-             -> m_force_offset[force_index])))
-         {
-           cout << "slot = " << i->mySlot << ", "
-               << ((IntegratorScalarLambda*) data)->m_scalar_name << " = "
-               << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset)
-               << ", "
-               << "new force = "
-               << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-               -> m_force_offset[force_index])
-               << endl;
-
-           throw gError("IntegratorScalarLambda::integrateStep1(first step)", "Force was "
-               "not-a-number!");
-         }
-
-          // Integration
          i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset) +=
              ((IntegratorScalarLambda*) data)->m_dt *
               (
              m_lambda*i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_force_offset[force_index])
               );
-// MSG_DEBUG("IntegratorScalarLambda::integrateStep1", " data = " << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset));
-//          MSG_DEBUG("IntegratorScalarLambda::integrateStep1", "old_force" << other_force_index << " = " << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-//              -> m_force_offset[other_force_index]) << ", new_force" << force_index << " = " << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-//                  -> m_force_offset[force_index]));
-
-
-//           // Debugging
-//          if (i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset) < 0)
-//           {
-//             cout << "slot = " << i->mySlot << ", "
-//                 << ((IntegratorScalarLambda*) data)->m_scalar_name << " = "
-//                 << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset) << ", "
-//                 << "force = "
-//                 << i->tag.doubleByOffset(((IntegratorScalarLambda*) data)
-//                 -> m_force_offset[force_index])
-//                 << endl;
-
-//             i->tag.doubleByOffset(((IntegratorScalarLambda*) data)->m_scalar_offset) = 0.1;
-
-//        // added next line to check when this happens
-//             throw gError("IntegratorScalarLambda::integrateStep1(first step)",
-//                          "scalar negative !!!");
-//           }
          );
          m_laterStep = true;
    }
