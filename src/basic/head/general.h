@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -55,7 +55,7 @@ Parts of the code in this file are based on code from E. Rudnyi's tdlib http://e
 #include "consts.h"
 
 #include "config.h"
-// for gcc4.3
+
 #include<typeinfo>
 #include<algorithm>
 #include<string.h>
@@ -121,9 +121,6 @@ typedef map_string_string::const_iterator map_string_string_ci;
 
 #define index index_
 
-// WriteDebug() is also commented out in general.cpp
-// void WriteDebug(string &s); //from parser
-
 
 //the idea of this class is taken from gnussl
 class gError
@@ -139,14 +136,13 @@ public:
 		PARTICLEFLEWTOOFAR = 2
 	};
 
-  // WriteDebug() is also commented out in general.cpp
-  gError() {/*WriteDebug(message);*/}
-  gError(const char *msg) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(DEFAULT) {/*WriteDebug(message);*/}
-  gError(const string msg) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(DEFAULT) {/*WriteDebug(message);*/}
+  gError() {}
+  gError(const char *msg) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(DEFAULT) {}
+  gError(const string msg) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(DEFAULT) {}
   gError(const char *where, const char *msg) : m_where(where), m_msg(string("ERROR: ") + msg), m_exitValue(DEFAULT) { }
   gError(const string where, const string msg) : m_where(where), m_msg(string("ERROR: ") + msg), m_exitValue(DEFAULT) { }
-  gError(const char *msg, const int exitValue) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(exitValue) {/*WriteDebug(message);*/}
-  gError(const string msg, const int exitValue) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(exitValue) {/*WriteDebug(message);*/}
+  gError(const char *msg, const int exitValue) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(exitValue) {}
+  gError(const string msg, const int exitValue) : m_where("Unknown"), m_msg(string("ERROR: ") + msg), m_exitValue(exitValue) {}
   gError(const char *where, const char *msg, int exitValue) : m_where(where), m_msg(string("ERROR: ") + msg), m_exitValue(exitValue) { }
   gError(const string where, const string msg, int exitValue) : m_where(where), m_msg(string("ERROR: ") + msg), m_exitValue(exitValue) { }
 
@@ -206,7 +202,6 @@ string ObjToString(const T &x)
   ostringstream out;
   out << x;
   string res(out.str());
-  // delete out.str();
   return res;
 }
 

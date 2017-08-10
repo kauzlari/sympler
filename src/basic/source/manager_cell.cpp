@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -47,9 +47,8 @@
 
 using namespace std;
 
-int ManagerCell::thread_counter = 0;
+size_t ManagerCell::thread_counter = 0;
 
-// class ColourPair;
 //---- Constructors/Destructor ----
 
 #ifdef _OPENMP
@@ -58,11 +57,10 @@ ManagerCell::ManagerCell(Phase* p)
     /*m_n_active_links(0), m_first_link(NULL),*/
     m_phase(p)/* m_distances_valid(false), m_pairsValid(false) */
 {
-//    MSG_DEBUG("ManagerCell::ManagerCell", "Constructor.");
   m_first_link.resize(global::n_threads);
   m_n_active_links.resize(global::n_threads);
   
-  for (int t = 0; t < global::n_threads; ++t) {
+  for (size_t t = 0; t < global::n_threads; ++t) {
     m_first_link[t]= NULL;
     m_n_active_links[t] = 0;
   }
@@ -80,7 +78,6 @@ ManagerCell::ManagerCell(Phase* p)
     m_n_active_links(0), m_first_link(NULL),
     m_phase(p)
 {
-//    MSG_DEBUG("ManagerCell::ManagerCell", "Constructor.");
 
 #ifdef ENABLE_PTHREADS
   pthread_mutex_init(&m_cells__mutex, &g_mutex_attr);
@@ -92,7 +89,6 @@ ManagerCell::ManagerCell(Phase* p)
 
 ManagerCell::~ManagerCell()
 {
-//    MSG_DEBUG("ManagerCell::~ManagerCell", "Destructor.");
 
 #ifdef ENABLE_PTHREADS
   pthread_mutex_destroy(&m_cells__mutex);

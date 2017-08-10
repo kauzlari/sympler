@@ -108,7 +108,6 @@ void Controller::init()
 
 
 void Controller::run() { 
-  //      MSG_DEBUG("Controller::run", M_SIMULATION->phase()->manager()->firstLink()->next->actsOn().first << "actsOnInfo starting");
 
   clock_t tInitStart, tInitEnd;
 //   time_t tInitStart, tInitEnd;
@@ -123,20 +122,20 @@ void Controller::run() {
   for(set<Function*>::iterator funcs = Function::toCompile.begin();
       funcs != Function::toCompile.end(); ++funcs)
     (*funcs) -> compile();
-  // don't need that anymore
+
   Function::toCompile.clear();
   MSG_DEBUG("Controller:run", "Hard compiling DONE.");
 
-  double timestep;//, minsize;
+  double timestep;
 
   // FIXME: 7 calls via M_SIMULATION follow: make one M_SIMULATION-call out of that
   M_SIMULATION->setSymbolStages();
 
   // this may be called before setupAfterParticleCreation() because the (empty) connected lists have already been created which is important for setting the stages of the tripletLists
-  M_SIMULATION->sortSymbolStages();
+  M_SIMULATION->sortSymbolsByStages();
 
 #ifdef _OPENMP
-  // next to be called AFTER sortSymbolStages()
+  // next to be called AFTER sortSymbolsByStages()
   // next to be called BEFORE createParticles()
   M_SIMULATION->setupCopyVectors();
 #endif
@@ -350,7 +349,6 @@ void Controller::run() {
       for (vector<GenF*>::iterator force = (*M_SIMULATION->particleForces())[c]->begin(); force != (*M_SIMULATION->particleForces())[c]->end(); ++force) {
 	    (*force)->invalidate();
 	    (*force)->computeForces(i, m_force_index);
-	//	MSG_DEBUG("Controller::run()", "(*force)->name() = " << (*M_SIMULATION->particleForces())[c]->size());
       }
     }
   }
@@ -421,16 +419,6 @@ void Controller::run() {
     }
 
     integrate();
-
-    //      particle tracking
-    //     FOR_EACH_FREE_PARTICLE_C
-    //         (M_SIMULATION->phase(), 0,
-    //          if(i->mySlot == 62)
-    //          {
-    //            MSG_DEBUG("Controller::run", i->mySlot << " AFTER integrate(N=" << M_SIMULATION->phase()->returnNofPart() << "):"
-    //                << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1] << endl/* << "ie=" << i->tag.doubleByOffset(0)*/);
-    //          }
-    //         );    
     
     // callables are, e.g., thermostats; they decide themselves, whether activated or not
     FOR_EACH
@@ -512,7 +500,6 @@ void Controller::integrate()
 //          }
 //         );
 
-
   /* Recalculate forces. */
   other_force_index = (m_force_index+1)&(FORCE_HIST_SIZE-1);
 
@@ -554,12 +541,6 @@ void Controller::integrate()
 // std::time(&t0);
   M_PAIRCREATOR->createDistances();
 
-//   FOR_EACH_COLOUR_PAIR
-//     ( 
-//      phase->manager(),
-//      MSG_DEBUG("Controller::run", "CP(" << cp->firstColour() << cp->secondColour() << "): freePairs=" << cp->freePairs()[0].size() << ", frozenPairs=" << cp->frozenPairs()[0].size());
-//      );
-
   tInitEnd = clock();
 //   std::time(&tInitEnd);
   m_pairCreateTime += (tInitEnd - tInitStart)/(double)CLOCKS_PER_SEC;
@@ -588,11 +569,6 @@ void Controller::integrate()
       vector<GenF*>::iterator pairForcesEnd = cp->pairForces()->end();
       if(cp->freePairsRandom(t).size())
 	{
-	  // #pragma omp parallel
-	  // {
-	  
-	  // size_t currentPos = 0;
-	  // PrimitiveSLEntry<size_t> *i = cp->freePairsRandom(0).first();
 	  for (PrimitiveSLEntry<size_t> *i = cp->freePairsRandom(t).first(); i != NULL; i = i->next) {
 	    Pairdist* pair = &(cp->freePairs()[t][i->m_val]);	  
 	    for (vector<GenF*>::iterator force = cp->pairForces()->begin(); force != pairForcesEnd; ++force) {
@@ -603,12 +579,7 @@ void Controller::integrate()
 	      (*force)->computeForces(pair, other_force_index, t);
 #endif
 	    }
-	    
-	    // i = i->next;
-	    // ++currentPos;
-	    //       }
 	  }
-	  // }
 	}
       else {
 // 	MSG_DEBUG("Controller::run", "Looping over non-random pair list");
@@ -616,8 +587,6 @@ void Controller::integrate()
 	  
 	  Pairdist* pair = i;
 
-//  	  MSG_DEBUG("Controller::run", "pair (" << pair->firstPart()->mySlot << "," << pair->secondPart()->mySlot << ")");
-	  
 	  for (vector<GenF*>::iterator force = cp->pairForces()->begin(); force != pairForcesEnd; ++force) {
 	    (*force)->invalidate();
 	    
@@ -673,7 +642,6 @@ void Controller::integrate()
       
       FOR_EACH_PARTICLE_C
 	(M_SIMULATION->phase(), _c,
-	 // MSG_DEBUG("Controller::run", " integr = " << ((Integrator*)(*integr))->className());
 	 ((Integrator*)(*integr))->mergeCopies(__iSLFE, t, other_force_index);
 	 );
     }
@@ -741,7 +709,6 @@ void Controller::integrate()
 
 
 void Controller::runSymbols() {
-//    MSG_DEBUG("Controller::runSymbols", "START");
 
   clock_t tInitStart;
   clock_t tInitEnd;
@@ -760,15 +727,11 @@ void Controller::runSymbols() {
   size_t stage = 0;
   bool cpsFinished = false;
 
-  while(stage <= Particle::s_maxStage/*PCA_MAX_STAGE*/ || !cpsFinished)
+  while(stage <= Particle::s_maxStage || !cpsFinished)
     {
-//       MSG_DEBUG("Controller::runSymbols", "LOOP-START: stage = " << stage << ", Pstage = " << Particle::s_maxStage << ", cpsFinished = " << cpsFinished);
       /* Run ParticleCaches... Means calculator information that 
 	 is particle dependent. Can rely on calculator outputs from
 	 same and lower stages and on cache outputs from lower stages */
-      //      if(stage <= Particle::s_maxStage/*PCA_MAX_STAGE*/)
-      //      {
-//       ManagerCell* manager = phase->manager();
 
       tInitStart = clock();
 //       std::time(&tInitStart);
@@ -776,8 +739,7 @@ void Controller::runSymbols() {
       size_t nCols = phase->nColours();
       for (size_t col = 0; col < nCols; ++col) 
 	{
-	  if (/* !Particle::s_cached_properties[col][stage].empty()*/
-	      Particle::s_cached_properties[col].size() > stage) 
+	  if (Particle::s_cached_properties[col].size() > stage) 
 	    {
 	      
 	      vector<ParticleCache*>::iterator __begin, __end;
@@ -794,7 +756,6 @@ void Controller::runSymbols() {
 		 );
 	    }
 	}
-      //       }
 
       tInitEnd = clock();
 //       std::time(&tInitEnd);
@@ -864,7 +825,6 @@ void Controller::runSymbols() {
 	     else cpsFinished = false;
 	   }
 	 }
-//       MSG_DEBUG("Controller::runSymbols", "IN CP: before non-bonded");
 
 	 tInitEnd = clock();
 // 	 std::time(&tInitEnd);
@@ -880,11 +840,9 @@ void Controller::runSymbols() {
 
 	 /* Run all calculators for non-bonded pairs in current stage. */
 	 if (cp->maxStage() >= stage) {
-//  	 MSG_DEBUG("Controller::run", "nonBonded-calc: stage-check TRUE; stage=" << stage);
 	   FOR_EACH
 	     (vector<ValCalculator*>,
 	      cp->valCalculators(stage),
-// 	      MSG_DEBUG("Controller::run", "nonBonded-calc: " << (*__iFE)->className() << ", stage=" << stage);
 	      FOR_EACH_PAIR__PARALLEL
 	      (Controller,
 	       cp,
@@ -918,8 +876,6 @@ void Controller::runSymbols() {
      // FIXME: parallelise! Currently NOT parallel!!!     
      FOR_EACH_COLOUR_PAIR
        (M_MANAGER,
-	// next line commented out because maxStage() and maxBondedStage decoupled now (2010-01-18)
-// 	if (cp->maxStage() >= stage) {
 
 	  // loop over vector of connected lists
 	  size_t clSize = cp->connectedLists()->size(); 
@@ -935,22 +891,16 @@ void Controller::runSymbols() {
 	      else cpsFinished = false;
 	    }
 	  }
-// 	} // end of if (cp->maxStage() >= stage)
-	);
 
+	);
 
 // time(&t0);
 // t0 = clock();
-// vector<ColourPair*>::iterator cp;
-//           vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();   
-//           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                                
-//             if ((*cp)->maxStage() >= stage) {
+
 #pragma omp parallel for
         for (size_t t = 0; t < global::n_threads; ++t) {
           vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();   
           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                            
-//             ColourPair *cp = *__cp; 
-        
             if ((*cp)->maxStage() >= stage) {
    
 	      // Run all calculators for non-bonded pairs        
@@ -1034,7 +984,6 @@ void Controller::runSymbols() {
 }
 
 void Controller::runSymbols_0() {
-//   MSG_DEBUG("Controller::runSymbols_0", "START");
 
   clock_t tInitStart;
   clock_t tInitEnd;
@@ -1053,14 +1002,10 @@ void Controller::runSymbols_0() {
   bool cpsFinished = false;
   while(stage <= Particle::s_maxStage_0/*PCA_MAX_STAGE*/ || !cpsFinished)
     {
-    //MSG_DEBUG("Controller::runSymbols_0", "stage = " << Particle::s_maxStage_0);
     
       /* Run ParticleCaches... Means calculator information that 
 	 is particle dependent. Can rely on calculator outputs from
 	 same and lower stages and on cache outputs from lower stages */
-      //      if(stage <= Particle::s_maxStage_0/*PCA_MAX_STAGE*/)
-      //      {
-//       ManagerCell* manager = phase->manager();
 
       tInitStart = clock();
 //       std::time(&tInitStart);
@@ -1068,8 +1013,7 @@ void Controller::runSymbols_0() {
       size_t nCols = phase->nColours();
       for (size_t col = 0; col < nCols; ++col) 
 	{
-	  if (/* !Particle::s_cached_properties_0[col][stage].empty()*/
-	      Particle::s_cached_properties_0[col].size() > stage) 
+	  if (Particle::s_cached_properties_0[col].size() > stage) 
 	    {
 	      
 	      vector<ParticleCache*>::iterator __begin, __end;
@@ -1086,7 +1030,6 @@ void Controller::runSymbols_0() {
 		 );
 	    }
 	}
-      //       }
 
       tInitEnd = clock();
 //       std::time(&tInitEnd);
@@ -1099,7 +1042,6 @@ void Controller::runSymbols_0() {
       // the bonded triplets
       //FIXME: parallelise!
       size_t tlSize = phase->tripletLists()->size(); 
- //    MSG_DEBUG("Controller::runSymbols_0", "tlSize = " << tlSize); 
       for(size_t itl = 0; itl < tlSize; ++itl) {
 	    if(phase->maxBondedStage_triplet_0(itl) >= stage) {
 	      tripletList* tL = phase->returnTripletList(itl);
@@ -1125,7 +1067,6 @@ void Controller::runSymbols_0() {
 	  }
 	}
       }
-
 
       tInitEnd = clock();
 //       std::time(&tInitEnd);
@@ -1209,8 +1150,6 @@ void Controller::runSymbols_0() {
      // FIXME: parallelise! Currently NOT parallel!!!     
      FOR_EACH_COLOUR_PAIR
        (M_MANAGER,
-	// next line commented out because now (2010-01-18) maxStage_0() and maxBondedStage_0() have been decoupled
-// 	if (cp->maxStage_0() >= stage) {
 	  // loop over vector of connected lists
 	  size_t clSize = cp->connectedLists()->size(); 
 //	  MSG_DEBUG("Controller::runSymbols_0", "clSize = " << clSize); 
@@ -1225,21 +1164,13 @@ void Controller::runSymbols_0() {
 	      else cpsFinished = false;
 	    }
 	  }
-	//} // end of if (cp->maxStage_0() >= stage)
 	);
 
-
-
-
-// vector<ColourPair*>::iterator cp;
-//           vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();   
-//           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                                
-//             if ((*cp)->maxStage_0() >= stage) {
 #pragma omp parallel for 
-        for (size_t t = 0; t < global::n_threads; ++t) {
+
+     for (size_t t = 0; t < global::n_threads; ++t) {
           vector<ColourPair*>::iterator __end = M_MANAGER->colourPairs().end();   
           for(vector<ColourPair*>::iterator cp = M_MANAGER->colourPairs().begin(); cp != __end; ++cp) {                                            
-//             ColourPair *cp = *__cp; 
             if ((*cp)->maxStage_0() >= stage) {
               if((*cp)->freePairsRandom(t).size())
               {
@@ -1318,14 +1249,8 @@ void Controller::runSymbols_0() {
 void Controller::setup() {
   NodeManyChildren::setup();
 
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck *this: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(*this));
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck m_timesteps: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(m_timesteps));
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck m_dt: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(m_dt));
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck m_t: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(m_t));
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck m_statusEvery: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(m_statusEvery));
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck m_force_index: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(m_force_index));
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck m_toSetupAfterParticleCreation: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(m_toSetupAfterParticleCreation));
-//   MSG_DEBUG("Controller::setup", "Valgrindcheck m_toSetupAfterParticleCreation.begin: "<< VALGRIND_CHECK_VALUE_IS_DEFINED(m_toSetupAfterParticleCreation.begin()));
+  // A reminder, how one can use valgrind
+  
 //   MSG_DEBUG("Controller::setup", "Valgrindcheck (*(m_toSetupAfterParticleCreation.begin())): "<< VALGRIND_CHECK_VALUE_IS_DEFINED((*(m_toSetupAfterParticleCreation.begin()))));
 
 }

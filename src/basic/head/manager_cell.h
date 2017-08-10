@@ -337,7 +337,7 @@ public:
   /*!
    * Thread-number counter
    */
-  static int thread_counter;
+  static size_t thread_counter;
 
   /*!
    * Create the pair list
