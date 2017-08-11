@@ -47,16 +47,13 @@ protected:
   /* list of frozen particles */
   	map<int, ParticleList> m_particles_frozen;
   //is particle inside geometry or not? default yes      
-<<<<<<< HEAD
+
   bool m_particlesInside ; 
   /*!
    * Takes the cutoff from SImulation before the "skin" from the Verlet List is added
    */
   double myCutoff;
-=======
-  bool m_particlesinside ; 
 
->>>>>>> upstream/master
   void init();
 
   static string readNext(ifstream &pos);

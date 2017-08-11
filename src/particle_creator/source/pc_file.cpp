@@ -28,8 +28,6 @@
  * 
  */
 
-
-
 #include <fstream>
 #include <iostream>
 #include <cstring>
@@ -95,8 +93,7 @@ string ParticleCreatorFile::readNext(ifstream &pos) {
   return s;
 }
 
-void ParticleCreatorFile::createParticles()
-{
+void ParticleCreatorFile::createParticles(){
   MSG_DEBUG("ParticleCreatorFile::createParticles","start");
     
   Phase *phase = M_PHASE;
@@ -623,7 +620,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
           // if-> is inside ::Need to implement based on input from input file. Particles inside or outside?
           //Default = inside (backwards compatible)
 	//
-<<<<<<< HEAD
+
         if(m_particlesInside){
          if (M_BOUNDARY->isInside(p.r)) {
            p.g = c->group();
@@ -637,30 +634,12 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
         if(!m_particlesInside){        
          if (!(M_BOUNDARY->isInside(p.r))) {
            p.g = c->group();
-=======
-        if(m_particlesinside){
-         if (M_BOUNDARY->isInside(p.r)) {
-           p.g = c->group();
->>>>>>> upstream/master
 	  
            if (freeOrFrozen == "frozen")
 	    m_particles_frozen[p.g].newEntry() = p;
 	  else
 	    m_particles[p.g].newEntry() = p;
           }
-<<<<<<< HEAD
-=======
-	}
-        if(!m_particlesinside){
-         if (!(M_BOUNDARY->isInside(p.r))) {
-           p.g = c->group();
-	  
-           if (freeOrFrozen == "frozen")
-	    m_particles_frozen[p.g].newEntry() = p;
-	  else
-	    m_particles[p.g].newEntry() = p;
-          }
->>>>>>> upstream/master
 	}
       }
       //     } // end of if(m_species ...)
@@ -678,6 +657,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
   /* next will call the one in ParticleCreatorFree */
   flushParticles();
 }
+
 
 void ParticleCreatorFile::readParticle(Particle &p, ifstream &pos, string &freeOrFrozen ){
     
@@ -773,20 +753,13 @@ void ParticleCreatorFile::init() {
 			"File containing the position and velocity information.")
 	;
         BOOLPC
-<<<<<<< HEAD
-    (particlesInside, m_particlesInside,
-=======
-    (particlesinside, m_particlesinside,
->>>>>>> upstream/master
+                (particlesInside, m_particlesInside,
      " true if particles are inside inside of geometry (fluid particles), false"
                 " if they are outside (wall particles). Useful when working with STL geometries. Default is true so that it is backwards compatible. ");
         
 	m_filename = "default.pos";
-<<<<<<< HEAD
         m_particlesInside = "true";
-=======
-        m_particlesinside = "true";
->>>>>>> upstream/master
+      
 }
 
 void ParticleCreatorFile::flushParticles() {
