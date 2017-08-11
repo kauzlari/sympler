@@ -84,7 +84,7 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
 /* Macro to perform operation on all SmartPointer datatypes */
 #define NOOP while(0)
 #ifdef WITH_ARRAY_TYPES
-//auch
+
 #define	DATAFORMAT_ARRAY_SWITCH(attr,m_data,oper) \
 	case DataFormat::MArray2D:\
 		oper(attr,m_data,array2d_double_sp); break
@@ -92,18 +92,7 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
 #define	DATAFORMAT_ARRAY_SWITCH(attr,m_data,oper) NOOP
 #endif
 
-#define DATAFORMAT_VECTOR_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
-	case DataFormat::VECTOR_DOUBLE:\
-		oper((attr),(m_data),vector_double_sp); break; \
-	case DataFormat::VECTOR_INT:\
-		oper((attr),(m_data),vector_int_sp); break; \
-	case DataFormat::VECTOR_POINT:\
-		oper((attr),(m_data),vector_point_sp); break; \
-	case DataFormat::VECTOR_TENSOR:\
-		oper((attr),(m_data),vector_tensor_sp); break; \
-}
-
-#define DATAFORMAT_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
+#define DATAFORMAT_CONTAINER_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
   case DataFormat::VECTOR_DOUBLE:				       \
     oper((attr),(m_data),vector_double_sp); break;		       \
   case DataFormat::VECTOR_INT:					       \
@@ -113,11 +102,9 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
   case DataFormat::VECTOR_TENSOR:				       \
     oper((attr),(m_data),vector_tensor_sp); break;		       \
     DATAFORMAT_ARRAY_SWITCH((attr),(m_data),oper);			\
-  default: \
-    throw gError("DATAFORMAT_SWITCH(attr,m_data,oper)", "FATAL ERROR: \
-usage of this switch statement with wrong DataFormat enumeration value. " \
-		 + ObjToString((attr)->datatype)); break;		\
+  default: /*Yes, it will be called for other formats and should then do NOTHING!*/ break; \
 }
+
 
 //---- Classes ----
 

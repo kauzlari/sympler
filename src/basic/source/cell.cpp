@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -87,10 +87,6 @@ CellLink::CellLink()
 CellLink::CellLink(Cell *first, Cell *second, int alignment, bool acts_on_first, bool acts_on_second)
   : m_n_active_cells(0), next(NULL), prev(NULL)/*, m_linkUsed(false)*/
 {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_init(&m_activation__mutex, &g_mutex_attr);
-#endif
-
   set(first, second, alignment, acts_on_first, acts_on_second);
 }
 
@@ -106,9 +102,6 @@ CellLink::CellLink(const CellLink &copy)
 
 CellLink::~CellLink()
 {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_destroy(&m_activation__mutex);
-#endif
 }
 
 
@@ -167,9 +160,6 @@ void CellLink::set(Cell *first, Cell *second, int alignment, bool acts_on_first,
    If both links are activated, activate this link
 */
 void CellLink::cellActivated() {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_lock(&m_activation__mutex);
-#endif
 
   ++m_n_active_cells;
 
@@ -185,10 +175,6 @@ void CellLink::cellActivated() {
   if (m_n_active_cells == 2) 
     m_first->manager()->activateCellLink(this);
 
-
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_unlock(&m_activation__mutex);
-#endif
 }
 
 
@@ -196,9 +182,6 @@ void CellLink::cellActivated() {
    If link is active, deactivate link.
 */
 void CellLink::cellDeactivated() {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_lock(&m_activation__mutex);
-#endif
 
   --m_n_active_cells;
 
@@ -213,55 +196,10 @@ void CellLink::cellDeactivated() {
   if (m_n_active_cells == 1)
     m_first->manager()->deactivateCellLink(this);
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_unlock(&m_activation__mutex);
-#endif
 }
 
 
 /* ---- Inline helper functions ---- */
-
-
-/* add a Pairdist to the appropriate distances
-   list
-*/
-
-// #ifdef _OPENMP
-// inline void addPair(vector<PairList> &distances, double cutoff_sq,
-//                     int dir, Cell *first_c, Cell *second_c,
-//                     Particle *first_p, Particle *second_p,
-//                     bool ao_f, bool ao_s,
-//                     point_t &cell_dist,
-//                     int thread_no)
-// {
-// #else
-// inline void addPair(vector<PairList> &distances, double cutoff_sq,
-//                     int dir, Cell *first_c, Cell *second_c,
-//                     Particle *first_p, Particle *second_p,
-//                     bool ao_f, bool ao_s,
-//                     point_t &cell_dist)
-// {
-// #endif
-//   dist_t d;
-//   d.abs_square = 0;
-//   for (int _i = 0; _i < SPACE_DIMS; _i++) {
-//     d.cartesian[_i] = -dir*cell_dist[_i]
-//       + first_p -> r[_i] - first_c -> corner1[_i]
-//       - second_p -> r[_i] + second_c -> corner1[_i];
-//     d.abs_square += d.cartesian[_i]*d.cartesian[_i];
-//     }
-/*   Take care: The order of *j, *i defines the direction d	\
-     is pointing to.*/
-//   if (d.abs_square < cutoff_sq) {
-//     d.abs = sqrt(d.abs_square);
-// #ifdef _OPENMP    
-//     distances[thread_no].newPair().set(d, first_p, second_p, ao_f, ao_s);
-// #else    
-//     distances[PairCreator::counterTN].newPair().set(d, first_p, second_p, ao_f, ao_s);
-// #endif
-
-//   }
-// }
 
 #ifdef _OPENMP
 inline void createDistancesForSame
@@ -687,15 +625,8 @@ void CellLink::createDistances()
 Cell::Cell(ManagerCell *mgr, int group)
   : m_particles(mgr->nColours()), m_frozen_particles(mgr->nColours()),
     m_injected_particles(mgr->nColours()), m_n_particles(0), m_manager(mgr), m_group(group), m_cellUsed(false),
-#ifdef ENABLE_PTHREADS
-    m_injected_particles__mutex(mgr->nColours()),
-#endif
     next(NULL), prev(NULL)
 {
-#ifdef ENABLE_PTHREADS
-  for (size_t i = 0; i < m_injected_particles__mutex.size(); i++)
-    pthread_mutex_init(&m_injected_particles__mutex[i], &g_mutex_attr);
-#endif
 }
 
 
@@ -704,16 +635,8 @@ Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int group)
     m_injected_particles(mgr->nColours()),
     m_n_particles(0),
     m_manager(mgr), m_group(group), m_cellUsed(false),
-#ifdef ENABLE_PTHREADS
-    m_injected_particles__mutex(mgr->nColours()),
-#endif
     next(NULL), prev(NULL)
 {
-#ifdef ENABLE_PTHREADS
-  for (size_t i = 0; i < m_injected_particles__mutex.size(); i++)
-    pthread_mutex_init(&m_injected_particles__mutex[i], &g_mutex_attr);
-#endif
-
   corner1 = c1;
   corner2 = c2;
 }
@@ -721,10 +644,6 @@ Cell::Cell(ManagerCell *mgr, const point_t &c1, const point_t &c2, int group)
 
 Cell::~Cell()
 {
-#ifdef ENABLE_PTHREADS
-  for (int i = 0; i < m_injected_particles__mutex.size(); i++)
-    pthread_mutex_destroy(&m_injected_particles__mutex[i]);
-#endif
 }
 
 
@@ -1082,13 +1001,7 @@ void Cell::injectFree(size_t colour, Particle *p)
     p->g = m_group;
   }
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_lock(&m_injected_particles__mutex[colour]);
-#endif
   m_injected_particles[colour].push_back(p);
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_unlock(&m_injected_particles__mutex[colour]);
-#endif
 }
 
 

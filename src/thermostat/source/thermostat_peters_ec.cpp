@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -115,34 +115,16 @@ void ThermostatPetersEnergyConserving::thermalize(Phase* phase)
     (ThermostatPetersEnergyConserving,
      m_cp,
      if(pair->abs() < self->m_cutoff) {
-       
-       
-/*       // particle tracking
-       if(pair->firstPart()->mySlot == 183 && pair->firstPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize", "183: v_before = " << pair->firstPart()->v << endl << "ie_before = " << pair->firstPart()->tag.doubleByOffset(self->m_energy_offset.first) << endl << "T = " << pair->firstPart()->tag.doubleByOffset(24) << endl << "rho_lucy1_before = " << pair->firstPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_before = " << pair->firstPart()->tag.tensorByOffset(40) << endl << "PARTNER: c = " << pair->secondPart()->c << ", v_before = " << pair->secondPart()->v << endl << "ie_before = " << pair->secondPart()->tag.doubleByOffset(self->m_energy_offset.second) << endl << "rho_lucy1_before = " << pair->secondPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_before = " << pair->secondPart()->tag.tensorByOffset(40));
-       if(pair->secondPart()->mySlot == 183 && pair->secondPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize", "183: v_before = " << pair->secondPart()->v << endl << "ie_before = " << pair->secondPart()->tag.doubleByOffset(self->m_energy_offset.second) << endl << "T = " << pair->secondPart()->tag.doubleByOffset(24) << endl << "rho_lucy1_before = " << pair->secondPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_before = " << pair->secondPart()->tag.tensorByOffset(40) << endl << "PARTNER: c = " << pair->firstPart()->c << ", v_before = " << pair->firstPart()->v << endl << "ie_before = " << pair->firstPart()->tag.doubleByOffset(self->m_energy_offset.first) << endl << "rho_lucy1_before = " << pair->firstPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_before = " << pair->firstPart()->tag.tensorByOffset(40));*/
-       
-       
+              
        double temp;
        self->m_dissipation(&temp, &(*pair));
        point_t g;
        g.assign(0);
        double weight = self->m_wf->interpolate(pair, g);
        //RandomNumberGenerator m_rng;
-
-       
-//        // particle tracking
-//        if(pair->firstPart()->mySlot == 183 && pair->firstPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize", "183: temp = " << temp << ", weight = " << weight);
-//        if(pair->secondPart()->mySlot == 183 && pair->secondPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize",  "183: temp = " << temp << ", weight = " << weight);
-
-       
               
        /* ---- Peters Scheme II ---- */
        weight *= 2 * temp/*self->m_dissipation*/ * self->m_dt;
-
-#ifdef ENABLE_PTHREADS
-       pair->firstPart()->lock();
-       pair->secondPart()->lock();
-#endif
 
        /*-------*/
 
@@ -155,15 +137,8 @@ void ThermostatPetersEnergyConserving::thermalize(Phase* phase)
 		+
 		self->m_ie.second->reciprocalTemperature(*pair->secondPart()))
 	       ));
-    
-       
-       
-//        if(pair->firstPart()->mySlot == 183 && pair->firstPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize", "183: a = " << a << ", b = " << b);
-//        if(pair->secondPart()->mySlot == 183 && pair->secondPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize",  "183: a = " << a << ", b = " << b);
-
-       
-       
-       /* ---- Peter Scheme I ----
+           
+       /* ---- Peters Scheme I ----
 
        double a = m_dissipation*weight*weight*m_dt;
        double b = sqrt(
@@ -193,28 +168,9 @@ void ThermostatPetersEnergyConserving::thermalize(Phase* phase)
          pair->secondPart()->tag.doubleByOffset(self->m_energy_offset.second) -= de;
        }
 
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
      }
-     
-//      // particle tracking
-//      if(pair->firstPart()->mySlot == 183 && pair->firstPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize", "183: v_after = " << pair->firstPart()->v << endl << "ie_after = " << pair->firstPart()->tag.doubleByOffset(self->m_energy_offset.first) << endl << "rho_lucy1_after = " << pair->firstPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_after = " << pair->firstPart()->tag.tensorByOffset(40) << endl << "PARTNER: c = " << pair->secondPart()->c << ", v_after = " << pair->secondPart()->v << endl << "ie_after = " << pair->secondPart()->tag.doubleByOffset(self->m_energy_offset.second) << endl << "rho_lucy1_after = " << pair->secondPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_after = " << pair->secondPart()->tag.tensorByOffset(40));
-//      if(pair->secondPart()->mySlot == 183 && pair->secondPart()-> c == 0) MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize", "183: v_after = " << pair->secondPart()->v << endl << "ie_after = " << pair->secondPart()->tag.doubleByOffset(self->m_energy_offset.second) << endl << "rho_lucy1_after = " << pair->secondPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_after = " << pair->secondPart()->tag.tensorByOffset(40) << endl << "PARTNER: c = " << pair->firstPart()->c << ", v_after = " << pair->firstPart()->v << endl << "ie_after = " << pair->firstPart()->tag.doubleByOffset(self->m_energy_offset.first) << endl << "rho_lucy1_after = " << pair->firstPart()->tag.doubleByOffset(32) << endl << "shear_lucy1_after = " << pair->firstPart()->tag.tensorByOffset(40));
-
-    
+         
     );
-
-//     // particle tracking
-//      FOR_EACH_FREE_PARTICLE_C
-//          (M_SIMULATION->phase(), 0,
-//           if(i->mySlot == 183)
-//           {
-//             MSG_DEBUG("ThermostatPetersEnergyConserving::thermalize", i->mySlot << " END(N=" << M_SIMULATION->phase()->returnNofPart() << "):"
-//                 << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1]);
-//           }
-//          );
 
 }
 

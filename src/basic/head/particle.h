@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -38,14 +38,6 @@
 #include "geometric_primitives.h"
 // #include "particle_cache.h"
 
-#ifdef ENABLE_PTHREADS
-extern pthread_mutexattr_t g_mutex_attr;
-
-#include "pthread.h"
-#endif
-
-// #define PCA_MAX_STAGE 2
-
 /*--- Particle ---*/
 
 #define FORCE_HIST_SIZE 2
@@ -60,9 +52,6 @@ class ParticleCache;
 class Particle
 {
 protected:
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_t m_mutex; // Mutex for concurrent access
-#endif
 
   /*!
    * Copy the information from particle \a p. Used by the copy
@@ -159,10 +148,6 @@ public:
    * Constructor
    */ 
   Particle(): m_mass(1.), c((size_t)HUGE_VAL) {
-#ifdef ENABLE_PTHREADS
-    pthread_mutex_init(&m_mutex, &g_mutex_attr);
-#endif
-//     displacement.assign(0);
     isFrozen = 0;
     clear();
   }
@@ -172,11 +157,7 @@ public:
    * @param colour The color of the newly created particle
    */
     Particle(size_t colour): m_mass(1.), c((size_t)HUGE_VAL) {
-#ifdef ENABLE_PTHREADS
-    pthread_mutex_init(&m_mutex, &g_mutex_attr);
-#endif
     setColour(colour);
-//     displacement.assign(0);
     isFrozen = 0;
     clear();
   }
@@ -186,9 +167,6 @@ public:
    * @param p The particle to copy from
    */
   Particle(const Particle& p) {
-#ifdef ENABLE_PTHREADS
-    pthread_mutex_init(&m_mutex, &g_mutex_attr);
-#endif
     copyFrom(p);
   } 
        
@@ -196,9 +174,6 @@ public:
    * Destructor
    */
   ~Particle() {
-#ifdef ENABLE_PTHREADS
-    pthread_mutex_destroy(&m_mutex);
-#endif
   }
 
 
@@ -250,15 +225,6 @@ public:
 /* TESTING WHETHER NEEDED */
 /*     displacement.assign(0); */
   }
-
-#ifdef ENABLE_PTHREADS
-  void lock() {
-    pthread_mutex_lock(&m_mutex);
-  }
-  void unlock() {
-    pthread_mutex_unlock(&m_mutex);
-  }
-#endif
 
   /*!
  * Properties that are recalculated for every timestep 

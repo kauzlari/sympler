@@ -385,12 +385,6 @@ void Simulation::init()
     (simName, m_name,
      "Name of the simulation. Used for filename generation.");
 
-#ifdef ENABLE_PTHREADS
-  INTPC
-    (nThreads, global::n_threads, 0,
-     "Number of parallel threads to use in this calculation.");
-#endif
-
 #ifdef _OPENMP
   INTPC
     (nThreads, global::n_threads, 0,

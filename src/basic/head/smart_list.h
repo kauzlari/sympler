@@ -121,11 +121,6 @@ protected:
    * List of free slots
    */
   list<size_t> m_free_slots;
-
-  /* Thread safety */
-#ifdef ENABLE_PTHREAD
-  pthread_mutex_t m_mutex;
-#endif
     
   /*!
    * Expand the list capacity, i.e., add another chunk and
@@ -156,9 +151,6 @@ protected:
    * Initialize the list => create first chunk
    */
   void init() {
-#ifdef ENABLE_PTHREAD
-    pthread_mutex_init(&m_mutex, &g_mutex_attr);
-#endif
     expandCapacity();
   }
 
@@ -234,9 +226,6 @@ list <size_t> freeSlots()
     typename vector<T*>::iterator chunks_end = m_chunks.end();
     for (typename vector<T*>::iterator i = m_chunks.begin(); i != chunks_end; i++)
       delete [] *i;
-#ifdef ENABLE_PTHREAD
-    pthread_mutex_destroy(&m_mutex);
-#endif
   }
 
   SmartList<T> &operator=(const SmartList<T> &copy) {
@@ -250,10 +239,6 @@ list <size_t> freeSlots()
    */
   T &newEntry() {
     size_t slot;
-
-#ifdef ENABLE_PTHREAD
-    pthread_mutex_lock(&m_mutex);
-#endif
 
     //printf("m_size %d, m_capacity %d, m_emptyIndex %d\n",m_size, m_capacity,m_emptyIndex);
     if (m_size == m_capacity) {
@@ -297,10 +282,6 @@ list <size_t> freeSlots()
     entry.next = NULL;
     m_last = &entry;
 
-#ifdef ENABLE_PTHREAD
-    pthread_mutex_unlock(&m_mutex);
-#endif
-
     entry.mySlot = slot;
 
     return entry;
@@ -311,9 +292,6 @@ list <size_t> freeSlots()
    * @param entry Entry to delete
    */
   void deleteEntry(T &entry) {
-#ifdef ENABLE_PTHREAD
-    pthread_mutex_lock(&m_mutex);
-#endif
 
     assert(m_size > 0);
     assert(m_first != NULL);
@@ -332,15 +310,11 @@ list <size_t> freeSlots()
     if (entry.next)
       entry.next->prev = entry.prev;
 
-
 // if(entry.mySlot == 54)
 // MSG_DEBUG("SmartList::basics", "id of this pair = " << &entry << "  previous pair id = " << entry.prev << "  next pair id = " << entry.next << " prev of next = " << entry.next->prev << " next of prev = " << entry.prev->next << " prev of prev of next = " << entry.next->prev->prev << " next of next of prev" << entry.prev->next->next);
 
-#ifdef ENABLE_PTHREAD
-    pthread_mutex_unlock(&m_mutex);
-#endif
   }
-
+    
   /*!
    * Delete an entry
    * @param slot Entry slot to delete
@@ -356,13 +330,6 @@ list <size_t> freeSlots()
     m_size = 0;
     m_emptyIndex = 0;
     m_free_slots.clear();
-
-    /*
-    for(size_t i = 0; i < m_capacity; ++i)
-      {
-	m_free_slots.push_back(i);
-      }
-    */
 
     m_first = NULL;
     m_last = NULL;
@@ -452,9 +419,6 @@ struct PrimitiveSLEntry
    * constructor
    */
   PrimitiveSLEntry() {
-#ifdef ENABLE_PTHREADS
-    pthread_mutex_init(&m_mutex, &g_mutex_attr);
-#endif
   } 
 
   /*!
@@ -462,9 +426,6 @@ struct PrimitiveSLEntry
    * @param entry The entry to copy from
    */
   PrimitiveSLEntry(const PrimitiveSLEntry<T>& entry) {
-#ifdef ENABLE_PTHREADS
-    pthread_mutex_init(&m_mutex, &g_mutex_attr);
-#endif
     copyFrom(entry);
   } 
 

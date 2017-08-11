@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -254,27 +254,14 @@ void FPairVelsBC::computeForces(Pairdist* pair, int force_index, int thread_no)
       if(innerDist == HUGE_VAL)
 	throw gError("FPairVelsBC::computeForces", "No wall found for pair. Check your geometry and other settings. If this doesn't help, contact the programmers. \nDetails: slot1=" + ObjToString(pair->firstPart()->mySlot) + ", slot2=" + ObjToString(pair->secondPart()->mySlot) + "c1=" + ObjToString(pair->firstPart()->c) + ", c2=" + ObjToString(pair->secondPart()->c) + ", r1=" + ObjToString(pair->firstPart()->r) + ", r2=" + ObjToString(pair->secondPart()->r));
             
-
-#ifdef ENABLE_PTHREADS
-	 pair->firstPart()->lock();
-	 pair->secondPart()->lock();
-#endif
     this->m_pairFactor(&temp, arg, &(*pair));
-
-// 	 MSG_DEBUG("FPairVelsBC::computeForces", "temp = " << temp);
 
     point_t fi;
     point_t fj;
 
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fi before = " << fi);
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fj before = " << fj);
-
     // compute the particle-expressions
     this->m_1stparticleFactor(&fi, arg, &(*pair));
     this->m_2ndparticleFactor(&fj, arg, &(*pair));
-
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fi after function = " << fi);
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fj after function = " << fj);
 
     // loop necessary because operator* of math_vector_t does scalar product
     for(size_t i = 0; i < SPACE_DIMS; ++i)
@@ -283,26 +270,8 @@ void FPairVelsBC::computeForces(Pairdist* pair, int force_index, int thread_no)
       fj[i] *= temp[i];
     }
 
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fi after temp = " << fi);
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fj after temp = " << fj);
-
-
     fi *= this->m_wf->weight(pair, pair->secondPart()->r);
     fj *= this->m_wf->weight(pair, pair->firstPart()->r);
-
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fi after weight = " << fi);
-//     MSG_DEBUG("FPairVelsBC::computeForces", "fj after weight = " << fj);
-
-
-// 	 MSG_DEBUG("FPairVelsBC::computeForces", " second r = " << pair->secondPart()->r << "first r = " << pair->firstPart()->r);
-
-    /* Set elements of the stress tensor */
-//     for (int a = 0; a < SPACE_DIMS; ++a) {
-//       for (int b = 0; b < SPACE_DIMS; ++b) {
-//         pair->firstPart()->stress(a, b) += (*pair)[a]*fi[b];
-//         pair->secondPart()->stress(a, b) += (*pair)[a]*fj[b];
-//       }
-//     }
 
 #ifndef _OPENMP
     if (pair->actsOnFirst())
@@ -322,12 +291,7 @@ void FPairVelsBC::computeForces(Pairdist* pair, int force_index, int thread_no)
     }
 #endif
 
-#ifdef ENABLE_PTHREADS
-	 pair->secondPart()->unlock();
-	 pair->firstPart()->unlock();
-#endif
        }
-//       );
 }
 
 

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -35,7 +35,6 @@
 #include "general.h"
 #include "simulation.h"
 #include "manager_cell.h"
-/* #include "val_calculator_arbitrary.h" */
 #include "bonded_pair_particle_calc.h"
 #include "colour_pair.h"
 #include "function_pair.h"
@@ -43,9 +42,9 @@
 
 /*!
  * Class doing summation over bonded pairs and computing a DPD-like momentum conserving vector force with random amplitude. 
-
-ASSUMPTION: constant integration time step
-
+ *
+ *ASSUMPTION: constant integration time step
+ *
  */
 class BondedPairParticleOneNoiseVector : public BondedPairParticleCalc
 {
@@ -116,38 +115,23 @@ class BondedPairParticleOneNoiseVector : public BondedPairParticleCalc
                     
 	  Particle* first = pD->firstPart(); 
 	  Particle* second = pD->secondPart();
-	  //             MSG_DEBUG("BondedPairParticleOneNoiseVector::compute", "temp = " << temp);            
-	  
           
 	  if(pD->actsOnFirst())
             {
-#ifdef ENABLE_PTHREADS
-              first->lock();
-#endif
 	      
 #ifndef _OPENMP
 
                first->tag.pointByOffset(m_slots.first) += temp;
-
-/* 	      MSG_DEBUG("BondedPairParticleOneNoiseVector::compute", "tag-data AFTER = " << first->tag.pointByOffset(m_slots.first));             */
-
 
 #else
 	      // FIXME: parallelise!
               first->tag.pointByOffset(m_slots.first) += temp;
 #endif
 	      
-	      //     MSG_DEBUG("BondedPairParticleOneNoiseVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));            
-#ifdef ENABLE_PTHREADS
-              first->unlock();
-#endif
             }
 	  
 	  if(pD->actsOnSecond())
             {
-#ifdef ENABLE_PTHREADS
-              second->lock();
-#endif
 	      
 #ifndef _OPENMP
               second->tag.pointByOffset(m_slots.second) += m_symmetry*temp;
@@ -156,10 +140,6 @@ class BondedPairParticleOneNoiseVector : public BondedPairParticleCalc
               second->tag.pointByOffset(m_slots.second) += m_symmetry*temp;
 #endif
 	      
-	      //     MSG_DEBUG("BondedPairParticleOneNoiseVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              second->unlock();
-#endif
             }
 	  
         }

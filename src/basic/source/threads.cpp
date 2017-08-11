@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,55 +29,7 @@
  */
 
 
-#include "threads.h"
-
-#include "general.h"
-
-#ifdef ENABLE_PTHREADS
-
-pthread_mutexattr_t g_mutex_attr;
-
-
-void *RunThread(thread_info_t *t)                              
-{                                                         
-  ((BasicThread*) t->handler)->operator()(t->no);     
-                                                          
-  pthread_exit(NULL);                                     
-}
-
-
-void ForkThreads(BasicThread *handler)
-{
-  ForkThreadsWithFunction((thread_func_t) RunThread, handler);
-}
-
-
-void ForkThreadsWithFunction(thread_func_t function, void *handler)
-{
-  thread_info_t *thread = new thread_info_t[global::n_threads];
-
-  /*
-  MSG_DEBUG
-    ("--- ForkThreadsWithFunction",
-     "Forking " << global::n_threads << " threads.");
-  */
-
-  for (int t = 0; t < global::n_threads; t++) {
-    thread[t].no = t;
-    thread[t].handler = handler;
-    pthread_create(&thread[t].id, NULL, function, &thread[t]);
-  }
-
-  for (int t = 0; t < global::n_threads; t++) {
-    pthread_join(thread[t].id, NULL);
-  }
-
-  /*
-  MSG_DEBUG
-    ("--- ForkThreadsWithFunction",
-     "Synchronized.");
-  */
-  delete thread;
-}
-
-#endif
+/*!
+ * This file contained implementations for usage of pthreads. 
+ * This was removed.
+ */

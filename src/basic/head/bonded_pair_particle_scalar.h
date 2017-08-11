@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -119,9 +119,6 @@ class BondedPairParticleScalar : public BondedPairParticleArbitrary
 	  if(pD->actsOnFirst())
             {
 	      tempFirst *= temp;
-#ifdef ENABLE_PTHREADS
-              first->lock();
-#endif
 	      
 #ifndef _OPENMP
 
@@ -141,18 +138,11 @@ class BondedPairParticleScalar : public BondedPairParticleArbitrary
 /*               } */
 #endif
 	      
-	      //     MSG_DEBUG("BondedPairParticleScalar::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));            
-#ifdef ENABLE_PTHREADS
-              first->unlock();
-#endif
             }
 	  
 	  if(pD->actsOnSecond())
             {
 	      tempSecond *= temp;
-#ifdef ENABLE_PTHREADS
-              second->lock();
-#endif
 	      
 #ifndef _OPENMP
               second->tag.doubleByOffset(m_slots.second) += m_symmetry*(tempSecond);
@@ -166,10 +156,6 @@ class BondedPairParticleScalar : public BondedPairParticleArbitrary
 /*               } */
 #endif
 	      
-	      //     MSG_DEBUG("BondedPairParticleScalar::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              second->unlock();
-#endif
             }
 	  
         }

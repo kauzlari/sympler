@@ -93,18 +93,18 @@ fi
 
 
 # Use pthreads?
-AC_ARG_ENABLE(pthreads,
-  [  --enable-pthreads       build multithreaded code using pthreads (currently unstable)],
-  [
-    if test "$enableval" = "yes"; then
-      ENABLE_PTHREADS="yes"
-    fi
-  ])
-
-if test "${ENABLE_PTHREADS}" = "yes"; then
-  AC_DEFINE(ENABLE_PTHREADS, 1, Compile multithreaded code using pthreads)
-#  CFLAGS="-pthread -D__USE_MALLOC $CFLAGS"
-fi
+#AC_ARG_ENABLE(pthreads,
+#  [  --enable-pthreads       build multithreaded code using pthreads (currently unstable)],
+#  [
+#    if test "$enableval" = "yes"; then
+#      ENABLE_PTHREADS="yes"
+#    fi
+#  ])
+#
+#if test "${ENABLE_PTHREADS}" = "yes"; then
+#  AC_DEFINE(ENABLE_PTHREADS, 1, Compile multithreaded code using pthreads)
+##  CFLAGS="-pthread -D__USE_MALLOC $CFLAGS"
+#fi
 
 #AC_SUBST(CFLAGS)
 

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -50,7 +50,7 @@ public:
   virtual void computeForces(Pairdist* pair, int force_index, size_t thread_no)
 #endif
   {
-    if (pair->abs() < /*this->*/m_cutoff) {
+    if (pair->abs() < m_cutoff) {
       
       double r6i = pair->tag.doubleByOffset(m_compute_r6i_offset);
       double ri = pair->tag.doubleByOffset(m_compute_ri_offset);
@@ -58,12 +58,7 @@ public:
       point_t f = 
 	48*m_epsilon*(m_sigma_pow_12*r6i-m_half_sigma_pow_6)*r6i*ri*ri /*- m_shift_force*/ 
 	* pair->cartesian();
-      
-#ifdef ENABLE_PTHREADS
-      pair->firstPart()->lock();
-      pair->secondPart()->lock();
-#endif
-      
+            
       /* because of CONVENTION 2 in pairdist.h, actsOn*() will always return false for a
 	 frozen particle and there is consequently no danger, e.g., of modifying a force
 	 acting on a frozen particle, which does not exist in memory */
@@ -96,10 +91,6 @@ public:
       
 #endif
       
-#ifdef ENABLE_PTHREADS
-      pair->secondPart()->unlock();
-      pair->firstPart()->unlock();
-#endif
     }
     
   }

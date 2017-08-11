@@ -65,12 +65,7 @@ ManagerCell::ManagerCell(Phase* p)
     m_n_active_links[t] = 0;
   }
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_init(&m_cells__mutex, &g_mutex_attr);
-  pthread_mutex_init(&m_links__mutex, &g_mutex_attr);
-#endif
 }
-
 
 #else
 ManagerCell::ManagerCell(Phase* p)
@@ -79,21 +74,12 @@ ManagerCell::ManagerCell(Phase* p)
     m_phase(p)
 {
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_init(&m_cells__mutex, &g_mutex_attr);
-  pthread_mutex_init(&m_links__mutex, &g_mutex_attr);
-#endif
 }
 #endif
 
 
 ManagerCell::~ManagerCell()
 {
-
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_destroy(&m_cells__mutex);
-  pthread_mutex_destroy(&m_links__mutex);
-#endif
 
   for (vector<CellLink*>::iterator i = m_links.begin(); i != m_links.end(); i++)
     delete *i;
@@ -168,7 +154,7 @@ void ManagerCell::invalidatePositions(IntegratorPosition *integrator)
   FOR_EACH__PARALLEL
     (vector<Cell*>,
      m_cells,
-     NULL,
+     //NULL,
      (*__iFE)->commitInjections();
     );
 
@@ -340,28 +326,28 @@ void ManagerCell::clearTags()
   FOR_EACH__PARALLEL
     (vector<Cell*>,
      m_cells,
-     NULL,
+     // NULL,
      (*__iFE)->clearTags();
     );
 }
 
 
-/**
+/*!
+ * Assign given container to every cell. The cell is then looking for
+ *    the walls crossing them and keeps track of these walls.
  *
- * @param container
+ * @param container \a Container object to be assigned
  */
 void ManagerCell::assignContainer(WallContainer *container)
 {
   MSG_DEBUG("ManagerCell::assignContainer", "Sorting walls to cells.");
 
-  /* Assign this container to every cell. The cell is then looking for
-     the walls crossing them and keeps track of these walls.
-  */
   FOR_EACH__PARALLEL
     (vector<Cell*>,
      m_cells,
-     container,
-     (*__iFE)->assignContainer((WallContainer*) data);
+     // container,
+     // (*__iFE)->assignContainer((WallContainer*) data);
+     (*__iFE)->assignContainer(container);
   );
 
 //   MSG_DEBUG("ManagerCell::assignContainer", "setupWalls");
@@ -373,7 +359,7 @@ void ManagerCell::assignContainer(WallContainer *container)
   FOR_EACH__PARALLEL
     (vector<Cell*>,
      m_cells,
-     NULL,
+     // NULL,
      (*__iFE)->setupWalls();
   );
 }
@@ -938,9 +924,6 @@ ColourPair *ManagerCell::cp(string firstS, string secondS)
 
 void ManagerCell::activateCell(Cell *c)
 {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_lock(&m_cells__mutex);
-#endif
 
   assert(c->next == NULL && c->prev == NULL);
 
@@ -953,18 +936,10 @@ void ManagerCell::activateCell(Cell *c)
   assert(m_n_active_cells < m_cells.size());
   ++m_n_active_cells;
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_unlock(&m_cells__mutex);
-#endif
 }
 
 void ManagerCell::deactivateCell(Cell *c)
 {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_lock(&m_cells__mutex);
-#endif
-
-// MSG_DEBUG("ManagerCell::deactivateCell", "active cells before: " << m_n_active_cells);
 
 // next line was commented out, because it could happen that only one cell was active
 // and is now deactivated. The activation of cells happens later in the timestep
@@ -987,18 +962,11 @@ void ManagerCell::deactivateCell(Cell *c)
   assert(m_n_active_cells > 0);
   --m_n_active_cells;
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_unlock(&m_cells__mutex);
-#endif
 }
 
 
 void ManagerCell::activateCellLink(CellLink *c)
 {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_lock(&m_links__mutex);
-#endif
-
 
 #ifdef _OPENMP
   c->mThread() = thread_counter;
@@ -1035,18 +1003,11 @@ void ManagerCell::activateCellLink(CellLink *c)
 //  MSG_DEBUG("ManagerCell::activateCellLink", "active links = " << m_n_active_links);
 #endif    
 
-
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_unlock(&m_links__mutex);
-#endif
 }
 
 
 void ManagerCell::deactivateCellLink(CellLink *c)
 {
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_lock(&m_links__mutex);
-#endif
 
 #ifdef _OPENMP
   int thread_no = c->mThread();
@@ -1092,7 +1053,4 @@ void ManagerCell::deactivateCellLink(CellLink *c)
   --m_n_active_links;
 #endif   
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutex_unlock(&m_links__mutex);
-#endif
 }

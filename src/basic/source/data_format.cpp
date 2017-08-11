@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -66,7 +66,6 @@ DataFormat::~DataFormat()
 
 void DataFormat::alignDataFor(size_t align)
 {
-//   MSG_DEBUG("DataFormat::alignDataFor", "Aligning data boundaries. align = " << align);
 
   for (int i = 0; i < EO_DATATYPE; ++i) {
     c_size_of_datatype[i] = (((c_size_of_datatype[i] - 1) >> align) + 1) << align;
@@ -145,8 +144,6 @@ void *DataFormat::alloc(bool alloc_sp) const
 {
     void *data = NULL;
 
-    //    MSG_DEBUG("DataFormat::alloc", "m_size = " << m_size);
-
     if (m_size) {
         data = malloc(m_size);
         memset((void*) data, (char) 0, m_size);
@@ -189,7 +186,6 @@ struct release_smart_pointer: public unary_function<DataFormat::attribute_t, voi
 void DataFormat::release(void *&data) const
 {
     if (data) {
-        //        MSG_DEBUG("DataFormat::release", "this = " << this << ", data = " << data);
 
         for_each(m_attr_by_index.begin(), m_attr_by_index.end(), release_smart_pointer(data));
 
@@ -206,14 +202,11 @@ void DataFormat::clear(void *data) const
         if (!i->persistent) {
 #define 	DATAFORMATCLEAR_RELEASE(attr,m_data,finaltype) \
 				((finaltype*)((size_t) m_data+attr->offset))->release()
-        	DATAFORMAT_SWITCH(i,data,DATAFORMATCLEAR_RELEASE);
+        	DATAFORMAT_CONTAINER_SWITCH(i,data,DATAFORMATCLEAR_RELEASE);
             memset((void*) ((size_t) data + i->offset), (char) 0, c_size_of_datatype[i->datatype]);
         }
     }
 
-    /*    if (data) {
-        memset((void*) data, (char) 0, m_size);
-        }*/
 }
 
 
@@ -222,13 +215,10 @@ void DataFormat::clearAll(void *data) const
     vector<attribute_t>::const_iterator attr_end = m_attr_by_index.end();
     for (vector<attribute_t>::const_iterator i = m_attr_by_index.begin();
          i != attr_end; i++) {
-         	DATAFORMAT_SWITCH(i,data,DATAFORMATCLEAR_RELEASE);
+         	DATAFORMAT_CONTAINER_SWITCH(i,data,DATAFORMATCLEAR_RELEASE);
             memset((void*) ((size_t) data + i->offset), (char) 0, c_size_of_datatype[i->datatype]);
     }
 
-    /*    if (data) {
-        memset((void*) data, (char) 0, m_size);
-        }*/
 }
 
 
@@ -242,7 +232,7 @@ string DataFormat::toString() const
 {
   string s("");
   map<string, attribute_t>::const_iterator attr_end = m_attr_by_name.end();
-// MSG_DEBUG("DataFormat::toString()", "start " << &(*(m_attr_by_name.begin())) << " , " << &(*(attr_end)) << " ,size " << m_attr_by_name.size());
+
   for (map<string, attribute_t>::const_iterator i = m_attr_by_name.begin();
        i != attr_end; i++) {
     if (s != "")
@@ -250,7 +240,6 @@ string DataFormat::toString() const
     else
       s += "'" + i->first + "'";
   }
-// MSG_DEBUG("DataFormat::toString()", "end " << s);
 
   return s;
 }
@@ -271,22 +260,17 @@ int DataFormat::getNumOfDoubles(datatype_t datatype)
 
 Data::Data(): m_format(NULL), m_data(NULL)
 {
-    //    MSG_DEBUG("Data::Data", "Default constructor.");
 }
 
 
 Data::Data(DataFormat *format): m_format(format)
 {
-    //    MSG_DEBUG("Data::Data", "m_format = " << m_format);
-
     m_data = m_format->alloc();
 }
 
 
 Data::Data(const Data &copy_data): m_format(NULL), m_data(NULL)
 {
-    //    MSG_DEBUG("Data::Data", "copy_data.m_format = " << copy_data.m_format <<
-    //              ", copy_data.m_data = " << copy_data.m_data);
 
     if (copy_data.m_format) {
     	// Copy pointer to data format, DataFormat instance is shared
@@ -297,31 +281,27 @@ Data::Data(const Data &copy_data): m_format(NULL), m_data(NULL)
         m_data = m_format->alloc(false);
         
         if(m_format->size()) {
-			memcpy((void*) m_data, (void*) copy_data.m_data, m_format->size());
-		
-        	// Iterate over all attributes and deep copy smartpointers where necessary 
-        	size_t iend = (m_format->rows());
-        	for(size_t i = 0; i < iend; i++) {
-        		DataFormat::attribute_t a = m_format->attrByIndex(i);
-
-// incRefCount: dirty hack to make memcpy possible
-#define	DATAFORMATCOPY_DEEP(a,m_data,finaltype) \
-            {reinterpret_cast<finaltype*>((size_t) m_data + a->offset)->incRefCount();\
-			*reinterpret_cast<finaltype*>((size_t) m_data + a->offset) = \
-   			reinterpret_cast<finaltype*>((size_t) m_data + a->offset)->deepCopy();} NOOP 
-			DATAFORMAT_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
-          	} // for
-//        throw gError("Data::Data", "Data can not be copied right now. Fix the problem with copying of SmartPointers(see operator=).");
-        	} // if
-        } // if
-    //    MSG_DEBUG("Data::Data", "now: copy_data.m_format = " << copy_data.m_format <<
-    //              ", copy_data.m_data = " << copy_data.m_data);
+	  memcpy((void*) m_data, (void*) copy_data.m_data, m_format->size());
+	  
+	  // Iterate over all attributes and deep copy smartpointers where necessary 
+	  size_t iend = (m_format->rows());
+	  for(size_t i = 0; i < iend; i++) {
+	    DataFormat::attribute_t a = m_format->attrByIndex(i);
+	    
+	    // incRefCount: dirty hack to make memcpy possible
+#define	DATAFORMATCOPY_DEEP(a,m_data,finaltype)				\
+            {reinterpret_cast<finaltype*>((size_t) m_data + a->offset)->incRefCount(); \
+	      *reinterpret_cast<finaltype*>((size_t) m_data + a->offset) = \
+		reinterpret_cast<finaltype*>((size_t) m_data + a->offset)->deepCopy();} NOOP 
+	    DATAFORMAT_CONTAINER_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
+	  } // for
+	} // if
+    } // if
 }
 
 
 Data::~Data()
 {
-    //    MSG_DEBUG("Data::~Data", "m_format = " << m_format << ", m_data = " << m_data);
     
     if (m_format)
         m_format->release(m_data);
@@ -330,8 +310,6 @@ Data::~Data()
 
 Data &Data::operator=(const Data &copy_data)
 {
-  //    MSG_DEBUG("Data::operator=", "m_format = " << m_format << ", m_data = " << m_data << 
-    //              ", copy_data.m_format = " << copy_data.m_format << ", copy_data.m_data = " << copy_data.m_data);
 
     if (m_format != copy_data.m_format) {
         if (m_format)
@@ -350,15 +328,10 @@ Data &Data::operator=(const Data &copy_data)
         size_t iend = (m_format->rows());
         for(size_t i = 0; i < iend; i++) {
         	DataFormat::attribute_t a = m_format->attrByIndex(i);
-		DATAFORMAT_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
+		DATAFORMAT_CONTAINER_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
           ;} // for         
     } //if
         
-        /*    else
-      throw gError("Data::operator=", "Tried to copy NULL Data. Boiling out.");*/
-
-    //    MSG_DEBUG("Data::operator=", "now: m_format = " << m_format << ", m_data = " << m_data << ", copy_data.m_format = " << copy_data.m_format <<
-    //              ", copy_data.m_data = " << copy_data.m_data);
     return *this;
 }
 
@@ -368,7 +341,6 @@ Data &Data::operator=(const Data &copy_data)
 
 void Data::setFormatAndAlloc(DataFormat *format)
 {
-    //    MSG_DEBUG("Data::setFormatAndAlloc", "format = " << format << ", m_format = " << m_format);
 
     if (m_format)
         m_format->release(m_data);
@@ -376,18 +348,7 @@ void Data::setFormatAndAlloc(DataFormat *format)
     m_format = format;
     alloc();
 
-    //    MSG_DEBUG("Data::setFormatAndAlloc", "now: m_format = " << m_format << ", m_data = " << m_data);
 }
-
-
-// void Data::setFormatAndCopy(Data *defaultData)
-// {   
-//     if (m_format)
-//       m_format->release(m_data);
-// 
-//     m_format = new DataFormat(*defaultData->m_format);
-//     m_data = new Data(*defaultData);
-// }
 
 
 DataFormat::attribute_t Data::addAttribute
@@ -402,7 +363,6 @@ DataFormat::attribute_t Data::addAttribute
     m_data = malloc(new_size);
     memset((char*) m_data, (char) 0, new_size);
     memcpy(m_data, oldData, old_size);
-//     memset((char*) m_data+old_size, (char) 0, new_size-old_size);
     free(oldData);
     (alloc_smart_pointer(m_data ))(tempAttr);
   }
@@ -594,7 +554,6 @@ string Data::toStringByIndex(int i, const std::string &eol) const
       return for_each(vi->begin(), vi->end(), accumulate_int(" ", " ", " ")).str();
     case DataFormat::VECTOR_POINT:
       vp = ((vector_point_sp*) m_format->ptrByIndex(i, m_data))->value();
-//       MSG_DEBUG("Data::toStringByIndex", "VECTOR_POINT case");
       return for_each(vp->begin(), vp->end(), accumulate_point_scientific(" ", " ", " ")).str();
 #ifdef WITH_ARRAY_TYPES
     case DataFormat::MArray2D:
@@ -628,7 +587,6 @@ int Data::countDoubles(DataFormat::datatype_t dtype)
 #endif
 
 
-// string Data::toMathematicaByIndex(int i) const
 string Data::toMathematicaByIndex(int i, const std::string &eol) const
 {
   char s[80];
@@ -734,19 +692,12 @@ void Data::fromStringByIndex(int i, const string &value)
       p[j] = atof(string(value, pos, endpos-pos).c_str());
       pos = endpos+1;
 
-//       MSG_DEBUG("Data::fromStringByIndex", "POINT case: assigned " << p[j] << " for dir " << j);
-
     }
     pointByIndex(i) = p;
-
-//     MSG_DEBUG("Data::fromStringByIndex", "POINT case: now point=" << pointByIndex(i) << "for index " << i);
-//     MSG_DEBUG("Data::fromStringByIndex", "POINT case: point-adresses=" << &(pointByIndex(i).x) << ", " << &(pointByIndex(i).y) << ", " << &(pointByIndex(i).z) << ", " << "for index " << i);
 
   }
     break;
   case DataFormat::TENSOR: {
-
-//     MSG_DEBUG("Data::fromStringByIndex", "TENSOR case for index " << i);
 
     tensor_t t;
     int pos;
@@ -776,19 +727,12 @@ void Data::fromStringByIndex(int i, const string &value)
     tensorByIndex(i) = t;
   }
     break;
-//#ifdef WITH_ARRAY_TYPES
-//    case DataFormat::ARRAY1D_DOUBLE:
-//    case DataFormat::ARRAY2D_DOUBLE:
-//		// fixme: return some meaningful information 
-//		break;
-//#endif
   default:
     throw gError
       ("Data::fromStringByIndex",
        "Unsupported data format.");
   }
 }
-
 
 
 /* For debugging purposes */

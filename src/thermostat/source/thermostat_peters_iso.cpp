@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -38,7 +38,6 @@
 #include "manager_cell.h"
 #include "random.h"
 #include "pair_creator.h"
-// #include "node.h"
 
 using namespace std;
 
@@ -107,7 +106,7 @@ void ThermostatPetersIso::thermalize(Phase* phase)
          point_t g;
          g.assign(0);
          double weight = self->m_wf->interpolate(pair, g);
-//       RandomNumberGenerator m_rng;
+
          /* ---- Peters Scheme II ---- */
 
          weight *= weight * temp/*self->m_dissipation*/ * self->m_dt / m_massred;
@@ -123,11 +122,6 @@ void ThermostatPetersIso::thermalize(Phase* phase)
          double b = sqrt(2*m_temperature*
          a*(1-a))*m_rng.normal(1);
        */
-
-#ifdef ENABLE_PTHREADS
-       pair->firstPart()->lock();
-       pair->secondPart()->lock();
-#endif
 
        point_t vij = pair->firstPart()->v - pair->secondPart()->v;
        point_t rij = pair->cartesian()/pair->cartesian().abs();
@@ -145,10 +139,6 @@ void ThermostatPetersIso::thermalize(Phase* phase)
          pair->secondPart()->v -= dv/m_mass2;
        }
 
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
        }
       );
 }

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -101,12 +101,6 @@ void FPairScalar::computeForces(Pairdist* pair, int force_index, int thread_no)
     {
       double temp;
 
-#ifdef ENABLE_PTHREADS
-         pair->firstPart()->lock();
-         pair->secondPart()->lock();
-#endif
-
-
     double fi;
     double fj;
 
@@ -134,11 +128,6 @@ void FPairScalar::computeForces(Pairdist* pair, int force_index, int thread_no)
        if (pair->actsOnSecond()) {
            (*pair->secondPart()->tag.vectorDoubleByOffset(m_offsetToVec[thread_no].second))[m_posInVec.second] += this->m_symmetry*fj;
        }
-#endif
-
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
 #endif
 
      }

@@ -49,12 +49,6 @@
   #include <SDL/SDL.h>
 #endif
 
-#ifdef ENABLE_PTHREADS
-  #include "threads.h"
-
-  #include <pthread.h>
-#endif
-
 #ifdef _MPI
   #include <mpi.h>
 #endif
@@ -75,11 +69,6 @@ int main(int argc, char *argv[])
 //  link_all_properly();
 
 	int exitValue = 0;
-
-#ifdef ENABLE_PTHREADS
-  pthread_mutexattr_init(&g_mutex_attr);
-  pthread_mutexattr_settype(&g_mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
-#endif
 
 //#ifdef _MPI
 //  MPI_Init(&argc,&argv);
@@ -127,9 +116,6 @@ int main(int argc, char *argv[])
   } else
     syntax();
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutexattr_destroy(&g_mutex_attr);
-#endif
 
 //#ifdef _MPI
 //  MPI::Finalize();

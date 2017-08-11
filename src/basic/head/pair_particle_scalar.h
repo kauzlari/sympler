@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -33,8 +33,6 @@
 #define __PAIR_PARTICLE_SCALAR_H
 
 #include "general.h"
-// #include "simulation.h"
-// #include "manager_cell.h"
 #include "val_calculator_arbitrary.h"
 #include "colour_pair.h"
 
@@ -89,7 +87,6 @@ class PairParticleScalar : public ValCalculatorArbitrary
     virtual void compute(Pairdist* pD, int thread_no)
 #endif
     {
-//           MSG_DEBUG("PairParticleScalar::compute", "START, m_cutoff = " << m_cutoff << ", slots = (" << m_slots.first << ", " << m_slots.second << ")");
       if(pD->abs() < m_cutoff)
       {
         double temp;
@@ -105,57 +102,31 @@ class PairParticleScalar : public ValCalculatorArbitrary
 
         Particle* first = pD->firstPart();
         Particle* second = pD->secondPart();
-/*        MSG_DEBUG("PairParticleScalar::compute", "tempFirst = " << tempFirst);
-        MSG_DEBUG("PairParticleScalar::compute", "tempSecond = " << tempSecond);       */
 
         if(pD->actsOnFirst())
         {
-#ifdef ENABLE_PTHREADS
-            first->lock();
-#endif
 
 #ifndef _OPENMP
             first->tag.doubleByOffset(m_slots.first) += temp*tempFirst;
 #else
-/* MSG_DEBUG("PairParticleScalar::compute", "BEFOREfirstPparallel"); */
-/* MSG_DEBUG("PairParticleScalar::compute", "thread_no = " << thread_no); */
-/* MSG_DEBUG("PairParticleScalar::compute", "m_vector_slots.first = " << m_vector_slots.first); */
-/* MSG_DEBUG("PairParticleScalar::compute", "m_copy_slots[thread_no].first = " << m_copy_slots[thread_no].first); */
-/*  MSG_DEBUG("PairParticleScalar::compute", "(*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first)) = " << (*first->tag.vectorDoubleByOffset(48))[0]); */
-
 
             (*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first))[m_vector_slots.first] += temp*tempFirst;
 
-/* MSG_DEBUG("PairParticleScalar::compute", "AFTERfirstPparallel");             */
-
 #endif
 
-//     MSG_DEBUG("PairParticleScalar::compute", "AFTER: first->point = " << first->tag.doubleByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-            first->unlock();
-#endif
         }
 
         if(pD->actsOnSecond())
         {
-#ifdef ENABLE_PTHREADS
-            second->lock();
-#endif
 
 #ifndef _OPENMP
               second->tag.doubleByOffset(m_slots.second) += m_symmetry*temp*tempSecond;
 #else
-/* MSG_DEBUG("PairParticleScalar::compute", "BEFOREsecondPparallel");             */
 
               (*second->tag.vectorDoubleByOffset(m_copy_slots[thread_no].second))[m_vector_slots.second] += m_symmetry*temp*tempSecond;
 
-/* MSG_DEBUG("PairParticleScalar::compute", "AFTERsecondPparallel");             */
 #endif
 
-//     MSG_DEBUG("PairParticleScalar::compute", "AFTER: first->point = " << first->tag.doubleByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-            second->unlock();
-#endif
         }
       }
     }

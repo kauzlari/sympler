@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -102,17 +102,13 @@ void computeForces(Pairdist* pair, int force_index, int thread_no)
 #endif
 {
 
-  /*fixme!!! there are weighting functions which use the particle position as
+  /*FIXME!!! there are weighting functions which use the particle position as
     argument but they are not yet usable here; that's why the following dirty hack*/
   if (this->m_cutoff > pair->abs()) 
     {                                    
 
       point_t temp;
 
-#ifdef ENABLE_PTHREADS
-      pair->firstPart()->lock();
-      pair->secondPart()->lock();
-#endif
       this->m_pairFactor(&temp, &(*pair));
             
       point_t fi;
@@ -134,7 +130,7 @@ void computeForces(Pairdist* pair, int force_index, int thread_no)
       
 #ifndef _OPENMP
        if (pair->actsOnFirst()) {
-	 pair->firstPart()->force[/*this->m_*/force_index] += fi;
+	 pair->firstPart()->force[force_index] += fi;
        }
 	 
 #else
@@ -148,7 +144,7 @@ void computeForces(Pairdist* pair, int force_index, int thread_no)
               
 #ifndef _OPENMP
 	 if (pair->actsOnSecond()) {
-	   pair->secondPart()->force[/*this->m_*/force_index] += m_symmetry*fj;
+	   pair->secondPart()->force[force_index] += m_symmetry*fj;
 	 }
 #else
      if (pair->actsOnSecond()) {
@@ -158,10 +154,6 @@ void computeForces(Pairdist* pair, int force_index, int thread_no)
      }
 #endif 
        
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
     }                                                                      
 }
 

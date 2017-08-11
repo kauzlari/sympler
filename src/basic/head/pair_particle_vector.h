@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -113,9 +113,6 @@ class PairParticleVector : public ValCalculatorArbitrary
             {
               for(size_t i = 0; i < SPACE_DIMS; ++i)
                 tempFirst[i] *= temp[i];
-#ifdef ENABLE_PTHREADS
-              first->lock();
-    #endif
 
 #ifndef _OPENMP
               first->tag.pointByOffset(m_slots.first) += tempFirst;
@@ -125,19 +122,12 @@ class PairParticleVector : public ValCalculatorArbitrary
               }
 #endif
 
-//     MSG_DEBUG("PairParticleVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              first->unlock();
-    #endif
             }
 
             if(pD->actsOnSecond())
             {
               for(size_t i = 0; i < SPACE_DIMS; ++i)
                 tempSecond[i] *= temp[i];
-#ifdef ENABLE_PTHREADS
-              second->lock();
-    #endif
 
 #ifndef _OPENMP
               second->tag.pointByOffset(m_slots.second) += m_symmetry*(tempSecond);
@@ -147,10 +137,6 @@ class PairParticleVector : public ValCalculatorArbitrary
               }
 #endif
 
-//     MSG_DEBUG("PairParticleVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              second->unlock();
-    #endif
             }
           }
         }

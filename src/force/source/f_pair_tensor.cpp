@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -95,99 +95,53 @@ void FPairTensor::computeForces(Pairdist* pair, int force_index)
 void FPairTensor::computeForces(Pairdist* pair, int force_index, int thread_no)
 #endif
 {
-
-/*  M_PAIRCREATOR->createDistances();
-
-  FOR_EACH_PAIR__PARALLEL
-      (FPairTensor,
-       m_cp, */
-
-       if (this->m_cutoff > pair->abs())
-       {
-         tensor_t temp;
-
-#ifdef ENABLE_PTHREADS
-	 pair->firstPart()->lock();
-	 pair->secondPart()->lock();
-#endif
-    this->m_pairFactor(&temp, &(*pair));
-
-// 	 MSG_DEBUG("FPairTensor::computeForces", "temp = " << temp);
-
-    tensor_t fi;
-    tensor_t fj;
-
-//     MSG_DEBUG("FPairTensor::computeForces", "fi before = " << fi);
-//     MSG_DEBUG("FPairTensor::computeForces", "fj before = " << fj);
-
-    // compute the particle-expressions
-    this->m_1stparticleFactor(&fi, &(*pair));
-    this->m_2ndparticleFactor(&fj, &(*pair));
-
-//     MSG_DEBUG("FPairTensor::computeForces", "fi after function = " << fi);
-//     MSG_DEBUG("FPairTensor::computeForces", "fj after function = " << fj);
-
-/*    point_t tester;
-    double arg[3];
-    for (size_t i = 0; i < 3; ++i)
+  
+  if (this->m_cutoff > pair->abs())
     {
-    tester[i] = 0;
-    arg[i] = i;
-       }
-    MSG_DEBUG("FPairTensor::computeForces", "tester before function = " << tester);
-    MSG_DEBUG("FPairTensor::computeForces", "velfirst = " << pair->firstPart()->v);
-    self->m_fpf(&tester, arg, &(*pair));
-    MSG_DEBUG("FPairTensor::computeForces", "tester after function = " << tester);*/
-
-    // loop necessary because operator* of math_tensor_t does scalar product
-    fi *= temp;
-    fj *= temp;
-
-//     MSG_DEBUG("FPairTensor::computeForces", "fi after temp = " << fi);
-//     MSG_DEBUG("FPairTensor::computeForces", "fj after temp = " << fj);
-
-
-    fi *= this->m_wf->weight(pair, pair->secondPart()->r);
-    fj *= this->m_wf->weight(pair, pair->firstPart()->r);
-
-//     MSG_DEBUG("FPairTensor::computeForces", "fi after weight = " << fi);
-//     MSG_DEBUG("FPairTensor::computeForces", "fj after weight = " << fj);
-
-
-// 	 MSG_DEBUG("FPairTensor::computeForces", " second r = " << pair->secondPart()->r << "first r = " << pair->firstPart()->r);
-
+      tensor_t temp;
+      
+      this->m_pairFactor(&temp, &(*pair));
+      
+      tensor_t fi;
+      tensor_t fj;
+      
+      // compute the particle-expressions
+      this->m_1stparticleFactor(&fi, &(*pair));
+      this->m_2ndparticleFactor(&fj, &(*pair));
+      
+      fi *= temp;
+      fj *= temp;
+      
+      fi *= this->m_wf->weight(pair, pair->secondPart()->r);
+      fj *= this->m_wf->weight(pair, pair->firstPart()->r);
+      
 #ifndef _OPENMP
-    if (pair->actsOnFirst())
-      pair->firstPart()->tag.tensorByOffset(this->m_force_offset[force_index].first) += fi;
-    if (pair->actsOnSecond())
-      pair->secondPart()->tag.tensorByOffset(this->m_force_offset[force_index].second) += this->m_symmetry*fj;
+      if (pair->actsOnFirst())
+	pair->firstPart()->tag.tensorByOffset(this->m_force_offset[force_index].first) += fi;
+      if (pair->actsOnSecond())
+	pair->secondPart()->tag.tensorByOffset(this->m_force_offset[force_index].second) += this->m_symmetry*fj;
 #else
-     if (pair->actsOnFirst()) {
-       size_t _i = 0;
-       for(size_t a = 0; a < SPACE_DIMS; ++a) {
-         for(size_t b = 0; b < SPACE_DIMS; ++b) {
-           (*pair->firstPart()->tag.vectorDoubleByOffset(m_offsetToVec[thread_no].first))[m_posInVec.first + _i] += fi(a,b);
-           ++_i;
-         }
-       }
-     }
-     if (pair->actsOnSecond()) {
-       size_t _i = 0;
-       for(size_t a = 0; a < SPACE_DIMS; ++a) {
-         for(size_t b = 0; b < SPACE_DIMS; ++b) {
-           (*pair->secondPart()->tag.vectorDoubleByOffset(m_offsetToVec[thread_no].second))[m_posInVec.second + _i] += this->m_symmetry*fj(a,b);
-           ++_i;
-         }
-       }
-     }
+      if (pair->actsOnFirst()) {
+	size_t _i = 0;
+	for(size_t a = 0; a < SPACE_DIMS; ++a) {
+	  for(size_t b = 0; b < SPACE_DIMS; ++b) {
+	    (*pair->firstPart()->tag.vectorDoubleByOffset(m_offsetToVec[thread_no].first))[m_posInVec.first + _i] += fi(a,b);
+	    ++_i;
+	  }
+	}
+      }
+      if (pair->actsOnSecond()) {
+	size_t _i = 0;
+	for(size_t a = 0; a < SPACE_DIMS; ++a) {
+	  for(size_t b = 0; b < SPACE_DIMS; ++b) {
+	    (*pair->secondPart()->tag.vectorDoubleByOffset(m_offsetToVec[thread_no].second))[m_posInVec.second + _i] += this->m_symmetry*fj(a,b);
+	    ++_i;
+	  }
+	}
+      }
 #endif
-
-#ifdef ENABLE_PTHREADS
-	 pair->secondPart()->unlock();
-	 pair->firstPart()->unlock();
-#endif
-       }
-//       );
+      
+    }
 }
 
 
@@ -210,14 +164,8 @@ void FPairTensor::setup()
   ColourPair *m_cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second));
 
   m_pairFactor.setReturnType(Variant::TENSOR);
-//   m_pairFactor.setColourPair(m_cp);
   m_1stparticleFactor.setReturnType(Variant::TENSOR);
   m_2ndparticleFactor.setReturnType(Variant::TENSOR);
-
-
-/*  if (m_pairFactor.isNull()) {
-  throw gError("FPairTensor::setup", "Please specify a function for 'pairFactor'.");
-}*/
 
   DataFormat::attribute_t firstAttr =
       Particle::s_tag_format[m_cp->firstColour()].attrByName(m_tensor_name);

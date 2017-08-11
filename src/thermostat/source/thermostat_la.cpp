@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -199,14 +199,6 @@ void ThermostatLA::thermalize(Phase* phase)
 	   {
 	     double newAbsRelVel = m_rng.normal(1) * self->m_MaxwellFactor * pair->abs();
 
-/*
- MSG_DEBUG("ThermostatLA::thermalize", "BEFORE  pair distance = " << pair->abs() << endl << "velocity  1st PART!!! = " << pair -> firstPart() -> v << endl << "slot  1st PART!!! = " << pair -> firstPart() -> mySlot << endl << "velocity  2nd PART!!! = " << pair -> secondPart() -> v << endl << "slot  2nd PART!!! = " << pair -> secondPart() -> mySlot);*/
-
-
-#ifdef ENABLE_PTHREADS
-	     pair->firstPart()->lock();
-	     pair->secondPart()->lock();
-#endif
 	     // newAbsRelVel = ((v_new_ij dot r_ij) - (v_ij dot r_ij)) 
 	     for(size_t i = 0; i < SPACE_DIMS; ++i)
 	       {
@@ -218,25 +210,10 @@ void ThermostatLA::thermalize(Phase* phase)
 	     // i.e., only multiplication with vector r_ij is missing
 	     newAbsRelVel *= 0.5 / pair -> absSquare();
 
-// 	     MSG_DEBUG("ThermostatLA::thermalize", " REL VEL SETTING   rel vel = " << newAbsRelVel << endl << "pair->absSquare = " << pair->absSquare());
 	     // now, delta[i] is computed and added to the old velocities
 	     point_t temp;
 	     temp = newAbsRelVel * pair->cartesian();
 	     // it acts at least on one, right?
-	     
-// 	     if (pair->firstPart()->mySlot == 0)
-// {
-//   Particle* i = pair->firstPart();
-//   MSG_DEBUG("ThermostatLA::thermalize", "BEFORE actsOnFirst" << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1]);
-// }	   
-// if (pair->secondPart()->mySlot == 0)
-// {
-//   Particle* i = pair->secondPart();
-//   MSG_DEBUG("ThermostatLA::thermalize", "BEFORE actsOnFirst" << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1]);
-// }
-	     
-
-
 	     
 	     if (pair->actsOnFirst())
 	       {
@@ -264,30 +241,6 @@ void ThermostatLA::thermalize(Phase* phase)
 		 pair->secondPart()->v -= temp;
 	       }
 	       
-	       
-/*	       
-	   if (pair->firstPart()->mySlot == 183)
-{
-  Particle* i = pair->firstPart();
-  MSG_DEBUG("ThermostatLA::thermalize", "AFTER actsOnFirst" << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1]);
-}	   
-if (pair->secondPart()->mySlot == 183)
-{
-  Particle* i = pair->secondPart();
-  MSG_DEBUG("ThermostatLA::thermalize", "AFTER actsOnFirst" << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1]);
-}    */
-	       
-	       
-	       
-	       
-
-#ifdef ENABLE_PTHREADS
-	     pair->secondPart()->unlock();
-	     pair->firstPart()->unlock();
-#endif
-
-//  MSG_DEBUG("ThermostatLA::thermalize", "AFTER THE LOOP!!!!!!!!!!  pair distance = " << pair->abs() << endl << "velocity  1st PART!!! = " << pair -> firstPart() -> v << endl << "slot  1st PART!!! = " << pair -> firstPart() -> mySlot << endl << "velocity  2nd PART!!! = " << pair -> secondPart() -> v << endl << "slot  2nd PART!!! = " << pair -> secondPart() -> mySlot);
-
 	   }
        }
      );
