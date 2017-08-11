@@ -46,11 +46,12 @@ protected:
   string m_filename;
   /* list of frozen particles */
   	map<int, ParticleList> m_particles_frozen;
-  //is particle inside geometry or not? default yes      
-
+  /*!
+   * is particle inside geometry or not? default yes      
+   */
   bool m_particlesInside ; 
   /*!
-   * Takes the cutoff from SImulation before the "skin" from the Verlet List is added
+   * Takes the cutoff from Simulation before the "skin" from the Verlet List is added
    */
   double myCutoff;
 

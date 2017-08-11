@@ -560,12 +560,9 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
   // 3rd while (for the real particle data)
 
   while (species != "!!!" && !pos.eof()) {
-       //   MSG_DEBUG("PCF::createParticles","Position : "<< pos.tellg());
 
 //     MSG_DEBUG("ParticleCreatorFile::createParticles", "start of 3rd while (species != \"!!!\" && !pos.eof()); species =  " << species << "; m_species = " << m_species);
- /************************************************************************************
-  ************************************************************************************
-  ************************************************************************************/
+
     Particle p;
     Cell *c;
     size_t colour;
@@ -575,21 +572,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
     //     bool reallyCreate;
     if (m_species == "UNDEF" || m_species == species) {
       colour = manager->getColour(species);
-      //       reallyCreate = true;
-     /* 
-      pos >> skipws >> freeOrFrozen;
-      //     MSG_DEBUG("ParticleCreatorFile::createParticles", "freeOrFrozen = " << freeOrFrozen);
-      if (freeOrFrozen == "free" || freeOrFrozen == "frozen") {
-	pos >> skipws >> p.r.x >> skipws >> p.r.y >> skipws >> p.r.z
-	    >> skipws >> p.v.x >> skipws >> p.v.y >> skipws >> p.v.z;
-      } else {
-	p.r.x = atof(freeOrFrozen.c_str());
-	pos >> skipws >> p.r.y >> skipws >> p.r.z >> skipws >> p.v.x
-	    >> skipws >> p.v.y >> skipws >> p.v.z;
-	freeOrFrozen = "free";
-      }
-      */
-     // point_t offset; 
+    
       
       readParticle(p,pos,freeOrFrozen);
   
@@ -617,10 +600,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
       
       c = manager->findCell(p.r);
       if (c) {
-          // if-> is inside ::Need to implement based on input from input file. Particles inside or outside?
-          //Default = inside (backwards compatible)
-	//
-
+    
         if(m_particlesInside){
          if (M_BOUNDARY->isInside(p.r)) {
            p.g = c->group();
@@ -743,9 +723,7 @@ void ParticleCreatorFile::init() {
      "Then, in another new line this section is terminated by another '!!!'.\n"
      "The particles are defined one per row, starting with their species, optionally followed by the label \"free\" or \"frozen\", and then followed by three position-values, three velocity values, and then the values of the additional attributes in the order specified in the header.\n"
      "After the last particle, the file is terminated by another new line containing '!!!'.\n"
-    "STL: \n"
-  "If used to add wall particles, in conjunction with an STL geometry, the geometry should have dummy walls on the exterior which make the bounding box artificially bigger."
-  " Otherwise, wall particles can land outside of bounding box leading to errors. These dummy walls should be perpendicular to the walls of your geometry for particlesinside to work properly."
+  
      );
 
 	STRINGPCINF
