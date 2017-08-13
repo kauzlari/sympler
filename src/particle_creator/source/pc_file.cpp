@@ -785,7 +785,7 @@ void ParticleCreatorFile::adjustBoxSize(point_t &size, bool_point_t& frameRCfron
           pos >> skipws >> s;              
         }
      Particle p;
-   	point_t addFrame = {{{0, 0, 0}}};
+   
 	bool_point_t periodicityFront = ((Boundary*) m_parent)->periodicityFront();
 	MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "periodicityFront = " << periodicityFront);
 	bool_point_t periodicityBack = ((Boundary*) m_parent)->periodicityBack();
@@ -793,21 +793,25 @@ void ParticleCreatorFile::adjustBoxSize(point_t &size, bool_point_t& frameRCfron
 	<< periodicityBack);
 	
         string freeOrFrozen = "free";
-        while(!pos.eof() && pos.peek() != 33 ){
-             pos >> skipws >> freeOrFrozen ;  //first species, dismissed.
+        /* peek() looks at what the next character is without extracting is. This loop 
+         * continues until the first '!' at the end of the input file is seen. 
+         * 
+         */
+        
+        
+        while(!pos.eof() && pos.peek() != '!' ){ 
+           pos >> skipws >> freeOrFrozen ;  //first species, dismissed.
            readParticle(p,pos,freeOrFrozen); 
            if(!m_particlesInside){        
                 if (!(M_BOUNDARY->isInside(p.r))) {
-                    //addFrame in direction of particle
+                 
                     for(int i = 0 ; i< SPACE_DIMS; i++){
                         if((p.r[i]-size[i]) <=0){ //smaller than box
                             frameRCfront[i] = frameRCfront[i] || !periodicityFront[i] ;
                         }
                         if((size[i]-p.r[i])<=0){ //bigger than box
                             frameRCend[i] = frameRCend[i] || !periodicityBack[i];
-                        }
-                        if(frameRCfront[i]) addFrame[i] += myCutoff;
-                        if(frameRCend[i]) addFrame[i] += myCutoff;
+                        }          
                     }
                 }
             }   
