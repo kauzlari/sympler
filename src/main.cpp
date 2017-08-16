@@ -229,6 +229,7 @@ void sayHello() {
 // Integrators
 #include "integrator_energy.h"
 #include "integrator_lse.h"
+#include "integrator_IISPH_const_rho.h"
 #include "integrator_omelyan.h"
 #include "integrator_omelyan_NR.h"
 #include "integrator_position.h"
@@ -456,13 +457,14 @@ void link_all_properly()
 
   // Integrators
   new IntegratorEnergy(NULL);
-  new IntegratorOmelyan(NULL);
-  new IntegratorOmelyanNR(NULL);
+  new IntegratorIISPHconstRho(NULL);
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H
   new IntegratorLSE(NULL);
 #endif
 #endif
+  new IntegratorOmelyan(NULL);
+  new IntegratorOmelyanNR(NULL);
   new IntegratorPosition(NULL);
   new IntegratorScalar(NULL);
   new IntegratorScalarLambda(NULL);
@@ -475,9 +477,9 @@ void link_all_properly()
   new IntegratorVector(NULL);
   new IntegratorVectorLambda(NULL);
   new IntegratorTensor(NULL);
+  new IntegratorTensorLambda(NULL);
   new IntegratorVelocityVerletDisp(NULL);
   new IntegratorVelocityVerletDispX(NULL);
-  new IntegratorTensorLambda(NULL);
   new IntegratorVelocityVerlet(NULL);
 #ifdef HAVE_JAMA_JAMA_LU_H
   new IntegratorVelocityVerletPressure(NULL);

@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libintegrator.la
 
 libintegrator_la_SOURCES = \
 	integrator_energy.cpp \
+	integrator_IISPH_const_rho.cpp \
 	integrator_lse.cpp \
 	integrator_omelyan.cpp \
 	integrator_omelyan_NR.cpp \
@@ -12,9 +13,9 @@ libintegrator_la_SOURCES = \
 	integrator_static.cpp \
 	integrator_static_lse.cpp \
 	integrator_tensor.cpp \
+	integrator_tensor_lambda.cpp \
 	integrator_velocity_verlet_disp.cpp \
 	integrator_velocity_verlet_disp_x.cpp \
-	integrator_tensor_lambda.cpp \
 	integrator_vector.cpp \
 	integrator_vector_lambda.cpp \
 	integrator_velocity_verlet.cpp \
