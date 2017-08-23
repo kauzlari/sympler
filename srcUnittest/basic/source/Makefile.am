@@ -1,7 +1,7 @@
-
 noinst_LTLIBRARIES = libbasicTest.la
+libbasicTest_la_SOURCES = pressure_calculationTest.cpp
+libbasicTest_la_SOURCES = density_calculationTest.cpp
 
-libbasicTest_la_SOURCES = \
 	smart_enumTest.cpp
 
 libbasicTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@

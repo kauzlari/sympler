@@ -287,6 +287,8 @@ void sayHello() {
 #include "particle_tensor.h"
 #include "particle_vector.h"
 #include "pca_random.h"
+#include "density_calculation.h"
+#include "pressure_calculation.h"
 // commented out because of complaint about redefinition
 // #include "pca_density_self_contribution.h"
 // #include "pca_energy_entropy.h"
@@ -502,6 +504,8 @@ void link_all_properly()
   new ParticleCacheDensity0Oc(NULL);
   new ParticleCacheDensitySelfContribution(NULL);
 //   new ParticleCacheShearSelfContribution(NULL);
+  new DensityCalculation(NULL);
+  new PressureCalculation(NULL);
   new ParticleCacheVolumeSelfContribution(NULL);
   new ParticleRandNormScalar(NULL);
   new ParticleRandNormVector(NULL);
