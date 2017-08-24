@@ -37,7 +37,6 @@ extern "C" {
 #include "pressure_calculationTest.h"
 #include "pressure_calculation.h"
 #include "simulation.h"
-#include <vector>
 
 CPPUNIT_TEST_SUITE_REGISTRATION (PressureCalculationTest);
 
@@ -59,11 +58,12 @@ void PressureCalculationTest  :: tearDown (void)
   delete ps;
 }
 void PressureCalculationTest  :: setupLUTTest (void) {
-
+  // Minimum and maximum Inputvalues
   double m_Tmin = 650;
   double m_rhomin = 300;
   double m_Tmax= 700;
   double m_rhomax = 600;
+  // Size of the arrays
   int m_arraysize_density = 100;
   int m_arraysize_temperature = 100;
   ps -> setupLUT(m_Tmin, m_rhomin, m_Tmax, m_rhomax,m_arraysize_density, m_arraysize_temperature);
@@ -72,8 +72,10 @@ void PressureCalculationTest  :: setupLUTTest (void) {
   double densityBoundary = freesteam_rho(S);
   if (m_rhomin > densityBoundary) {
     double pressure = freesteam_region3_p_rhoT(m_rhomin , m_Tmin );
+    // Assertions to check if the first and the last content of the array are correct.
     CPPUNIT_ASSERT_EQUAL (ps -> m_array_p[0][0], pressure);
   }
+  // Calculation steps between expansion points
   double m_calcstepRho= (m_rhomax-m_rhomin)/99;
   double m_calcstepT= (m_Tmax-m_Tmin)/99;
   double pressure = freesteam_region3_p_rhoT(600.000000 , 700.000000 );
@@ -82,13 +84,17 @@ void PressureCalculationTest  :: setupLUTTest (void) {
 
 void PressureCalculationTest  :: calculatePressureTest (void)
 {
+  // Minimum and maximum Inputvalues
   double m_Tmin = 650;
   double m_rhomin = 300;
   double m_Tmax= 750;
   double m_rhomax = 600;
-  int m_arraysize_density = 1000;
-  int m_arraysize_temperature = 1000;
+  // Size of the arrays
+  int m_arraysize_density = 100;
+  int m_arraysize_temperature = 100;
+  // Initialization of the LUT
   ps -> setupLUT(m_Tmin, m_rhomin, m_Tmax, m_rhomax,m_arraysize_density, m_arraysize_temperature);
+  // Assertion to check if the interpolation is correct.
   double pressure = freesteam_region3_p_rhoT(350 , 700 );
   double interpol = ps -> calculatePressure(700, 350, m_Tmin, m_rhomin);
   CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure,100);

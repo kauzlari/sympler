@@ -31,13 +31,10 @@
 
 extern "C" {
   #include <freesteam/steam_pT.h>
-  #include <freesteam/region3.h>
 }
 #include "density_calculationTest.h"
 #include "density_calculation.h"
 #include "simulation.h"
-#include <vector>
-
 
 CPPUNIT_TEST_SUITE_REGISTRATION (DensityCalculationTest);
 
@@ -58,16 +55,21 @@ void DensityCalculationTest  :: tearDown (void) {
 }
 
 void DensityCalculationTest  :: setupLUTTest (void) {
+  // Minimum and maximum Inputvalues
   double m_Tmin = 500;
   double m_pmin = 23000000;
   double m_Tmax= 700;
-  double m_pmax = 24000000;
+  double m_pmax = 25000000;
+  // Size of the arrays
   int m_arraysize_pressure = 100;
   int m_arraysize_temperature = 100;
+  // Initialization of the LUT
   ps ->setupLUT(m_Tmin, m_pmin, m_Tmax, m_pmax,m_arraysize_pressure, m_arraysize_temperature);
   SteamState S = freesteam_set_pT(m_pmin, m_Tmin);
   double density = freesteam_rho(S);
+  // Assertions to check if the first and the last content of the array are correct.
   CPPUNIT_ASSERT_EQUAL (ps -> m_array_rho[0][0], density);
+  // Calculation steps between expansion points
   double m_calcstepP= (m_pmax-m_pmin)/99;
   double m_calcstepT= (m_Tmax-m_Tmin)/99;
   S = freesteam_set_pT(m_pmin+ 99*m_calcstepP, m_Tmin+ 99*m_calcstepT);
@@ -77,19 +79,23 @@ void DensityCalculationTest  :: setupLUTTest (void) {
 
 void DensityCalculationTest  :: calculateDensityTest (void)
 {
-  double m_Tmin = 500;
+  // Minimum and maximum Inputvalues
+  double m_Tmin = 550;
   double m_pmin = 23000000;
   double m_Tmax= 700;
   double m_pmax = 24000000;
-  int m_arraysize_pressure = 100;
-  int m_arraysize_temperature = 100;
+  // Size of the arrays
+  int m_arraysize_pressure = 1000;
+  int m_arraysize_temperature = 1000;
+  // Calculation steps between expansion points
   double m_calcstepP= (m_pmax-m_pmin)/99;
   double m_calcstepT= (m_Tmax-m_Tmin)/99;
+  // Initialization of the LUT
   ps -> setupLUT(m_Tmin, m_pmin, m_Tmax, m_pmax, m_arraysize_pressure, m_arraysize_temperature );
-  //double ipDensity= ps -> calculateDensity(662, 24000000, m_Tmin, m_pmin);
-  SteamState S = freesteam_set_pT(24000000, 700);
+  SteamState S = freesteam_set_pT(24000000, 650);
   double density = freesteam_rho(S);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL ((ps -> calculateDensity(700,24000000 , m_Tmin,m_pmin)), density,0.1);
+  // Assertion to check if the interpolation is correct.
+  CPPUNIT_ASSERT_DOUBLES_EQUAL ((ps -> calculateDensity(650,24000000 , m_Tmin,m_pmin)), density,0.1);
 
 }
 

@@ -1,7 +1,5 @@
 extern "C" {
-  #include <freesteam/steam_ps.h>
   #include <freesteam/steam_pT.h>
-  #include <freesteam/region4.h>
 }
 #include "density_calculation.h"
 #include "simulation.h"
