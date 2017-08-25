@@ -95,7 +95,7 @@ void DensityCalculationTest  :: calculateDensityTest (void)
   SteamState S = freesteam_set_pT(24000000, 650);
   double density = freesteam_rho(S);
   // Assertion to check if the interpolation is correct.
-  CPPUNIT_ASSERT_DOUBLES_EQUAL ((ps -> calculateDensity(650,24000000 , m_Tmin,m_pmin)), density,0.1);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL ((ps -> calculateDensity(650, 24000000, m_Tmin,m_pmin)), density, 0.1);
 
 }
 

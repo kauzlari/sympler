@@ -78,7 +78,7 @@ void PressureCalculationTest  :: setupLUTTest (void) {
   // Calculation steps between expansion points
   double m_calcstepRho= (m_rhomax-m_rhomin)/99;
   double m_calcstepT= (m_Tmax-m_Tmin)/99;
-  double pressure = freesteam_region3_p_rhoT(600.000000 , 700.000000 );
+  double pressure = freesteam_region3_p_rhoT(600.000000, 700.000000);
   CPPUNIT_ASSERT_EQUAL (ps -> m_array_p[99][99], pressure);
 }
 
@@ -95,14 +95,14 @@ void PressureCalculationTest  :: calculatePressureTest (void)
   // Initialization of the LUT
   ps -> setupLUT(m_Tmin, m_rhomin, m_Tmax, m_rhomax,m_arraysize_density, m_arraysize_temperature);
   // Assertion to check if the interpolation is correct.
-  double pressure = freesteam_region3_p_rhoT(350 , 700 );
+  double pressure = freesteam_region3_p_rhoT(350, 700);
   double interpol = ps -> calculatePressure(700, 350, m_Tmin, m_rhomin);
   CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure,100);
-  pressure = freesteam_region3_p_rhoT(600 , 750 );
+  pressure = freesteam_region3_p_rhoT(600, 750);
   interpol = ps -> calculatePressure(750, 600, m_Tmin, m_rhomin);
   CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure,100);
-  pressure = freesteam_region3_p_rhoT(300 , 650 );
+  pressure = freesteam_region3_p_rhoT(300, 650);
   interpol = ps -> calculatePressure(650, 300, m_Tmin, m_rhomin);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure,100);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, 100);
 }
 

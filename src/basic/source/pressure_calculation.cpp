@@ -107,8 +107,6 @@ double PressureCalculation::calculatePressure(double inputT, double inputRho, do
   return m_pressure_interpolation;
 }
 
-
-
 void PressureCalculation::init()
 {
   m_properties.setClassName("PressureCalculation");
