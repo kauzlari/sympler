@@ -66,7 +66,7 @@ void FPairVelsWF::init()
  "       = Sum_j(particleFactor(i)_ij*pairFactor_ij*weight_ij)*dt\n"
  "where pairFactor_ij includes all (anti-) symmetric pair contributions of the pair ij,"
  " and particleFactor(i)_ij the non-symmetric ones for particle i."
- " weight_ij represents the derivative of the used weighting function."
+ " weight_ij represents -W'(rij)/rij of the used weighting function W."
  " Note that the expression has to give a vector in the end,"
  " otherwise the compiler will report an error.");
 
