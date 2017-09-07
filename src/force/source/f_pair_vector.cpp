@@ -65,7 +65,7 @@ void FPairVector::init()
      "dv_i = FPV*dt\n"
      "     = particleFactor_i*Sum_j(pairFactor_ij*weight_ij)*dt\n"
       "\nwhere particleFactor_i(j) is a vector and a sum of quantities related to particle i(j),\n"     "pairFactor_ij is a vector and includes all pair contributions of the pair ij,\n"
-     "weight_ij represents the derivative of the used weighting function.\n"
+     " weight_ij represents -W'(rij)/rij of the used weighting function W.\n"
      );
 
   STRINGPC
