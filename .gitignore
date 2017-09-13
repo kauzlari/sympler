@@ -9,6 +9,11 @@
 
 ### autotools ###
 
+# created by autoreconf
+
+INSTALL
+config.h.in
+
 # created by libtool
 
 ltmain.sh
