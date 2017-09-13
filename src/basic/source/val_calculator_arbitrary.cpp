@@ -424,8 +424,9 @@ bool ValCalculatorArbitrary::findStage()
   MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " START: stage = " << m_stage);
   if(m_stage == -1)
   {
-    // no symbols used?
-    if(m_function.usedSymbols().empty() && m_1stparticleFactor.usedSymbols().empty() && m_2ndparticleFactor.usedSymbols().empty())
+    // no symbols used? not overwriting?
+    bool usingSymbols = !(m_function.usedSymbols().empty() && m_1stparticleFactor.usedSymbols().empty() && m_2ndparticleFactor.usedSymbols().empty());
+    if(!usingSymbols && !m_overwrite)
     {
       m_stage = 0;
       MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
@@ -436,83 +437,128 @@ bool ValCalculatorArbitrary::findStage()
   // this is for setting the stage to '0' when there is no Calculator at all 
   // (but probably Integrators or s.th. like that)
     bool nothing = true;
-         
-    // loop over the used symbols
-    
-    typed_value_list_t usedSymbols;
-    for(typed_value_list_t::const_iterator s = m_function.usedSymbols().begin(); s != m_function.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_1stparticleFactor.usedSymbols().begin(); s != m_1stparticleFactor.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_2ndparticleFactor.usedSymbols().begin(); s != m_2ndparticleFactor.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    
-    // go through the string of "old" symbols and remove those from usedSymbols 
-    if (m_oldSymbols != "---") 
-    {
-      bool run = true;
-      string working = m_oldSymbols;
-      while(run)
-      {
-        string cur;
-        size_t pos = working.find('|');
 
-        if (pos == string::npos) {
-          run = false;
-          cur = working;
-        } else {
-          cur = string(working, 0, pos);
-          working = string(working, pos+1);
-        }
+    if(usingSymbols) {
+      // loop over the used symbols    
+      typed_value_list_t usedSymbols;
+      for(typed_value_list_t::const_iterator s = m_function.usedSymbols().begin(); s != m_function.usedSymbols().end() && !tooEarly; ++s)
+	usedSymbols.push_back(*s);
+      for(typed_value_list_t::const_iterator s = m_1stparticleFactor.usedSymbols().begin(); s != m_1stparticleFactor.usedSymbols().end() && !tooEarly; ++s)
+	usedSymbols.push_back(*s);
+      for(typed_value_list_t::const_iterator s = m_2ndparticleFactor.usedSymbols().begin(); s != m_2ndparticleFactor.usedSymbols().end() && !tooEarly; ++s)
+	usedSymbols.push_back(*s);
+      
+      // go through the string of "old" symbols and remove those from usedSymbols 
+      if (m_oldSymbols != "---") 
+	{
+	  bool run = true;
+	  string working = m_oldSymbols;
+	  while(run)
+	    {
+	      string cur;
+	      size_t pos = working.find('|');
+	      
+	      if (pos == string::npos) {
+		run = false;
+		cur = working;
+	      } else {
+		cur = string(working, 0, pos);
+		working = string(working, pos+1);
+	      }
+	      
+	      typed_value_list_t toRemove;
+	      // determine what to remove
+	      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end(); ++s)
+		{
+		  if((*s)->name() == cur)
+		    toRemove.push_back(*s);
+		}
+	      // remove it
+	      for(typed_value_list_t::const_iterator s = toRemove.begin(); s != toRemove.end(); ++s)
+		usedSymbols.remove(*s);
+	      if(toRemove.empty())
+		throw gError("ValCalculatorArbitrary::findStage", "Unable to find old symbol '" + cur + "' among used symbols");
+	    }
+	}
+      
+      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s)
+	{
+	  
+	  string name = (*s)->name();
+	  MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << ": now checking for used symbol with complete name " << name);
+	  // unfortunately, we have to remove the brackets for vectors and tensors
+	  if(name[0] == '{' || name[0] == '[')
+	    {
+	      // remove the first bracket
+	      name.erase(0, 1);
+	      // remove the last bracket; don't know why, but with these arguments it works
+	      name.erase(name.size()-1, name.size()-1);
+	    }
+	  // and the "i", "j" and "ij" of the pair expression have to be removed
+	  if(name[name.size()-2] == 'i' && name[name.size()-1] == 'j')
+	    // remove "ij"
+	    name.erase(name.size()-2, name.size()-1); 
+	  else
+	    // remove "i" or "j"
+	    name.erase(name.size()-1, name.size()-1);
+	  MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << ":short name: " << name);
+	  
+	  // we do if((*vCIt) != this) now, so, next should be unnecessary
+	  /*      if(m_symbolName == name)
+		  throw gError("ValCalculatorArbitrary::findStage", className() + " reporting: I cannot use my own symbol as argument.");*/
+	  
+	  findStageForSymbolName(name, tooEarly, nothing);
+	  
+	} // end loop over used symbols
+      
+    } // end of if(usingSymbols) 
 
-        typed_value_list_t toRemove;
-        // determine what to remove
-        for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end(); ++s)
-        {
-          if((*s)->name() == cur)
-            toRemove.push_back(*s);
-        }
-        // remove it
-        for(typed_value_list_t::const_iterator s = toRemove.begin(); s != toRemove.end(); ++s)
-          usedSymbols.remove(*s);
-        if(toRemove.empty())
-          throw gError("ValCalculatorArbitrary::findStage", "Unable to find old symbol '" + cur + "' among used symbols");
-      }
+    if(m_overwrite) {
+      // if we are overwriting we shouldn't be the first ones to write into this symbol,
+      // but should do so at a later stage. So we make an additional check for own symbol(s)
+      list<string> symbolNames = mySymbolNames();
+      
+      for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
+	
+      	findStageForSymbolName(*myNamesIt, tooEarly, nothing);
+      
     }
 
-    
-    for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s)
+    if(tooEarly)
+      return false;
+    if(m_stage == -1)
     {
-      
-      string name = (*s)->name();
-      MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << ": now checking for used symbol with complete name " << name);
-      // unfortunately, we have to remove the brackets for vectors and tensors
-      if(name[0] == '{' || name[0] == '[')
+      if(nothing)
       {
-        // remove the first bracket
-        name.erase(0, 1);
-        // remove the last bracket; don't know why, but with these arguments it works
-        name.erase(name.size()-1, name.size()-1);
-      }
-      // and the "i", "j" and "ij" of the pair expression have to be removed
-      if(name[name.size()-2] == 'i' && name[name.size()-1] == 'j')
-        // remove "ij"
-        name.erase(name.size()-2, name.size()-1); 
-      else
-        // remove "i" or "j"
-        name.erase(name.size()-1, name.size()-1);
-      MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << ":short name: " << name);
-      
-        // we do if((*vCIt) != this) now, so, next should be unnecessary
-/*      if(m_symbolName == name)
-      throw gError("ValCalculatorArbitrary::findStage", className() + " reporting: I cannot use my own symbol as argument.");*/
-          
+        m_stage = 0;
+        MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        return true;
+      } 
+      else return false;
+    }
+    else 
+    {
+      MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      return true;
+    }
+  } // end if(m_stage == -1)
+  else 
+  {
+    MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    return true;
+  }
+}
+
+
+void ValCalculatorArbitrary::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
+{
       // in the following loops we check, whether there exists a
       // ValCalculator for the current symbol. If yes, we check the 
       // stage of it and try to set the stage of this ValCalculator 
       // consistently to it,
-        
-      MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for " << mySymbolName() << ": m_phaseUser = " << m_phaseUser);
+
+      
+      MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName", className() << " for " << mySymbolName() << ": m_phaseUser = " << m_phaseUser);
       assert(m_phaseUser == 1 || m_phaseUser == 2);
       // first, loop over ColourPairs
       FOR_EACH_COLOUR_PAIR
@@ -531,7 +577,7 @@ bool ValCalculatorArbitrary::findStage()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("ValCalculatorArbitrary::findStage", "symbols of VC: ");
+		 //             MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -545,7 +591,7 @@ bool ValCalculatorArbitrary::findStage()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -569,7 +615,7 @@ bool ValCalculatorArbitrary::findStage()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("ValCalculatorArbitrary::findStage", "symbols of VC: ");
+		 //             MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -583,7 +629,7 @@ bool ValCalculatorArbitrary::findStage()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -622,7 +668,7 @@ bool ValCalculatorArbitrary::findStage()
 		       int stage = (*__iFE)->stage();
 		       if(stage == -1) 
 			 {
-			   MSG_DEBUG("ParticleCacheArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+			   MSG_DEBUG("ParticleCacheArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 			   tooEarly = true;
 			   m_stage = -1;
 			 }
@@ -656,7 +702,7 @@ bool ValCalculatorArbitrary::findStage()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -687,7 +733,7 @@ bool ValCalculatorArbitrary::findStage()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -704,32 +750,7 @@ bool ValCalculatorArbitrary::findStage()
 	       }
 	       );	    
           } // end if(!tooEarly) (for search in QuintetCalculators)
-
-
-    } // end loop over used symbols
-    if(tooEarly)
-      return false;
-    if(m_stage == -1)
-    {
-      if(nothing)
-      {
-        m_stage = 0;
-        MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
-        return true;
-      } 
-      else return false;
-    }
-    else 
-    {
-      MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
-      return true;
-    }
-  } // end if(m_stage == -1)
-  else 
-  {
-    MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
-    return true;
-  }
+	  
 }
 
 
@@ -738,8 +759,9 @@ bool ValCalculatorArbitrary::findStage_0()
   MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " START: stage = " << m_stage);
   if(m_stage == -1)
   {
-    // no symbols used?
-    if(m_function.usedSymbols().empty() && m_1stparticleFactor.usedSymbols().empty() && m_2ndparticleFactor.usedSymbols().empty())
+    // no symbols used? not overwriting?
+    bool usingSymbols = !(m_function.usedSymbols().empty() && m_1stparticleFactor.usedSymbols().empty() && m_2ndparticleFactor.usedSymbols().empty());
+    if(!usingSymbols && !m_overwrite)
     {
       m_stage = 0;
       MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
@@ -750,82 +772,126 @@ bool ValCalculatorArbitrary::findStage_0()
   // this is for setting the stage to '0' when there is no Calculator at all 
   // (but probably Integrators or s.th. like that)
     bool nothing = true;
-         
-    // loop over the used symbols
-    
-    typed_value_list_t usedSymbols;
-    for(typed_value_list_t::const_iterator s = m_function.usedSymbols().begin(); s != m_function.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_1stparticleFactor.usedSymbols().begin(); s != m_1stparticleFactor.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    for(typed_value_list_t::const_iterator s = m_2ndparticleFactor.usedSymbols().begin(); s != m_2ndparticleFactor.usedSymbols().end() && !tooEarly; ++s)
-      usedSymbols.push_back(*s);
-    
-    // go through the string of "old" symbols and remove those from usedSymbols 
-    if (m_oldSymbols != "---") 
-    {
-      bool run = true;
-      string working = m_oldSymbols;
-      while(run)
-      {
-        string cur;
-        size_t pos = working.find('|');
 
-        if (pos == string::npos) {
-          run = false;
-          cur = working;
-        } else {
-          cur = string(working, 0, pos);
-          working = string(working, pos+1);
-        }
-
-        typed_value_list_t toRemove;
-        // determine what to remove
-        for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end(); ++s)
-        {
-          if((*s)->name() == cur)
-            toRemove.push_back(*s);
-        }
-        // remove it
-        for(typed_value_list_t::const_iterator s = toRemove.begin(); s != toRemove.end(); ++s)
-          usedSymbols.remove(*s);
-        if(toRemove.empty())
-          throw gError("ValCalculatorArbitrary::findStage_0", "Unable to find old symbol '" + cur + "' among used symbols");
-      }
+    if(usingSymbols) {
+      // loop over the used symbols
+      typed_value_list_t usedSymbols;
+      for(typed_value_list_t::const_iterator s = m_function.usedSymbols().begin(); s != m_function.usedSymbols().end() && !tooEarly; ++s)
+	usedSymbols.push_back(*s);
+      for(typed_value_list_t::const_iterator s = m_1stparticleFactor.usedSymbols().begin(); s != m_1stparticleFactor.usedSymbols().end() && !tooEarly; ++s)
+	usedSymbols.push_back(*s);
+      for(typed_value_list_t::const_iterator s = m_2ndparticleFactor.usedSymbols().begin(); s != m_2ndparticleFactor.usedSymbols().end() && !tooEarly; ++s)
+	usedSymbols.push_back(*s);
+      
+      // go through the string of "old" symbols and remove those from usedSymbols 
+      if (m_oldSymbols != "---") 
+	{
+	  bool run = true;
+	  string working = m_oldSymbols;
+	  while(run)
+	    {
+	      string cur;
+	      size_t pos = working.find('|');
+	      
+	      if (pos == string::npos) {
+		run = false;
+		cur = working;
+	      } else {
+		cur = string(working, 0, pos);
+		working = string(working, pos+1);
+	      }
+	      
+	      typed_value_list_t toRemove;
+	      // determine what to remove
+	      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end(); ++s)
+		{
+		  if((*s)->name() == cur)
+		    toRemove.push_back(*s);
+		}
+	      // remove it
+	      for(typed_value_list_t::const_iterator s = toRemove.begin(); s != toRemove.end(); ++s)
+		usedSymbols.remove(*s);
+	      if(toRemove.empty())
+		throw gError("ValCalculatorArbitrary::findStage_0", "Unable to find old symbol '" + cur + "' among used symbols");
+	    }
+	}
+      
+      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s)
+	{
+	  
+	  string name = (*s)->name();
+	  MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << ": now checking for used symbol with complete name " << name);
+	  // unfortunately, we have to remove the brackets for vectors and tensors
+	  if(name[0] == '{' || name[0] == '[')
+	    {
+	      // remove the first bracket
+	      name.erase(0, 1);
+	      // remove the last bracket; don't know why, but with these arguments it works
+	      name.erase(name.size()-1, name.size()-1);
+	    }
+	  // and the "i", "j" and "ij" of the pair expression have to be removed
+	  if(name[name.size()-2] == 'i' && name[name.size()-1] == 'j')
+	    // remove "ij"
+	    name.erase(name.size()-2, name.size()-1); 
+	  else
+	    // remove "i" or "j"
+	    name.erase(name.size()-1, name.size()-1);
+	  MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << ":short name: " << name);
+	  
+	  // we do if((*vCIt) != this) now, so, next should be unnecessary
+	  /*      if(m_symbolName == name)
+		  throw gError("ValCalculatorArbitrary::findStage_0", className() + " reporting: I cannot use my own symbol as argument.");*/
+          
+	  findStageForSymbolName_0(name, tooEarly, nothing);
+	  
+	} // end loop over symbols
+      
+    } // end of if(usingSymbols) 
+    
+    if(m_overwrite) {
+      // if we are overwriting we shouldn't be the first ones to write into this symbol,
+      // but should do so at a later stage. So we make an additional check for own symbol(s)
+      list<string> symbolNames = mySymbolNames();
+      
+      for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
+	
+      	findStageForSymbolName_0(*myNamesIt, tooEarly, nothing);
+      
     }
 
-    
-    for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s)
+    if(tooEarly)
+      return false;
+    if(m_stage == -1)
     {
-      
-      string name = (*s)->name();
-      MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << ": now checking for used symbol with complete name " << name);
-      // unfortunately, we have to remove the brackets for vectors and tensors
-      if(name[0] == '{' || name[0] == '[')
+      if(nothing)
       {
-        // remove the first bracket
-        name.erase(0, 1);
-        // remove the last bracket; don't know why, but with these arguments it works
-        name.erase(name.size()-1, name.size()-1);
-      }
-      // and the "i", "j" and "ij" of the pair expression have to be removed
-      if(name[name.size()-2] == 'i' && name[name.size()-1] == 'j')
-        // remove "ij"
-        name.erase(name.size()-2, name.size()-1); 
-      else
-        // remove "i" or "j"
-        name.erase(name.size()-1, name.size()-1);
-      MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << ":short name: " << name);
-      
-        // we do if((*vCIt) != this) now, so, next should be unnecessary
-/*      if(m_symbolName == name)
-      throw gError("ValCalculatorArbitrary::findStage_0", className() + " reporting: I cannot use my own symbol as argument.");*/
-          
+        m_stage = 0;
+        MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        return true;
+      } 
+      else return false;
+    }
+    else 
+    {
+      MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      return true;
+    }
+  } // end if(m_stage == -1)
+  else 
+  {
+    MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    return true;
+  }
+}
+
+
+void ValCalculatorArbitrary::findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing)
+{
       // in the following loops we check, whether there exists a
       // ValCalculator for the current symbol. If yes, we check the 
       // stage of it and try to set the stage of this ValCalculator 
       // consistently to it,
-        
+      
       // first, loop over ColourPairs
       FOR_EACH_COLOUR_PAIR
 	(
@@ -842,7 +908,7 @@ bool ValCalculatorArbitrary::findStage_0()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("ValCalculatorArbitrary::findStage_0", "symbols of VC: ");
+		 //             MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -856,7 +922,7 @@ bool ValCalculatorArbitrary::findStage_0()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -880,7 +946,7 @@ bool ValCalculatorArbitrary::findStage_0()
 	       {
 		 list<string> symbols = (*vCIt)->mySymbolNames();
 		 
-		 //             MSG_DEBUG("ValCalculatorArbitrary::findStage", "symbols of VC: ");
+		 //             MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", "symbols of VC: ");
 		 
 		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
 		 //               cout << *symIt << endl;
@@ -894,7 +960,7 @@ bool ValCalculatorArbitrary::findStage_0()
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("ValCalculatorArbitrary::findStage", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -935,7 +1001,7 @@ bool ValCalculatorArbitrary::findStage_0()
 		       int stage = (*__iFE)->stage();
 		       if(stage == -1) 
 			 {
-			   MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+			   MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 			   tooEarly = true;
 			   m_stage = -1;
 			 }
@@ -960,7 +1026,7 @@ bool ValCalculatorArbitrary::findStage_0()
 	    // we have to search now in the TripletCalculators
 	    vector<TripletCalculator*>* tCs;
 	    tCs = M_PHASE->bondedTripletCalculatorsFlat_0();
-	    // MSG_DEBUG("ValCalculatorArbitrary::findStage_0", "loop over triplet calculators START");
+	    // MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", "loop over triplet calculators START");
             FOR_EACH
 	      (
 	       vector<TripletCalculator*>, (*tCs),
@@ -970,7 +1036,7 @@ bool ValCalculatorArbitrary::findStage_0()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -992,7 +1058,7 @@ bool ValCalculatorArbitrary::findStage_0()
 	    // we have to search now in the QuintetCalculators
 	    vector<QuintetCalculator*>* tCs;
 	    tCs = M_PHASE->bondedQuintetCalculatorsFlat_0();
-	    // MSG_DEBUG("ValCalculatorArbitrary::findStage_0", "loop over triplet calculators START");
+	    // MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", "loop over triplet calculators START");
             FOR_EACH
 	      (
 	       vector<QuintetCalculator*>, (*tCs),
@@ -1002,7 +1068,7 @@ bool ValCalculatorArbitrary::findStage_0()
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("ValCalculatorArbitrary::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -1020,29 +1086,4 @@ bool ValCalculatorArbitrary::findStage_0()
 	       );	    
           } // end if(!tooEarly) (for search in QuintetCalculators)
 
-
-    } // end loop over symbols
-    if(tooEarly)
-      return false;
-    if(m_stage == -1)
-    {
-      if(nothing)
-      {
-        m_stage = 0;
-        MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
-        return true;
-      } 
-      else return false;
-    }
-    else 
-    {
-      MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
-      return true;
-    }
-  } // end if(m_stage == -1)
-  else 
-  {
-    MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
-    return true;
-  }
 }
