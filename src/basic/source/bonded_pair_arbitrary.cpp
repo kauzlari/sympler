@@ -141,11 +141,11 @@ void BondedPairArbitrary::setup()
 
 void BondedPairArbitrary::setSlot(ColourPair* cp, size_t& slot,
 						 bool oneProp) {
-  m_slot = slot = cp->tagFormat().addAttribute
-    // OLD-STYLE. No idea why this was done.
-    //    ("BondedPairVector_" + cp->toString(), m_datatype, false, "m_scalar").offset;
-    // NEW-STYLE (2014-10-31)
-    (m_symbolName, m_datatype, false, m_symbolName).offset;
+  if(!cp->tagFormat().attrExists(m_symbolName))
+    m_slot = slot = cp->tagFormat().addAttribute
+      (m_symbolName, m_datatype, false, m_symbolName).offset;
+  else
+    throw gError("BondedPairArbitrary::setSlot for " + className(), "Symbol " + m_symbolName + " already exists for species pair (" + cp->firstSpecies() + ", " + cp->secondSpecies() + "). This would mean this module overwrites any previous values. So we should not do this.");
 }
 
 void BondedPairArbitrary::copyMembersTo(ValCalculator* vc)
