@@ -66,12 +66,6 @@ void BondedPairArbitrary::init()
       (symbol, m_symbolName,
        "Name of the symbol for the calculated property.");
 
-
-  BOOLPC
-      (overwrite, m_overwrite,
-       "Is this calculator allowed to overwrite already existing symbols " 
-           "with name given in attribute 'symbol' ?");
-
   STRINGPC
       (expression, m_expression,
        "The mathematical expression to be computed for the pairFactor."
@@ -82,11 +76,10 @@ void BondedPairArbitrary::init()
        "Here, you can list the used symbols, which should be treated as \"old\", i.e., this calculator will not wait for those symbols to be computed beforehand, but it will take what it finds. Separate the symbols by the \"|\"- (\"pipe\"-) symbol."
       );
 
-
 #ifdef _OPENMP
   m_particleCalculator = false;
 #endif
-  m_overwrite = false;
+
   m_listName = "undefined";
 
   m_oldSymbols = "---";
