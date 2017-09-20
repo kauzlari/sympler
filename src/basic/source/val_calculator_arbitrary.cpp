@@ -511,16 +511,8 @@ bool ValCalculatorArbitrary::findStage()
       
     } // end of if(usingSymbols) 
 
-    if(m_overwrite) {
-      // if we are overwriting we shouldn't be the first ones to write into this symbol,
-      // but should do so at a later stage. So we make an additional check for own symbol(s)
-      list<string> symbolNames = mySymbolNames();
-      
-      for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
-	
-      	findStageForSymbolName(*myNamesIt, tooEarly, nothing);
-      
-    }
+    // Possibly additional check for own symbol(s)
+    checkOverwriteForStageFinding(tooEarly, nothing);
 
     if(tooEarly)
       return false;
@@ -642,16 +634,8 @@ bool ValCalculatorArbitrary::findStage_0()
       
     } // end of if(usingSymbols) 
     
-    if(m_overwrite) {
-      // if we are overwriting we shouldn't be the first ones to write into this symbol,
-      // but should do so at a later stage. So we make an additional check for own symbol(s)
-      list<string> symbolNames = mySymbolNames();
-      
-      for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
-	
-      	findStageForSymbolName_0(*myNamesIt, tooEarly, nothing);
-      
-    }
+    // Possibly additional check for own symbol(s)
+    checkOverwriteForStageFinding_0(tooEarly, nothing);
 
     if(tooEarly)
       return false;

@@ -88,6 +88,35 @@ int Symbol::setNumOfDoubles() {
 }
 #endif
 
+void Symbol::checkOverwriteForStageFinding(bool& tooEarly, bool& nothing)
+{
+    if(m_overwrite) {
+      // if we are overwriting we shouldn't be the first ones to write into this symbol,
+      // but should do so at a later stage. So we make an additional check for own symbol(s)
+      list<string> symbolNames = mySymbolNames();
+      
+      for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
+	
+      	findStageForSymbolName(*myNamesIt, tooEarly, nothing);
+      
+    }
+}
+
+
+void Symbol::checkOverwriteForStageFinding_0(bool& tooEarly, bool& nothing)
+{
+    if(m_overwrite) {
+      // if we are overwriting we shouldn't be the first ones to write into this symbol,
+      // but should do so at a later stage. So we make an additional check for own symbol(s)
+      list<string> symbolNames = mySymbolNames();
+      
+      for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
+	
+      	findStageForSymbolName_0(*myNamesIt, tooEarly, nothing);
+      
+    }
+}
+
 
 void Symbol::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
 {

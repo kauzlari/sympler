@@ -104,11 +104,27 @@ class Symbol : public Node
     void init();
 
     /*!
+     * Deals with setting of \a m_stage at user stage 1 (\a m_phaseUser = 1 or 2)
+     * depending on value of \a m_overwrite
+     * @param tooEarly Modified to 'true' if stage cannot be determined yet
+     * @param nothing Set to false if other \a Symbol found, which computes \a name
+     */
+    virtual void checkOverwriteForStageFinding(bool& tooEarly, bool& nothing);
+    
+    /*!
+     * Deals with setting of \a m_stage at user stage 0 (\a m_phaseUser = 0 or 2)
+     * depending on value of \a m_overwrite
+     * @param tooEarly Modified to 'true' if stage cannot be determined yet
+     * @param nothing Set to false if other \a Symbol found, which computes \a name
+     */
+    virtual void checkOverwriteForStageFinding_0(bool& tooEarly, bool& nothing);
+    
+    /*!
      * Takes the \a name of one \a Symbol running at user stage 1 (\a m_phaseUser = 1 or 2) 
      * and tries to update \a m_stage of this \a ValCalculator
      * @param name Name of computed symbol to be checked for stage of computation
      * @param tooEarly Modified to 'true' if stage cannot be determined yet
-     * @param nothing Set to false if other \a Symbol found, which compute \a name
+     * @param nothing Set to false if other \a Symbol found, which computes \a name
      */
     virtual void findStageForSymbolName(string name, bool& tooEarly, bool& nothing);
 
@@ -117,7 +133,7 @@ class Symbol : public Node
      * and tries to update \a m_stage of this \a ValCalculator
      * @param name Name of computed symbol to be checked for stage of computation
      * @param tooEarly Modified to 'true' if stage cannot be determined yet
-     * @param nothing Set to false if other \a Symbol found, which compute \a name
+     * @param nothing Set to false if other \a Symbol found, which computes \a name
      */
     virtual void findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing);
 
