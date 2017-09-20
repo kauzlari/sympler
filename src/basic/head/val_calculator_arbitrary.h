@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -174,21 +174,7 @@ class ValCalculatorArbitrary : public NonBondedPairParticleCalculator
     {
       throw gError("ValcalculatorArbitrary::setSlots", "should not have been called! Contact the programmer.");
     }
-
- private:
-
-    /*!
-     * Takes the \a name of one \a Symbol running at user stage 1 (\a m_phaseUser = 1 or 2) 
-     * and tries to update \a m_stage of this \a ValCalculator
-     */
-    void findStageForSymbolName(string name, bool& tooEarly, bool& nothing);
-
-    /*!
-     * Takes the \a name of one \a Symbol running at user stage 0 (\a m_phaseUser = 0 or 2) 
-     * and tries to update \a m_stage of this \a ValCalculator
-     */
-    void findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing);
-
+    
 };
 
 #endif
