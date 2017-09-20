@@ -144,6 +144,16 @@ class BondedPairParticleCalc : public ValCalculatorPart
 	 */
         virtual void setup();
 
+	/*!
+	 * Determines \a m_stage of the current \a Symbol.
+	 */
+	virtual bool findStage();
+    
+	/*!
+	 * Determines \a m_stage of the current \a Symbol.
+	 */
+	virtual bool findStage_0();
+	
 };
 
 #endif

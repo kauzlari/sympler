@@ -177,6 +177,84 @@ void BondedPairParticleCalc::copyMembersTo(ValCalculator* vc)
 
 }
 
+bool BondedPairParticleCalc::findStage()
+{
+  MSG_DEBUG("BondedPairParticleCalc::findStage", className() << " START: stage = " << m_stage);
+  if(m_stage == -1)
+  {
+    // this is for aborting, when there is a Calculator, which has stage = -1 itself
+    bool tooEarly = false;
+    // this is for setting the stage to '0' when there is no Calculator at all 
+    // (but probably Integrators or s.th. like that)
+    bool nothing = true;
+
+    checkOverwriteForStageFinding(tooEarly, nothing);
+
+    if(tooEarly)
+      return false;
+    if(m_stage == -1)
+    {
+      if(nothing)
+      {
+        m_stage = 0;
+        MSG_DEBUG("BondedPairParticleCalc::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        return true;
+      } 
+      else return false;
+    }
+    else 
+    {
+      MSG_DEBUG("BondedPairParticleCalc::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      return true;
+    }
+  } // end if(m_stage == -1)
+  else 
+  {
+    MSG_DEBUG("BondedPairParticleCalc::findStage", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    return true;
+  }
+}
+
+
+bool BondedPairParticleCalc::findStage_0()
+{
+  MSG_DEBUG("BondedPairParticleCalc::findStage_0", className() << " START: stage = " << m_stage);
+  if(m_stage == -1)
+  {
+    // this is for aborting, when there is a Calculator, which has stage = -1 itself
+    bool tooEarly = false;
+    // this is for setting the stage to '0' when there is no Calculator at all 
+    // (but probably Integrators or s.th. like that)
+    bool nothing = true;
+
+    checkOverwriteForStageFinding_0(tooEarly, nothing);
+
+    if(tooEarly)
+      return false;
+    if(m_stage == -1)
+    {
+      if(nothing)
+      {
+        m_stage = 0;
+        MSG_DEBUG("BondedPairParticleCalc::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        return true;
+      } 
+      else return false;
+    }
+    else 
+    {
+      MSG_DEBUG("BondedPairParticleCalc::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      return true;
+    }
+  } // end if(m_stage == -1)
+  else 
+  {
+    MSG_DEBUG("BondedPairParticleCalc::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    return true;
+  }
+}
+
+
 
 #ifdef _OPENMP
 void BondedPairParticleCalc::mergeCopies(ColourPair* cp, int thread_no) {
