@@ -103,6 +103,7 @@ class Symbol : public Node
   /*!
    * Deals with setting of \a m_stage at user stage 0 (\a m_phaseUser = 0 or 2)
    * depending on value of \a m_overwrite
+   * FIXME: Try to avoid code duplication for _0 versions
    * @param tooEarly Modified to 'true' if stage cannot be determined yet
    * @param nothing Set to false if other \a Symbol found, which computes \a name
    */
@@ -120,6 +121,7 @@ class Symbol : public Node
   /*!
    * Takes the \a name of one \a Symbol running at user stage 0 (\a m_phaseUser = 0 or 2) 
    * and tries to update \a m_stage of this \a ValCalculator
+   * FIXME: Try to avoid code duplication for _0 versions
    * @param name Name of computed symbol to be checked for stage of computation
    * @param tooEarly Modified to 'true' if stage cannot be determined yet
    * @param nothing Set to false if other \a Symbol found, which computes \a name
@@ -238,9 +240,16 @@ class Symbol : public Node
   }
   
   /*!
-   * HEEEEEEEEEEEEEEEEEEEEEERE
+   * Will end up to be the new findStage() with same functionality.
+   * So see docu there
    */
   virtual bool findStageNewPrelim();
+  
+  /*!
+   * Will end up to be the new findStage_0() with same functionality.
+   * So see docu there
+   */
+  virtual bool findStageNewPrelim_0();
   
   /*!
    * Determines \a m_stage of the current \a Symbol.
@@ -260,6 +269,7 @@ class Symbol : public Node
    * so this function does nothing except returning the message (true) that the 
    * stage was already found. Symbols, which determine the stage during run-time 
    * have to redefine this function.
+   * FIXME: Try to avoid code duplication for _0 versions
    */
   virtual bool findStage_0()
   {

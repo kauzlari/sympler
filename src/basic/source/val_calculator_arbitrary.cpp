@@ -426,6 +426,15 @@ bool ValCalculatorArbitrary::findStage()
 
 bool ValCalculatorArbitrary::findStage_0()
 {
+  return Symbol::findStageNewPrelim_0();
+}
+
+
+// old version
+#if 0
+
+bool ValCalculatorArbitrary::findStage_0()
+{
   MSG_DEBUG("ValCalculatorArbitrary::findStage_0", className() << " START: stage = " << m_stage);
   if(m_stage == -1)
   {
@@ -545,6 +554,9 @@ bool ValCalculatorArbitrary::findStage_0()
     return true;
   }
 }
+
+#endif // end of #if 0
+
 
 void ValCalculatorArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) {
 

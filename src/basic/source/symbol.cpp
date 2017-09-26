@@ -156,6 +156,75 @@ bool Symbol::findStageNewPrelim()
   }
 }
 
+
+bool Symbol::findStageNewPrelim_0()
+{
+  MSG_DEBUG("Symbol::findStage_0", className() << " START: stage = " << m_stage);
+  if(m_stage == -1) {
+    typed_value_list_t usedSymbols;
+    
+    /*virtual Symbol::*/ addMyUsedSymbolsTo(/*typed_value_list_t&*/ usedSymbols);
+
+    // no symbols used? not overwriting?
+    bool usingSymbols = !(usedSymbols.empty());
+    if(!usingSymbols && !m_overwrite) {
+      m_stage = 0;
+      MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
+      return true;
+    }
+    
+    // this is for aborting, when there is a Calculator, which has stage = -1 itself
+    bool tooEarly = false;
+    // this is for setting the stage to '0' when there is no Calculator at all 
+    // (but probably Integrators or s.th. like that)
+    bool nothing = true;
+
+    if(usingSymbols) {
+
+      FunctionParser::removeFromTypedValues(/*string*/ /*m_oldSymbols*/usedSymbolsIgnoredForStaging(), /*typed_value_list_t&*/ usedSymbols);
+      
+      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s) {
+	  
+	string name = (*s)->name();
+	MSG_DEBUG("Symbol::findStage_0", className() << ": now checking for used symbol with complete name " << name);
+	
+	/*static*/ Symbol::cleanPairSymbol(name);
+	  
+	findStageForSymbolName_0(name, tooEarly, nothing);
+	  
+      } // end loop over used symbols
+      
+    } // end of if(usingSymbols) 
+
+    // Possibly additional check for own symbol(s)
+    checkOverwriteForStageFinding_0(tooEarly, nothing);
+
+    if(tooEarly)
+      return false;
+    if(m_stage == -1)
+    {
+      if(nothing)
+      {
+        m_stage = 0;
+        MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        return true;
+      } 
+      else return false;
+    }
+    else 
+    {
+      MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      return true;
+    }
+  } // end if(m_stage == -1)
+  else 
+  {
+    MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    return true;
+  }
+}
+
+
 /*static*/ void Symbol::cleanPairSymbol(string& name) {
 
   // unfortunately, we have to remove the brackets for vectors and tensors
