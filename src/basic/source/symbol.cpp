@@ -120,7 +120,7 @@ bool Symbol::findStageNewPrelim()
 	string name = (*s)->name();
 	MSG_DEBUG("Symbol::findStage", className() << ": now checking for used symbol with complete name " << name);
 	
-	/*static*/ Symbol::cleanPairSymbol(name);
+	cleanSymbol(name);
 	  
 	findStageForSymbolName(name, tooEarly, nothing);
 	  
@@ -188,7 +188,7 @@ bool Symbol::findStageNewPrelim_0()
 	string name = (*s)->name();
 	MSG_DEBUG("Symbol::findStage_0", className() << ": now checking for used symbol with complete name " << name);
 	
-	/*static*/ Symbol::cleanPairSymbol(name);
+	cleanSymbol(name);
 	  
 	findStageForSymbolName_0(name, tooEarly, nothing);
 	  
@@ -225,6 +225,9 @@ bool Symbol::findStageNewPrelim_0()
 }
 
 
+// does not work for all Symbols
+#if 0
+
 /*static*/ void Symbol::cleanPairSymbol(string& name) {
 
   // unfortunately, we have to remove the brackets for vectors and tensors
@@ -244,6 +247,8 @@ bool Symbol::findStageNewPrelim_0()
   MSG_DEBUG("Symbol::cleanPairSymbol", "shortened name of symbol: " << name);
 
 }
+
+#endif
  
 
 void Symbol::checkOverwriteForStageFinding(bool& tooEarly, bool& nothing)

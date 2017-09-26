@@ -146,17 +146,17 @@ class Symbol : public Node
   virtual string usedSymbolsIgnoredForStaging() const {
     return "---";
   }
-
   
   /*!
    * Helper function which removes indices and brackets from single terms in \a Function 
-   * expressions. E.g.: "[rij]" becomes "r, "[vi]" becomes "v"
+   * expressions. Subclasses must decide which kind of cleaning to perform
    * @param name Single term from a \a Function expression
    */
-  static void cleanPairSymbol(string& name);
-  
+  virtual void cleanSymbol(string& name) const {
+  }
   
  public:
+  
   /*!
    * Constructor for \a Node hierarchy
    * @param parent The parent node

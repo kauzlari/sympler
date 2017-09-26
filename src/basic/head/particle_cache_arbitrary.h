@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -38,8 +38,6 @@
 #include "function_particle.h"
 #include "symbol.h"
 
-// #define PCA_MAX_STAGE 2
-
 /*!
  * Functions to cache completely user-defined properties for the 
  * particles, which depend only on other particle properties.
@@ -58,12 +56,6 @@ class ParticleCacheArbitrary : public ParticleCache
     */
     FunctionParticle m_function;
     
-    /*! This is now a member of \a Symbol
-   * Is this calculator allowed to overwrite already existing symbols 
-   * with name \a m_symbolName ?
-     */
-/*     bool m_overwrite; */
-    
     /*!
      * Initialise the PropertyList.
      */
@@ -71,29 +63,30 @@ class ParticleCacheArbitrary : public ParticleCache
   
     /*!
      * Helper for setting m_offset
-   */
+     */
     virtual void setupOffset();
     
     /*!
-    * Return a copy of the current object
-    */
+     * Return a copy of the current object
+     */
     virtual ParticleCache* copyMySelf() = 0;
      
-    
+    virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
+  
   public:
-  /*!
-   * Constructor
-   */
+    /*!
+     * Constructor
+     */
     ParticleCacheArbitrary(/*Node*/Simulation* parent);
 
-  /*!
+    /*!
      * Destructor
-   */
+     */
     virtual ~ParticleCacheArbitrary();
 
-  /*!
+    /*!
      * Setup this ParticleCache
-   */
+     */
     virtual void setup();
 
     /*!

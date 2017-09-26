@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -37,45 +37,45 @@
 
 #include "symbol.h"
 
-// #define PCA_MAX_STAGE 2
 
 /*!
- * Functions to cache properties for the particles. Similar to the ValCalculators for
+ * Classes to cache properties for the particles. Similar to the ValCalculators for
  * the pairs.
  */
 class ParticleCache : public Symbol
 {
- protected:
-/*  
-   * The stage parameter tells the client when to call the cache:
-  * This is needed for e.g. calculation of a density correction (m_stage = 2), 
-  * which needs the local volume (m_stage = 1), which again needs the local 
-  * density (m_stage = 0).
-  * In particle.h (!), there is also defined the macro PCA_MAX_STAGE, which 
-  * is currently(06/02/28) set to 2. But we use now Particle::s_maxStage, which is 
-   * set at runtime in Particle::sortStages()
-  */
-//    size_t m_stage;
 
-   /*!
+ protected:
+  
+  /*!
    * memory offset where the computed attribute is located
    */
-   size_t m_offset;
-   
-   /*!
-  * Color of the particles this cache is used for.
-    */
-   string m_species;
-     
+  size_t m_offset;
+  
   /*!
-  * Color of the particles this cache is used for.
-    */
+   * Color of the particles this cache is used for.
+   */
+  string m_species;
+  
+  /*!
+   * Color of the particles this cache is used for.
+   */
   size_t m_colour;
-
+  
   /*!
    * Initialise the PropertyList.
    */
   void init();
+
+  /*!
+   * Helper function which removes brackets from single terms in \a Function. 
+   * expressions. E.g.: "[r]" becomes "r"
+   * Differently to class \a ValCalculator, there shouldn't be any indices to 
+   * be removed
+   * @param name Single term from a \a Function expression
+   */
+  virtual void cleanSymbol(string& name) const;
+
   
  public:
   /*!
@@ -110,32 +110,27 @@ class ParticleCache : public Symbol
    */
   virtual bool operator==(const ParticleCache &c) const = 0;
 
- /*!
-  * Return the color this cache is for
-    */
+  /*!
+   * Return the color this cache is for
+   */
   size_t colour() const {
     return m_colour;
   }
 
- /*!
-  * Return the color this cache writes into. HEre, the default behaviour is implemented
-    */
+  /*!
+   * Return the color this cache writes into. HEre, the default behaviour is implemented
+   */
   virtual size_t writeColour() const {
     return m_colour;
   }
 
   /*!
-  * returns the offset
-  */
-  size_t offset() const
-  {
-  return m_offset; 
-}
+   * returns the offset
+   */
+  size_t offset() const {
+    return m_offset; 
+  }
   
-/*  size_t stage() const
-  {
-  return m_stage; 
-}*/
 };
 
 #endif
