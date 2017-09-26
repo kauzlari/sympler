@@ -96,6 +96,12 @@ class BondedPairParticleArbitrary : public BondedPairParticleCalc
   virtual string usedSymbolsIgnoredForStaging() const {
     return m_oldSymbols;
   }
+
+  /*!
+   * Adds the expressions used by this \a Symbol to the given list. 
+   * @param usedSymbols List to be filled with own instances of \a TypedValue
+   */
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
   
   /*!
    * Helper function for polymorphic copying
