@@ -111,7 +111,21 @@ class ValCalculatorArbitrary : public NonBondedPairParticleCalculator
       */
     virtual ValCalculator* copyMySelf() = 0;
 
+    /*!
+     * The returned string contains those terms from runtime compiled expressions, 
+     * which should be ignored when determining the stage. The expressions are separated by " | ".
+     * An "empty" string must have the form "---".
+     */
+    virtual string usedSymbolsIgnoredForStaging() const {
+      return m_oldSymbols;
+    }
 
+    /*!
+     * Adds the expressions used by this \a Symbol to the given list. 
+     * @param usedSymbols List to be filled with own instances of \a TypedValue
+     */
+    virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
+      
   public:
 
     /*!

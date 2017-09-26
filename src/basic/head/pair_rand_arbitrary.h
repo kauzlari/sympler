@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2015, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -85,6 +85,16 @@ class PairRandArbitrary : public ValCalculatorPair {
    */
   virtual void init();
 
+  /*!
+   * The returned string contains those terms from runtime compiled expressions, 
+   * which should be ignored when determining the stage. The expressions are separated by " | ".
+   * An "empty" string must have the form "---".
+   */
+  virtual string usedSymbolsIgnoredForStaging() const {
+    return m_oldSymbols;
+  }
+
+  
  public:
   
   PairRandArbitrary(string symbol);

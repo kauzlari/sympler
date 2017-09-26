@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -432,4 +432,48 @@ FUNCTION_PARSER_LOG("FunctionParser::parseThis", "start-expression = " << expres
   }
 
   return NULL;
+}
+
+
+/*static*/ void FunctionParser::addToTypedValueList(const typed_value_list_t& newSymbols, typed_value_list_t& usedSymbols) {
+      
+  for(typed_value_list_t::const_iterator s = newSymbols.begin(); s != newSymbols.end(); ++s)
+    usedSymbols.push_back(*s);
+
+}
+
+
+/*static*/ void FunctionParser::removeFromTypedValues(string toRemove, typed_value_list_t& usedSymbols) {
+      
+  // go through the string of "old" symbols and remove those from usedSymbols 
+  if (toRemove != "---") {
+    bool run = true;
+    string working = toRemove;
+    while(run) {
+      string cur;
+      size_t pos = working.find('|');
+      
+      if (pos == string::npos) {
+	run = false;
+	cur = working;
+      }
+      else {
+	cur = string(working, 0, pos);
+	working = string(working, pos+1);
+      }
+      
+      typed_value_list_t symbolsToRemove;
+      // determine what to remove
+      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end(); ++s) {
+	if((*s)->name() == cur)
+	  symbolsToRemove.push_back(*s);
+      }
+      if(symbolsToRemove.empty())
+	throw gError("Symbol::findStage", "Unable to find old symbol '" + cur + "' among used symbols");
+      // remove all
+      for(typed_value_list_t::const_iterator s = symbolsToRemove.begin(); s != symbolsToRemove.end(); ++s)
+	usedSymbols.remove(*s);
+    }
+  }
+
 }

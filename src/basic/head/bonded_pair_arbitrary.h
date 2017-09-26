@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -70,17 +70,22 @@ class BondedPairArbitrary : public ValCalculatorPair
    * Initialise the property list
    */
   virtual void init();
-  
 
+  /*!
+   * The returned string contains those terms from runtime compiled expressions, 
+   * which should be ignored when determining the stage. The expressions are separated by " | ".
+   * An "empty" string must have the form "---".
+   */
+  virtual string usedSymbolsIgnoredForStaging() const {
+    return m_oldSymbols;
+  }
+  
   /*!
    * Helper function for polymorphic copying
    */
   virtual ValCalculatorPair* copyMySelf() = 0;
-  /*         { */
-  /*           return new BondedPairArbitrary(*this); */
-  /*         } */
   
-    /*!
+  /*!
      * copies the members of this class to \a vc
      */
     virtual void copyMembersTo(ValCalculator* vc);
