@@ -430,10 +430,9 @@ bool ValCalculatorArbitrary::findStage_0()
 }
 
 
-void ValCalculatorArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) {
-
+void ValCalculatorArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+{
   FunctionParser::addToTypedValueList(m_function.usedSymbols(), usedSymbols);
   FunctionParser::addToTypedValueList(m_1stparticleFactor.usedSymbols(), usedSymbols);
-  FunctionParser::addToTypedValueList(/*const typed_value_list_t&*/ m_2ndparticleFactor.usedSymbols(), /*typed_value_list_t&*/ usedSymbols);
-      
+  FunctionParser::addToTypedValueList(/*const typed_value_list_t&*/ m_2ndparticleFactor.usedSymbols(), /*typed_value_list_t&*/ usedSymbols);    
 }

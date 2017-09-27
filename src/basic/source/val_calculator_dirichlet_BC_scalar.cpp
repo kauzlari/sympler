@@ -68,7 +68,8 @@ void ValCalculatorDirichletBCScalar::init()
 {
   m_properties.setClassName("DirichletBCScalar");
 
-  m_properties.setDescription("Saves the pair-specific value of an arbitrary scalar of the boundary particle used for applying a Dirichlet boundary condition (BC) in each pair of particles. This calculator uses a linear approximation. The actual value of the Dirichlet boundary condition is assumed to be stored in the symbol of the respective boundary particle given by the attribute 'scalar'.");
+  m_properties.setDescription("Saves the pair-specific value of an arbitrary scalar of the boundary particle used for applying a Dirichlet boundary condition (BC) in each pair of particles. This calculator uses a linear approximation as described in [70]. The actual value of the Dirichlet boundary condition is assumed to be stored in the symbol of the respective boundary particle given by the attribute 'scalar'.\n"
+"[70]: J. P. Morris, P. J. Fox, Y. Zhu, J. Comp. Phys. 136 (1997) 214–226.");
   
    STRINGPC
        (scalar, m_scalarName,

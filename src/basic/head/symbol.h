@@ -136,6 +136,7 @@ class Symbol : public Node
    * use it should have to know about the type typed_value_list_t
    */
   virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) {
+    throw gError("Symbol::addMyUsedSymbolsToChecker", "Error for module " + className() + " This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
   }
 
   /*!
