@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -112,7 +112,27 @@ class PCaEigensystem: public ParticleCache
     {
       return new PCaEigensystem(*this);
     }
-    
+
+    /*!
+     * Adds the expressions used by this \a Symbol to the given list. 
+     * @param usedSymbols List to be filled with own instances of \a TypedValue
+     */
+    virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+    {
+
+    }
+
+    /*!
+     * Returns the strings of those \a Symbols that the given class depends on
+     * due to hard-coded reasons (not due to runtime compiled expressions).
+     * @param usedSymbols List to add the strings to.
+     */
+    virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+    {
+      usedSymbols.push_back(m_tensor_symbol);
+    }
+
+
   public:
     
 //  /*!
