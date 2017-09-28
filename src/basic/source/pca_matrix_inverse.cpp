@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -187,6 +187,24 @@ void PCaMatrixInverse::setup()
     
   }
 }
+
+
+bool PCaMatrixInverse::findStage()
+{
+  return Symbol::findStageNewPrelim();
+}
+
+
+bool PCaMatrixInverse::findStage_0()
+{
+  return Symbol::findStageNewPrelim_0();
+}
+
+
+
+
+// old version to be deleted if new one works
+#if 0
 
 bool PCaMatrixInverse::findStage()
 {
@@ -680,3 +698,4 @@ bool PCaMatrixInverse::findStage_0()
   }
 }
     
+#endif // end of #if 0
