@@ -74,6 +74,17 @@ class ValCalculatorDirichletBCScalar : public ValCalculatorBC
     {
       return new ValCalculatorDirichletBCScalar(*this); 
     }
+
+    /*!
+     * Returns the strings of those \a Symbols that the given class depends on
+     * due to hard-coded reasons (not due to runtime compiled expressions).
+     * @param usedSymbols List to add the strings to.
+     */
+    virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+    {
+      usedSymbols.push_back(m_scalarName);
+    }
+
   
   public:
   /*!

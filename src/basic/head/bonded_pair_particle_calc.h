@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -44,31 +44,19 @@
  */
 class BondedPairParticleCalc : public ValCalculatorPart
 {
-  protected:
-
-  /*! This is now a member of \a Symbol
-   * Is this calculator allowed to overwrite already existing symbols
-   * with name \a m_symbolName ?
-   */
-/*   bool m_overwrite; */
-
-  //  /*!
-  // * index of the bonded list, this calculator belongs to
-  // */
-  //size_t m_listIndex;
-    
+ protected:
+  
   /*!
    * name of the bonded list, this calculator belongs to
    */
   string m_listName;
-
+  
   /*!
    * How does the pair expression behave under index interchange?
    * 1 means symmetric behaviour
    * -1 means antisymmetric behaviour
    */
   int m_symmetry;
-
 
   /*!
    * Initialise the property list
@@ -79,81 +67,89 @@ class BondedPairParticleCalc : public ValCalculatorPart
    * Helper function for polymorphic copying
    */
   virtual ValCalculator* copyMySelf() = 0;
-/*         { */
-/*           return new BondedPairParticleVector(*this); */
-/*         } */
   
-    /*!
-     * copies the members of this class to \a vc
-     */
-    virtual void copyMembersTo(ValCalculator* vc);
-
-  public:
-   
-    /*!
-   * Constructor for the \a Node hierarchy
-     */
-    BondedPairParticleCalc(/*Node*/Simulation* parent);
+  /*!
+   * copies the members of this class to \a vc
+   */
+  virtual void copyMembersTo(ValCalculator* vc);
 
   /*!
-     * Destructor
+   * Returns the strings of those \a Symbols that the given class depends on
+   * due to hard-coded reasons (not due to runtime compiled expressions).
+   * @param usedSymbols List to add the strings to.
    */
-    virtual ~BondedPairParticleCalc();
+  virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+  {
+    
+  }
+  
+    
+ public:
+  
+  /*!
+   * Constructor for the \a Node hierarchy
+   */
+  BondedPairParticleCalc(/*Node*/Simulation* parent);
+  
+  /*!
+   * Destructor
+   */
+  virtual ~BondedPairParticleCalc();
 
 #ifdef _OPENMP
-    /*!
-     * Merge the copies of all threads together
-     */
-    virtual void mergeCopies(ColourPair* cp, int thread_no);
+  /*!
+   * Merge the copies of all threads together
+   */
+  virtual void mergeCopies(ColourPair* cp, int thread_no);
 #endif
-
-    /*!
-     * Compute the user defined expression for pair \a pD
-     * @param pD \a Pairdist whose contribution we calculate
-     */
+  
+  /*!
+   * Compute the user defined expression for pair \a pD
+   * @param pD \a Pairdist whose contribution we calculate
+   */
 #ifndef _OPENMP
- virtual void compute(Pairdist* pD) = 0;
+  virtual void compute(Pairdist* pD) = 0;
 #else
- virtual void compute(Pairdist* pD, int thread_no) = 0;
+  virtual void compute(Pairdist* pD, int thread_no) = 0;
 #endif
-
-	/*!
-         * Returns the symbol name as defined in the input file.
-	 */
-        virtual string myName() {
-          return m_symbolName;
-        }
-
-	/*!
-         * Returns the name of the bonded list this \a ValCalculator computes for.
-	 */
-        virtual string listName() {
-          return m_listName;
-        }
-
-	/*!
-         * Register the computed symbol
-	 */
-        virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp) 
-        {
-          throw gError("BondedPairParticleVector::setSlots", "should not have been called! Contact the programmer.");
-        }
-
-	/*!
-         * Setup this Calculator
-	 */
-        virtual void setup();
-
-	/*!
-	 * Determines \a m_stage of the current \a Symbol.
-	 */
-	virtual bool findStage();
-    
-	/*!
-	 * Determines \a m_stage of the current \a Symbol.
-	 */
-	virtual bool findStage_0();
-	
+  
+  /*!
+   * Returns the symbol name as defined in the input file.
+   */
+  virtual string myName() {
+    return m_symbolName;
+  }
+  
+  /*!
+   * Returns the name of the bonded list this \a ValCalculator computes for.
+   */
+  virtual string listName() {
+    return m_listName;
+  }
+  
+  /*!
+   * Register the computed symbol
+   */
+  virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp) 
+  {
+    throw gError("BondedPairParticleVector::setSlots", "should not have been called! Contact the programmer.");
+  }
+  
+  /*!
+   * Setup this Calculator
+   */
+  virtual void setup();
+  
+  /*!
+   * Determines \a m_stage of the current \a Symbol.
+   */
+  virtual bool findStage();
+  
+  /*!
+   * Determines \a m_stage of the current \a Symbol.
+   */
+  virtual bool findStage_0();
+  
 };
 
 #endif

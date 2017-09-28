@@ -93,13 +93,18 @@ bool Symbol::findStageNewPrelim()
 {
   MSG_DEBUG("Symbol::findStage", className() << " START: stage = " << m_stage);
   if(m_stage == -1) {
-    typed_value_list_t usedSymbols;
-    
-    /*virtual Symbol::*/ addMyUsedSymbolsTo(/*typed_value_list_t&*/ usedSymbols);
 
-    // no symbols used? not overwriting?
+    // check for symbols in runtime compiled expressions
+    typed_value_list_t usedSymbols;    
+    /*virtual Symbol::*/ addMyUsedSymbolsTo(/*typed_value_list_t&*/ usedSymbols);
     bool usingSymbols = !(usedSymbols.empty());
-    if(!usingSymbols && !m_overwrite) {
+
+    // some modules depend on other symbols in a hard-coded way
+    list<string> hardCodedSymbols;
+    addMyHardCodedDependenciesTo(hardCodedSymbols);
+    bool hardCodedDependencies = !(hardCodedSymbols.empty());
+    
+    if(!hardCodedDependencies && !usingSymbols && !m_overwrite) {
       m_stage = 0;
       MSG_DEBUG("Symbol::findStage", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
       return true;
@@ -113,7 +118,7 @@ bool Symbol::findStageNewPrelim()
 
     if(usingSymbols) {
 
-      FunctionParser::removeFromTypedValues(/*string*/ /*m_oldSymbols*/usedSymbolsIgnoredForStaging(), /*typed_value_list_t&*/ usedSymbols);
+      FunctionParser::removeFromTypedValues(usedSymbolsIgnoredForStaging(), /*typed_value_list_t&*/ usedSymbols);
       
       for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s) {
 	  
@@ -128,6 +133,13 @@ bool Symbol::findStageNewPrelim()
       
     } // end of if(usingSymbols) 
 
+    if(hardCodedDependencies) {
+      for(list<string>::const_iterator s = hardCodedSymbols.begin(); s != hardCodedSymbols.end() && !tooEarly; ++s) {
+	MSG_DEBUG("Symbol::findStage", className() << ": now checking for hard-coded used symbol with name " << *s);
+	findStageForSymbolName(*s, tooEarly, nothing);
+      }
+    }
+    
     // Possibly additional check for own symbol(s)
     checkOverwriteForStageFinding(tooEarly, nothing);
 

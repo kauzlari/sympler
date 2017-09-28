@@ -96,7 +96,7 @@ class Symbol : public Node
    * Deals with setting of \a m_stage at user stage 1 (\a m_phaseUser = 1 or 2)
    * depending on value of \a m_overwrite
    * @param tooEarly Modified to 'true' if stage cannot be determined yet
-   * @param nothing Set to false if other \a Symbol found, which computes \a name
+   * @param nothing Set to false if other \a Symbol found, which computes \a mySymbolNames()
    */
   virtual void checkOverwriteForStageFinding(bool& tooEarly, bool& nothing);
   
@@ -105,7 +105,7 @@ class Symbol : public Node
    * depending on value of \a m_overwrite
    * FIXME: Try to avoid code duplication for _0 versions
    * @param tooEarly Modified to 'true' if stage cannot be determined yet
-   * @param nothing Set to false if other \a Symbol found, which computes \a name
+   * @param nothing Set to false if other \a Symbol found, which computes \a mySymbolNames()
    */
   virtual void checkOverwriteForStageFinding_0(bool& tooEarly, bool& nothing);
   
@@ -134,9 +134,22 @@ class Symbol : public Node
    * @param usedSymbols List to be filled with own instances of \a TypedValue
    * FIXME: this construction is not optimal, since only those subclasses which 
    * use it should have to know about the type typed_value_list_t
+   * FIXME: When all inheriting classes are transferred to Symbol::findStage/-_0(), 
+   * then remove exception and make this method pure virtual, such that the programmer 
+   * must think about the appropriate behaviour for every child 
    */
-  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) {
-    throw gError("Symbol::addMyUsedSymbolsToChecker", "Error for module " + className() + " This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+  {
+    throw gError("Symbol::addMyUsedSymbolsTo", "Error for module " + className() + " This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest use case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
+  }
+
+  /*!
+   * Returns the strings of those \a Symbols that the given class depends on
+   * due to hard-coded reasons (not due to runtime compiled expressions).
+   */
+  virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+  {
+    throw gError("Symbol::myHardCodedDependencies", "Error for module " + className() + " This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest use case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
   }
 
   /*!
@@ -178,7 +191,7 @@ class Symbol : public Node
   /*!
    * Setup this Symbol
    */
-  virtual void setup() = 0;
+  /* virtual void setup() = 0; */
   
   /*!
    * Return a string identifier for the calculator of this symbol

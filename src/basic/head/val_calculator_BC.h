@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -93,10 +93,7 @@ class ValCalculatorBC : public ValCalculatorPair
      * Helper function for returning a copy of itself
      */
     virtual ValCalculatorPair* copyMySelf() = 0;
-/*     { */
-/*       return new ValCalculatorBC(*this);  */
-/*     } */
-
+    
     /*!
      * Find the wall-segment where the rij-vector is hitting and the distance of ri to it
      * @param pD \a Pairdist for which to compute the distances
@@ -104,8 +101,18 @@ class ValCalculatorBC : public ValCalculatorPair
      * @param outerDist variable for distance of wall particle to wall
      */ 
     virtual void computeDists(Pairdist* pair, double& innerDist, double& outerDist); //FIXME: inline ?
+    
+    /*!
+     * Adds the expressions used by this \a Symbol to the given list. 
+     * This is only for symbols used in runtime-compiled expressions, so none here
+     * @param usedSymbols List to be filled with own instances of \a TypedValue
+     */
+    virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+    {
+      
+    }
 
-  
+    
   public:
   /*!
    * Constructor

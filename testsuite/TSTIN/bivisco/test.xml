@@ -340,6 +340,8 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
 
    </MeterAverage>
 
+   <!-- useless for testsuite, useful for actual simulation
+       
    <GridAveragerStructured
      nX = "14"
      nY = "1"
@@ -370,5 +372,7 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
         <OutputVTK nameOutputFile = "posFrozen/pos.vtk" format = "ascii"/>
 
    </MeterPosVel>
+
+-->
 
 </Simulation>
