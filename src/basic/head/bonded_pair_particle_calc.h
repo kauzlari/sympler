@@ -74,6 +74,16 @@ class BondedPairParticleCalc : public ValCalculatorPart
   virtual void copyMembersTo(ValCalculator* vc);
 
   /*!
+   * Adds the expressions used by this \a Symbol to the given list. 
+   * There are subclasses, which indeed do not leave the list in its original state
+   * @param usedSymbols List to be filled with own instances of \a TypedValue
+   */
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+  {
+
+  }
+
+  /*!
    * Returns the strings of those \a Symbols that the given class depends on
    * due to hard-coded reasons (not due to runtime compiled expressions).
    * @param usedSymbols List to add the strings to.
