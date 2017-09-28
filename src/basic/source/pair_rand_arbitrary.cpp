@@ -145,6 +145,27 @@ void PairRandArbitrary::setSlot(ColourPair* cp, size_t& slot, bool oneProp) {
     (m_symbolName, m_datatype, false, m_symbolName).offset;
 }
 
+
+bool PairRandArbitrary::findStage()
+{
+  return Symbol::findStageNewPrelim();
+}
+
+
+bool PairRandArbitrary::findStage_0()
+{
+  return Symbol::findStageNewPrelim_0();
+}
+
+
+void PairRandArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+{
+  FunctionParser::addToTypedValueList(m_function.usedSymbols(), usedSymbols);
+}
+
+
+#if 0
+
 bool PairRandArbitrary::findStage() {
   MSG_DEBUG("PairRandArbitrary::findStage", className() << " START: stage = " << m_stage);
   if (m_stage == -1) {
@@ -538,3 +559,4 @@ bool PairRandArbitrary::findStage_0() {
 }
 
 
+#endif
