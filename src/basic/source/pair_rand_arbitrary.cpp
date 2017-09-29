@@ -146,18 +146,6 @@ void PairRandArbitrary::setSlot(ColourPair* cp, size_t& slot, bool oneProp) {
 }
 
 
-bool PairRandArbitrary::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool PairRandArbitrary::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-
-
 void PairRandArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
 {
   FunctionParser::addToTypedValueList(m_function.usedSymbols(), usedSymbols);

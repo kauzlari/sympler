@@ -89,7 +89,7 @@ int Symbol::setNumOfDoubles() {
 #endif
 
 
-bool Symbol::findStageNewPrelim()
+bool Symbol::findStage()
 {
   MSG_DEBUG("Symbol::findStage", className() << " START: stage = " << m_stage);
   if(m_stage == -1) {
@@ -169,7 +169,7 @@ bool Symbol::findStageNewPrelim()
 }
 
 
-bool Symbol::findStageNewPrelim_0()
+bool Symbol::findStage_0()
 {
   MSG_DEBUG("Symbol::findStage_0", className() << " START: stage = " << m_stage);
   if(m_stage == -1) {

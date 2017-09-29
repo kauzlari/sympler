@@ -71,6 +71,10 @@ class ParticleCacheArbitrary : public ParticleCache
      */
     virtual ParticleCache* copyMySelf() = 0;
      
+    /*!
+     * Adds the expressions used by this \a Symbol to the given list. 
+     * @param usedSymbols List to be filled with own instances of \a TypedValue
+     */
     virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
 
     /*!
@@ -99,18 +103,6 @@ class ParticleCacheArbitrary : public ParticleCache
      * Setup this ParticleCache
      */
     virtual void setup();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has 
-     * to determine its stage during run-time
-     */
-    virtual bool findStage();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has 
-     * to determine its stage during run-time
-     */
-    virtual bool findStage_0();
 
 };
 

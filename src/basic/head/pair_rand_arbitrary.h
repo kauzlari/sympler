@@ -167,15 +167,6 @@ class PairRandArbitrary : public ValCalculatorPair {
 #endif
   virtual void compute(Pairdist* dis) = 0;
   
-  /*!
-   * Determine the stage of computation due to symbol dependencies
-   */
-  virtual bool findStage();
-  
-  /*!
-   * Determine the stage of computation due to symbol dependencies
-   */
-  virtual bool findStage_0();
 };
 
 #endif /*PAIR_SCALAR_H_*/

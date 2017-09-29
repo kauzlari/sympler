@@ -140,60 +140,48 @@ class ValCalculatorArbitrary : public NonBondedPairParticleCalculator
 
     /*!
      * Constructor for the \a Node hierarchy
-    */
+     */
     ValCalculatorArbitrary(/*Node*/Simulation* parent);
-
-  /*!
+    
+    /*!
      * Destructor
-   */
+     */
     virtual ~ValCalculatorArbitrary() {
     }
-
-  /*!
+    
+    /*!
      * Setup this Calculator
-   */
+     */
     virtual void setup();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage_0();
-
+    
     /*!
      * Compute the user defined expression for pair \a pD
      * @param pD \a Pairdist whose contribution is calculated
-   */
+     */
 #ifndef _OPENMP
     virtual void compute(Pairdist* pD) = 0;
 #else
     virtual void compute(Pairdist* pD, int thread_no) = 0;
 #endif
-
-
+    
+    
 #ifdef _OPENMP
     /*!
      * Merge the copies of all threads together
      */
     virtual void mergeCopies(ColourPair* cp, int thread_no) = 0;
 #endif
-
+    
     /*!
      * Returns the symbol name as defined in the input file.
-   */
+     */
     virtual string myName() {
       return m_symbolName;
     }
-
-  /*!
+    
+    /*!
      * Register all degrees of freedom
-   */
+     */
     virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp)
     {
       throw gError("ValcalculatorArbitrary::setSlots", "should not have been called! Contact the programmer.");

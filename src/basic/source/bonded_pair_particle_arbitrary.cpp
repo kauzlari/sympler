@@ -103,6 +103,7 @@ void BondedPairParticleArbitrary::setup()
   
 }
 
+
 void BondedPairParticleArbitrary::copyMembersTo(ValCalculator* vc)
 {
   BondedPairParticleCalc::copyMembersTo(vc);
@@ -117,18 +118,6 @@ void BondedPairParticleArbitrary::copyMembersTo(ValCalculator* vc)
   ((BondedPairParticleArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
   ((BondedPairParticleArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
 
-}
-
-
-bool BondedPairParticleArbitrary::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool BondedPairParticleArbitrary::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
 }
 
 

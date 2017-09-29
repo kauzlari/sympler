@@ -418,18 +418,6 @@ void ValCalculatorArbitrary::setup()
 }
 
 
-bool ValCalculatorArbitrary::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool ValCalculatorArbitrary::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-
-
 void ValCalculatorArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
 {
   FunctionParser::addToTypedValueList(m_function.usedSymbols(), usedSymbols);

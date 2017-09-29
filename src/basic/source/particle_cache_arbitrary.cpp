@@ -202,18 +202,6 @@ void ParticleCacheArbitrary::setupOffset()
 }
 
 
-bool ParticleCacheArbitrary::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool ParticleCacheArbitrary::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-
-
 void ParticleCacheArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) {
 
   FunctionParser::addToTypedValueList(m_function.usedSymbols(), usedSymbols);      

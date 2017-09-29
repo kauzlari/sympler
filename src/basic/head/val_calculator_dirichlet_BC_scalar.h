@@ -167,24 +167,6 @@ class ValCalculatorDirichletBCScalar : public ValCalculatorBC
      */
     virtual void setup();
 
-    /*!
-     * For each wall-particle, find the walls in range
-     */
-/*     virtual void setupAfterParticleCreation(); */
-
-
-    /*!
-     * Find the right stage for the computation right at the beginning of a timestep.
-     */
-    bool findStage_0();
-
-    /*!
-     * Find the right stage for the computation before the forces.
-     */
-    bool findStage();
-
-
-
 };
 
 #endif

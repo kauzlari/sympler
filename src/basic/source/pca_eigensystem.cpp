@@ -210,17 +210,3 @@ int PCaEigensystem::setNumOfDoubles() {
 }
 #endif
 
-
-
-bool PCaEigensystem::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool PCaEigensystem::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-
-

@@ -1052,16 +1052,3 @@ void TripletCalcAngularDt2F::mergeCopies(size_t thread_no) {
 }
 #endif
 
-
-bool TripletCalcAngularDt2F::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool TripletCalcAngularDt2F::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-
-

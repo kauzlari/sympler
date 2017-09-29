@@ -178,18 +178,6 @@ void BondedPairParticleCalc::copyMembersTo(ValCalculator* vc)
 }
 
 
-bool BondedPairParticleCalc::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool BondedPairParticleCalc::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-
-
 #ifdef _OPENMP
 void BondedPairParticleCalc::mergeCopies(ColourPair* cp, int thread_no) {
 

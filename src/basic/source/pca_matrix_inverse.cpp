@@ -188,14 +188,3 @@ void PCaMatrixInverse::setup()
   }
 }
 
-
-bool PCaMatrixInverse::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool PCaMatrixInverse::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}

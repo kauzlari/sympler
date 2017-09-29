@@ -287,17 +287,6 @@ class PCaEigensystem: public ParticleCache
      */
     virtual void setup();
         
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has 
-     * to determine its stage during run-time
-     */
-    virtual bool findStage();
-        
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has 
-     * to determine its stage during run-time
-     */
-    virtual bool findStage_0();
 };
 
 #endif

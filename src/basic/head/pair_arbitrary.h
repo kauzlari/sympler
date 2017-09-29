@@ -151,15 +151,6 @@ class PairArbitrary: public ValCalculatorPair {
 		 "not be called! Contact the programmers.");
   }
   
-  /*!
-   * Determine stage during run-time
-   */
-  virtual bool findStage();
-  
-  /*!
-   * Determine during run-time
-   */
-  virtual bool findStage_0();
 };
 
 

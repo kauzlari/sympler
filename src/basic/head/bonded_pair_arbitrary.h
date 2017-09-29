@@ -79,6 +79,22 @@ class BondedPairArbitrary : public ValCalculatorPair
   virtual string usedSymbolsIgnoredForStaging() const {
     return m_oldSymbols;
   }
+
+  /*!
+   * Adds the expressions used by this \a Symbol to the given list. 
+   * @param usedSymbols List to be filled with own instances of \a TypedValue
+   */
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
+  
+  /*!
+   * Returns the strings of those \a Symbols that the given class depends on
+   * due to hard-coded reasons (not due to runtime compiled expressions).
+   * @param usedSymbols List to add the strings to.
+   */
+  virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+  {
+    
+  }
   
   /*!
    * Helper function for polymorphic copying
@@ -89,6 +105,7 @@ class BondedPairArbitrary : public ValCalculatorPair
      * copies the members of this class to \a vc
      */
     virtual void copyMembersTo(ValCalculator* vc);
+
 
   public:
     
@@ -155,18 +172,6 @@ class BondedPairArbitrary : public ValCalculatorPair
      * Setup this Calculator
      */
     virtual void setup();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage();
-    
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage_0();
     
 };
 

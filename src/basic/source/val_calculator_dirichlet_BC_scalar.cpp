@@ -134,15 +134,3 @@ void ValCalculatorDirichletBCScalar::setup()
   
 }
 
-
-bool ValCalculatorDirichletBCScalar::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool ValCalculatorDirichletBCScalar::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-

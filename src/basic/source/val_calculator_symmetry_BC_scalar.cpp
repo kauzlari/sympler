@@ -353,14 +353,3 @@ void ValCalculatorSymmetryBCScalar::computeDists(Pairdist* pD, double& innerDist
     }
 }
 
-
-bool ValCalculatorSymmetryBCScalar::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool ValCalculatorSymmetryBCScalar::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}

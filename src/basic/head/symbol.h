@@ -254,29 +254,13 @@ class Symbol : public Node
   }
   
   /*!
-   * Will end up to be the new findStage() with same functionality.
-   * So see docu there
-   */
-  virtual bool findStageNewPrelim();
-  
-  /*!
-   * Will end up to be the new findStage_0() with same functionality.
-   * So see docu there
-   */
-  virtual bool findStageNewPrelim_0();
-  
-  /*!
    * Determines \a m_stage of the current \a Symbol.
    * By default, we assume that the stage is fixed and known during compile-time, 
    * so this function does nothing except returning the message (true) that the 
    * stage was already found. Symbols, which determine the stage during run-time 
    * have to redefine this function.
    */
-  virtual bool findStage()
-  {
-    /* return true; */
-    return findStageNewPrelim();
-  }
+  virtual bool findStage();
   
   /*!
    * Determines \a m_stage of the current \a Symbol.
@@ -286,15 +270,11 @@ class Symbol : public Node
    * have to redefine this function.
    * FIXME: Try to avoid code duplication for _0 versions
    */
-  virtual bool findStage_0()
-  {
-    /* return true; */
-    return findStageNewPrelim_0();
-  }
+  virtual bool findStage_0();
   
   /*!
    * Checks for a consistent setup. Currently (2009-08-10) 
-   * just needed for the tripletCalculator 
+   * just needed for the \a TripletCalculator 
    */
   virtual void checkConsistency() {
     

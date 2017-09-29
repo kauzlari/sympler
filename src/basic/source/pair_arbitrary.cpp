@@ -132,17 +132,6 @@ void PairArbitrary::setSlot(ColourPair* cp, size_t& slot,
     (m_symbolName + cp->toString(), m_datatype, false, m_symbolName).offset;
 }
 
-bool PairArbitrary::findStage()
-{
-  return Symbol::findStageNewPrelim();
-}
-
-
-bool PairArbitrary::findStage_0()
-{
-  return Symbol::findStageNewPrelim_0();
-}
-
 
 void PairArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
 {

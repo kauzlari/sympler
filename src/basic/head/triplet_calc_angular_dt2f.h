@@ -165,36 +165,16 @@ public:
     /*!
      * setup this calculator
      */
-  virtual void setup();
-
+    virtual void setup();
+    
     /*!
      * run those setups requiring that \a Particle s have been created
      */
-  virtual void setupAfterParticleCreation();
-
-
-    /*!
-     * Determines \a m_stage of the current \a Symbol.
-     * By default, we assume that the stage is fixed and known during compile-time, 
-     * so this function does nothing except returning the message (true) that the 
-     * stage was already found. Symbols, which determine the stage during run-time 
-     * have to redefine this function.
-     */
-  bool findStage();
-
-    /*!
-     * Determines \a m_stage of the current \a Symbol.
-     * By default, we assume that the stage is fixed and known during compile-time, 
-     * so this function does nothing except returning the message (true) that the 
-     * stage was already found. Symbols, which determine the stage during run-time 
-     * have to redefine this function.
-     */
-  bool findStage_0();
-
-      
+    virtual void setupAfterParticleCreation();
+    
     /*!
      * Return the name of the computed symbols to be used in other expressions.
-       */
+     */
     virtual list<string> mySymbolNames()
     {
       list<string> temp;
@@ -203,8 +183,7 @@ public:
       temp.push_back(m_Dt2Fname);
       return temp;
     }
-
+    
 };
-
 
 #endif
