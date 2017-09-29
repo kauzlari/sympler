@@ -274,7 +274,8 @@ class Symbol : public Node
    */
   virtual bool findStage()
   {
-    return true;
+    /* return true; */
+    return findStageNewPrelim();
   }
   
   /*!
@@ -287,7 +288,8 @@ class Symbol : public Node
    */
   virtual bool findStage_0()
   {
-    return true;
+    /* return true; */
+    return findStageNewPrelim_0();
   }
   
   /*!
