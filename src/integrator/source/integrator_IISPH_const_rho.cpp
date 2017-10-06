@@ -543,8 +543,10 @@ void IntegratorIISPHconstRho::integrateStep2()
      p1Tag.doubleByOffset(m_advDensityOffset) += p2Mass*deltaVelAdvDotInterpolGradient;
      p2Tag.doubleByOffset(m_advDensityOffset) += p1Mass*deltaVelAdvDotInterpolGradient;
 
+     MSG_DEBUG("IntegratorIISPHconstRho::integrateStep2", "p1Mass(" << pair->firstPart()->mySlot << ")=" << p1Mass << ", p2Mass(" << pair->secondPart()->mySlot << ")=" << p2Mass<< ", p1vAdv=" << p1Tag.pointByOffset(vAdvOffsetSelf) << ", p2vAdv=" << p2Tag.pointByOffset(vAdvOffsetSelf) << ", interpolGradient=" << interpolGradient << ", pair->r=" << pair->cartesian() << ", -W'(r)/r=" << m_kernel->weight(pair, dummyNullPoint) << ", eij=" << pair->cartesian()/pair->abs());
+	  
      // if(pair->firstPart()->mySlot==48 || pair->secondPart()->mySlot==48)
-     //   MSG_DEBUG("IntegratorIISPHconstRho::integrateStep2", "advDensityPairLoop( " << pair->firstPart()->mySlot << "," << pair->secondPart()->mySlot << "): incr1=" << p2Mass*deltaVelAdvDotInterpolGradient << ", incr2=" << p1Mass*deltaVelAdvDotInterpolGradient << ", rhoAdvNew1=" << p1Tag.doubleByOffset(m_advDensityOffset) << ", rhoAdvNew2=" << p2Tag.doubleByOffset(m_advDensityOffset));
+        MSG_DEBUG("IntegratorIISPHconstRho::integrateStep2", "advDensityPairLoop(" << pair->firstPart()->mySlot << "," << pair->secondPart()->mySlot << "): incr1=" << p2Mass*deltaVelAdvDotInterpolGradient << ", incr2=" << p1Mass*deltaVelAdvDotInterpolGradient << ", rhoAdvNew1=" << p1Tag.doubleByOffset(m_advDensityOffset) << ", rhoAdvNew2=" << p2Tag.doubleByOffset(m_advDensityOffset));
      
      ); // end FOR_EACH_PAIR__PARALLEL
 
@@ -596,8 +598,8 @@ void IntegratorIISPHconstRho::integrateStep2()
      i->tag.doubleByOffset(m_advDensityOffset) *= m_dt;
 
      // if(i->mySlot == 48) {
-     //   MSG_DEBUG("IntegratorIISPHconstRho::integrateStep2", "pSlot=" << i->mySlot << ", rhoAdvBeforeFinal(=DifferenceToOldRho)=" << i->tag.doubleByOffset(m_advDensityOffset) );
-     //   MSG_DEBUG("IntegratorIISPHconstRho::integrateStep2", "pSlot=" << i->mySlot << ", OldRho-rho0=" << i->tag.doubleByOffset(m_densityOffset)-m_rho0 );
+       // MSG_DEBUG("IntegratorIISPHconstRho::integrateStep2", "pSlot=" << i->mySlot << ", rhoAdvBeforeFinal(=DifferenceToOldRho)=" << i->tag.doubleByOffset(m_advDensityOffset) );
+       // MSG_DEBUG("IntegratorIISPHconstRho::integrateStep2", "pSlot=" << i->mySlot << ", OldRho-rho0=" << i->tag.doubleByOffset(m_densityOffset)-m_rho0 );
      // }
      
      i->tag.doubleByOffset(m_advDensityOffset) += i->tag.doubleByOffset(m_densityOffset);
