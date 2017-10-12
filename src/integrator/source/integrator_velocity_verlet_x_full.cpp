@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -124,7 +124,7 @@ void IntegratorVelocityVerletXFull::integrateStep2()
 //        MSG_DEBUG("IntegratorVelocityVerlet::integrateStep2", name() << "MAIN: v AFTER = " << i->tag.pointByOffset(m_v_offset));  
       );
 
-   phase->invalidate();
+   phase->invalidateVelocities();
 }
 
 void IntegratorVelocityVerletXFull::integrateVelocity(Particle* p)
