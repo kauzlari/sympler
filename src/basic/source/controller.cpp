@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -229,13 +229,7 @@ void Controller::run() {
   tInitStart = clock();
 //   std::time(&tInitStart);
 
-  FOR_EACH_COLOUR_PAIR
-    ( 
-     phase->manager(),
-     cp->updateConnectedDistances();    
-     );
-
-  M_PAIRCREATOR->createDistances();
+  triggerNeighbourUpdate();
 
   tInitEnd = clock();
 //   std::time(&tInitEnd);
@@ -531,16 +525,11 @@ void Controller::integrate()
   tInitStart = clock();
 //   std::time(&tInitStart);
       
-  FOR_EACH_COLOUR_PAIR
-    ( 
-     phase->manager(),
-     cp->updateConnectedDistances();    
-     );
-
 // time_t t0, t1;
 // std::time(&t0);
-  M_PAIRCREATOR->createDistances();
 
+  triggerNeighbourUpdate();
+  
   tInitEnd = clock();
 //   std::time(&tInitEnd);
   m_pairCreateTime += (tInitEnd - tInitStart)/(double)CLOCKS_PER_SEC;
@@ -1269,4 +1258,15 @@ void Controller::registerForPrecomputation_0 (Node* callable)
 void Controller::registerForSetupAfterParticleCreation (Node* callable)
 {
   m_toSetupAfterParticleCreation.push_back(callable); 
+}
+
+void Controller::triggerNeighbourUpdate() const
+{
+  FOR_EACH_COLOUR_PAIR
+    ( 
+     M_MANAGER,
+     cp->updateConnectedDistances();    
+     );
+
+  M_PAIRCREATOR->createDistances();
 }
