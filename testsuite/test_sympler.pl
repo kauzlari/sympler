@@ -160,11 +160,14 @@ foreach $dir (@dirs)
 		foreach my $sim(@sim)
 		{
 			system("perl -pi -e 's/-0.000000/0.000000/g' $sim");
+			#print "At res $res and at sim $sim\n";
 			if($res eq $sim)
 			{	
+				#print "Before diff\n";
 				$ret=system("diff -E -b -t $Bin/RESULTS/$res /tmp/SIMULATION/$sim >/tmp/diff_$sim");
 				if ($ret){print "RESULT CHANGED FOR $res and $sim AND CHANGED RESULTS ARE STORED IN '/tmp/diff_$sim \n";}
 				else {print "RESULT IS SAME FOR $res and $sim\n";} 
+				#print "After diff\n";
 			}
 			
 		}

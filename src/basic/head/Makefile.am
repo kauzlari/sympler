@@ -53,6 +53,8 @@ include_HEADERS = \
 	pair_tensor.h\
 	pair_vector.h\
 	particle.h \
+        density_calculation.h \
+        pressure_calculation.h \
 	particle_cache.h \
 	particle_cache_arbitrary.h \
 	particle_cache_arb_rng.h \
