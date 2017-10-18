@@ -21,7 +21,7 @@ symplerTest_LDADD = \
 	-lm \
 	\
         @GSL_LIBS@ @SDL_LIBS@ @XML_LIBS@ \
-	-llzma -licui18n -licuuc -licudata
+	-llzma -licui18n -licuuc -licudata -lfreesteam
 #	-lz -lpthread -llzma -licui18n -licuuc -licudata
 # -lz seems to be automatically added by XML_LIBS
 # -lpthread was replaced by -pthread in sympler_LDFLAGS below
