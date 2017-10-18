@@ -307,7 +307,6 @@ nY = "1"
 avgOver = "1"
 measureEvery = "10"
 >
-
 <Velocity
 species = "WALL"
 />
@@ -332,3 +331,5 @@ writeHead = "no"
 -->
 
 </Simulation>
+
+
