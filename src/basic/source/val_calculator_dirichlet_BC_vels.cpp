@@ -50,14 +50,14 @@ using namespace std;
 ValCalculatorDirichletBCVels::ValCalculatorDirichletBCVels(string symbol)
   : ValCalculatorBC(symbol)
 {
-//   MSG_DEBUG("ValCalculatorDirichletBCVels::ValCalculatorDirichletBCVels", "CONSTRUCTOR");
+  m_stage = 0;
+  //   MSG_DEBUG("ValCalculatorDirichletBCVels::ValCalculatorDirichletBCVels", "CONSTRUCTOR");
 }
 
 ValCalculatorDirichletBCVels::ValCalculatorDirichletBCVels(/*Node*/Simulation* parent)
   : ValCalculatorBC(parent)
 {
-  // next already done in upper class
-  //  m_stage = 0;
+  m_stage = 0;
   init();
 }
 

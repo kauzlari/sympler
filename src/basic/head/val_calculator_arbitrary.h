@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -111,69 +111,82 @@ class ValCalculatorArbitrary : public NonBondedPairParticleCalculator
       */
     virtual ValCalculator* copyMySelf() = 0;
 
+    /*!
+     * The returned string contains those terms from runtime compiled expressions, 
+     * which should be ignored when determining the stage. The expressions are separated by " | ".
+     * An "empty" string must have the form "---".
+     */
+    virtual string usedSymbolsIgnoredForStaging() const {
+      return m_oldSymbols;
+    }
 
+    /*!
+     * Adds the expressions used by this \a Symbol to the given list. 
+     * @param usedSymbols List to be filled with own instances of \a TypedValue
+     */
+    virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
+
+    /*!
+     * Returns the strings of those \a Symbols that the given class depends on
+     * due to hard-coded reasons (not due to runtime compiled expressions).
+     * @param usedSymbols List to add the strings to.
+     */
+    virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+    {
+      
+    }
+    
   public:
 
     /*!
      * Constructor for the \a Node hierarchy
-    */
+     */
     ValCalculatorArbitrary(/*Node*/Simulation* parent);
-
-  /*!
+    
+    /*!
      * Destructor
-   */
+     */
     virtual ~ValCalculatorArbitrary() {
     }
-
-  /*!
+    
+    /*!
      * Setup this Calculator
-   */
+     */
     virtual void setup();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage_0();
-
+    
     /*!
      * Compute the user defined expression for pair \a pD
      * @param pD \a Pairdist whose contribution is calculated
-   */
+     */
 #ifndef _OPENMP
     virtual void compute(Pairdist* pD) = 0;
 #else
     virtual void compute(Pairdist* pD, int thread_no) = 0;
 #endif
-
-
+    
+    
 #ifdef _OPENMP
     /*!
      * Merge the copies of all threads together
      */
     virtual void mergeCopies(ColourPair* cp, int thread_no) = 0;
 #endif
-
+    
     /*!
      * Returns the symbol name as defined in the input file.
-   */
+     */
     virtual string myName() {
       return m_symbolName;
     }
-
-  /*!
+    
+    /*!
      * Register all degrees of freedom
-   */
+     */
     virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp)
     {
       throw gError("ValcalculatorArbitrary::setSlots", "should not have been called! Contact the programmer.");
     }
+    
 };
 
 #endif

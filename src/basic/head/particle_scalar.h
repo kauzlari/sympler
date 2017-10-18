@@ -79,15 +79,8 @@ class ParticleScalar : public ParticleCacheArbitrary
        */
     virtual void computeCacheFor(Particle* p)
     {
-/*        if(p->mySlot == 0)  */
-/*           MSG_DEBUG("ParticleScalar::computeCacheFor", "BEFORE " + m_symbolName + " = " << p->tag.doubleByOffset(m_offset));  */
       
       m_function(&(p->tag.doubleByOffset(m_offset)), p);
-
-
-/*        if(p->mySlot <= 432) */
-/* 	MSG_DEBUG("ParticleScalar::computeCacheFor", p->mySlot << "AFTER " + m_expression + ", " + m_symbolName + " = " << p->tag.doubleByOffset(m_offset) << "stage=" << m_stage); */
-
       
     }
 

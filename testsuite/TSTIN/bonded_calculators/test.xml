@@ -13,7 +13,7 @@
 		name="L075" />
 -->
   <Controller
-  	timesteps="600"
+  	timesteps="30"
 	statusEvery="100"
 	dt="0.005">
     <IntegratorVelocityVerlet
@@ -69,7 +69,7 @@
         species2 = "blobTF"
         species3 = "blobTF"
   	listName = "angularDPDTF"
-	K = "0"
+	K = "0.9"
 	thetaEq = "60"
         symbol = "FDPDangularTF"
   />
@@ -80,9 +80,22 @@
         species2 = "blobNS"
         species3 = "blobNS"
   	listName = "angularDPDNS"
-	K = "0"
+	K = "0.9"
 	thetaEq = "60"
         symbol = "FDPDangularNS"
+  />
+
+  <!-- Next one is just for the testsuite. Does not necessarily make sense-->
+  <TripletCalcAngularDt2F
+        species1 = "blobNS"
+        species2 = "blobNS"
+        species3 = "blobNS"
+  	listName = "angularDPDNS"
+	K = "0.9"
+	thetaEq = "60"
+        symbol2 = "FDPDangularDt2FNS"
+	forceSymbol = "FDPDangularNS"
+	symbol = "first"
   />
 
   <!-- test of BondedPairVector-->
@@ -223,6 +236,7 @@
   <MeterAverage measureEvery = "10">
     <Temperature species = "blobTF"/>
     <Temperature species = "blobNS"/>
+    <Scalar species = "blobNS" symbol = "FDPDangularDt2FNS"/>
     <OutputFile nameOutputFile = "bonded_calculators.dat" multipleFiles = "no"/>
   </MeterAverage>
 

@@ -210,8 +210,22 @@ class FunctionParser
    * Counts the number of \a FunctionParser s; needed for \a s_logFileStream
    */
   static size_t s_numFunctionParsers;
-  
 
+  /*!
+   * Adds the \a TypedValue s of the first list to the second
+   * @param newSymbols List with \a TypedValue s to be added
+   * @param usedSymbols List with \a TypedValue we want to add new ones to
+   */
+  static void addToTypedValueList(const typed_value_list_t& newSymbols, typed_value_list_t& usedSymbols);
+
+  /*!
+   * Removes the \a TypedValue with name \a toRemove from \a usedSymbols
+   * @param toRemove Name of \a TypedValue to be removed
+   * @param usedSymbols List with \a TypedValue s where we want to remove 
+   * the one with name \a toRemove
+   */
+  static void removeFromTypedValues(string toRemove, typed_value_list_t& usedSymbols);
+    
 };
 
 #endif

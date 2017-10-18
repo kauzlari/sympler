@@ -73,13 +73,3 @@ void BondedPairScalar::setup() {
  
 }
 
-// Now (2014-10-31) in BondedPairArbitrary
-// void BondedPairScalar::setSlot(ColourPair* cp, size_t& slot,
-// 						 bool oneProp) {
-//   m_slot = slot = cp->tagFormat().addAttribute
-//     // OLD-STYLE. No idea why this was done.
-//     //    ("BondedPairScalar_" + cp->toString(), DataFormat::DOUBLE, false, "m_scalar").offset;
-//     // NEW-STYLE (2014-10-31)
-//     (m_symbolName, DataFormat::DOUBLE, false, m_symbolName).offset;
-// }
-

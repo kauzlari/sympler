@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -61,4 +61,16 @@ void ParticleCache::init()
   
   m_species = "undefined";
    
+}
+
+
+void ParticleCache::cleanSymbol(string& name) const
+{
+  if(name[0] == '{' || name[0] == '[') {
+    // remove the first bracket
+    name.erase(0, 1);
+    // remove the last bracket; don't know why, but with these arguments it works
+    name.erase(name.size()-1, name.size()-1);
+  }
+  MSG_DEBUG("ValCalculator::cleanPairSymbol", className() << ": shortened name of symbol: " << name);
 }

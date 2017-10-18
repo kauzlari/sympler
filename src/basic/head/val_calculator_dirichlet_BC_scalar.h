@@ -74,6 +74,17 @@ class ValCalculatorDirichletBCScalar : public ValCalculatorBC
     {
       return new ValCalculatorDirichletBCScalar(*this); 
     }
+
+    /*!
+     * Returns the strings of those \a Symbols that the given class depends on
+     * due to hard-coded reasons (not due to runtime compiled expressions).
+     * @param usedSymbols List to add the strings to.
+     */
+    virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+    {
+      usedSymbols.push_back(m_scalarName);
+    }
+
   
   public:
   /*!
@@ -155,24 +166,6 @@ class ValCalculatorDirichletBCScalar : public ValCalculatorBC
      * Setup this Calculator
      */
     virtual void setup();
-
-    /*!
-     * For each wall-particle, find the walls in range
-     */
-/*     virtual void setupAfterParticleCreation(); */
-
-
-    /*!
-     * Find the right stage for the computation right at the beginning of a timestep.
-     */
-    bool findStage_0();
-
-    /*!
-     * Find the right stage for the computation before the forces.
-     */
-    bool findStage();
-
-
 
 };
 

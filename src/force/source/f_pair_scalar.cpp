@@ -69,7 +69,7 @@ void FPairScalar::init()
     "     = particleFactor_i*Sum_j(pairFactor_ij*weight_ij)*dt\n"
       "\nwhere particleFactor_i(j) is a sum of quantities related to particle i(j),\n"
       "      pairFactor_ij includes all pair contributions of the pair ij,\n"
-      "      weight_ij represents the derivative of the weighting function.\n"
+      "      weight_ij represents -W'(rij)/rij of the used weighting function W.\n"
     "\nNote that the expression has to give a scalar in the end,"
     "otherwise the compiler will report an error.");
 

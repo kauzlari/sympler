@@ -15,7 +15,7 @@
 		name = "Lucy1"
 		/>
 	<Controller
-		   timesteps = "400"
+		   timesteps = "20"
 		   dt = "0.1"
 		   >
 
@@ -207,7 +207,7 @@
 		
 	</Phase>
 	<MeterAverage
-		     measureEvery = "100"
+		     measureEvery = "10"
 		     >
 		<Velocity species = "H"/>
 		<LocalDensity

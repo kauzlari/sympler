@@ -70,7 +70,7 @@ void FPairVelsBC::init()
       "dv_i = FPV*dt\n"
       "     = particleFactor_i(BV)*Sum_j(pairFactor_ij(BV)*weight_ij)*dt\n"
       "where pairFactor_ij(BV) includes all pair contributions of the pair ij,\n"
-      "weight_ij represents the derivative of the used weighting function,\n"
+      "weight_ij represents -W'(rij)/rij of the used weighting function W.,\n"
       "particleFactor_i(j)(BV) represents factors specific to particle i(j),\n"
       "and BV is the symbol for the boundary value (usually of some "
       "boundary-particles), which may be used in the expressions as indicated.\n"
