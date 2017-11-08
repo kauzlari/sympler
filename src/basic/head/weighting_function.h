@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -232,6 +232,11 @@ class WeightingFunctionWithWall: public WeightingFunction
   virtual double interpolate(const Pairdist *r, const point_t &p, double *dist_from_wall = NULL) const {
     point_t normal = {{{ 0, 0, 0 }}};
 
+    if(!r) {
+      throw gError("WeightingFunctionWithWall::interpolate for " + className(), "r=NULL detected. This is currently not supported! Please use a different WeightingFunction");
+      return 0.;
+    }
+      
     if (r && r->abs() > m_cutoff)
       return 0.;
 
