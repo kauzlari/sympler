@@ -61,8 +61,8 @@ void DensityCalculationTest  :: setupLUTTest (void) {
   double m_Tmax= 700;
   double m_pmax = 25000000;
   // Size of the arrays
-  int m_arraysize_pressure = 100;
-  int m_arraysize_temperature = 100;
+  int m_arraysize_pressure = 10;
+  int m_arraysize_temperature = 10;
   // Initialization of the LUT
   ps ->setupLUT(m_Tmin, m_pmin, m_Tmax, m_pmax,m_arraysize_pressure, m_arraysize_temperature);
   SteamState S = freesteam_set_pT(m_pmin, m_Tmin);
@@ -70,11 +70,11 @@ void DensityCalculationTest  :: setupLUTTest (void) {
   // Assertions to check if the first and the last content of the array are correct.
   CPPUNIT_ASSERT_EQUAL (ps -> m_array_rho[0][0], density);
   // Calculation steps between expansion points
-  double m_calcstepP= (m_pmax-m_pmin)/99;
-  double m_calcstepT= (m_Tmax-m_Tmin)/99;
-  S = freesteam_set_pT(m_pmin+ 99*m_calcstepP, m_Tmin+ 99*m_calcstepT);
+  double m_calcstepP= (m_pmax-m_pmin)/(m_arraysize_pressure-1);
+  double m_calcstepT= (m_Tmax-m_Tmin)/(m_arraysize_temperature-1);
+  S = freesteam_set_pT(m_pmin+ (m_arraysize_pressure-1)*m_calcstepP, m_Tmin+ (m_arraysize_temperature-1)*m_calcstepT);
   density = freesteam_rho(S);
-  CPPUNIT_ASSERT_EQUAL (ps -> m_array_rho[99][99], density);
+  CPPUNIT_ASSERT_EQUAL (ps -> m_array_rho[(m_arraysize_pressure-1)][(m_arraysize_temperature-1)], density);
 }
 
 void DensityCalculationTest  :: calculateDensityTest (void)
@@ -85,11 +85,8 @@ void DensityCalculationTest  :: calculateDensityTest (void)
   double m_Tmax= 700;
   double m_pmax = 24000000;
   // Size of the arrays
-  int m_arraysize_pressure = 1000;
-  int m_arraysize_temperature = 1000;
-  // Calculation steps between expansion points
-  double m_calcstepP= (m_pmax-m_pmin)/99;
-  double m_calcstepT= (m_Tmax-m_Tmin)/99;
+  int m_arraysize_pressure = 10;
+  int m_arraysize_temperature = 10;
   // Initialization of the LUT
   ps -> setupLUT(m_Tmin, m_pmin, m_Tmax, m_pmax, m_arraysize_pressure, m_arraysize_temperature );
   SteamState S = freesteam_set_pT(24000000, 650);
