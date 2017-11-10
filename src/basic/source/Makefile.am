@@ -52,6 +52,8 @@ libbasic_la_SOURCES = \
 	pair_tensor.cpp\
 	pair_vector.cpp\
 	particle.cpp \
+        density_calculation.cpp \
+        pressure_calculation.cpp \
 	particle_cache.cpp \
 	particle_cache_arbitrary.cpp \
 	particle_cache_arb_rng.cpp \
