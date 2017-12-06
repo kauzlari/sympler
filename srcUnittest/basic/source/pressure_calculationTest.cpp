@@ -64,8 +64,8 @@ void PressureCalculationTest  :: setupLUTTest (void) {
   double m_Tmax= 700;
   double m_rhomax = 600;
   // Size of the arrays
-  int m_arraysize_density = 100;
-  int m_arraysize_temperature = 100;
+  int m_arraysize_density = 10;
+  int m_arraysize_temperature = 10;
   ps -> setupLUT(m_Tmin, m_rhomin, m_Tmax, m_rhomax,m_arraysize_density, m_arraysize_temperature);
   double b23Pressure = freesteam_b23_p_T(m_Tmin);
   SteamState S = freesteam_set_pT(b23Pressure, m_Tmin);
@@ -76,10 +76,10 @@ void PressureCalculationTest  :: setupLUTTest (void) {
     CPPUNIT_ASSERT_EQUAL (ps -> m_array_p[0][0], pressure);
   }
   // Calculation steps between expansion points
-  double m_calcstepRho= (m_rhomax-m_rhomin)/99;
-  double m_calcstepT= (m_Tmax-m_Tmin)/99;
+  double m_calcstepRho= (m_rhomax-m_rhomin)/(m_arraysize_density - 1);
+  double m_calcstepT= (m_Tmax-m_Tmin)/(m_arraysize_temperature - 1);
   double pressure = freesteam_region3_p_rhoT(600.000000, 700.000000);
-  CPPUNIT_ASSERT_EQUAL (ps -> m_array_p[99][99], pressure);
+  CPPUNIT_ASSERT_EQUAL (ps -> m_array_p[m_arraysize_density - 1][m_arraysize_temperature - 1], pressure);
 }
 
 void PressureCalculationTest  :: calculatePressureTest (void)
@@ -90,19 +90,18 @@ void PressureCalculationTest  :: calculatePressureTest (void)
   double m_Tmax= 750;
   double m_rhomax = 600;
   // Size of the arrays
-  int m_arraysize_density = 100;
-  int m_arraysize_temperature = 100;
+  int m_arraysize_density = 10;
+  int m_arraysize_temperature = 10;
   // Initialization of the LUT
   ps -> setupLUT(m_Tmin, m_rhomin, m_Tmax, m_rhomax,m_arraysize_density, m_arraysize_temperature);
   // Assertion to check if the interpolation is correct.
   double pressure = freesteam_region3_p_rhoT(350, 700);
   double interpol = ps -> calculatePressure(700, 350, m_Tmin, m_rhomin);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure,100);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, (interpol / 100));	// relativ delta: 1% of expected
   pressure = freesteam_region3_p_rhoT(600, 750);
   interpol = ps -> calculatePressure(750, 600, m_Tmin, m_rhomin);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure,100);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, (interpol / 100));	// relativ delta: 1% of expected
   pressure = freesteam_region3_p_rhoT(300, 650);
   interpol = ps -> calculatePressure(650, 300, m_Tmin, m_rhomin);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, 100);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, (interpol / 100));	// relativ delta: 1% of expected
 }
-
