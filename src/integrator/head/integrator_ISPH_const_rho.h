@@ -342,6 +342,13 @@ protected:
   double m_epsilonAvg;
 
   /*!
+   * Helper that is not really necessary, but we need it at least now 
+   * (20171206) due to reasons discussed at the initialisation in 
+   * \a setup().
+   */
+  double m_kernelSelfContrib;
+  
+  /*!
    * Memory offset in the \a Particle tag meant to be used flexibly "as needed" for precomputed 
    * values. Currently (2017-01-26) it is used for only one value. Increased usage might save an 
    * insignificant amount of memory and make the code more messy
@@ -474,20 +481,82 @@ protected:
   void residualsPerColour(size_t colour, double& maxRes, double& sqL2Res);
   
   /*!
-   * Pressure force acceleration contribution FP/m of particles from 
-   * other colours to the fluid particles.
+   * Helper function for pressure force acceleration contribution FP/m 
+   * of particles from other colours to the fluid particles.
    * We use the SPH-discretisation 
    * dv/dt = -nablaP/rho = -sum_j[mj(Pi/rhoi^2+Pj/rhoj^2)]nablaWij
    */
   void pressureForceIncrementFluidOther(ColourPair* cp);
 
   /*!
-   * Pressure force acceleration contribution dt*FP/m of fluid particles 
-   * to the fluid particles.
+   * Helper function for pressure force acceleration contribution 
+   * dt*FP/m of fluid particles to the fluid particles.
    * We use the SPH-discretisation 
    * dv/dt = -nablaP/rho = -sum_j[mj(Pi/rhoi^2+Pj/rhoj^2)]nablaWij
    */
   void pressureForceIncrementFluidFluid();
+
+  /*!
+   * Helper function for some variable initialisations. Should only be
+   * called if \a m_usingWalls == true
+   */
+  void initialisationsWithWalls();
+
+  /*!
+   * Helper function for contributions to the advected density by wall 
+   * and edge particles. Should only be called if 
+   * \a m_usingWalls == true
+   */
+  void advDensityContribsWithWalls();
+
+
+  void normalisationDenominatorsWithWalls();
+
+
+  /*!
+   * Helper function applying interpolation normalisations to the 
+   * advected density for edge particles. Will only make changes if 
+   * \a m_usingWalls == true
+   */
+  void normaliseAdvDensityWithWalls();
+
+  
+  /*!
+   * Helper function for contributions to the diagonal part aii of the 
+   * PPE by wall and edge particles. Should only be called if 
+   * \a m_usingWalls == true
+   */
+  void aiiContribWithWalls();
+
+
+  /*!
+   * Helper function that computes the initial pressure for wall and 
+   * edge particles. Should only be called if \a m_usingWalls == true
+   */
+  void initialPressureWithWalls();
+
+    
+  /*!
+   * Helper function that initialises the wall and edge particle 
+   * variables which are relevant for the pressure iteration. Should 
+   * only be called if \a m_usingWalls == true
+   */
+  void initPressureIterWithWalls();
+
+
+  /*!
+   * Helper function that sets the final pressure to the last result 
+   * obtained from the Jacobi iteration for wall and edge particles. 
+   * Should only be called if \a m_usingWalls == true
+   */
+  void finalisePressureWithWalls();
+
+  /*!
+   * Helper function that computes the pair contribution within the 
+   * Jacobi iteration from the edge and wall particles. 
+   * Should only be called if \a m_usingWalls == true
+   */
+  void pairIterPContribWithWalls();
 
   
 public:
@@ -568,7 +637,7 @@ public:
 
 #endif
 
-  static const point_t dummyNullPoint;
+  static const point_t s_dummyNullPoint;
   
 };
 

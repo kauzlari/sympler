@@ -48,7 +48,7 @@ using namespace std;
 #define M_MANAGER M_PHASE->manager()
 const Integrator_Register<IntegratorISPHconstRho> integrator_ISPH_const_rho("IntegratorISPHconstRho");
 
-const point_t IntegratorISPHconstRho::dummyNullPoint = {0, 0, 0};
+const point_t IntegratorISPHconstRho::s_dummyNullPoint = {0, 0, 0};
 
 
 //---- Constructors/Destructor ----
@@ -74,18 +74,19 @@ void IntegratorISPHconstRho::init()
   m_properties.setName("IntegratorISPHconstRho");
   
   m_properties.setDescription
-    ("Incompressible SPH Integrator based on the algorithm proposed by S. Shao, E.Y.M. Lo / Advances in Water Resources 26 (2003) 787–800.\n"
-     "Currently, the algorithm uses relaxed Jacobi iteration to solve the resulting pressure Poisson equation.\n"
+    ("Incompressible SPH Integrator based on the algorithm proposed by S. Shao, E.Y.M. Lo / Advances in Water Resources 26 (2003) 787–800. The user has still freedom to choose the exact form of the SPH discretisation of the left hand side (LHS) of the pressure Poisson equation (PPE). \n"
+     "Currently, the algorithm uses relaxed Jacobi iteration to solve the resulting PPE.\n"
      "NOTE THE FOLLOWING PROPERTIES, ASSUMPTIONS, LIMITATIONS, AND REQUIREMENTS:\n"
-     "- This Integrator enforces incompressibility within a SINGLE species. Multi-phase incompressibility is not yet (2017-01-18) supported.\n"
+     "- This Integrator enforces incompressibility within a SINGLE species. Multi-phase incompressibility is not yet (2017-12-06) supported.\n"
      "- Walls have to be handled by introducing two additional species. With the attribute 'edgeSpecies', particles are introduced which are positioned exactly on the boundary. With the attribute 'wallSpecies', particles are introduced which are positioned \"behind\" the boundary outside of the fluid domain, usually within a shell of one maximum cutoff thickness. Particles of all species (fluid, edge, wall) must be created with ParticleCreators. The user is responsible for the correct placing of the particles. The interactions and the pressure computation between the particles are implemented as described in the reference given above, with a some differences: To achieve compatibility with arbitrarily shaped boundaries, the pressure and advected density of wall particles is computed by partial and corrected SPH-interpolation over the edge particles.\n"
      "- Hard collisions with walls or similar objects are currently (2017-12-04) not supported. Using this integrator, such collisons will not be detected and particles may penetrate walls leading to loss of particles or to their motion in 'forbidden' areas.\n"
      );
 
   STRINGPC
       (PPEexpression, m_PPEexpr,
-       "The mathematical expression aij' for the LHS of the SPH-discretised pressure Poisson equation. The full LHS will be sumj aij(Pi-Pj) with pressure P, where aij=aij'Wij, with interpolation kernel Wij. The kernel term is multiplied automatically such that the user must only provide aij' within 'PPEexpression'.\n "
-       "NOTE: Currently, aij' must be fully symmetric w.r.t. particle-index interchange i<->j."
+       "The mathematical expression aij' for the LHS of the SPH-discretised pressure Poisson equation (PPE). The full LHS will be sumj aij(Pi-Pj) with pressure P, where aij=aij'(-Wij'/rij), with interpolation kernel Wij, its derivative Wij' and absolute distance rij beetween particles i and j. The negative kernel-derivative term divided by rij in brackets is multiplied automatically such that the user must only provide aij' within 'PPEexpression'.\n"
+       "NOTE: Currently, aij' must be fully symmetric w.r.t. particle-index interchange i<->j.\n"
+       "NOTE: Within the ISPH algorithm by Shao and Lo (see reference above), the density to be used within the LHS should be the advected density, which is accessible by the symbol name 'advDensity' for fluid, edge and wall particles. Of course you may use the standard density defined by the attribute 'densityName' if you think it suits your own model. The standard density will represent the old density of the previous time step, when used in the LHS of the PPE. \n"
       );
   m_PPEexpr = "undefined";
   
@@ -109,13 +110,13 @@ void IntegratorISPHconstRho::init()
 
   STRINGPC
     (edgeEdgeListName, m_edgeEdgeListName,
-     "Name of the list of bonded pairs that this Integrator automatically constructs for computation of interaction terms between two edge particles."
+     "Name of the list of bonded pairs that this Integrator automatically constructs for computation of interaction terms between two edge particles. This is ignored and not done if attributes 'edgeSpecies' and 'wallSpecies' are kept undefined."
      );
   m_edgeEdgeListName = "__ISPHedgeEdgeList";
 
   STRINGPC
     (edgeWallListName, m_edgeWallListName,
-     "Name of the list of bonded pairs that this Integrator automatically constructs for computation of interaction terms between edge particles and wall particles."
+     "Name of the list of bonded pairs that this Integrator automatically constructs for computation of interaction terms between edge particles and wall particles. This is ignored and not done if attributes 'edgeSpecies' and 'wallSpecies' are kept undefined."
      );
   m_edgeWallListName = "__ISPHedgeWallList";
 
@@ -207,7 +208,7 @@ void IntegratorISPHconstRho::setup()
   
   // interpolation kernel
   m_kernel = M_SIMULATION->findWeightingFunction(m_kernelName);
-  
+
   // This simplifies some loops in the algorithm
   if(m_colour != 0)
     throw gError("IntegratorISPHconstRho::setup", "The incompressible species was not defined as the very first species but this is required by IntegratorISPHconstRho. To achieve this, no other modules (such as Integrators) should define a species before IntegratorISPHconstRho.");
@@ -258,7 +259,7 @@ void IntegratorISPHconstRho::setup()
   m_aiiOffset[m_colour] = DataFormat::addNewAttribute
     (m_colour, "__ISPHaii", DataFormat::DOUBLE);
   m_advDensityOffset[m_colour] = DataFormat::addNewAttribute
-    (m_colour, "__ISPHadvDensity", DataFormat::DOUBLE);
+    (m_colour, "advDensity", DataFormat::DOUBLE);
   m_pressureIterOldOffset[m_colour] = DataFormat::addNewAttribute
     (m_colour, "__ISPHpIterSlot1", DataFormat::DOUBLE);
   m_pressureIterNewOffset[m_colour] = DataFormat::addNewAttribute
@@ -302,9 +303,9 @@ void IntegratorISPHconstRho::setup()
     m_aiiOffset[m_edgeColour] = DataFormat::addNewAttribute
       (m_edgeColour, "__ISPHaii", DataFormat::DOUBLE);
     m_advDensityOffset[m_edgeColour] = DataFormat::addNewAttribute
-      (m_edgeColour, "__ISPHadvDensity", DataFormat::DOUBLE);
+      (m_edgeColour, "advDensity", DataFormat::DOUBLE);
     m_advDensityOffset[m_wallColour] = DataFormat::addNewAttribute
-    (m_wallColour, "__ISPHadvDensity", DataFormat::DOUBLE);
+    (m_wallColour, "advDensity", DataFormat::DOUBLE);
     m_pressureIterOldOffset[m_edgeColour] = DataFormat::addNewAttribute
       (m_edgeColour, "__ISPHpIterSlot1", DataFormat::DOUBLE);
     m_pressureIterNewOffset[m_edgeColour] = DataFormat::addNewAttribute
@@ -368,6 +369,15 @@ void IntegratorISPHconstRho::isAboutToStart()
     m_edgeEdgeListIndex = HUGE_VAL;
     m_edgeWallListIndex = HUGE_VAL;
   }
+
+  // kernel self-contribution; this is not really necessary, but I got
+  // an internal compiler error with g++ (Ubuntu 5.4.0-6ubuntu1~16.04.5)
+  // 5.4.0 20160609 when calling the function at some places in private
+  // member functions
+  // NOTE: This cannot be done in setup() since the kernel functions
+  // are compiled after Integrator::setup()
+  m_kernelSelfContrib =
+    m_kernel->interpolate(NULL, s_dummyNullPoint);
   
 }
 
@@ -429,34 +439,33 @@ void IntegratorISPHconstRho::integrateStep2()
   size_t force_index = M_CONTROLLER->forceIndex();
   double dtsq = m_dt*m_dt;
   double temp;
-  const point_t dummyNullPoint = {0, 0, 0};
+  // const point_t s_dummyNullPoint = {0, 0, 0};
 
-  size_t edgeAdvDensityPrecompOffset =
-    m_advDensityPrecompOffset[m_edgeColour];
-  size_t wallAdvDensityPrecompOffset =
-    m_advDensityPrecompOffset[m_wallColour];
-  size_t advDensityOffsetEdge =  m_advDensityOffset[m_edgeColour];
+  // size_t edgeAdvDensityPrecompOffset =
+  //   m_advDensityPrecompOffset[m_edgeColour];
+  // size_t wallAdvDensityPrecompOffset =
+  //   m_advDensityPrecompOffset[m_wallColour];
   size_t advDensityOffsetFluid =  m_advDensityOffset[m_colour];
-  size_t advDensityOffsetWall = m_advDensityOffset[m_wallColour];
+  // size_t advDensityOffsetWall = m_advDensityOffset[m_wallColour];
   size_t advNormalisationOffsetFluid = m_advNormalisationOffset[m_colour];
-  size_t advNormalisationOffsetEdge = m_advNormalisationOffset[m_edgeColour];
+  // size_t advNormalisationOffsetEdge = m_advNormalisationOffset[m_edgeColour];
   size_t aiiOffsetFluid = m_aiiOffset[m_colour];
-  size_t aiiOffsetEdge = m_aiiOffset[m_edgeColour];
   
   // the following are changed during the iteration, that's why the
   // reference
   size_t& pressureIterNewFluidOffset = m_pressureIterNewOffset[m_colour];
   size_t& pressureIterOldFluidOffset = m_pressureIterOldOffset[m_colour];
-  size_t& pressureIterNewEdgeOffset = m_pressureIterNewOffset[m_edgeColour];
-  size_t& pressureIterOldEdgeOffset = m_pressureIterOldOffset[m_edgeColour];
+  // size_t& pressureIterNewEdgeOffset = m_pressureIterNewOffset[m_edgeColour];
+  // size_t& pressureIterOldEdgeOffset = m_pressureIterOldOffset[m_edgeColour];
 
   size_t pressureFluidOffset = m_pressureOffset[m_colour];
-  size_t pressureEdgeOffset = m_pressureOffset[m_edgeColour];
-  size_t pressureWallOffset = m_pressureOffset[m_wallColour];
+  // size_t pressureEdgeOffset = m_pressureOffset[m_edgeColour];
+  // size_t pressureWallOffset = m_pressureOffset[m_wallColour];
   
   // works and gives the self contribution except for
   // WeightingFunctions that will complain in a clean way
-  double kernelSelfContrib = m_kernel->interpolate(NULL, dummyNullPoint);
+  // See setup() for why this was replaced by a member m_kernelSelfContrib
+  // double kernelSelfContrib = m_kernel->interpolate(NULL, s_dummyNullPoint);
   
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
     (phase, m_colour, this,
@@ -469,7 +478,7 @@ void IntegratorISPHconstRho::integrateStep2()
      // initialise advected density to self-contrib (for equal masses
      // within a species this could be much simplified, but we want to
      // keep the flexibility of different masses)
-     pTag.doubleByOffset(advDensityOffsetFluid) = i->m_mass*kernelSelfContrib;
+     pTag.doubleByOffset(advDensityOffsetFluid) = i->m_mass*m_kernelSelfContrib;
      
      // advected velocity: currently we do not need it
      // i->v += m_dt*i->force[force_index]/(pTag.doubleByOffset(genMassOffsetSelf));
@@ -484,23 +493,8 @@ void IntegratorISPHconstRho::integrateStep2()
   phase->invalidatePositions((IntegratorPosition*) this);  
   M_CONTROLLER->triggerNeighbourUpdate();
 
-  if(m_usingWalls) {
-
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_edgeColour, this,
-       // handle
-       const Data& pTag = i->tag;
-       
-       // initialisation for below
-       pTag.doubleByOffset(aiiOffsetEdge) = 0.;
-       
-       // initialise advected density to self-contrib 
-       pTag.doubleByOffset(advDensityOffsetEdge) = i->m_mass*kernelSelfContrib;
-       
-       // No advected velocity and position advection for m_edgeColour
-       
-       );
-  } // end of if(m_usingWalls)
+  if(m_usingWalls)
+    initialisationsWithWalls();
     
 
   // --- START: advected density based on advected positions/velocities --------------
@@ -510,93 +504,8 @@ void IntegratorISPHconstRho::integrateStep2()
   // advected density based on advected positions/velocities: fluid-fluid part
   advDensityPairSum(m_cpFluidFluid);
 
-  if(m_usingWalls) {
-    
-    if(!m_precomputationDone) {// entered once and never again
-      
-      m_precomputationDone = true;  
-
-      // density based on advected positions/velocities:
-      // PRECOMPUTATIONS following
-      
-      // edge-edge contribs.
-      advDensPrecompConnectedPairContrib(m_cpEdgeEdge, m_edgeEdgeListIndex);
-      // edge-wall contribs.
-      // The nominator of the contrib to wall can also be computed here
-      // only the normalisation contains a dynamic variable and is
-      // hence computed below, in each timestep 
-      advDensPrecompConnectedPairContrib(m_cpEdgeWall, m_edgeWallListIndex);
-            
-      // advected density based on advected positions/velocities: edge-self-contribution 
-      FOR_EACH_FREE_PARTICLE_C__PARALLEL
-	(phase, m_edgeColour, this,
-	 i->tag.doubleByOffset(edgeAdvDensityPrecompOffset)
-	 += i->m_mass*kernelSelfContrib;
-	 );
-      
-      // the way we compute the advected density for the wall particles does not require a self-contribution
-      
-    } // end of if(!m_precomputationDone)
-
-    
-    // density based on advected positions/velocities: edge precomputed contribution 
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_edgeColour, this,
-       i->tag.doubleByOffset(advDensityOffsetEdge) =
-       i->tag.doubleByOffset(edgeAdvDensityPrecompOffset);
-       );
-
-    // density based on advected positions/velocities: fluid-edge part;
-    advDensityPairSum(m_cpFluidEdge);
-          
-    // advected density based on advected positions/velocities: fluid-wall part; Here, only the summation into the advected fluid density goes the usual way. The advected density of the wall particles is computed from interpolation over the edge particles;
-    // contribution to fluid
-    FOR_EACH_PAIR__PARALLEL
-      (IntegratorISPHconstRho, m_cpFluidWall,
-       
-       pair->firstPart()->tag.doubleByOffset(advDensityOffsetFluid)
-       += pair->secondPart()->m_mass
-       *m_kernel->interpolate(pair, dummyNullPoint);
-
-       );
-
-    // initialise to zero for following summation
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_wallColour, this,
-       i->tag.doubleByOffset(m_wallEdgeNormalisationOffset) = 0.;
-       );
-    
-    // normalisation-denominator for wall particle variables
-    // interpolated by summation over edge particles only
-    // NOTE: before the following step we need the final advected
-    // density for the edge particles
-    pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      // handles
-      Particle* p1 = pair->firstPart();
-      
-      pair->secondPart()->tag.doubleByOffset(m_wallEdgeNormalisationOffset) +=
-	p1->m_mass*m_kernel->interpolate(pair, dummyNullPoint)
-	/p1->tag.doubleByOffset(advDensityOffsetEdge);
-      
-    }
-        
-    // advected density for wall particles computed from advected
-    // density of edge particles (assuming Neumann=0 BC):
-    // Here we only have to divide through the time-dependent
-    // normalisation-denominator. The full equation is
-    // rho_wall_j = sum_k(m_k*W_jk)/normalisation_j
-    // where division by the previously computed
-    // normalisation_j = sum_k W_jk*m_k/rho_k is done here
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_wallColour, this,
-       const Data& pTag = (i->tag);
-       pTag.doubleByOffset(advDensityOffsetWall) =
-       pTag.doubleByOffset(wallAdvDensityPrecompOffset)
-       / pTag.doubleByOffset(m_wallEdgeNormalisationOffset);
-       );
-
-  } // end of if(m_usingWalls)
+  if(m_usingWalls)
+    advDensityContribsWithWalls();
 
   // --- END: advected density based on advected positions/velocities --------------
 
@@ -608,67 +517,15 @@ void IntegratorISPHconstRho::integrateStep2()
     (phase, m_colour, this,
      const Data& pTag = (i->tag);
      pTag.doubleByOffset(advNormalisationOffsetFluid) =
-     i->m_mass*kernelSelfContrib
+     i->m_mass*m_kernelSelfContrib
      /pTag.doubleByOffset(advDensityOffsetFluid);
      );
 
   // fluid-fluid
   interpolateOne(m_cpFluidFluid);
 
-  if(m_usingWalls) {
-
-    // initialisation with edge self-contribution
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_edgeColour, this,
-       const Data& pTag = (i->tag);
-       pTag.doubleByOffset(advNormalisationOffsetEdge) =
-       i->m_mass*kernelSelfContrib
-       /pTag.doubleByOffset(advDensityOffsetEdge);
-       );
-    
-    // fluid-edge / edge-fluid
-    interpolateOne(m_cpFluidFluid);
-    
-    // fluid-wall 
-    FOR_EACH_PAIR__PARALLEL
-      (IntegratorISPHconstRho, m_cpFluidWall,
-       // handles
-       Particle* p2 = pair->secondPart();
-       const double& p2AdvDensity = p2->tag.doubleByOffset(advDensityOffsetEdge);
-       double& p1AdvNormalisation = pair->firstPart()->tag.doubleByOffset(advNormalisationOffsetFluid);
-       double kernel = m_kernel->interpolate(pair, dummyNullPoint);
-       
-       p1AdvNormalisation += p2->m_mass*kernel/p2AdvDensity;
-       );
-    
-    // edge-edge
-    pL = m_cpEdgeEdge->connectedList(m_edgeEdgeListIndex);
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      // handles
-      Particle* p1 = pair->firstPart();
-      Particle* p2 = pair->secondPart();
-      const Data& p1Tag = (p1->tag);
-      const Data& p2Tag = (p2->tag);
-      double kernel = m_kernel->interpolate(pair, dummyNullPoint);
-      
-      p1Tag.doubleByOffset(advNormalisationOffsetEdge)
-	+= p2->m_mass*kernel/p2Tag.doubleByOffset(advDensityOffsetEdge);
-      p2Tag.doubleByOffset(advNormalisationOffsetEdge)
-	+= p1->m_mass*kernel/p1Tag.doubleByOffset(advDensityOffsetEdge);
-    }
-    
-    // edge-wall
-    pL = m_cpEdgeEdge->connectedList(m_edgeWallListIndex);
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      // handles
-      Particle* p2 = pair->secondPart();
-      
-      pair->firstPart()->tag.doubleByOffset(advNormalisationOffsetEdge)
-	+= p2->m_mass*m_kernel->interpolate(pair, dummyNullPoint)
-	/p2->tag.doubleByOffset(advDensityOffsetWall);
-    }
-    
-  } // end if(m_usingWalls)
+  if(m_usingWalls)
+    normalisationDenominatorsWithWalls();
   
   // --- END: normalisation-denominators for fluid and edge interpolation -------
 
@@ -682,13 +539,9 @@ void IntegratorISPHconstRho::integrateStep2()
      /= pTag.doubleByOffset(advNormalisationOffsetFluid);
      );
 
-  FOR_EACH_FREE_PARTICLE_C__PARALLEL
-    (phase, m_edgeColour, this,
-     const Data& pTag = (i->tag);
-     pTag.doubleByOffset(advDensityOffsetEdge)
-     /= pTag.doubleByOffset(advNormalisationOffsetEdge);
-     );
-
+  // will check m_usingWalls itself
+  normaliseAdvDensityWithWalls();
+  
   // --- END: normalisation of advected densities for fluid and edge species ----
 
   
@@ -705,69 +558,8 @@ void IntegratorISPHconstRho::integrateStep2()
   // aiiFluidFluid:
   aiiPairContrib(m_cpFluidFluid);
 
-  if(m_usingWalls) {
-    
-    // aiiFluidEdge and aiiEdgeFluid
-    aiiPairContrib(m_cpFluidEdge);
-    
-    // aiiFluidWall but NOT aiiWallFluid since wall implements boundary
-    // condition for pressure and does hence not have a pressure-DOF
-    FOR_EACH_PAIR__PARALLEL
-      (IntegratorISPHconstRho, m_cpFluidWall,
-       // handles
-       const Data& p1Tag = (pair->firstPart()->tag);
-       double& p1aii = p1Tag.doubleByOffset(aiiOffsetFluid);
-       
-       m_PPEfunc(&temp, pair);       
-       p1aii += m_kernel->weight(pair, dummyNullPoint)*temp;
-       );
-    
-    // aiiEdgeEdge
-    pL = m_cpEdgeEdge->connectedList(m_edgeEdgeListIndex);
-    
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-
-      m_PPEfunc(&temp, pair);       
-      temp *= m_kernel->weight(pair, dummyNullPoint);
-      
-      pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) += temp;
-      pair->secondPart()->tag.doubleByOffset(aiiOffsetEdge) += temp;
-    }
-    
-    // aiiEdgeWall: conrib to edge only
-    pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
-    
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      m_PPEfunc(&temp, pair);             
-      pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) +=
-	m_kernel->weight(pair, dummyNullPoint) * temp;
-    }
-    
-    // aiiEdgeWall2nd: contrib to edge only; this comes from the
-    // definition of wall pressure Pj through edge pressure Pk
-    // by Pj = sumk Pk*mk*Wjk/rhok/(sumk mk*Wjk/rhok).
-    //      := sumk Pk*mk*Wjk/rhok/Sigmaj.
-    // The resulting aii is then
-    // aii = (mi/rhoi)*sumjInWall aij/Sigmaj
-    //     = (mi/rhoi)*sumjInWall dWdrij*PPEexprij/Sigmaj
-    pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      m_PPEfunc(&temp, pair);             
-      pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) +=
-	// multiplication with mi/rhoi still missing here because can be
-	// factored out and done right after this loop
-	m_kernel->weight(pair, dummyNullPoint) * temp
-	/ pair->secondPart()->tag.doubleByOffset(m_wallEdgeNormalisationOffset);
-    }
-    // and now the multiplication with mi/rhoi 
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_edgeColour, this,
-       const Data& pTag = (i->tag);
-       pTag.doubleByOffset((aiiOffsetEdge)) *=
-       i->m_mass / pTag.doubleByOffset(advDensityOffsetEdge);
-       );
-
-  } // end of if(m_usingWalls)
+  if(m_usingWalls)
+    aiiContribWithWalls();
     
   // --- END: diagonal part of a-matrix -------------------------------
 
@@ -795,17 +587,8 @@ void IntegratorISPHconstRho::integrateStep2()
   // initial value for pressure iteration for fluid species
   initPressure(m_colour);
 
-  if(m_usingWalls) {
-
-    // initial value for pressure iteration for edge species
-    initPressure(m_edgeColour);
-
-    // pressure value for wall particles by normalised interpolation
-    // of pressure of edge particles
-    // we compute initial value here and updated values in while loop after having new pressures
-    computeWallPressure();
-    
-  } // end of if(m_usingWalls)  
+  if(m_usingWalls)
+    initialPressureWithWalls();
   
   // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "BEFORE ITER: residualEpsMax = " << residualEpsMax << ", m_maxDensityError = " << m_maxDensityError << ", residualEpsAvg = " << residualEpsAvg << ", m_avgDensityError = " << m_avgDensityError);
 
@@ -845,21 +628,8 @@ void IntegratorISPHconstRho::integrateStep2()
 	 );
 
       // analogous operations in case of walls
-      if(m_usingWalls) {
-	
-	// Set newest pressure to old; set previous old pressure to new for new summation
-	tempOffset = pressureIterOldEdgeOffset;
-	pressureIterOldEdgeOffset = pressureIterNewEdgeOffset;
-	pressureIterNewEdgeOffset = tempOffset;
-      
-	// reset to zero for new summation (we will be working on the pressureIterOffsetNew slot!!!)
-	FOR_EACH_FREE_PARTICLE_C__PARALLEL
-	  (phase, m_edgeColour, this,
-	   // this will be used for the next pressure iteration and is hence reset here
-	   i->tag.doubleByOffset(pressureIterNewEdgeOffset) = 0.;
-	   );
-
-      } // end of if(m_usingWalls)
+      if(m_usingWalls)
+	initPressureIterWithWalls();
 
       // for fluid and edge particles: compute new pressure, i.e.
       // += RHS_i
@@ -913,19 +683,8 @@ void IntegratorISPHconstRho::integrateStep2()
 
      );
 
-  if(m_usingWalls) {
-  
-  // final pressure for edge particles
-  FOR_EACH_FREE_PARTICLE_C__PARALLEL
-    (phase, m_edgeColour, this,
-     // handles
-     const Data& pTag = i->tag;
-
-     pTag.doubleByOffset(pressureEdgeOffset) = pTag.doubleByOffset(pressureIterNewEdgeOffset);
-
-     );
-
-  }
+  if(m_usingWalls)
+    finalisePressureWithWalls();
 
   // --- END: set the final pressure ----------------------------------
   
@@ -1013,7 +772,350 @@ void IntegratorISPHconstRho::hitPos(double dt, const Particle* p, point_t &hit_p
   throw gError("IntegratorISPHconstRho::hitPos", "Fatal ERROR: Shouldn't have been called! Contact programmer!");
 }
 
+
+void IntegratorISPHconstRho::initialisationsWithWalls() {
+
+  Phase* phase = M_PHASE;
+  size_t aiiOffsetEdge = m_aiiOffset[m_edgeColour];
+  size_t advDensityOffsetEdge =  m_advDensityOffset[m_edgeColour];
+  // double kernelSelfContrib =
+  //   // m_kernel->interpolate(NULL, s_dummyNullPoint);
+  //   m_kernel->cutoff();
+
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     // handle
+     const Data& pTag = i->tag;
+     
+     // initialisation for below
+     pTag.doubleByOffset(aiiOffsetEdge) = 0.;
+     
+     // initialise advected density to self-contrib 
+     pTag.doubleByOffset(advDensityOffsetEdge) = i->m_mass*m_kernelSelfContrib;
+     
+     // No advected velocity and position advection for m_edgeColour
+     
+     );
+
+}
+
+
+void IntegratorISPHconstRho::advDensityContribsWithWalls() {
+
+  Phase* phase = M_PHASE;
+  size_t advDensityOffsetEdge =  m_advDensityOffset[m_edgeColour];
+  size_t edgeAdvDensityPrecompOffset =
+    m_advDensityPrecompOffset[m_edgeColour];
+  size_t wallAdvDensityPrecompOffset =
+    m_advDensityPrecompOffset[m_wallColour];
+  size_t advDensityOffsetFluid =  m_advDensityOffset[m_colour];
+  size_t advDensityOffsetWall = m_advDensityOffset[m_wallColour];
+  // double kernelSelfContrib = 1.;
+  point_t dummyNullPoint;
+  dummyNullPoint.assign(0);
+  // double kernelSelfContrib = 
+  //   // m_kernel->interpolate(NULL, s_dummyNullPoint);
+  //   m_kernel->interpolate(NULL, dummyNullPoint);
   
+  if(!m_precomputationDone) {// entered once and never again
+    
+    m_precomputationDone = true;  
+    
+    // density based on advected positions/velocities:
+    // PRECOMPUTATIONS following
+    
+    // edge-edge contribs.
+    advDensPrecompConnectedPairContrib(m_cpEdgeEdge, m_edgeEdgeListIndex);
+    // edge-wall contribs.
+    // The nominator of the contrib to wall can also be computed here
+    // only the normalisation contains a dynamic variable and is
+    // hence computed below, in each timestep 
+    advDensPrecompConnectedPairContrib(m_cpEdgeWall, m_edgeWallListIndex);
+    
+    // advected density based on advected positions/velocities: edge-self-contribution 
+    FOR_EACH_FREE_PARTICLE_C__PARALLEL
+      (phase, m_edgeColour, this,
+       i->tag.doubleByOffset(edgeAdvDensityPrecompOffset)
+       += i->m_mass*m_kernelSelfContrib;
+       );
+    
+    // the way we compute the advected density for the wall particles does not require a self-contribution
+    
+  } // end of if(!m_precomputationDone)
+  
+  // density based on advected positions/velocities: edge precomputed contribution 
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     i->tag.doubleByOffset(advDensityOffsetEdge) =
+     i->tag.doubleByOffset(edgeAdvDensityPrecompOffset);
+     );
+  
+  // density based on advected positions/velocities: fluid-edge part;
+  advDensityPairSum(m_cpFluidEdge);
+  
+  // advected density based on advected positions/velocities: fluid-wall part; Here, only the summation into the advected fluid density goes the usual way. The advected density of the wall particles is computed from interpolation over the edge particles;
+  // contribution to fluid
+  FOR_EACH_PAIR__PARALLEL
+    (IntegratorISPHconstRho, m_cpFluidWall,
+     
+     pair->firstPart()->tag.doubleByOffset(advDensityOffsetFluid)
+     += pair->secondPart()->m_mass
+     *m_kernel->interpolate(pair, s_dummyNullPoint);
+     
+     );
+  
+  // initialise to zero for following summation
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_wallColour, this,
+     i->tag.doubleByOffset(m_wallEdgeNormalisationOffset) = 0.;
+     );
+  
+  // normalisation-denominator for wall particle variables
+  // interpolated by summation over edge particles only
+  // NOTE: before the following step we need the final advected
+  // density for the edge particles
+  PairList* pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    // handles
+    Particle* p1 = pair->firstPart();
+    
+    pair->secondPart()->tag.doubleByOffset(m_wallEdgeNormalisationOffset) +=
+      p1->m_mass*m_kernel->interpolate(pair, s_dummyNullPoint)
+      /p1->tag.doubleByOffset(advDensityOffsetEdge);
+    
+  }
+  
+  // advected density for wall particles computed from advected
+  // density of edge particles (assuming Neumann=0 BC):
+  // Here we only have to divide through the time-dependent
+  // normalisation-denominator. The full equation is
+  // rho_wall_j = sum_k(m_k*W_jk)/normalisation_j
+  // where division by the previously computed
+  // normalisation_j = sum_k W_jk*m_k/rho_k is done here
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_wallColour, this,
+     const Data& pTag = (i->tag);
+     pTag.doubleByOffset(advDensityOffsetWall) =
+     pTag.doubleByOffset(wallAdvDensityPrecompOffset)
+     / pTag.doubleByOffset(m_wallEdgeNormalisationOffset);
+     );
+  
+} // end of advDensityContribsWithWalls()
+
+
+void IntegratorISPHconstRho::normalisationDenominatorsWithWalls() {
+
+  Phase* phase = M_PHASE;
+  size_t advNormalisationOffsetFluid = m_advNormalisationOffset[m_colour];
+  size_t advNormalisationOffsetEdge = m_advNormalisationOffset[m_edgeColour];
+  size_t advDensityOffsetEdge =  m_advDensityOffset[m_edgeColour];
+  size_t advDensityOffsetWall = m_advDensityOffset[m_wallColour];
+  // double kernelSelfContrib =
+  //   // m_kernel->interpolate(NULL, s_dummyNullPoint);
+  //   m_kernel->cutoff();
+  PairList* pL;
+  
+  // initialisation with edge self-contribution
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     const Data& pTag = (i->tag);
+     pTag.doubleByOffset(advNormalisationOffsetEdge) =
+     i->m_mass*m_kernelSelfContrib
+     /pTag.doubleByOffset(advDensityOffsetEdge);
+     );
+  
+  // fluid-edge / edge-fluid
+  interpolateOne(m_cpFluidFluid);
+  
+  // fluid-wall 
+  FOR_EACH_PAIR__PARALLEL
+    (IntegratorISPHconstRho, m_cpFluidWall,
+     // handles
+     Particle* p2 = pair->secondPart();
+     const double& p2AdvDensity = p2->tag.doubleByOffset(advDensityOffsetEdge);
+     double& p1AdvNormalisation = pair->firstPart()->tag.doubleByOffset(advNormalisationOffsetFluid);
+     double kernel = m_kernel->interpolate(pair, s_dummyNullPoint);
+     
+     p1AdvNormalisation += p2->m_mass*kernel/p2AdvDensity;
+     );
+  
+  // edge-edge
+  pL = m_cpEdgeEdge->connectedList(m_edgeEdgeListIndex);
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    // handles
+    Particle* p1 = pair->firstPart();
+    Particle* p2 = pair->secondPart();
+    const Data& p1Tag = (p1->tag);
+    const Data& p2Tag = (p2->tag);
+    double kernel = m_kernel->interpolate(pair, s_dummyNullPoint);
+    
+    p1Tag.doubleByOffset(advNormalisationOffsetEdge)
+      += p2->m_mass*kernel/p2Tag.doubleByOffset(advDensityOffsetEdge);
+    p2Tag.doubleByOffset(advNormalisationOffsetEdge)
+      += p1->m_mass*kernel/p1Tag.doubleByOffset(advDensityOffsetEdge);
+  }
+  
+  // edge-wall
+  pL = m_cpEdgeEdge->connectedList(m_edgeWallListIndex);
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    // handles
+    Particle* p2 = pair->secondPart();
+    
+    pair->firstPart()->tag.doubleByOffset(advNormalisationOffsetEdge)
+      += p2->m_mass*m_kernel->interpolate(pair, s_dummyNullPoint)
+      /p2->tag.doubleByOffset(advDensityOffsetWall);
+  }
+  
+} // end of normalisationDenominatorsWithWalls()
+
+
+void IntegratorISPHconstRho::normaliseAdvDensityWithWalls() {
+
+  Phase* phase = M_PHASE;
+  size_t advNormalisationOffsetEdge = m_advNormalisationOffset[m_edgeColour];
+  
+  if(m_usingWalls) {
+    
+    size_t advDensityOffsetEdge =  m_advDensityOffset[m_edgeColour];
+    
+    FOR_EACH_FREE_PARTICLE_C__PARALLEL
+      (phase, m_edgeColour, this,
+       const Data& pTag = (i->tag);
+       pTag.doubleByOffset(advDensityOffsetEdge)
+       /= pTag.doubleByOffset(advNormalisationOffsetEdge);
+       );
+    
+  }  
+}
+
+
+void IntegratorISPHconstRho::aiiContribWithWalls() {
+
+  size_t advDensityOffsetEdge =  m_advDensityOffset[m_edgeColour];
+  size_t aiiOffsetFluid = m_aiiOffset[m_colour];
+  size_t aiiOffsetEdge = m_aiiOffset[m_edgeColour];
+  double temp;
+  PairList* pL;
+  Phase* phase = M_PHASE;
+  
+  // aiiFluidEdge and aiiEdgeFluid
+  aiiPairContrib(m_cpFluidEdge);
+  
+  // aiiFluidWall but NOT aiiWallFluid since wall implements boundary
+  // condition for pressure and does hence not have a pressure-DOF
+  FOR_EACH_PAIR__PARALLEL
+    (IntegratorISPHconstRho, m_cpFluidWall,
+     // handles
+     const Data& p1Tag = (pair->firstPart()->tag);
+     double& p1aii = p1Tag.doubleByOffset(aiiOffsetFluid);
+     
+     m_PPEfunc(&temp, pair);       
+     p1aii += m_kernel->weight(pair, s_dummyNullPoint)*temp;
+     );
+  
+  // aiiEdgeEdge
+  pL = m_cpEdgeEdge->connectedList(m_edgeEdgeListIndex);
+  
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    
+    m_PPEfunc(&temp, pair);       
+    temp *= m_kernel->weight(pair, s_dummyNullPoint);
+    
+    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) += temp;
+    pair->secondPart()->tag.doubleByOffset(aiiOffsetEdge) += temp;
+  }
+  
+  // aiiEdgeWall: conrib to edge only
+  pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
+  
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    m_PPEfunc(&temp, pair);             
+    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) +=
+      m_kernel->weight(pair, s_dummyNullPoint) * temp;
+  }
+  
+  // aiiEdgeWall2nd: contrib to edge only; this comes from the
+  // definition of wall pressure Pj through edge pressure Pk
+  // by Pj = sumk Pk*mk*Wjk/rhok/(sumk mk*Wjk/rhok).
+  //      := sumk Pk*mk*Wjk/rhok/Sigmaj.
+  // The resulting aii is then
+  // aii = (mi/rhoi)*sumjInWall aij/Sigmaj
+  //     = (mi/rhoi)*sumjInWall dWdrij*PPEexprij/Sigmaj
+  pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    m_PPEfunc(&temp, pair);             
+    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) +=
+      // multiplication with mi/rhoi still missing here because can be
+      // factored out and done right after this loop
+      m_kernel->weight(pair, s_dummyNullPoint) * temp
+      / pair->secondPart()->tag.doubleByOffset(m_wallEdgeNormalisationOffset);
+  }
+  // and now the multiplication with mi/rhoi 
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     const Data& pTag = (i->tag);
+     pTag.doubleByOffset((aiiOffsetEdge)) *=
+     i->m_mass / pTag.doubleByOffset(advDensityOffsetEdge);
+     );
+  
+}
+
+
+void IntegratorISPHconstRho::initialPressureWithWalls() {
+  
+  // initial value for pressure iteration for edge species
+  initPressure(m_edgeColour);
+  
+  // pressure value for wall particles by normalised interpolation
+  // of pressure of edge particles
+  // we compute initial value here and updated values in while loop after having new pressures
+  computeWallPressure();
+  
+}
+
+
+void IntegratorISPHconstRho::initPressureIterWithWalls() {
+
+  size_t tempOffset;
+  // handles used for resetting the array entries on the RHS
+  size_t& pressureIterNewEdgeOffset = m_pressureIterNewOffset[m_edgeColour];
+  size_t& pressureIterOldEdgeOffset = m_pressureIterOldOffset[m_edgeColour];
+  Phase* phase = M_PHASE;
+  
+  // Set newest pressure to old; set previous old pressure to new for new summation
+  tempOffset = pressureIterOldEdgeOffset;
+  pressureIterOldEdgeOffset = pressureIterNewEdgeOffset;
+  pressureIterNewEdgeOffset = tempOffset;
+  
+  // reset to zero for new summation (we will be working on the pressureIterOffsetNew slot!!!)
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     // this will be used for the next pressure iteration and is hence reset here
+     i->tag.doubleByOffset(pressureIterNewEdgeOffset) = 0.;
+     );
+  
+}
+
+
+void IntegratorISPHconstRho::finalisePressureWithWalls() {
+  
+  Phase* phase = M_PHASE;
+  size_t pressureEdgeOffset = m_pressureOffset[m_edgeColour];
+  size_t pressureIterNewEdgeOffset = m_pressureIterNewOffset[m_edgeColour];
+
+  // final pressure for edge particles
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     // handles
+     const Data& pTag = i->tag;
+     
+     pTag.doubleByOffset(pressureEdgeOffset) = pTag.doubleByOffset(pressureIterNewEdgeOffset);
+     
+     );
+  
+}
+
+
 void IntegratorISPHconstRho::conditionalCreateColour(size_t& colourTester, string species, string attribute) {
   
   if(species == "---")
@@ -1038,7 +1140,7 @@ void IntegratorISPHconstRho::advDensPrecompConnectedPairContrib(ColourPair* cp, 
     // handles
     Particle* p1 = pair->firstPart();
     Particle* p2 = pair->secondPart();
-    double kernel = m_kernel->interpolate(pair, dummyNullPoint);
+    double kernel = m_kernel->interpolate(pair, s_dummyNullPoint);
     
     p1->tag.doubleByOffset(offset1) += p2->m_mass*kernel;
     p2->tag.doubleByOffset(offset2) += p1->m_mass*kernel;
@@ -1057,7 +1159,7 @@ void IntegratorISPHconstRho::advDensityPairSum(ColourPair* cp) {
      Particle* p2 = pair->secondPart();
      double& p1AdvDensity = p1->tag.doubleByOffset(firstAdvDensityOffset);
      double& p2AdvDensity = p2->tag.doubleByOffset(secondAdvDensityOffset);
-     double kernel = m_kernel->interpolate(pair, dummyNullPoint);
+     double kernel = m_kernel->interpolate(pair, s_dummyNullPoint);
      
      p1AdvDensity += p2->m_mass*kernel;
      p2AdvDensity += p1->m_mass*kernel;
@@ -1083,7 +1185,7 @@ void IntegratorISPHconstRho::interpolateOne(ColourPair* cp) {
      const double& p2AdvDensity = p2Tag.doubleByOffset(advDensityOffset2);
      double& p1AdvNormalisation = p1Tag.doubleByOffset(advNormalisationOffset1);
      double& p2AdvNormalisation = p2Tag.doubleByOffset(advNormalisationOffset2);
-     double kernel = m_kernel->interpolate(pair, dummyNullPoint);
+     double kernel = m_kernel->interpolate(pair, s_dummyNullPoint);
      
      p1AdvNormalisation += p2->m_mass*kernel/p2AdvDensity;
      p2AdvNormalisation += p1->m_mass*kernel/p1AdvDensity;
@@ -1106,7 +1208,7 @@ void IntegratorISPHconstRho::aiiPairContrib(ColourPair* cp) {
      double& p2aii = p2Tag.doubleByOffset(aiiOffset2);
      double temp;
      m_PPEfunc(&temp, pair);
-     temp *= m_kernel->weight(pair, dummyNullPoint);
+     temp *= m_kernel->weight(pair, s_dummyNullPoint);
      
      // ASSUMPTION: The factor within the runtime compiled expression
      // is symmetric
@@ -1152,7 +1254,7 @@ void IntegratorISPHconstRho::computeWallPressure() {
     Particle* p1 = pair->firstPart();
     pair->secondPart()->tag.doubleByOffset(pressureWallOffset) +=
       p1->tag.doubleByOffset(pressureIterNewEdgeOffset)
-      * m_kernel->interpolate(pair, dummyNullPoint) * p1->m_mass
+      * m_kernel->interpolate(pair, s_dummyNullPoint) * p1->m_mass
       / p1->tag.doubleByOffset(edgeAdvDensityOffset);
   }
   
@@ -1195,7 +1297,7 @@ void IntegratorISPHconstRho::pairIterPContrib(ColourPair* cp) {
      // const double& p1PIterOld = p1Tag.doubleByOffset(firstPIterOldOffset);
      // const double& p2PIterOld = p2Tag.doubleByOffset(secondPIterOldOffset);
      m_PPEfunc(&temp, pair);
-     temp *= m_kernel->weight(pair, dummyNullPoint);
+     temp *= m_kernel->weight(pair, s_dummyNullPoint);
 
      p1PairIterContrib -=  temp*p2PIterNew;
      p2PairIterContrib -=  temp*p1PIterNew;
@@ -1247,10 +1349,6 @@ void IntegratorISPHconstRho::totalPairContrib() {
 
   Phase* phase = M_PHASE;
   size_t pairContribFluidOffset = m_pairIterContribOffset[m_colour];
-  size_t pairContribEdgeOffset = m_pairIterContribOffset[m_edgeColour];
-  size_t pressureIterNewEdgeOffset = m_pressureIterNewOffset[m_edgeColour];
-  size_t advDensityEdgeOffset = m_advDensityOffset[m_edgeColour];
-  size_t pressureWallOffset = m_pressureOffset[m_wallColour];
   double temp;
   
   // reset to zero for new summation (we will be working on the pressureIterOffsetNew slot!!!)
@@ -1264,89 +1362,102 @@ void IntegratorISPHconstRho::totalPairContrib() {
   pairIterPContrib(m_cpFluidFluid);
   
   // analogous operations in case of walls
-  if(m_usingWalls) {
-	
-    // reset to zero for new summation (we will be working on the pressureIterOffsetNew slot!!!)
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_edgeColour, this,
-       // this will be used for the next pressure iteration and is hence reset here
-       i->tag.doubleByOffset(pairContribEdgeOffset) = 0.;
-       );
-    
-    // subtraction term for edge-wall pressure contribution
-    // sum_j a_ij*(1/Sigma_j)*(-1)*(m_i/rho_i)*W_ji*P_i^l
-    // with i edge and j wall
-    // This is done first for edge since we want to multiply the
-    // i-terms in a particle loop which can only be done, if this
-    // is the only contribution so far
-    PairList* pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);	
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      m_PPEfunc(&temp, pair);
-      pair->firstPart()->tag.doubleByOffset(pairContribEdgeOffset)
-	// yes, +=, since we substract from terms that are all
-	// added by -=
-	// this is Wji = Wij
-	+= m_kernel->interpolate(pair, dummyNullPoint)
-	// this is aij
-	* temp * m_kernel->weight(pair, dummyNullPoint);
-    }
-    // now multiply the particle-prefactor (m_i/rho_i)*P_i^l
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-      (phase, m_edgeColour, this,
-       const Data& pTag = i->tag;
-       pTag.doubleByOffset(pairContribEdgeOffset)
-       *= i->m_mass
-       * pTag.doubleByOffset(pressureIterNewEdgeOffset)
-       / pTag.doubleByOffset(advDensityEdgeOffset);
-       );
-
-    // fluid-edge / edge-fluid pressure contribution
-    pairIterPContrib(m_cpFluidEdge);      
-      
-    // fluid-wall pressure contribution
-    FOR_EACH_PAIR__PARALLEL
-      (IntegratorISPHconstRho, m_cpFluidWall,
-
-       m_PPEfunc(&temp, pair);
-
-       pair->firstPart()->tag.doubleByOffset(pairContribFluidOffset)
-       -=  m_kernel->weight(pair, dummyNullPoint) * temp
-       * pair->secondPart()->tag.doubleByOffset(pressureWallOffset);
-       
-       );
-
-    // edge-edge pressure contribution
-    pL = m_cpEdgeEdge->connectedList(m_edgeEdgeListIndex);
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      // handles
-      const Data& p1Tag = (pair->firstPart()->tag);
-      const Data& p2Tag = (pair->secondPart()->tag);
-      
-      m_PPEfunc(&temp, pair);
-      temp *= m_kernel->weight(pair, dummyNullPoint);
-	  
-      p1Tag.doubleByOffset(pairContribEdgeOffset) -= temp*p2Tag.doubleByOffset(pressureIterNewEdgeOffset);
-      p2Tag.doubleByOffset(pairContribEdgeOffset) -= temp*p1Tag.doubleByOffset(pressureIterNewEdgeOffset);
-    }
-	
-    // edge-wall pressure contribution
-    // sum_j a_ij*(1/Sigma_j)*sum_k (m_k/rho_k)*W_jk*P_k^l
-    // (with j in wall and i,k in edge)
-    // = sum_j a_ij*P_j^l
-    // where P_j^l was precomputed for this l
-    // NOTE: The subtraction necessary for this term was already
-    // done above.
-    pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);	
-    for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-      m_PPEfunc(&temp, pair);
-      pair->firstPart()->tag.doubleByOffset(pairContribEdgeOffset)
-	-= m_kernel->weight(pair, dummyNullPoint) * temp
-	* pair->secondPart()->tag.doubleByOffset(pressureWallOffset);
-    }
-    
-  } // end of if(m_usingWalls)
+  if(m_usingWalls)
+    pairIterPContribWithWalls();
   
 } // end of void IntegratorISPHconstRho::totalPairContrib()
+
+
+void IntegratorISPHconstRho::pairIterPContribWithWalls() {
+  
+  size_t pairContribFluidOffset = m_pairIterContribOffset[m_colour];
+  size_t pairContribEdgeOffset = m_pairIterContribOffset[m_edgeColour];
+  size_t pressureIterNewEdgeOffset = m_pressureIterNewOffset[m_edgeColour];
+  size_t advDensityEdgeOffset = m_advDensityOffset[m_edgeColour];
+  size_t pressureWallOffset = m_pressureOffset[m_wallColour];
+  double temp;
+  Phase* phase = M_PHASE;
+  
+  // reset to zero for new summation (we will be working on the pressureIterOffsetNew slot!!!)
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     // this will be used for the next pressure iteration and is hence reset here
+     i->tag.doubleByOffset(pairContribEdgeOffset) = 0.;
+     );
+  
+  // subtraction term for edge-wall pressure contribution
+  // sum_j a_ij*(1/Sigma_j)*(-1)*(m_i/rho_i)*W_ji*P_i^l
+  // with i edge and j wall
+  // This is done first for edge since we want to multiply the
+  // i-terms in a particle loop which can only be done, if this
+  // is the only contribution so far
+  PairList* pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);	
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    m_PPEfunc(&temp, pair);
+    pair->firstPart()->tag.doubleByOffset(pairContribEdgeOffset)
+      // yes, +=, since we substract from terms that are all
+      // added by -=
+      // this is Wji = Wij
+      += m_kernel->interpolate(pair, s_dummyNullPoint)
+      // this is aij
+      * temp * m_kernel->weight(pair, s_dummyNullPoint);
+  }
+  // now multiply the particle-prefactor (m_i/rho_i)*P_i^l
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_edgeColour, this,
+     const Data& pTag = i->tag;
+     pTag.doubleByOffset(pairContribEdgeOffset)
+     *= i->m_mass
+     * pTag.doubleByOffset(pressureIterNewEdgeOffset)
+     / pTag.doubleByOffset(advDensityEdgeOffset);
+     );
+  
+  // fluid-edge / edge-fluid pressure contribution
+  pairIterPContrib(m_cpFluidEdge);      
+  
+  // fluid-wall pressure contribution
+  FOR_EACH_PAIR__PARALLEL
+    (IntegratorISPHconstRho, m_cpFluidWall,
+     
+     m_PPEfunc(&temp, pair);
+     
+     pair->firstPart()->tag.doubleByOffset(pairContribFluidOffset)
+     -=  m_kernel->weight(pair, s_dummyNullPoint) * temp
+     * pair->secondPart()->tag.doubleByOffset(pressureWallOffset);
+     
+     );
+  
+  // edge-edge pressure contribution
+  pL = m_cpEdgeEdge->connectedList(m_edgeEdgeListIndex);
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    // handles
+    const Data& p1Tag = (pair->firstPart()->tag);
+    const Data& p2Tag = (pair->secondPart()->tag);
+    
+    m_PPEfunc(&temp, pair);
+    temp *= m_kernel->weight(pair, s_dummyNullPoint);
+    
+    p1Tag.doubleByOffset(pairContribEdgeOffset) -= temp*p2Tag.doubleByOffset(pressureIterNewEdgeOffset);
+    p2Tag.doubleByOffset(pairContribEdgeOffset) -= temp*p1Tag.doubleByOffset(pressureIterNewEdgeOffset);
+  }
+  
+  // edge-wall pressure contribution
+  // sum_j a_ij*(1/Sigma_j)*sum_k (m_k/rho_k)*W_jk*P_k^l
+  // (with j in wall and i,k in edge)
+  // = sum_j a_ij*P_j^l
+  // where P_j^l was precomputed for this l
+  // NOTE: The subtraction necessary for this term was already
+  // done above.
+  pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);	
+  for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
+    m_PPEfunc(&temp, pair);
+    pair->firstPart()->tag.doubleByOffset(pairContribEdgeOffset)
+      -= m_kernel->weight(pair, s_dummyNullPoint) * temp
+      * pair->secondPart()->tag.doubleByOffset(pressureWallOffset);
+  }
+  
+} // end of pairIterPContribWithWalls()
+
 
 /*!
  * Computes total normalised l2-norm and the infinity norm    
@@ -1448,7 +1559,7 @@ void IntegratorISPHconstRho::pressureForceIncrementFluidOther(ColourPair* cp) {
      (p1Tag.doubleByOffset(pressureFluidOffset)/p1Density/p1Density
       + p2Tag.doubleByOffset(pressureOtherOffset)/p2Density/p2Density)
      // negative kernel gradient
-     * pair->cartesian()*m_kernel->weight(pair, dummyNullPoint);
+     * pair->cartesian()*m_kernel->weight(pair, s_dummyNullPoint);
      
      );
   
@@ -1482,7 +1593,7 @@ void IntegratorISPHconstRho::pressureForceIncrementFluidFluid() {
      (p1Tag.doubleByOffset(pressureFluidOffset)/p1Density/p1Density
       + p2Tag.doubleByOffset(pressureFluidOffset)/p2Density/p2Density)
      // negative kernel gradient
-     * pair->cartesian()*m_kernel->weight(pair, dummyNullPoint);
+     * pair->cartesian()*m_kernel->weight(pair, s_dummyNullPoint);
      
      p1Tag.pointByOffset(m_pressureAccelFluidOffset) += p2->m_mass*temp;
      // antisymmetric
