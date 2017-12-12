@@ -1,3 +1,34 @@
+/*
+ * This file is part of the SYMPLER package.
+ * https://github.com/kauzlari/sympler
+ *
+ * Copyright 2002-2017, 
+ * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * and others authors stated in the AUTHORS file in the top-level 
+ * source directory.
+ *
+ * SYMPLER is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * SYMPLER is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with SYMPLER.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Please cite the research papers on SYMPLER in your own publications. 
+ * Check out the PUBLICATIONS file in the top-level source directory.
+ *
+ * You are very welcome to contribute extensions to the code. Please do 
+ * so by making a pull request on https://github.com/kauzlari/sympler
+ * 
+ */
+
+
 extern "C" {
   #include <freesteam/b23.h>
   #include <freesteam/steam_pT.h>
@@ -33,10 +64,13 @@ PressureCalculation::PressureCalculation
 
 PressureCalculation::~PressureCalculation()
 {
-  for (int i = 0; i < m_arraysize_temperature ; ++i) {
-    delete [] m_array_p[i];
+  if(m_array_p) {
+    for (int i = 0; i < m_arraysize_temperature ; ++i) {
+      if(m_array_p[i])
+	delete [] m_array_p[i];
+    }
+    delete [] m_array_p;
   }
-  delete [] m_array_p;
 }
 
 void PressureCalculation::setupLUT(double Tmin, double rhomin, double Tmax, double rhomax, int m_arraysize_density, int m_arraysize_temperature) {
@@ -177,29 +211,31 @@ void PressureCalculation::setup()
   // should we create a Cache for the other colours, too?
   if(m_species == "ALL")
   {
-    // This calculator does not care if the symbol is already existing
+    // YES! Using m_colour in this loop is correct since we want to
+    // create one ParticleCache per colour
     for (m_colour = 0; m_colour < M_MANAGER->nColours(); ++m_colour)
     {
-      // at least, if the attribute already exists, we preserve the persistency and can hope that another module has set it correctly
       if(Particle::s_tag_format[m_colour].attrExists(m_symbolName))
       {
-        if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_symbolName).datatype)
-          throw gError("PressureCalculation::setup", "Symbol " + m_symbolName + " already exists as a non-scalar.");
-        else m_offset = Particle::s_tag_format[m_colour]./*indexOf*/offsetByName(m_symbolName);
-
+	throw gError("PressureCalculation::setup", "Symbol '" + m_symbolName + "' was already created by other module.");
       }
       else
-      // if it does not yet exist we set the persistency to false
         m_offset = Particle::s_tag_format[m_colour].addAttribute(m_symbolName, m_datatype, false/*persistency*/, m_symbolName).offset;
-      if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName) && Particle::s_tag_format[m_colour].attrExists(m_densityName)) {
+
+      if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName)) {
         if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_temperatureName).datatype)
-          throw gError("PressureCalculation::setup", "Temperature " + m_temperatureName + " already exists as a non-scalar.");
-        else m_temperatureOffset = Particle::s_tag_format[m_colour]./*indexOf*/offsetByName(m_temperatureName);
-        if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_densityName).datatype)
-          throw gError("PressureCalculation::setup", "Density " + m_densityName + " already exists as a non-scalar.");
-        else m_densityOffset = Particle::s_tag_format[m_colour]./*indexOf*/offsetByName(m_densityName);
+          throw gError("PressureCalculation::setup", "Symbol '" + m_temperatureName + "' already exists as a non-scalar.");
+        else m_temperatureOffset = Particle::s_tag_format[m_colour].offsetByName(m_temperatureName);
       } else 
-          throw gError("PressureCalculation::setup", "Density " + m_densityName + " Temperature " + m_temperatureName + " do not exist.");
+          throw gError("PressureCalculation::setup", "Symbol '" + m_temperatureName + "' does not exist but required by this module.");
+
+      if(Particle::s_tag_format[m_colour].attrExists(m_densityName)) {
+        if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_densityName).datatype)
+          throw gError("PressureCalculation::setup", "Symbol '" + m_densityName + "' already exists as a non-scalar.");
+        else m_densityOffset = Particle::s_tag_format[m_colour].offsetByName(m_densityName);
+      } else 
+          throw gError("PressureCalculation::setup", "Symbol '" + m_densityName + "' does not exist but required by this module.");
+
       // is it the last cache to be created?
       if(m_colour == M_MANAGER->nColours()-1)
       {
@@ -255,28 +291,30 @@ void PressureCalculation::setup()
   }
   else /*it is a Symbol limited to one colour*/
   {
-    m_colour = M_MANAGER->getColour/*AndAdd*/(m_species);
+    m_colour = M_MANAGER->getColour(m_species);
     
-    // at least, if the attribute alrteady exists, we preserve the persistency and can hope that an other module has set it correctly
     if(Particle::s_tag_format[m_colour].attrExists(m_symbolName))
     {
       if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_symbolName).datatype)
-        throw gError("ParticleCacheDensitySelfContribution::setup", "Symbol " + m_symbolName + " already exists as a non-scalar.");
-      else m_offset = Particle::s_tag_format[m_colour]./*indexOf*/offsetByName(m_symbolName);
+        throw gError("ParticleCacheDensitySelfContribution::setup", "Symbol '" + m_symbolName + "' was already created by other module.");
     }
     else
-      // if it does not yet exist we set the persistency to false
       m_offset = Particle::s_tag_format[m_colour].addAttribute(m_symbolName, m_datatype, false/*persistency*/, m_symbolName).offset;
 
-    if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName) && Particle::s_tag_format[m_colour].attrExists(m_densityName)) {
+    if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName)) {
       if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_temperatureName).datatype)
         throw gError("PressureCalculation::setup", "Temperature " + m_temperatureName + " already exists as a non-scalar.");
-      else m_temperatureOffset = Particle::s_tag_format[m_colour]./*indexOf*/offsetByName(m_temperatureName);
-        if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_densityName).datatype)
-          throw gError("PressureCalculation::setup", "Density " + m_densityName + " already exists as a non-scalar.");
-        else m_densityOffset = Particle::s_tag_format[m_colour]./*indexOf*/offsetByName(m_densityName);
+      else m_temperatureOffset = Particle::s_tag_format[m_colour].offsetByName(m_temperatureName);
     } else 
-          throw gError("PressureCalculation::setup", "Density " + m_densityName + " Temperature " + m_temperatureName + " do not exist.");
+      throw gError("PressureCalculation::setup", "Symbol '" + m_temperatureName + "' does not exist but required by this module.");
+
+    if(Particle::s_tag_format[m_colour].attrExists(m_densityName)) {
+      if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_densityName).datatype)
+        throw gError("PressureCalculation::setup", "Temperature " + m_densityName + " already exists as a non-scalar.");
+      else m_densityOffset = Particle::s_tag_format[m_colour].offsetByName(m_densityName);
+    } else 
+      throw gError("PressureCalculation::setup", "Symbol '" + m_densityName + "' does not exist but required by this module.");
+
     if(m_phaseUser == 0)
       Particle::registerCache_0(this);
     else if(m_phaseUser == 1)

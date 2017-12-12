@@ -91,6 +91,7 @@ void ParticleCacheArbitrary::setup()
     throw gError("ParticleCache::setup", className() + " reports: Attribute 'symbol' has value \"undefined\"");
   if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
     throw gError("ParticleCache::setup", className() + " reports: Attribute 'stage' has none of the allowed values \"0\", \"1\", \"2\".");
+
   // should we create a Cache for the other colours too?
   if(m_species == "ALL")
   {
@@ -143,10 +144,10 @@ void ParticleCacheArbitrary::setup()
     m_colour = 0;
   }
   else m_colour = M_MANAGER->getColour/*AndAdd*/(m_species);
-  
+
   // next lines are done in any case 
   setupOffset();
-  
+
   m_function.setExpression(m_expression);
   m_function.setColour(m_colour);
   
@@ -171,7 +172,7 @@ void ParticleCacheArbitrary::setup()
     assert(((ParticleCacheArbitrary*) pc)->m_offset == m_offset);
     Particle::registerCache(pc);
   }
-
+  
 }
 
 void ParticleCacheArbitrary::setupOffset()
@@ -191,14 +192,16 @@ void ParticleCacheArbitrary::setupOffset()
   }
   else
   {
-    // so the attribute shoudn't yet exist
-    if(Particle::s_tag_format[m_colour].attrExists(m_symbolName))
-      throw gError("ParticleCache::setup", "Symbol " + m_symbolName + " already existing. Second definition is not allowed for 'overwrite = \"no\"'.");
-    else 
-      // FIXME: let's try if it works for all cases that persistency = false
+    // so the attribute shouldn't yet exist
+    if(Particle::s_tag_format[m_colour].attrExists(m_symbolName)) {
+      throw gError("ParticleCacheArbitrary::setupOffset: For module " + className(), "Symbol '" + m_symbolName + "' already existing. Second definition is not allowed for 'overwrite = \"no\"'.");
+    }
+    else {
+    // FIXME: let's try if it works for all cases that persistency = false
       m_offset = Particle::s_tag_format[m_colour].addAttribute(m_symbolName, m_datatype, false, m_symbolName).offset;
-    MSG_DEBUG("ParticleCacheArbitrary::setupOffset", "Offset for " << m_symbolName << " = " << m_offset);
-  } 
+    }
+    MSG_DEBUG("ParticleCacheArbitrary::setupOffset: For module " + className(), "Offset for " << m_symbolName << " = " << m_offset);
+  }  
 }
 
 
