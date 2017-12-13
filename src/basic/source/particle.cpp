@@ -123,6 +123,6 @@ void Particle::sortStages_0()
        s_cached_properties_0[(*__iFE)->colour()].resize(stage+1);
      s_cached_properties_0[(*__iFE)->colour()][stage].push_back(*__iFE);
      );
-  MSG_DEBUG("Particle::sortStages", "highest stage: " << s_maxStage_0);  
+  MSG_DEBUG("Particle::sortStages_0", "highest stage: " << s_maxStage_0);  
   
 }

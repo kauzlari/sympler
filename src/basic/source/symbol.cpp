@@ -91,7 +91,7 @@ int Symbol::setNumOfDoubles() {
 
 bool Symbol::findStage()
 {
-  MSG_DEBUG("Symbol::findStage", className() << " START: stage = " << m_stage);
+  MSG_DEBUG("Symbol::findStage for module " << className(), "START: stage = " << m_stage);
   if(m_stage == -1) {
 
     // check for symbols in runtime compiled expressions

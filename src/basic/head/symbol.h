@@ -140,7 +140,7 @@ class Symbol : public Node
    */
   virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
   {
-    throw gError("Symbol::addMyUsedSymbolsTo", "Error for module " + className() + " This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest use case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
+    throw gError("Symbol::addMyUsedSymbolsTo", "Error for module " + className() + ": This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest use case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
   }
 
   /*!
@@ -149,7 +149,7 @@ class Symbol : public Node
    */
   virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
   {
-    throw gError("Symbol::myHardCodedDependencies", "Error for module " + className() + " This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest use case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
+    throw gError("Symbol::myHardCodedDependencies", "Error for module " + className() + ": This method should not have been called. This means that a programmer forgot to implement this method for an inheriting class. In the simplest use case the missing implementation would just do nothing. If you have no idea what to do, find the person to blame for the affected class/module. Oh, it's you, well...");
   }
 
   /*!

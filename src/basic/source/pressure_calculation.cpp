@@ -65,7 +65,7 @@ PressureCalculation::PressureCalculation
 PressureCalculation::~PressureCalculation()
 {
   if(m_array_p) {
-    for (int i = 0; i < m_arraysize_temperature ; ++i) {
+    for (int i = 0; i < m_arraysize_density; ++i) {
       if(m_array_p[i])
 	delete [] m_array_p[i];
     }

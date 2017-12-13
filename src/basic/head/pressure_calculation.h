@@ -144,18 +144,39 @@ class PressureCalculation: public ParticleCache
   /*!
    * Size of the array for temperature values.
    */
+
   int m_arraysize_temperature;
   /*!
    * Size of the array for pressure values.
    */
   int m_arraysize_density;
   
-
   /*!
   * Initialise the property list
   */
   virtual void init();
   
+  /*!
+   * Adds the expressions used by this \a Symbol to the given list. 
+   * @param usedSymbols List to be filled with own instances of \a TypedValue
+   */
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+  {
+    
+  }
+  
+  /*!
+   * Returns the strings of those \a Symbols that the given class depends on
+   * due to hard-coded reasons (not due to runtime compiled expressions).
+   * @param usedSymbols List to add the strings to.
+   */
+  virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+  {
+    usedSymbols.push_back(m_temperatureName);
+    usedSymbols.push_back(m_densityName);
+  }
+
+
  public:
   /*!
    * Constructor

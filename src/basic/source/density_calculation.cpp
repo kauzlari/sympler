@@ -47,14 +47,12 @@ const SymbolRegister<DensityCalculation> DensityCalculation("DensityCalculation"
 DensityCalculation::DensityCalculation
   (size_t colour, size_t offset, string symbolName)
   : ParticleCache(colour, offset, symbolName)/*m_colour(colour), m_offset(offset), *//*m_wf(wf)*/ {
-  m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
 }
 
 DensityCalculation::DensityCalculation
     (/*Node*/Simulation* parent)
   : ParticleCache(parent) {
-  m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
   init();
 }
@@ -62,7 +60,7 @@ DensityCalculation::DensityCalculation
 
 DensityCalculation::~DensityCalculation() {
   if(m_array_rho) {
-    for (int i = 0; i < m_arraysize_temperature ; ++i) {
+    for (int i = 0; i < m_arraysize_pressure; ++i) {
       if(m_array_rho[i])
 	delete [] m_array_rho[i];
     }
@@ -321,3 +319,4 @@ void DensityCalculation::setup() {
 void DensityCalculation::registerWithParticle()
 {
 }
+
