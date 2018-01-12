@@ -1530,9 +1530,7 @@ void IntegratorISPHconstRho::newPressureIter(size_t colour) {
      const Data& pTag = i->tag;
      double& newP = pTag.doubleByOffset(pressureIterNewOffset);
      newP +=
-     // // add RHS  
-     // rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset))
-     // and subtract pair contrib
+     // subtract pair contrib
      - pTag.doubleByOffset(pairContribOffset);
      // *=omega/(dt^2*rho0)
      newP *= m_omega/pTag.doubleByOffset(aiiOffset);
