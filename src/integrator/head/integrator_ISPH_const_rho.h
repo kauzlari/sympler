@@ -504,7 +504,7 @@ protected:
   /*!
    * Helper function that computes the final new pressure for the given
    * iteration step:
-   * - Adds the RHS (\a m_rho_0 - rho_adv) / (\a m_rho_0 * dt^2),  
+   * - Adds the RHS,  
    * - Multiplies with \a m_omega / aii
    * - Finally adds (1-omega)*Pold.
    * ASSUMPTION: The operations are performed on the data in the 
@@ -517,7 +517,8 @@ protected:
 
   /*!
    * Adds the RHS of the PPE to the storage of the new pressure in the
-   * iteration.
+   * iteration. In this class, 
+   * RHS = (\a m_rho0 - rho_adv) / (\a m_rho0 * dt^2)
    * @param colour Colour of the particles this function should operate 
    * on
    */

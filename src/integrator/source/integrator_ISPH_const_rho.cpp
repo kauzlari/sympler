@@ -1504,7 +1504,7 @@ void IntegratorISPHconstRho::pairIterPContrib(ColourPair* cp, const FunctionPair
 
 /*!
  * Computes the final new pressure for the given iteration step:
- * Adds the RHS (\a m_rho0 - rho_adv) / (\a m_rho0 * dt^2),
+ * Adds the RHS,
  * subtracts all pair contributions aijPj  
  * multiplies with \a m_omega / aii
  * finally adds (1-omega)*Pold.
