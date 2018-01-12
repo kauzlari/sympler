@@ -510,11 +510,19 @@ protected:
    * ASSUMPTION: The operations are performed on the data in the 
    * \a Particle tag accessed by \a m_pressureIterOldOffset for 
    * \a colour.
-   * @param colour Colour of the particles the function should operate 
+   * @param colour Colour of the particles this function should operate 
    * on
    */
   void newPressureIter(size_t colour);
 
+  /*!
+   * Adds the RHS of the PPE to the storage of the new pressure in the
+   * iteration.
+   * @param colour Colour of the particles this function should operate 
+   * on
+   */
+  virtual void addRHStoNewPressure(size_t colour);
+  
   /*!
    * Helper function that computes the total normalised l2-norm and the 
    * infinity norm for the residuals in the PPE solution   

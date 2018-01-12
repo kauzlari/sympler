@@ -1523,12 +1523,15 @@ void IntegratorISPHconstRho::newPressureIter(size_t colour) {
   size_t advDensityOffset = m_advDensityOffset[colour];
   size_t aiiOffset = m_aiiOffset[colour];
 
+  addRHStoNewPressure(colour);
+  
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
     (phase, colour, this,
      const Data& pTag = i->tag;
      double& newP = pTag.doubleByOffset(pressureIterNewOffset);
-     // add RHS  
-     newP += rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset))
+     newP +=
+     // // add RHS  
+     // rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset))
      // and subtract pair contrib
      - pTag.doubleByOffset(pairContribOffset);
      // *=omega/(dt^2*rho0)
@@ -1536,13 +1539,28 @@ void IntegratorISPHconstRho::newPressureIter(size_t colour) {
      // += (1-omega)*Pold
      newP += oneMinOm*pTag.doubleByOffset(pressureIterOldOffset);
 
-
      MSG_DEBUG("IntegratorISPHconstRho::newPressureIter", "p=" << i->mySlot << ": Pold=" << pTag.doubleByOffset(pressureIterOldOffset) << ", Pnew=" << newP << ", RHS=" << rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset)) << ", aijPjold=" << pTag.doubleByOffset(pairContribOffset) << ", aii=" << pTag.doubleByOffset(aiiOffset) << ", rhoAdv=" << pTag.doubleByOffset(advDensityOffset));
-
 
      );
 }
 
+void IntegratorISPHconstRho::addRHStoNewPressure(size_t colour) {
+
+  Phase* phase = M_PHASE;
+  double rhsDenom = 1./(m_dt*m_dt*m_rho0);
+  size_t advDensityOffset = m_advDensityOffset[colour];
+  size_t pressureIterNewOffset = m_pressureIterNewOffset[colour];
+
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, colour, this,
+     const Data& pTag = i->tag;
+     double& newP = pTag.doubleByOffset(pressureIterNewOffset);
+     // add RHS  
+     newP += rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset));
+
+     );
+
+}
 
 void IntegratorISPHconstRho::totalPairContrib() {
   // ASSUMPTION: No self-contribution terms needed because each
