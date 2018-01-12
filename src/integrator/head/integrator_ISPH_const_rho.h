@@ -76,10 +76,34 @@ protected:
   string m_PPEexpr;
   
   /*!
-   * The \a FunctionPair computing the user defined \a m_PPEexpr
+   * The \a FunctionPair computing the user defined \a m_PPEexpr for
+   * fluid-fluid particle pairs.
    */
-  FunctionPair m_PPEfunc;
-
+  FunctionPair m_PPEfuncFluidFluid;
+  
+  /*!
+   * The \a FunctionPair computing the user defined \a m_PPEexpr for
+   * fluid-edge particle pairs.
+   */
+  FunctionPair m_PPEfuncFluidEdge;
+  
+  /*!
+   * The \a FunctionPair computing the user defined \a m_PPEexpr for
+   * fluid-wall particle pairs.
+   */
+  FunctionPair m_PPEfuncFluidWall;
+  
+  /*!
+   * The \a FunctionPair computing the user defined \a m_PPEexpr for
+   * edge-edge particle pairs.
+   */
+  FunctionPair m_PPEfuncEdgeEdge;
+  
+  /*!
+   * The \a FunctionPair computing the user defined \a m_PPEexpr for
+   * edge-wall particle pairs.
+   */
+  FunctionPair m_PPEfuncEdgeWall;
   
   /*!
    * Helper method for computation of a preliminary displacement increment due to the newest 
@@ -341,6 +365,30 @@ protected:
    */
   double m_epsilonAvg;
 
+  /*! Convergence limit for the difference of the maximum error of the linear system
+   *  solver for the PPE between two iteration steps.
+   */
+  /* double m_epsilonMaxDelta; */
+
+  /*! Convergence limit for the difference of the average error of the linear system
+   *  solver for the PPE between two iteration steps.
+   */
+  /* double m_epsilonAvgDelta; */
+
+  /*! Convergence limit for the maximum relative difference in
+   *  iterated pressure values between two iteration steps. The
+   *  relative difference is computed as (Pnew-Pold)/Pold. If Pold=0,
+   *  (i.e. abs(Pold)<Peps, cf. attribute 'Peps') then Pnew is taken
+   *  in the denominator.
+   */
+  double m_epsilonMaxRelDeltaP;
+  
+  /*! Threshold for computed pressures. Pressures below this threshold
+   *  are treated as zero within the error estimate for the
+   *  convergence check of the iterative solution.
+   */
+  double m_epsilonPZero;
+  
   /*!
    * Helper that is not really necessary, but we need it at least now 
    * (20171206) due to reasons discussed at the initialisation in 
@@ -415,8 +463,10 @@ protected:
    * to the diagonal matrix entries aii in the pressure Poisson 
    * equation.
    * @param cp \a ColourPair of the contributing particle pairs
+   * @param PPEfunc \a FunctionPair computing the PPE pair expression 
+   * defined in \a m_PPEexpr for the given \a ColourPair 
    */
-  void aiiPairContrib(ColourPair* cp);
+  void aiiPairContrib(ColourPair* cp, const FunctionPair& PPEfunc);
 
   
   /*!
@@ -438,8 +488,10 @@ protected:
    * the iteration.
    * @param cp The \a ColourPair of the species pair for which the 
    * contribution should be computed.
+   * @param PPEfunc \a FunctionPair computing the PPE pair expression 
+   * defined in \a m_PPEexpr for the given \a ColourPair 
    */
-  void pairIterPContrib(ColourPair* cp);
+  void pairIterPContrib(ColourPair* cp, const FunctionPair& PPEfunc);
 
   
   /*!
@@ -479,6 +531,26 @@ protected:
    * @param sqL2Res Variable storing the squared l2-norm  
    */
   void residualsPerColour(size_t colour, double& maxRes, double& sqL2Res);
+
+  /*!
+   * Returns the largest relative pressure difference for the given 
+   * iteration step l (Pnew) and the previous iteration step l-1 
+   * (Pold) considering all relevant species. This function only 
+   * collects and returns the maximum but does not any computation on 
+   * its own
+   */
+  double returnMaxRelDeltaP();
+
+  /*!
+   * Computes the largest relative pressure difference for the given
+   * iteration step l (Pnew) and the previous iteration step l-1 
+   * (Pold) considering for the species given by \a colour. 
+   * The formula is (Pnew-Pold)/Pold. If Pold<\a m_epsilonPZero
+   * then Pnew is taken for the denominator.
+   * @param colour Colour of the currently considered species of particles
+   * @param maxRelDeltaP Variable holding the final result
+   */
+  void maxRelDeltaPPerColour(size_t colour, double& maxRelDeltaP);  
   
   /*!
    * Helper function for pressure force acceleration contribution FP/m 

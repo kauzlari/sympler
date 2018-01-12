@@ -149,7 +149,43 @@ void IntegratorISPHconstRho::init()
      "||R||_2 = sqrt( sum_i R_i^2*dt^2 ) / N"
      );
   m_epsilonAvg = 0.0005;
+  
+  // DOUBLEPC
+  //   (maxErrorDeltaLimit, m_epsilonMaxDelta, 0.,
+  //    "Convergence limit for the difference of the maximum error of the linear system "
+  //    "solver for the PPE between two iteration steps. The error is defined as the residual "
+  //    "R_i = nabla.((1/rho)nabla P)_i - RHS_i for each particle i."
+  //    );
+  // m_epsilonMaxDelta = 0.00001;
+  
+  // DOUBLEPC
+  //   (avgErrorDeltaLimit, m_epsilonAvgDelta, 0.,
+  //    "Convergence limit for the difference of the average error of the linear system "
+  //    "solver for the PPE between two iteration steps. The error is defined as the residual "
+  //    "R_i = dt^2*nabla.((1/rho)nabla P)_i - RHS_i for each particle i."
+  //    "The average is computed by the normalised l2-norm "
+  //    "||R||_2 = sqrt( sum_i R_i^2*dt^2 ) / N"
+  //    );
+  // m_epsilonAvgDelta = 0.000005;
 
+  DOUBLEPC
+    (maxRelDeltaPLimit, m_epsilonMaxRelDeltaP, 0.,
+     "Convergence limit for the maximum relative difference in "
+     "iterated pressure values between two iteration steps. The "
+     "relative difference is computed as (Pnew-Pold)/Pold. If Pold=0, "
+     "(i.e. abs(Pold)<PzeroLimit, cf. attribute 'Peps') then Pnew is taken "
+     "in the denominator."
+     );
+  m_epsilonMaxRelDeltaP = 0.000005;
+  
+  DOUBLEPC
+    (PzeroLimit, m_epsilonPZero, 0.,
+     "Threshold for computed pressures. Pressures below this threshold"
+     "are treated as zero within the error estimate for the"
+     "convergence check of the iterative solution."
+     );
+  m_epsilonPZero = 1e-14;
+  
   DOUBLEPC
     (omega, m_omega, 0.,
      "Relaxation parameter for the relaxed Jacobi iteration\n"
@@ -202,6 +238,18 @@ void IntegratorISPHconstRho::setup()
   
   if(m_epsilonAvg <= 0.)
     throw gError("IntegratorISPHconstRho::setup", "Invalid value \"" + ObjToString(m_epsilonAvg) + "\" for attribute 'avgErrorLimit'. Must be >0!");
+
+  if(m_epsilonMaxRelDeltaP <= 0.)
+    throw gError("IntegratorISPHconstRho::setup", "Invalid value \"" + ObjToString(m_epsilonMaxRelDeltaP) + "\" for attribute 'maxRelDeltaPLimit'. Must be >0!");
+    
+  if(m_epsilonPZero <= 0.)
+    throw gError("IntegratorISPHconstRho::setup", "Invalid value \"" + ObjToString(m_epsilonPZero) + "\" for attribute 'PzeroLimit'. Must be >0!");
+
+  // if(m_epsilonMaxDelta <= 0.)
+  //   throw gError("IntegratorISPHconstRho::setup", "Invalid value \"" + ObjToString(m_epsilonMaxDelta) + "\" for attribute 'maxErrorDeltaLimit'. Must be >0!");
+  
+  // if(m_epsilonAvgDelta <= 0.)
+  //   throw gError("IntegratorISPHconstRho::setup", "Invalid value \"" + ObjToString(m_epsilonAvgDelta) + "\" for attribute 'avgErrorDeltaLimit'. Must be >0!");
   
   if(m_lMax < 1)
     throw gError("IntegratorISPHconstRho::setup", "Invalid value \"" + ObjToString(m_lMax) + "\" for attribute 'nIterSteps'. Must be >0!");
@@ -213,7 +261,7 @@ void IntegratorISPHconstRho::setup()
   if(m_colour != 0)
     throw gError("IntegratorISPHconstRho::setup", "The incompressible species was not defined as the very first species but this is required by IntegratorISPHconstRho. To achieve this, no other modules (such as Integrators) should define a species before IntegratorISPHconstRho.");
 
-
+  
   // -------- START: Create those other colours we interact with ----------------------
 
   size_t colourTester = 0;
@@ -255,6 +303,11 @@ void IntegratorISPHconstRho::setup()
   // assertion for checking preliminary limitation
   assert(m_colour == 0);
 
+  // the pair expression
+  m_PPEfuncFluidFluid.setExpression(m_PPEexpr);
+  m_PPEfuncFluidFluid.setReturnType(Variant::SCALAR);
+  m_PPEfuncFluidFluid.setColourPair(m_cpFluidFluid);
+  
   // add internal Symbols and get offset; hence Symbols should not yet exist
   m_aiiOffset[m_colour] = DataFormat::addNewAttribute
     (m_colour, "__ISPHaii", DataFormat::DOUBLE);
@@ -298,6 +351,23 @@ void IntegratorISPHconstRho::setup()
     // assertion for checking preliminary limitation
     assert(m_edgeColour == 1);
     assert(m_wallColour == 2);
+
+    // the pair expression
+    m_PPEfuncFluidEdge.setExpression(m_PPEexpr);
+    m_PPEfuncFluidEdge.setReturnType(Variant::SCALAR);
+    m_PPEfuncFluidEdge.setColourPair(m_cpFluidEdge);
+
+    m_PPEfuncFluidWall.setExpression(m_PPEexpr);
+    m_PPEfuncFluidWall.setReturnType(Variant::SCALAR);
+    m_PPEfuncFluidWall.setColourPair(m_cpFluidWall);
+
+    m_PPEfuncEdgeEdge.setExpression(m_PPEexpr);
+    m_PPEfuncEdgeEdge.setReturnType(Variant::SCALAR);
+    m_PPEfuncEdgeEdge.setColourPair(m_cpEdgeEdge);
+
+    m_PPEfuncEdgeWall.setExpression(m_PPEexpr);
+    m_PPEfuncEdgeWall.setReturnType(Variant::SCALAR);
+    m_PPEfuncEdgeWall.setColourPair(m_cpEdgeWall);
 
     // add internal Symbols and get offset; hence Symbols should not yet exist
     m_aiiOffset[m_edgeColour] = DataFormat::addNewAttribute
@@ -370,10 +440,10 @@ void IntegratorISPHconstRho::isAboutToStart()
     m_edgeWallListIndex = HUGE_VAL;
   }
 
-  // kernel self-contribution; this is not really necessary, but I got
-  // an internal compiler error with g++ (Ubuntu 5.4.0-6ubuntu1~16.04.5)
-  // 5.4.0 20160609 when calling the function at some places in private
-  // member functions
+  // kernel self-contribution; this extra variable is not really
+  // necessary, but I got an internal compiler error with g++
+  // (Ubuntu 5.4.0-6ubuntu1~16.04.5) 5.4.0 20160609 when calling the
+  // function at some places in private member functions.
   // NOTE: This cannot be done in setup() since the kernel functions
   // are compiled after Integrator::setup()
   m_kernelSelfContrib =
@@ -387,6 +457,8 @@ void IntegratorISPHconstRho::integrateStep1()
 
   // For the following creation of bonded pairs based on non-bonded pairs, the latter ones must have been created already, which is true here, even at the first time step, when the code is in fact executed for the one and only time based on the boolean m_precomputationDone. Then, in the first call of integrateStep2(..), the true precomputations are done based on these lists
 
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep1", "START");
+  
   if(m_usingWalls && !m_precomputationDone) {
   
     // loop over edge-edge in non-bonded way and create the bonded pairs
@@ -428,11 +500,17 @@ void IntegratorISPHconstRho::integrateStep1()
   
   // M_PHASE->invalidatePositions((IntegratorPosition*) this);
 
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep1", "END");
+
+  
 }
 
 
 void IntegratorISPHconstRho::integrateStep2()
 {
+
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "START");
+
   PairList* pL;
 
   Phase *phase = M_PHASE;
@@ -495,7 +573,9 @@ void IntegratorISPHconstRho::integrateStep2()
 
   if(m_usingWalls)
     initialisationsWithWalls();
-    
+
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "1/4");
+
 
   // --- START: advected density based on advected positions/velocities --------------
 
@@ -508,6 +588,18 @@ void IntegratorISPHconstRho::integrateStep2()
     advDensityContribsWithWalls();
 
   // --- END: advected density based on advected positions/velocities --------------
+
+
+  // Debug Output
+  MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "advected densities before normalisation:");
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_colour, this,
+     // handle
+     const Data& pTag = i->tag;
+     
+     cout << pTag.doubleByOffset(advDensityOffsetFluid) << endl;
+     
+     );
 
   
   // --- START: normalisation-denominators for fluid and edge interpolation -----
@@ -529,6 +621,9 @@ void IntegratorISPHconstRho::integrateStep2()
   
   // --- END: normalisation-denominators for fluid and edge interpolation -------
 
+
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "3/8");
+
   
   // --- START: normalisation of advected densities for fluid and edge species --
 
@@ -544,6 +639,19 @@ void IntegratorISPHconstRho::integrateStep2()
   
   // --- END: normalisation of advected densities for fluid and edge species ----
 
+  // Debug Output
+  MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "advected densities after normalisation:");
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_colour, this,
+     // handle
+     const Data& pTag = i->tag;
+     
+     cout << pTag.doubleByOffset(advDensityOffsetFluid) << endl;
+     
+     );
+
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "7/16");
+
   
   // --- START: diagonal part of a-matrix ----------------------------------------
 
@@ -556,7 +664,7 @@ void IntegratorISPHconstRho::integrateStep2()
   // self-coontribution vanishes
 
   // aiiFluidFluid:
-  aiiPairContrib(m_cpFluidFluid);
+  aiiPairContrib(m_cpFluidFluid, m_PPEfuncFluidFluid);
 
   if(m_usingWalls)
     aiiContribWithWalls();
@@ -574,6 +682,9 @@ void IntegratorISPHconstRho::integrateStep2()
   
   // --- END: The RHS -------------------------------------------------
   
+
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "HALF");
+
   
   // --- START: Relaxed Jacobi iteration ------------------------------
 
@@ -582,7 +693,11 @@ void IntegratorISPHconstRho::integrateStep2()
   bool converged = false;
   // Convergence measures. The functions computing them do the correct
   // initialisation
-  double maxRes, l2Res;
+  double maxRes = HUGE_VAL;
+  double l2Res = HUGE_VAL;
+  // double l2ResDelta = HUGE_VAL;
+  // double maxResDelta = HUGE_VAL;
+  double maxRelDeltaP = HUGE_VAL;
        
   // initial value for pressure iteration for fluid species
   initPressure(m_colour);
@@ -590,19 +705,16 @@ void IntegratorISPHconstRho::integrateStep2()
   if(m_usingWalls)
     initialPressureWithWalls();
   
-  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "BEFORE ITER: residualEpsMax = " << residualEpsMax << ", m_maxDensityError = " << m_maxDensityError << ", residualEpsAvg = " << residualEpsAvg << ", m_avgDensityError = " << m_avgDensityError);
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "BEFORE ITER: m_epsilonMax = " << m_epsilonMax << ", maxRes = " << maxRes << ", l2Res = " << l2Res << ", m_epsilonAvg = " << m_epsilonAvg);
 
   // compute the aijPj i!=j contribution for initial pressure,
   // the function checks itself if only for fluid or also for edge
   totalPairContrib();
 
-  
-  // The iteration
+  // Iteration loop
   while(!converged || l < 2)
     {
-      // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "ITER-START, l = " << l);
-
-      // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "IN ITER: residualEpsMax = " << residualEpsMax << ", m_maxDensityError = " << m_maxDensityError << ", residualEpsAvg = " << residualEpsAvg << ", m_avgDensityError = " << m_avgDensityError);
+      MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "ITER START for l=" << l << ": m_epsilonMax = " << m_epsilonMax << ", maxRes = " << maxRes << ", l2Res = " << l2Res << ", m_epsilonAvg = " << m_epsilonAvg << ", maxRelDeltaP = " << maxRelDeltaP << ", m_epsilonMaxRelDeltaP = " << m_epsilonMaxRelDeltaP << /* ", m_epsilonMaxDelta = " << m_epsilonMaxDelta << ", maxResDelta = " << maxResDelta << ", l2ResDelta = " << l2ResDelta << ", m_epsilonAvgDelta = " << m_epsilonAvgDelta << */ ", 1./HUGE_VAL=" << 1./HUGE_VAL << ", (1.-HUGE_VAL)/HUGE_VAL=" << (1.-HUGE_VAL)/HUGE_VAL);
       
       if(l > m_lMax) 
 	throw gError("IntegratorISPHconstRho::integrateStep2", "Iteration steps exceeded user defined maximum of " + ObjToString(m_lMax) + " without convergence. Here are the error limits and errors:\n"
@@ -610,6 +722,12 @@ void IntegratorISPHconstRho::integrateStep2()
 		     " (current = " + ObjToString(maxRes) + ")\n"
 		     "avgResidualErrorLimit = " + ObjToString(m_epsilonAvg) +
 		     " (current = " + ObjToString(l2Res) + ")\n"
+		     "maxRelDeltaPLimit = " + ObjToString(m_epsilonMaxRelDeltaP) +
+		     " (current = " + ObjToString(maxRelDeltaP) + ")\n"
+		     // "maxResidualErrorDeltaLimit = " + ObjToString(m_epsilonMaxDelta) +
+		     // " (current = " + ObjToString(maxResDelta) + ")\n"
+		     // "avgResidualErrorDeltaLimit = " + ObjToString(m_epsilonAvgDelta) +
+		     // " (current = " + ObjToString(l2ResDelta) + ")\n"
 		     "\nAborting.");
 
 	
@@ -633,6 +751,7 @@ void IntegratorISPHconstRho::integrateStep2()
 
       // for fluid and edge particles: compute new pressure, i.e.
       // += RHS_i
+      // -= all aijPjold
       // *= omega/a_ii
       // += (1-omega)*Pold_i
       newPressureIter(m_colour);
@@ -653,13 +772,27 @@ void IntegratorISPHconstRho::integrateStep2()
       // estimate and next iteration
       totalPairContrib();
 
+      // keep for the deltas
+      double maxResOld = maxRes;
+      double l2ResOld = l2Res;
+      
       totalResiduals(maxRes, l2Res);
 
-      converged = (l2Res < m_epsilonAvg && maxRes < m_epsilonMax);
+      maxRelDeltaP = returnMaxRelDeltaP();
+      
+      assert(l2Res < l2ResOld);
+      assert(maxRes < maxResOld);
+      // it shouldn't matter much which one we put into the denominator
+      // l2ResDelta = (l2ResOld-l2Res)/l2Res;
+      // maxResDelta = (maxResOld-maxRes)/maxRes;
+
+      converged = (l2Res < m_epsilonAvg && maxRes < m_epsilonMax && maxRelDeltaP < m_epsilonMaxRelDeltaP /* l2ResDelta < m_epsilonAvgDelta && maxResDelta < m_epsilonMaxDelta */);
+
+      MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "Jacobi-end for l=" << l << ", l2Res=" << l2Res << ", maxRes=" << maxRes << /* ", l2ResDelta=" << l2ResDelta << ", maxResDelta=" << maxResDelta << */ ", maxRelDeltaP=" << maxRelDeltaP << ", converged=" << converged);
       
       ++l;
       
-    } // end while(residualEpsMax > m_eps...
+    } // end while(!converged...
   
   // --- END: Relaxed Jacobi iteration --------------------------------
     
@@ -738,6 +871,51 @@ void IntegratorISPHconstRho::integrateStep2()
   M_CONTROLLER->triggerNeighbourUpdate();
 
   // --- END: velocity+position update and final pressure -------------
+
+  // MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "END");
+
+
+  // ----------- START: DEBUGGING ONLY ---------------------
+
+  // --- START: reusing the routines for advected density --------------
+
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_colour, this,
+     // handle
+     const Data& pTag = i->tag;
+     
+     // initialise advected density to self-contrib (for equal masses
+     // within a species this could be much simplified, but we want to
+     // keep the flexibility of different masses)
+     pTag.doubleByOffset(advDensityOffsetFluid) = i->m_mass*m_kernelSelfContrib;
+     
+     );
+
+  
+  // fluid self-contrib already done above
+  
+  // advected density based on advected positions/velocities: fluid-fluid part
+  advDensityPairSum(m_cpFluidFluid);
+  
+  if(m_usingWalls)
+    advDensityContribsWithWalls();
+  
+  // --- END: reusing the routines for advected density --------------
+
+  // Debug Output
+  MSG_DEBUG("IntegratorISPHconstRho::integrateStep2", "Final densities(without normalisation correction):");
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_colour, this,
+     // handle
+     const Data& pTag = i->tag;
+     
+     cout << pTag.doubleByOffset(advDensityOffsetFluid) << endl;
+     
+     );
+
+  
+  // ----------- END: DEBUGGING ONLY ---------------------
+
   
 } // end of integrateStep2()
 
@@ -991,6 +1169,8 @@ void IntegratorISPHconstRho::normaliseAdvDensityWithWalls() {
 
 void IntegratorISPHconstRho::aiiContribWithWalls() {
 
+  // MSG_DEBUG("IntegratorISPHconstRho::aiiContribWithWalls", "START");
+  
   size_t advDensityOffsetEdge =  m_advDensityOffset[m_edgeColour];
   size_t aiiOffsetFluid = m_aiiOffset[m_colour];
   size_t aiiOffsetEdge = m_aiiOffset[m_edgeColour];
@@ -999,7 +1179,7 @@ void IntegratorISPHconstRho::aiiContribWithWalls() {
   Phase* phase = M_PHASE;
   
   // aiiFluidEdge and aiiEdgeFluid
-  aiiPairContrib(m_cpFluidEdge);
+  aiiPairContrib(m_cpFluidEdge, m_PPEfuncFluidEdge);
   
   // aiiFluidWall but NOT aiiWallFluid since wall implements boundary
   // condition for pressure and does hence not have a pressure-DOF
@@ -1009,28 +1189,28 @@ void IntegratorISPHconstRho::aiiContribWithWalls() {
      const Data& p1Tag = (pair->firstPart()->tag);
      double& p1aii = p1Tag.doubleByOffset(aiiOffsetFluid);
      
-     m_PPEfunc(&temp, pair);       
-     p1aii += m_kernel->weight(pair, s_dummyNullPoint)*temp;
+     m_PPEfuncFluidWall(&temp, pair);       
+     p1aii -= m_kernel->weight(pair, s_dummyNullPoint)*temp;
      );
-  
+
   // aiiEdgeEdge
   pL = m_cpEdgeEdge->connectedList(m_edgeEdgeListIndex);
   
   for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
     
-    m_PPEfunc(&temp, pair);       
+    m_PPEfuncEdgeEdge(&temp, pair);       
     temp *= m_kernel->weight(pair, s_dummyNullPoint);
     
-    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) += temp;
-    pair->secondPart()->tag.doubleByOffset(aiiOffsetEdge) += temp;
+    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) -= temp;
+    pair->secondPart()->tag.doubleByOffset(aiiOffsetEdge) -= temp;
   }
   
   // aiiEdgeWall: conrib to edge only
   pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
   
   for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-    m_PPEfunc(&temp, pair);             
-    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) +=
+    m_PPEfuncEdgeWall(&temp, pair);             
+    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) -=
       m_kernel->weight(pair, s_dummyNullPoint) * temp;
   }
   
@@ -1043,8 +1223,8 @@ void IntegratorISPHconstRho::aiiContribWithWalls() {
   //     = (mi/rhoi)*sumjInWall dWdrij*PPEexprij/Sigmaj
   pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);
   for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-    m_PPEfunc(&temp, pair);             
-    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) +=
+    m_PPEfuncEdgeWall(&temp, pair);             
+    pair->firstPart()->tag.doubleByOffset(aiiOffsetEdge) -=
       // multiplication with mi/rhoi still missing here because can be
       // factored out and done right after this loop
       m_kernel->weight(pair, s_dummyNullPoint) * temp
@@ -1057,8 +1237,10 @@ void IntegratorISPHconstRho::aiiContribWithWalls() {
      pTag.doubleByOffset((aiiOffsetEdge)) *=
      i->m_mass / pTag.doubleByOffset(advDensityOffsetEdge);
      );
-  
-}
+
+    // MSG_DEBUG("IntegratorISPHconstRho::aiiContribWithWalls", "END");
+
+} // end of aiiContribWithWalls()
 
 
 void IntegratorISPHconstRho::initialPressureWithWalls() {
@@ -1077,7 +1259,7 @@ void IntegratorISPHconstRho::initialPressureWithWalls() {
 void IntegratorISPHconstRho::initPressureIterWithWalls() {
 
   size_t tempOffset;
-  // handles used for resetting the array entries on the RHS
+  // handles used for resetting the array entries
   size_t& pressureIterNewEdgeOffset = m_pressureIterNewOffset[m_edgeColour];
   size_t& pressureIterOldEdgeOffset = m_pressureIterOldOffset[m_edgeColour];
   Phase* phase = M_PHASE;
@@ -1194,10 +1376,14 @@ void IntegratorISPHconstRho::interpolateOne(ColourPair* cp) {
 }
 
 
-void IntegratorISPHconstRho::aiiPairContrib(ColourPair* cp) {
+void IntegratorISPHconstRho::aiiPairContrib(ColourPair* cp, const FunctionPair& PPEfunc) {
+
+  // MSG_DEBUG("IntegratorISPHconstRho::aiiPairContrib", "START");
   
   size_t aiiOffset1 = m_aiiOffset[cp->firstColour()];
   size_t aiiOffset2 = m_aiiOffset[cp->secondColour()];
+
+  // MSG_DEBUG("IntegratorISPHconstRho::aiiPairContrib", "1/5");
   
   FOR_EACH_PAIR__PARALLEL
     (IntegratorISPHconstRho, cp,
@@ -1207,14 +1393,19 @@ void IntegratorISPHconstRho::aiiPairContrib(ColourPair* cp) {
      double& p1aii = p1Tag.doubleByOffset(aiiOffset1);
      double& p2aii = p2Tag.doubleByOffset(aiiOffset2);
      double temp;
-     m_PPEfunc(&temp, pair);
+     // MSG_DEBUG("IntegratorISPHconstRho::aiiPairContrib", "before m_PPE");
+     PPEfunc(&temp, pair);
+     // MSG_DEBUG("IntegratorISPHconstRho::aiiPairContrib", "after m_PPE");
      temp *= m_kernel->weight(pair, s_dummyNullPoint);
      
      // ASSUMPTION: The factor within the runtime compiled expression
      // is symmetric
-     p1aii += temp;
-     p2aii += temp;
+     p1aii -= temp;
+     p2aii -= temp;
      );
+
+  // MSG_DEBUG("IntegratorISPHconstRho::aiiPairContrib", "END");
+
 }
 
 
@@ -1231,6 +1422,9 @@ void IntegratorISPHconstRho::initPressure(size_t colour) {
      // 20, 426 (2014))
      pTag.doubleByOffset(pressureIterOffset)
      = 0.5*pTag.doubleByOffset(pressureOffset);
+
+     MSG_DEBUG("IntegratorISPHconstRho::initPressure", "initial pressure for p=" << i->mySlot << ": " << pTag.doubleByOffset(pressureIterOffset));
+     
      );
 }
 
@@ -1245,7 +1439,7 @@ void IntegratorISPHconstRho::computeWallPressure() {
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
     (phase, m_wallColour, this,
      const Data& pTag = (i->tag);
-     pTag.doubleByOffset(pressureWallOffset) = 0;
+     pTag.doubleByOffset(pressureWallOffset) = 0.;
      );
   
   // non-normalised nominator
@@ -1275,7 +1469,7 @@ void IntegratorISPHconstRho::computeWallPressure() {
 }
 
 
-void IntegratorISPHconstRho::pairIterPContrib(ColourPair* cp) {
+void IntegratorISPHconstRho::pairIterPContrib(ColourPair* cp, const FunctionPair& PPEfunc) {
 
   size_t firstPIterNewOffset = m_pressureIterNewOffset[cp->firstColour()];
   size_t secondPIterNewOffset = m_pressureIterNewOffset[cp->secondColour()];
@@ -1296,11 +1490,13 @@ void IntegratorISPHconstRho::pairIterPContrib(ColourPair* cp) {
      double& p2PairIterContrib = p2Tag.doubleByOffset(secondPairIterContribOffset);
      // const double& p1PIterOld = p1Tag.doubleByOffset(firstPIterOldOffset);
      // const double& p2PIterOld = p2Tag.doubleByOffset(secondPIterOldOffset);
-     m_PPEfunc(&temp, pair);
+     PPEfunc(&temp, pair);
      temp *= m_kernel->weight(pair, s_dummyNullPoint);
 
-     p1PairIterContrib -=  temp*p2PIterNew;
-     p2PairIterContrib -=  temp*p1PIterNew;
+     MSG_DEBUG("IntegratorISPHconstRho::pairIterPContrib", "a(" << pair->firstPart()->mySlot << "," << pair->secondPart()->mySlot << ")=" << temp);
+
+     p1PairIterContrib +=  temp*p2PIterNew;
+     p2PairIterContrib +=  temp*p1PIterNew;
      );
   
 }
@@ -1308,17 +1504,18 @@ void IntegratorISPHconstRho::pairIterPContrib(ColourPair* cp) {
 
 /*!
  * Computes the final new pressure for the given iteration step:
- * Adds the RHS (\a m_rho0 - rho_adv) / (\a m_rho0 * dt^2),  
+ * Adds the RHS (\a m_rho0 - rho_adv) / (\a m_rho0 * dt^2),
+ * subtracts all pair contributions aijPj  
  * multiplies with \a m_omega / aii
  * finally adds (1-omega)*Pold.
  * ASSUMPTION: The operations are performed on the data in the 
- * \a Particle tag accessed by \a m_pressureIterOldOffset for \a colour.
+ * \a Particle tag accessed by \a m_pressureIterNewOffset for \a colour.
  * @param colour Colour of the particles the function should operate on
  */
 void IntegratorISPHconstRho::newPressureIter(size_t colour) {
 
   Phase* phase = M_PHASE;
-  double temp = m_omega/m_dt/m_dt/m_rho0;
+  double rhsDenom = 1./(m_dt*m_dt*m_rho0);
   double oneMinOm = 1-m_omega;
   size_t pressureIterOldOffset = m_pressureIterOldOffset[colour];
   size_t pressureIterNewOffset = m_pressureIterNewOffset[colour];
@@ -1330,13 +1527,19 @@ void IntegratorISPHconstRho::newPressureIter(size_t colour) {
     (phase, colour, this,
      const Data& pTag = i->tag;
      double& newP = pTag.doubleByOffset(pressureIterNewOffset);
-     // add pair contrib + RHS without denominator
-     newP += pTag.doubleByOffset(pairContribOffset)
-     + m_rho0 - pTag.doubleByOffset(advDensityOffset);
+     // add RHS  
+     newP += rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset))
+     // and subtract pair contrib
+     - pTag.doubleByOffset(pairContribOffset);
      // *=omega/(dt^2*rho0)
-     newP *= temp/pTag.doubleByOffset(aiiOffset);
+     newP *= m_omega/pTag.doubleByOffset(aiiOffset);
      // += (1-omega)*Pold
      newP += oneMinOm*pTag.doubleByOffset(pressureIterOldOffset);
+
+
+     MSG_DEBUG("IntegratorISPHconstRho::newPressureIter", "p=" << i->mySlot << ": Pold=" << pTag.doubleByOffset(pressureIterOldOffset) << ", Pnew=" << newP << ", RHS=" << rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset)) << ", aijPjold=" << pTag.doubleByOffset(pairContribOffset) << ", aii=" << pTag.doubleByOffset(aiiOffset) << ", rhoAdv=" << pTag.doubleByOffset(advDensityOffset));
+
+
      );
 }
 
@@ -1359,7 +1562,7 @@ void IntegratorISPHconstRho::totalPairContrib() {
      );
   
   // fluid-fluid pressure contribution
-  pairIterPContrib(m_cpFluidFluid);
+  pairIterPContrib(m_cpFluidFluid, m_PPEfuncFluidFluid);
   
   // analogous operations in case of walls
   if(m_usingWalls)
@@ -1393,7 +1596,7 @@ void IntegratorISPHconstRho::pairIterPContribWithWalls() {
   // is the only contribution so far
   PairList* pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);	
   for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-    m_PPEfunc(&temp, pair);
+    m_PPEfuncEdgeWall(&temp, pair);
     pair->firstPart()->tag.doubleByOffset(pairContribEdgeOffset)
       // yes, +=, since we substract from terms that are all
       // added by -=
@@ -1413,13 +1616,13 @@ void IntegratorISPHconstRho::pairIterPContribWithWalls() {
      );
   
   // fluid-edge / edge-fluid pressure contribution
-  pairIterPContrib(m_cpFluidEdge);      
+  pairIterPContrib(m_cpFluidEdge, m_PPEfuncFluidEdge);      
   
   // fluid-wall pressure contribution
   FOR_EACH_PAIR__PARALLEL
     (IntegratorISPHconstRho, m_cpFluidWall,
      
-     m_PPEfunc(&temp, pair);
+     m_PPEfuncFluidWall(&temp, pair);
      
      pair->firstPart()->tag.doubleByOffset(pairContribFluidOffset)
      -=  m_kernel->weight(pair, s_dummyNullPoint) * temp
@@ -1434,7 +1637,7 @@ void IntegratorISPHconstRho::pairIterPContribWithWalls() {
     const Data& p1Tag = (pair->firstPart()->tag);
     const Data& p2Tag = (pair->secondPart()->tag);
     
-    m_PPEfunc(&temp, pair);
+    m_PPEfuncEdgeEdge(&temp, pair);
     temp *= m_kernel->weight(pair, s_dummyNullPoint);
     
     p1Tag.doubleByOffset(pairContribEdgeOffset) -= temp*p2Tag.doubleByOffset(pressureIterNewEdgeOffset);
@@ -1450,7 +1653,7 @@ void IntegratorISPHconstRho::pairIterPContribWithWalls() {
   // done above.
   pL = m_cpEdgeWall->connectedList(m_edgeWallListIndex);	
   for(Pairdist *pair = pL->first(); pair != NULL; pair = pair->next) {
-    m_PPEfunc(&temp, pair);
+    m_PPEfuncEdgeWall(&temp, pair);
     pair->firstPart()->tag.doubleByOffset(pairContribEdgeOffset)
       -= m_kernel->weight(pair, s_dummyNullPoint) * temp
       * pair->secondPart()->tag.doubleByOffset(pressureWallOffset);
@@ -1486,7 +1689,6 @@ void IntegratorISPHconstRho::totalResiduals(double& maxRes, double& l2Res) {
   
 }
 
-
 /*!
  * Compute maximum and squared l2-norm for residuals R_i`=Ri*dt^2 with  
  * R_i=RHS_i-AijPj = RHS_i - (AijPjpairs + AiiPi) for one colour  
@@ -1506,11 +1708,13 @@ void IntegratorISPHconstRho::residualsPerColour(size_t colour, double& maxRes, d
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
     (phase, colour, this,
      const Data& pTag = i->tag;
+
+     MSG_DEBUG("IntegratorISPHconstRho::residualsPerColour", "particle" << i->mySlot << ": rho0-advRho=" << m_rho0-pTag.doubleByOffset(advDensityOffset) << ", AijPj=" << pTag.doubleByOffset(pairIterContribOffset) << ", Aii=" << pTag.doubleByOffset(aiiOffset) << ", Pi=" << pTag.doubleByOffset(pressureIterNewOffset) << ", AiiPi=" << pTag.doubleByOffset(aiiOffset)*pTag.doubleByOffset(pressureIterNewOffset));
      
      temp =
      // RHS
      // pTag.doubleByOffset(rhsOffset)
-     (m_rho0 - pTag.doubleByOffset(advDensityOffset))/rhsDenominator
+     (m_rho0 - pTag.doubleByOffset(advDensityOffset))/rhsDenominator     
      - (// Aij*Pj
 	pTag.doubleByOffset(pairIterContribOffset)
 	// Aii*Pi
@@ -1518,17 +1722,69 @@ void IntegratorISPHconstRho::residualsPerColour(size_t colour, double& maxRes, d
 	*pTag.doubleByOffset(pressureIterNewOffset)
 	);
 
+     // No! Don't come up again with the idea that this dtSq and the
+     // one in rhsDenominator cancel! They do not! There is a sum!
      temp*=dtSq;
+
+     // MSG_DEBUG("IntegratorISPHconstRho::residualsPerColour", "new residual contrib from particle " << i->mySlot << ", colour=" << colour << " = " << temp);
+
      
      maxRes = max(fabs(temp), maxRes);
 
      temp*=temp;     
      sqL2Res += temp;
+
+     // MSG_DEBUG("IntegratorISPHconstRho::residualsPerColour", "END of particle: maxRes=" << maxRes << ", sqL2Res=" << sqL2Res);
      
      );
   
 }
 
+double IntegratorISPHconstRho::returnMaxRelDeltaP() {
+
+  double maxRelDeltaP = 0.;
+
+  maxRelDeltaPPerColour(m_colour, maxRelDeltaP);
+    
+  if(m_usingWalls) {
+
+    maxRelDeltaPPerColour(m_edgeColour, maxRelDeltaP);
+    
+  } // end of if(m_usingWalls)
+
+  return maxRelDeltaP;
+  
+}
+
+void IntegratorISPHconstRho::maxRelDeltaPPerColour(size_t colour, double& maxRelDeltaP) {
+
+  Phase* phase = M_PHASE;
+  
+  size_t PnewOffset = m_pressureIterNewOffset[colour];
+  size_t PoldOffset = m_pressureIterOldOffset[colour];
+
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, colour, this,
+     const Data& pTag = (i->tag);
+     const double& Pold = pTag.doubleByOffset(PoldOffset);
+     const double& Pnew = pTag.doubleByOffset(PnewOffset);
+
+     if(fabs(Pold) < m_epsilonPZero) {
+       if(fabs(Pnew) < m_epsilonPZero) {
+	 // So Pold and Pnew are really small and almost 0. Then do
+	 // nothing, since we won't get a larger maxRelDeltaP for sure
+       }
+       else {// then take Pnew as denominator
+	 maxRelDeltaP = max(fabs((Pnew - Pold)/Pnew), maxRelDeltaP);
+       }       
+     }
+     else {// then take Pold as denominator by default
+       maxRelDeltaP = max(fabs((Pnew - Pold)/Pold), maxRelDeltaP);
+     }
+       
+     );
+
+}
 
 /*!
  * Pressure force acceleration contribution FP/m of particles from 
