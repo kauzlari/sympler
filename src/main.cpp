@@ -215,7 +215,7 @@ void sayHello() {
 
 // Integrators
 #include "integrator_energy.h"
-#include "integrator_ISPH_const_rho.h"
+#include "integrator_ISPH_const_rho_FDRHS.h"
 #include "integrator_lse.h"
 #include "integrator_omelyan.h"
 #include "integrator_omelyan_NR.h"
@@ -445,7 +445,7 @@ void link_all_properly()
 
   // Integrators
   new IntegratorEnergy(NULL);
-  new IntegratorISPHconstRho(NULL);
+  new IntegratorISPHconstRhoFDRHS(NULL);
   new IntegratorOmelyan(NULL);
   new IntegratorOmelyanNR(NULL);
 #ifdef WITH_ARRAY_TYPES

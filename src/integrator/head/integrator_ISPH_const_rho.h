@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -516,13 +516,19 @@ protected:
   void newPressureIter(size_t colour);
 
   /*!
+   * Performs operations required to compute the RHS of the PPE. The 
+   * default behaviour in this abstract parent class is an empty 
+   * function
+   */
+  virtual void computeRHS() {}
+  
+  /*!
    * Adds the RHS of the PPE to the storage of the new pressure in the
-   * iteration. In this class, 
-   * RHS = (\a m_rho0 - rho_adv) / (\a m_rho0 * dt^2)
+   * iteration. This is a pure virtual function in this class.
    * @param colour Colour of the particles this function should operate 
    * on
    */
-  virtual void addRHStoNewPressure(size_t colour);
+  virtual void addRHStoNewPressure(size_t colour) = 0;
   
   /*!
    * Helper function that computes the total normalised l2-norm and the 

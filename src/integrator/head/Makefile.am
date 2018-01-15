@@ -2,6 +2,7 @@
 include_HEADERS = \
 	integrator_energy.h \
 	integrator_ISPH_const_rho.h \
+	integrator_ISPH_const_rho_FDRHS.h \
 	integrator_lse.h \
 	integrator_position.h \
 	integrator_scalar.h \

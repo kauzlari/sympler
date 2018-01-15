@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -46,7 +46,9 @@ using namespace std;
 #define M_PHASE M_SIMULATION->phase()
 
 #define M_MANAGER M_PHASE->manager()
-const Integrator_Register<IntegratorISPHconstRho> integrator_ISPH_const_rho("IntegratorISPHconstRho");
+
+// now an abstract class
+// const Integrator_Register<IntegratorISPHconstRho> integrator_ISPH_const_rho("IntegratorISPHconstRho");
 
 const point_t IntegratorISPHconstRho::s_dummyNullPoint = {0, 0, 0};
 
@@ -679,6 +681,7 @@ void IntegratorISPHconstRho::integrateStep2()
   // further action should be necessary.
   // When trying different RHSs in different subclasses, we might at
   // least write an overloaded method that returns the RHS. 
+  computeRHS();
   
   // --- END: The RHS -------------------------------------------------
   
@@ -1520,7 +1523,7 @@ void IntegratorISPHconstRho::newPressureIter(size_t colour) {
   size_t pressureIterOldOffset = m_pressureIterOldOffset[colour];
   size_t pressureIterNewOffset = m_pressureIterNewOffset[colour];
   size_t pairContribOffset = m_pairIterContribOffset[colour];
-  size_t advDensityOffset = m_advDensityOffset[colour];
+  // size_t advDensityOffset = m_advDensityOffset[colour];
   size_t aiiOffset = m_aiiOffset[colour];
 
   addRHStoNewPressure(colour);
@@ -1529,35 +1532,15 @@ void IntegratorISPHconstRho::newPressureIter(size_t colour) {
     (phase, colour, this,
      const Data& pTag = i->tag;
      double& newP = pTag.doubleByOffset(pressureIterNewOffset);
-     newP +=
-     // subtract pair contrib
-     - pTag.doubleByOffset(pairContribOffset);
+     newP -= pTag.doubleByOffset(pairContribOffset);
      // *=omega/(dt^2*rho0)
      newP *= m_omega/pTag.doubleByOffset(aiiOffset);
      // += (1-omega)*Pold
      newP += oneMinOm*pTag.doubleByOffset(pressureIterOldOffset);
 
-     MSG_DEBUG("IntegratorISPHconstRho::newPressureIter", "p=" << i->mySlot << ": Pold=" << pTag.doubleByOffset(pressureIterOldOffset) << ", Pnew=" << newP << ", RHS=" << rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset)) << ", aijPjold=" << pTag.doubleByOffset(pairContribOffset) << ", aii=" << pTag.doubleByOffset(aiiOffset) << ", rhoAdv=" << pTag.doubleByOffset(advDensityOffset));
+     MSG_DEBUG("IntegratorISPHconstRho::newPressureIter", "p=" << i->mySlot << ": Pold=" << pTag.doubleByOffset(pressureIterOldOffset) << ", Pnew=" << newP << ", aijPjold=" << pTag.doubleByOffset(pairContribOffset) << ", aii=" << pTag.doubleByOffset(aiiOffset));
 
      );
-}
-
-void IntegratorISPHconstRho::addRHStoNewPressure(size_t colour) {
-
-  Phase* phase = M_PHASE;
-  double rhsDenom = 1./(m_dt*m_dt*m_rho0);
-  size_t advDensityOffset = m_advDensityOffset[colour];
-  size_t pressureIterNewOffset = m_pressureIterNewOffset[colour];
-
-  FOR_EACH_FREE_PARTICLE_C__PARALLEL
-    (phase, colour, this,
-     const Data& pTag = i->tag;
-     double& newP = pTag.doubleByOffset(pressureIterNewOffset);
-     // add RHS  
-     newP += rhsDenom*(m_rho0 - pTag.doubleByOffset(advDensityOffset));
-
-     );
-
 }
 
 void IntegratorISPHconstRho::totalPairContrib() {
