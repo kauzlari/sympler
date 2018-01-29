@@ -33,8 +33,6 @@ extern "C" {
   #include <freesteam/steam_pT.h>
 }
 #include "density_calculationTest.h"
-// #include "density_calculation.h"
-// #include "simulation.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (DensityCalculationTest);
 
@@ -42,25 +40,24 @@ void DensityCalculationTest  :: setUp (void) {
   /*!
    * Initialize objects
    */
- m_simulation = new Simulation();
- m_ps = new FakeDensityCalculation(m_simulation);
-
- m_Tmax = 700.;
- m_pmax = 25000000.;
- m_Tmin = 550.;
- m_pmin = 23000000.;
- m_arraysize_temperature = 10;
- m_arraysize_pressure = 10;
-
- m_ps->set_m_Tmax(m_Tmax);
- m_ps->set_m_pmax(m_pmax);
- m_ps->set_m_Tmin(m_Tmin);
- m_ps->set_m_pmin(m_pmin);
- m_ps->set_m_arraysize_temperature(m_arraysize_temperature);
- m_ps->set_m_arraysize_pressure(m_arraysize_pressure);
-
- // FIXME: does not need any arguments!!!
- m_ps ->setupLUT(m_Tmin, m_pmin, m_Tmax, m_pmax, m_arraysize_pressure, m_arraysize_temperature);
+  m_simulation = new Simulation();
+  m_ps = new FakeDensityCalculation(m_simulation);
+  
+  m_Tmax = 700.;
+  m_pmax = 25000000.;
+  m_Tmin = 550.;
+  m_pmin = 23000000.;
+  m_arraysize_temperature = 10;
+  m_arraysize_pressure = 10;
+  
+  m_ps->set_m_Tmax(m_Tmax);
+  m_ps->set_m_pmax(m_pmax);
+  m_ps->set_m_Tmin(m_Tmin);
+  m_ps->set_m_pmin(m_pmin);
+  m_ps->set_m_arraysize_temperature(m_arraysize_temperature);
+  m_ps->set_m_arraysize_pressure(m_arraysize_pressure);
+  
+  m_ps ->setupLUT();
  
 }
 
@@ -74,8 +71,8 @@ void DensityCalculationTest  :: tearDown (void) {
 
 void DensityCalculationTest  :: setupLUTTest (void) {
 
-  // Initialization of the LUT
-  // m_ps ->setupLUT(m_Tmin, m_pmin, m_Tmax, m_pmax,m_arraysize_pressure, m_arraysize_temperature);
+  // Initialization of the LUT now done in setUp of test class
+  // m_ps ->setupLUT();
   SteamState S = freesteam_set_pT(m_pmin, m_Tmin);
   double density = freesteam_rho(S);
   // Assertions to check if the first and the last content of the array are correct.
@@ -91,9 +88,9 @@ void DensityCalculationTest  :: setupLUTTest (void) {
 void DensityCalculationTest  :: calculateDensityTest (void)
 {
 
-  // Initialization of the LUT
-  m_ps -> setupLUT(m_Tmin, m_pmin, m_Tmax, m_pmax, m_arraysize_pressure, m_arraysize_temperature );
-  SteamState S = freesteam_set_pT(24000000, 650);
+  // Initialization of the LUT now done in setUp of test class 
+  // m_ps -> setupLUT();
+  SteamState S = freesteam_set_pT(24000000., 650.);
   double density = freesteam_rho(S);
   // Assertion to check if the interpolation is correct.
   double temp;
@@ -101,17 +98,16 @@ void DensityCalculationTest  :: calculateDensityTest (void)
   gError tempGerror;
 
   try {
-    temp = m_ps -> calculateDensity(650, 24000000, m_Tmin,m_pmin);
+    temp = m_ps -> calculateDensity(650., 24000000.);
   } catch(gError& err) {
 
   	tempString = err.message(); 
 
   }
 
-  CPPUNIT_ASSERT_NO_THROW_MESSAGE(tempString, m_ps -> calculateDensity(650, 24000000, m_Tmin,m_pmin));
+  CPPUNIT_ASSERT_NO_THROW_MESSAGE(tempString, m_ps -> calculateDensity(650., 24000000.));
 
   CPPUNIT_ASSERT_DOUBLES_EQUAL (temp, density, 0.2);
-  // CPPUNIT_ASSERT_DOUBLES_EQUAL (ps -> calculateDensity(650, 24000000, m_Tmin,m_pmin), density, 0.1);
 
 }
 

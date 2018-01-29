@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -68,14 +68,15 @@ DensityCalculation::~DensityCalculation() {
   }
 }
 
-void DensityCalculation::setupLUT(double Tmin, double pmin, double Tmax, double pmax, int m_arraysize_pressure, int m_arraysize_temperature) {
-  // Function intern auxiliary vaiables
+void DensityCalculation::setupLUT() {
+  
+  // auxiliary variables
   double pr = 0;
   double t = 0;
   double density;
   // Step sizes depending on the size of the Array and the ranges of the input values.
-  m_calcstepP= (pmax-pmin)/(m_arraysize_pressure-1);
-  m_calcstepT= (Tmax-Tmin)/(m_arraysize_temperature-1);
+  m_calcstepP= (m_pmax-m_pmin)/(m_arraysize_pressure-1);
+  m_calcstepT= (m_Tmax-m_Tmin)/(m_arraysize_temperature-1);
   // Initialization of the 2D Array, depending on the given temperature and pressure sizes.
   m_array_rho = new double*[m_arraysize_pressure+1];
   for (int i = 0; i <= m_arraysize_pressure; i++) {
@@ -85,7 +86,7 @@ void DensityCalculation::setupLUT(double Tmin, double pmin, double Tmax, double 
   // stores them into the LUT.
   for(int j = 0; j < m_arraysize_pressure; j++) {
     for (int i = 0; i < m_arraysize_temperature; i++) {  
-      SteamState S = freesteam_set_pT(pmin + pr,Tmin + t);
+      SteamState S = freesteam_set_pT(m_pmin + pr,m_Tmin + t);
       density = freesteam_rho(S);
       m_array_rho[j][i] = density;
       t += m_calcstepT;
@@ -95,28 +96,29 @@ void DensityCalculation::setupLUT(double Tmin, double pmin, double Tmax, double 
   }
 }
 
-double DensityCalculation::calculateDensity(double inputT, double inputP, double Tmin, double pmin) {
+double DensityCalculation::calculateDensity(double inputT, double inputP) {
 
   // out of bounds?
-  if((inputP < pmin) || (inputT < Tmin) || (inputP > m_pmax) || (inputT > m_Tmax))
-    throw gError("DensityCalculation::calculateDensity", "(P,T) pair out of bounds: P=" + ObjToString(inputP) + ", T=" + ObjToString(inputT) + ", admissible [Pmin,Pmax] = [" + ObjToString(pmin) + "," + ObjToString(m_pmax) + "], admissible [Tmin,Tmax] = [" + ObjToString(Tmin) + "," + ObjToString(m_Tmax) + "].");
+  if((inputP < m_pmin) || (inputT < m_Tmin) || (inputP > m_pmax) || (inputT > m_Tmax))
+    throw gError("DensityCalculation::calculateDensity", "(P,T) pair out of bounds: P=" + ObjToString(inputP) + ", T=" + ObjToString(inputT) + ", admissible [Pmin,Pmax] = [" + ObjToString(m_pmin) + "," + ObjToString(m_pmax) + "], admissible [Tmin,Tmax] = [" + ObjToString(m_Tmin) + "," + ObjToString(m_Tmax) + "].");
   
   // Calculation of the surrounding sampling points
-  int x_pressure_array_0 = (floor((inputP-pmin)/m_calcstepP));
-  int y_temperature_array_0 =(floor((inputT-Tmin)/m_calcstepT));
-  int x_pressure_array_1 = (floor((inputP-pmin)/m_calcstepP)+1);
-  int y_temperature_array_1 =(floor((inputT-Tmin)/m_calcstepT)+1);
+  int x_pressure_array_0 = (floor((inputP-m_pmin)/m_calcstepP));
+  int y_temperature_array_0 =(floor((inputT-m_Tmin)/m_calcstepT));
+  int x_pressure_array_1 = (floor((inputP-m_pmin)/m_calcstepP)+1);
+  int y_temperature_array_1 =(floor((inputT-m_Tmin)/m_calcstepT)+1);
   // Normalization of the input values.
-  double press_nominated =  ((inputP -(x_pressure_array_0*m_calcstepP+pmin)) / m_calcstepP);
-  double temp_nominated =   ((inputT -(y_temperature_array_0*m_calcstepT+Tmin)) / m_calcstepT);
+  double press_normalised =  ((inputP -(x_pressure_array_0*m_calcstepP+m_pmin)) / m_calcstepP);
+  double temp_normalised =   ((inputT -(y_temperature_array_0*m_calcstepT+m_Tmin)) / m_calcstepT);
   // Bilinear interpolation of the normalized values.
-  double x_0_y_0 = m_array_rho[x_pressure_array_0][y_temperature_array_0]*(1-press_nominated)*(1-temp_nominated);
-  double x_1_y_0 = m_array_rho[x_pressure_array_1][y_temperature_array_0]*press_nominated*(1-temp_nominated);
-  double x_0_y_1 = m_array_rho[x_pressure_array_0][y_temperature_array_1]*(1-press_nominated)*temp_nominated;
-  double x_1_y_1 = m_array_rho[x_pressure_array_1][y_temperature_array_1]*temp_nominated*press_nominated;
+  double x_0_y_0 = m_array_rho[x_pressure_array_0][y_temperature_array_0]*(1-press_normalised)*(1-temp_normalised);
+  double x_1_y_0 = m_array_rho[x_pressure_array_1][y_temperature_array_0]*press_normalised*(1-temp_normalised);
+  double x_0_y_1 = m_array_rho[x_pressure_array_0][y_temperature_array_1]*(1-press_normalised)*temp_normalised;
+  double x_1_y_1 = m_array_rho[x_pressure_array_1][y_temperature_array_1]*temp_normalised*press_normalised;
   // Interpolated density value.
   m_density_interpolation = x_0_y_0 + x_1_y_0 + x_0_y_1 + x_1_y_1;
   return m_density_interpolation;
+
 }
 
 
@@ -323,7 +325,8 @@ void DensityCalculation::setup() {
     } 
   }
 
-   setupLUT( m_Tmin,  m_pmin, m_Tmax, m_pmax, m_arraysize_pressure, m_arraysize_temperature);   
+  // setup the look-up table
+  setupLUT();   
 }
 
 

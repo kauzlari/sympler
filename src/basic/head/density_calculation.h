@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -36,17 +36,17 @@
 
 
 /*!
- * 
+ * Local density at the particle computed from the local pressure
+ * and local temperature based on IAPWS-IF97 (International
+ * Association for the Properties of Water and Steam. Revised
+ * release on the IAPWS industrial formulation 1997 for the
+ * thermodynamic properties of water and steam. adadad, August
+ * 2007).
  */
 class DensityCalculation: public ParticleCache
 {
  protected:
-//   /*!
-//   * Tag offset of the local density
-   //   */
-//  size_t m_offset;
 
-   //DensityCalculation *pcl;
   /*!
    * From which symbol to take the local temperature
    */
@@ -212,17 +212,22 @@ class DensityCalculation: public ParticleCache
    * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
    * Bilinear interpolation is used for approximation.
    */
-  virtual double calculateDensity(double inputT, double inputP, double m_Tmin, double m_pmin);
+  virtual double calculateDensity(double inputT, double inputP);
 
   /*!
    * Precalculates the density in given temperature and pressure ranges.
    * The density values are stored in a Look-Up table (2D Array) with fixed step sizes.
    */
-  virtual void setupLUT(double m_Tmin, double m_pmin, double m_Tmax, double m_pmax,int arraysize_density, int arraysize_temperature);
+  virtual void setupLUT(/* double m_Tmin, double m_pmin, double m_Tmax, double m_pmax,int arraysize_density, int arraysize_temperature */);
+
+  /*!
+   * Calculates the density for the given particle
+   * @param p The given particle
+   */
   virtual void computeCacheFor(Particle* p) {
     double inputT = p->tag.doubleByOffset(m_temperatureOffset);
     double inputP = p->tag.doubleByOffset(m_pressureOffset);
-    calculateDensity(inputT, inputP, m_Tmin, m_pmin);
+    calculateDensity(inputT, inputP);
     p->tag.doubleByOffset(m_offset) =  m_density_interpolation;
   }
 
@@ -231,27 +236,23 @@ class DensityCalculation: public ParticleCache
    */
   virtual void registerWithParticle();
 
-
-
   /*!
    * Does this calculator equal \a c?
    * @param c Other calculator
    */
   virtual bool operator==(const ParticleCache &c) const {
-//     MSG_DEBUG("PressureCalculation::==", "called");
+
     if (typeid(c) == typeid(*this)) {
-
-      /* DensityCalculation *cc = (DensityCalculation*) &c; */
-
       return true;
           /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
     } else {
       return false;
     }
-  } 
+  }
+  
   /*!
-   * If it belongs to a Node structure, setup this
-   * ParticleCacheDensitySelfContribution
+   * If it belongs to a Node structure, setup this instance of
+   * \a DensityCalculation
    */
   virtual void setup();
 
