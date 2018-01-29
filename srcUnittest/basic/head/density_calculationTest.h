@@ -39,23 +39,106 @@
 #include "simulation.h"
 using namespace std;
 
+
+/*!
+ * Fake class for testing class \a Densityclaculation. Current resons 
+ * for its need:
+ * - private/protected member m_Tmax, m_pmax should be possible to set
+ *   by public method
+ */
+class FakeDensityCalculation : public DensityCalculation
+{
+  
+ public: 
+  
+  FakeDensityCalculation (Simulation* parent)
+    : DensityCalculation (parent)
+  {}
+  
+  /*!
+   * Destructor
+   */
+  virtual ~FakeDensityCalculation() {
+  }
+  
+  /*!
+   * Set private member \a m_Tmax to given value
+   * @param Tmax value that m_Tmax should be set to
+   */
+  void set_m_Tmax(const double& Tmax) {
+    m_Tmax = Tmax;
+  }
+  
+  /*!
+   * Set private member \a m_pmax to given value
+   * @param pmax value that m_pmax should be set to
+   */
+  void set_m_pmax(const double& pmax) {
+    m_pmax = pmax;
+  }
+  
+  /*!
+   * Set private member \a m_Tmin to given value
+   * @param Tmin value that m_Tmin should be set to
+   */
+  void set_m_Tmin(const double& Tmin) {
+    m_Tmin = Tmin;
+  }
+  
+  /*!
+   * Set private member \a m_pmin to given value
+   * @param pmin value that m_pmin should be set to
+   */
+  void set_m_pmin(const double& pmin) {
+    m_pmin = pmin;
+  }
+  
+  /*!
+   * Set private member \a m_arraysize_temperature to given value
+   * @param size value that m_arraysize_temperature should be set to
+   */
+  void set_m_arraysize_temperature(size_t size) {
+    m_arraysize_temperature = size;
+  }
+  
+  /*!
+   * Set private member \a m_arraysize_pressure to given value
+   * @param size value that m_arraysize_pressure should be set to
+   */
+  void set_m_arraysize_pressure(size_t size) {
+    m_arraysize_pressure = size;
+  }
+    
+};
+
 class DensityCalculationTest : public CPPUNIT_NS :: TestFixture
 {
   CPPUNIT_TEST_SUITE (DensityCalculationTest);
   CPPUNIT_TEST (setupLUTTest);
   CPPUNIT_TEST (calculateDensityTest);
   CPPUNIT_TEST_SUITE_END ();
+  
+ public:
+  
+  void setUp (void);
+  void tearDown (void);
+  
+ protected:
+  
+  void setupLUTTest (void);
+  void calculateDensityTest (void);
+  
+ private:
+  
+  Simulation *m_simulation; 
+  FakeDensityCalculation *m_ps;
 
-  public:
-    void setUp (void);
-    void tearDown (void);
+  double m_Tmax;
+  double m_pmax;
+  double m_Tmin;
+  double m_pmin;
+  size_t m_arraysize_temperature;
+  size_t m_arraysize_pressure;
 
-  protected:
-    void setupLUTTest (void);
-    void calculateDensityTest (void);
-
-  private:
-  Simulation *simulation; 
-  DensityCalculation *ps;
 };
 #endif

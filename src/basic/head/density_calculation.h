@@ -36,8 +36,7 @@
 
 
 /*!
- * Add the particles self contribution to the local density
- * to the local density field.
+ * 
  */
 class DensityCalculation: public ParticleCache
 {
@@ -199,11 +198,13 @@ class DensityCalculation: public ParticleCache
   virtual ~DensityCalculation();
     /*!
    * LUT (2D Array), where all density values are stored
+   * FIXME: should not be public
    */
   double **m_array_rho;
 
   /*!
    * Value of the interpolated local density.
+   * FIXME: should not be public; probably even obsolete
    */
   double m_density_interpolation;
 
