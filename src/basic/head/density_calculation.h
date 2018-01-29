@@ -139,16 +139,15 @@ class DensityCalculation: public ParticleCache
    */
   double m_calcstepP;
 
-
   /*!
    * Size of the array for temperature values.
    */
   int m_arraysize_temperature;
+
   /*!
    * Size of the array for pressure values.
    */
   int m_arraysize_pressure;
-  
 
   /*!
   * Initialise the property list
@@ -177,6 +176,7 @@ class DensityCalculation: public ParticleCache
 
   
  public:
+
   /*!
    * Constructor
    * @param colour The particle's color
@@ -196,17 +196,6 @@ class DensityCalculation: public ParticleCache
    * Destructor
    */
   virtual ~DensityCalculation();
-    /*!
-   * LUT (2D Array), where all density values are stored
-   * FIXME: should not be public
-   */
-  double **m_array_rho;
-
-  /*!
-   * Value of the interpolated local density.
-   * FIXME: should not be public; probably even obsolete
-   */
-  double m_density_interpolation;
 
   /*!
    * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
@@ -218,17 +207,21 @@ class DensityCalculation: public ParticleCache
    * Precalculates the density in given temperature and pressure ranges.
    * The density values are stored in a Look-Up table (2D Array) with fixed step sizes.
    */
-  virtual void setupLUT(/* double m_Tmin, double m_pmin, double m_Tmax, double m_pmax,int arraysize_density, int arraysize_temperature */);
+  virtual void setupLUT();
 
   /*!
    * Calculates the density for the given particle
    * @param p The given particle
    */
   virtual void computeCacheFor(Particle* p) {
-    double inputT = p->tag.doubleByOffset(m_temperatureOffset);
-    double inputP = p->tag.doubleByOffset(m_pressureOffset);
-    calculateDensity(inputT, inputP);
-    p->tag.doubleByOffset(m_offset) =  m_density_interpolation;
+
+    Data& pTag = p->tag;
+    
+    pTag.doubleByOffset(m_offset) =
+      calculateDensity(
+		       pTag.doubleByOffset(m_temperatureOffset),
+		       pTag.doubleByOffset(m_pressureOffset)
+		       );
   }
 
   /*!
@@ -256,6 +249,19 @@ class DensityCalculation: public ParticleCache
    */
   virtual void setup();
 
+  /*!
+   * Returns the values stored in the LUT
+   */ 
+  virtual double** returnLUTvals() {
+    return m_array_rho;
+  }
+
+ protected:
+
+  /*!
+   * LUT (2D Array), where all density values are stored
+   */
+  double **m_array_rho;
 
 };
 

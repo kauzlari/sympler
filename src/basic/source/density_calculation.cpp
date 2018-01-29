@@ -115,9 +115,9 @@ double DensityCalculation::calculateDensity(double inputT, double inputP) {
   double x_1_y_0 = m_array_rho[x_pressure_array_1][y_temperature_array_0]*press_normalised*(1-temp_normalised);
   double x_0_y_1 = m_array_rho[x_pressure_array_0][y_temperature_array_1]*(1-press_normalised)*temp_normalised;
   double x_1_y_1 = m_array_rho[x_pressure_array_1][y_temperature_array_1]*temp_normalised*press_normalised;
+
   // Interpolated density value.
-  m_density_interpolation = x_0_y_0 + x_1_y_0 + x_0_y_1 + x_1_y_1;
-  return m_density_interpolation;
+  return x_0_y_0 + x_1_y_0 + x_0_y_1 + x_1_y_1;
 
 }
 
