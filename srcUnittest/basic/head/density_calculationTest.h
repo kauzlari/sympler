@@ -41,7 +41,7 @@ using namespace std;
 
 
 /*!
- * Fake class for testing class \a Densityclaculation. Current resons 
+ * Fake class for testing class \a DensityCalculation. Current resons 
  * for its need:
  * - private/protected member m_Tmax, m_pmax should be possible to set
  *   by public method
@@ -109,7 +109,7 @@ class FakeDensityCalculation : public DensityCalculation
     m_arraysize_pressure = size;
   }
     
-};
+}; // end of FakeDensityCalculation
 
 class DensityCalculationTest : public CPPUNIT_NS :: TestFixture
 {

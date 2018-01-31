@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -36,19 +36,18 @@
 
 
 /*!
- * Add the particles self contribution to the local density
- * to the local density field.
+ * Local pressure at the particle computed from the local density
+ * and local temperature based on IAPWS-IF97 (International
+ * Association for the Properties of Water and Steam. Revised
+ * release on the IAPWS industrial formulation 1997 for the
+ * thermodynamic properties of water and steam. adadad, August
+ * 2007).
  */
 class PressureCalculation: public ParticleCache
 {
- protected:
   
-//   /*!
-//   * Tag offset of the local density
-   //   */
-//  size_t m_offset;
+ protected:
 
-   //DensityCalculation *pcl;
   /*!
    * From which symbol to take the local temperature
    */
@@ -150,6 +149,11 @@ class PressureCalculation: public ParticleCache
    * Size of the array for pressure values.
    */
   int m_arraysize_density;
+
+  /*!
+   * LUT (2D Array), where all density values are stored
+   */
+  double **m_array_p;
   
   /*!
   * Initialise the property list
@@ -199,31 +203,35 @@ class PressureCalculation: public ParticleCache
   virtual ~PressureCalculation(); 
 
   /*!
-   * LUT (2D Array), where all density values are stored
-   */
-  double **m_array_p;
-
-  /*!
    * Value of the interpolated local density.
    */
-  double m_pressure_interpolation;
+  /* double m_pressure_interpolation; */
 
   /*!
    * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
    * Bilinear interpolation is used for approximation.
    */
-  virtual double calculatePressure(double inputT, double inputRho, double m_Tmin, double m_rhomin);
+  virtual double calculatePressure(double inputT, double inputRho);
 
   /*!
    * Precalculates the pressure in given temperature and density ranges.
    * The pressure values are stored in a Look-Up table (2D Array) with fixed step sizes.
    */
-  virtual void setupLUT(double m_Tmin, double m_rhomin, double m_Tmax, double m_rhomax,int m_arraysize_pressure, int m_arraysize_temperature);
+  virtual void setupLUT(/* double m_Tmin, double m_rhomin, double m_Tmax, double m_rhomax,int m_arraysize_pressure, int m_arraysize_temperature */);
+
+  /*!
+   * Calculates the pressure for the given particle
+   * @param p The given particle
+   */
   virtual void computeCacheFor(Particle* p) {
-    double inputT = p->tag.doubleByOffset(m_temperatureOffset);
-    double inputRho = p->tag.doubleByOffset(m_densityOffset);
-    calculatePressure(inputT, inputRho, m_Tmin, m_rhomin);
-    p->tag.doubleByOffset(m_offset) =  m_pressure_interpolation;
+    
+    Data& pTag = p->tag;
+    
+    pTag.doubleByOffset(m_offset) =
+      calculatePressure(
+		       pTag.doubleByOffset(m_temperatureOffset),
+		       pTag.doubleByOffset(m_densityOffset)
+		       ); 
   }
 
   /*!
@@ -231,16 +239,13 @@ class PressureCalculation: public ParticleCache
    */
   virtual void registerWithParticle();
 
-
-
   /*!
    * Does this calculator equal \a c?
    * @param c Other calculator
    */
   virtual bool operator==(const ParticleCache &c) const {
-//     MSG_DEBUG("PressureCalculation::==", "called");
+
     if (typeid(c) == typeid(*this)) {
-      /* PressureCalculation *cc = (PressureCalculation*) &c; */
 
       return true;
           /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
@@ -248,12 +253,19 @@ class PressureCalculation: public ParticleCache
       return false;
     }
   } 
+
   /*!
-   * If it belongs to a Node structure, setup this
-   * ParticleCacheDensitySelfContribution
+   * If it belongs to a Node structure, setup this instance of
+   * \a PressureCalculation
    */
   virtual void setup();
 
+  /*!
+   * Returns the values stored in the LUT
+   */ 
+  virtual double** returnLUTvals() {
+    return m_array_p;
+  }
 
 };
 

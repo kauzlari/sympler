@@ -97,13 +97,13 @@ void DensityCalculationTest  :: calculateDensityTest (void)
   // Assertion to check if the interpolation is correct.
   double temp;
   string tempString = "ERROR: Unspecified bug in DensityCalculationTest::calculateDensityTest. Please check!";
-  gError tempGerror;
+  // gError tempGerror;
 
   try {
     temp = m_ps -> calculateDensity(650., 24000000.);
   } catch(gError& err) {
 
-  	tempString = err.message(); 
+    tempString = err.message(); 
 
   }
 

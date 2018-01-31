@@ -195,6 +195,12 @@ void DensityCalculation::setup() {
   if(m_arraysize_pressure == 0)
     throw gError("DensityCalculation::setup", "Attribute 'arraysize_pressure' was not defined.");
 
+  if(m_Tmin >= m_Tmax)
+    throw gError("PressureCalculation::setup", "Attribute 'temperatureMin' (= " + ObjToString(m_Tmin) + ") >= attribute 'temperatureMax' (= " + ObjToString(m_Tmax) + ") not meaningful!");
+  
+  if(m_pmin >= m_pmax)
+    throw gError("PressureCalculation::setup", "Attribute 'pressureMin' (= " + ObjToString(m_pmin) + ") >= attribute 'pressureMax' (= " + ObjToString(m_pmax) + ") not meaningful!");
+
   
   pair<size_t, size_t> tempPair;
   

@@ -150,6 +150,11 @@ class DensityCalculation: public ParticleCache
   int m_arraysize_pressure;
 
   /*!
+   * LUT (2D Array), where all density values are stored
+   */
+  double **m_array_rho;
+  
+  /*!
   * Initialise the property list
   */
   virtual void init();
@@ -255,13 +260,6 @@ class DensityCalculation: public ParticleCache
   virtual double** returnLUTvals() {
     return m_array_rho;
   }
-
- protected:
-
-  /*!
-   * LUT (2D Array), where all density values are stored
-   */
-  double **m_array_rho;
 
 };
 
