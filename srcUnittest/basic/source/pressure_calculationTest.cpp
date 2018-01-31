@@ -78,15 +78,6 @@ void PressureCalculationTest  :: tearDown (void)
 }
 
 void PressureCalculationTest  :: setupLUTTest (void) {
-
-  // // Minimum and maximum Inputvalues
-  // double m_Tmin = 650;
-  // double m_rhomin = 300;
-  // double m_Tmax= 700;
-  // double m_rhomax = 600;
-  // // Size of the arrays
-  // int m_arraysize_density = 10;
-  // int m_arraysize_temperature = 10;
   
   // Initialization of the LUT now done in setUp of test class
   // m_ps -> setupLUT();
@@ -97,19 +88,13 @@ void PressureCalculationTest  :: setupLUTTest (void) {
   if (m_rhomin > densityBoundary) {
     double pressure = freesteam_region3_p_rhoT(m_rhomin, m_Tmin);
     // Assertions to check if the first and the last entry of the array are correct.
-    // CPPUNIT_ASSERT_EQUAL (ps -> m_array_p[0][0], pressure);
     CPPUNIT_ASSERT_EQUAL (m_ps -> returnLUTvals()[0][0], pressure);
   }
   else
     // case should not happen, so check for it
     CPPUNIT_ASSERT_EQUAL (2.0, 1.0);
     
-  // Calculation steps between expansion points
-  // double m_calcstepRho= (m_rhomax-m_rhomin)/(m_arraysize_density - 1);
-  // double m_calcstepT= (m_Tmax-m_Tmin)/(m_arraysize_temperature - 1);
   double pressure = freesteam_region3_p_rhoT(m_rhomax, m_Tmax);
-
-  // MSG_DEBUG("PressureCalculationTest  :: setupLUTTest", "95%: m_arraysize_density = " << m_arraysize_density << ", m_arraysize_temperature = " << m_arraysize_temperature);
 
   CPPUNIT_ASSERT_EQUAL (m_ps -> returnLUTvals()[m_arraysize_density - 1][m_arraysize_temperature - 1], pressure);
 
@@ -117,34 +102,9 @@ void PressureCalculationTest  :: setupLUTTest (void) {
 
 void PressureCalculationTest  :: calculatePressureTest (void)
 {
-  // // Minimum and maximum Inputvalues
-  // double m_Tmin = 650;
-  // double m_rhomin = 300;
-  // double m_Tmax= 750;
-  // double m_rhomax = 600;
-  // // Size of the arrays
-  // int m_arraysize_density = 10;
-  // int m_arraysize_temperature = 10;
-
-  // Initialization of the LUT now done in setUp of test class
-  // ps -> setupLUT();
-
-  // // Assertion to check if the interpolation is correct.
-  // double pressure = freesteam_region3_p_rhoT(350, 700);
-  // double interpol = ps -> calculatePressure(700, 350/*, m_Tmin, m_rhomin*/);
-  // CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, (interpol / 100));	// relativ delta: 1% of expected
-  // pressure = freesteam_region3_p_rhoT(600, 750);
-  // interpol = ps -> calculatePressure(750, 600/*, m_Tmin, m_rhomin*/);
-  // CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, (interpol / 100));	// relativ delta: 1% of expected
-  // pressure = freesteam_region3_p_rhoT(300, 650);
-  // interpol = ps -> calculatePressure(650, 300/*, m_Tmin, m_rhomin*/);
-  // CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, pressure, (interpol / 100));	// relativ delta: 1% of expected
-
-
   execPressureTest(350., 700.);
   execPressureTest(600., 750.);
-  execPressureTest(300., 650.);
-  
+  execPressureTest(300., 650.); 
 }
 
 void PressureCalculationTest  :: execPressureTest(const double& density, const double& temperature) {
@@ -154,7 +114,6 @@ void PressureCalculationTest  :: execPressureTest(const double& density, const d
   double pressure;
   string exceptMsg;
   
-  // 1st test
   exceptMsg = "ERROR: Unspecified exception in PressureCalculationTest::calculatePressureTest. Please check!";
   pressure = freesteam_region3_p_rhoT(350., 700.);
   try {

@@ -46,7 +46,7 @@ const SymbolRegister<DensityCalculation> DensityCalculation("DensityCalculation"
 
 DensityCalculation::DensityCalculation
   (size_t colour, size_t offset, string symbolName)
-  : ParticleCache(colour, offset, symbolName)/*m_colour(colour), m_offset(offset), *//*m_wf(wf)*/ {
+  : ParticleCache(colour, offset, symbolName) {
   m_datatype = DataFormat::DOUBLE;
 }
 

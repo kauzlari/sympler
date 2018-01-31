@@ -203,11 +203,6 @@ class PressureCalculation: public ParticleCache
   virtual ~PressureCalculation(); 
 
   /*!
-   * Value of the interpolated local density.
-   */
-  /* double m_pressure_interpolation; */
-
-  /*!
    * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
    * Bilinear interpolation is used for approximation.
    */
@@ -217,7 +212,7 @@ class PressureCalculation: public ParticleCache
    * Precalculates the pressure in given temperature and density ranges.
    * The pressure values are stored in a Look-Up table (2D Array) with fixed step sizes.
    */
-  virtual void setupLUT(/* double m_Tmin, double m_rhomin, double m_Tmax, double m_rhomax,int m_arraysize_pressure, int m_arraysize_temperature */);
+  virtual void setupLUT();
 
   /*!
    * Calculates the pressure for the given particle

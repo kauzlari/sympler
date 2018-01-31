@@ -118,7 +118,7 @@ void PressureCalculation::setupLUT() {
   }     
 }
 
-double PressureCalculation::calculatePressure(double inputT, double inputRho/*, double Tmin, double rhomin*/) {
+double PressureCalculation::calculatePressure(double inputT, double inputRho) {
 
   // out of bounds?
   if((inputRho < m_rhomin) || (inputT < m_Tmin) || (inputRho > m_rhomax) || (inputT > m_Tmax))
@@ -354,7 +354,7 @@ void PressureCalculation::setup()
   }
 
   // setup the look-up table
-  setupLUT(/* m_Tmin,  m_rhomin, m_Tmax, m_rhomax,m_arraysize_density, m_arraysize_temperature */);
+  setupLUT();
 }
 
 
