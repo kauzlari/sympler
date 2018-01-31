@@ -40,7 +40,6 @@
 using namespace std;
 
 
-
 /*!
  * Fake class for testing class \a PressureCalculation. Current resons 
  * for its need:
