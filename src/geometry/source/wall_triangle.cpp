@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -114,18 +114,6 @@ cuboid_t WallTriangle::boundingBox()
 }
 
 
-/*void WallTriangle::stretchBy(const point_t &factor)
-{
-	for (int i = 0; i < SPACE_DIMS; i++) {
-		for (int j = 0; j < 3; j++) {
-			m_corners[j][i] *= factor[i];
-		}
-	}
-	
-	initHelpers();
-}*/
-
-
 string WallTriangle::toString() const
 {
 	stringstream s;
@@ -152,16 +140,14 @@ bool WallTriangle::intersects(const line_t &l, point_t &hit_pos) const
 	
   double a = (m_ndotr - m_surface_normal*l.from)/np;
 	
-	// MSG_DEBUG("WallTriangle::intersects", "a = " << a);
+  // MSG_DEBUG("WallTriangle::intersects(line_t, point_t)", "a = " << a << ", m_ndotr=" << m_ndotr << ", m_surface_normal=" << m_surface_normal << ", l.from=" << l.from << ", np=" << np << ", m_corners[0]=" << m_corners[0]);
 	
-  if (a < 0 || a > 1)
+  if (a+g_geom_eps < 0 || a-g_geom_eps > 1)
     return false;
 	
   /* Vector to the intersection point relativ to the origin of the plane. */
   hit_pos = l.from + d*a;
-	// MSG_DEBUG("WallTriangle::intersects", "hit_pos = " << hit_pos);	
-//	cout << s << endl;
-	
+
   return reallyInPlane(hit_pos);
 }
 
@@ -177,7 +163,7 @@ bool WallTriangle::intersects(const point_t& from, const point_t& dir, /*point_t
   // notice that m_surface_normal points INSIDE, but the normal vector we need here points in fact OUTSIDE !
   dist = (-m_surface_normal*from + m_ndotr);
 	
-//   MSG_DEBUG("WallTriangle::intersects", "dist = " << dist << ", np = " << np << " for: from = " << from << ", m_ndotr = " << m_ndotr << ", m_surface_normal = " << m_surface_normal << ", dir = " << dir);
+  // MSG_DEBUG("WallTriangle::intersects(point_t,point_t,double&)", "dist = " << dist << ", np = " << np << " for: from = " << from << ", m_ndotr = " << m_ndotr << ", m_surface_normal = " << m_surface_normal << ", dir = " << dir);
 	
   double a = dist/np;
   
@@ -239,8 +225,23 @@ bool WallTriangle::reallyInPlane(const point_t &s) const {
   return true;
 }
 
-
-#define TI(a, b)  if (intersects(a, b, dummy)) {/* if(g1.x > 16.1 && g1.x < 17.9 && g1.y > 1.6 && g1.y < 3.4 && g1.z > 0.5 && g1.z < 1.625) MSG_DEBUG("WallTriangle::intersects(cuboid)", "TI: " << g1);*/ return true;}
+// calls intersects(point_t, point_t, point_t&) which
+// calls intersects(line_t, point_t&)
+#define TI(a, b)  if (intersects(a, b, dummy)) { \
+    /*    if(g1.x > -1. && g1.x < 1. && g1.y > 2. && g1.y < 3.*/    \
+    /*       && g1.z > 103. && g1.z < 104.)	*/		    \
+    /*      MSG_DEBUG("WallTriangle::intersects(cuboid)" */		\
+    /*		, "TI TRUE: cuboid corner1=" << g1 << ", triangle=" */	\
+    /*	<< m_corners[0] << m_corners[1]	*/				\
+    /*		<< m_corners[2]);	*/				\
+      return true;} \
+  else {						    \
+    /* if(g1.x > -1. && g1.x < 1. && g1.y > 2. && g1.y < 3. &&	*/	\
+    /*    g1.z > 103. && g1.z < 104.)	*/				\
+    /*   MSG_DEBUG("WallTriangle::intersects(cuboid)",	*/		\
+    /* "TI FALSE: cuboid corner1=" << g1 << ", triangle="	*/	\
+    /* 		<< m_corners[0] << m_corners[1] << m_corners[2]); */	\
+  }
 
 
 inline bool __isInside(const cuboid_t &c, const point_t &pos) {
@@ -254,44 +255,32 @@ inline bool __isInside(const cuboid_t &c, const point_t &pos) {
 
 bool WallTriangle::intersects(const cuboid_t &c) const
 {
+
+  // Debug code
+  // point_t g1 = c.corner1;
+  // bool isTrackedCuboid = false;
+  // if(
+  //    c.corner1.x > -1. && c.corner1.x < 1. &&
+  //    c.corner1.y > 2. && c.corner1.y < 3. &&
+  //    c.corner1.z > 103. && c.corner1.z < 104. 
+  //    )
+  //   isTrackedCuboid = true;
+
+  // if(isTrackedCuboid)
+  //   MSG_DEBUG("WallTriangle::intersects(cuboid)", "START for tracked cuboid");
+  
 /* Quick check: does at least one of the triangle corners lie in the cuboid? */
-//   point_t g1 = c.corner1;
-	if (__isInside(c, m_corners[0]) || __isInside(c, m_corners[1]) || __isInside(c, m_corners[2]))
-	  {
+  if (__isInside(c, m_corners[0]) || __isInside(c, m_corners[1]) || __isInside(c, m_corners[2]))
+    {
 
 // 	    if(g1.x > 16.1 && g1.x < 17.9 &&
 // 	     g1.y > 1.6 && g1.y < 3.4 &&
 // 	    g1.z > 0.5 && g1.z < 1.625)
 // 	  MSG_DEBUG("WallTriangle::intersects(cuboid)", "INSIDE: " << g1);
 
-		return true;
-	  }
-
-
-#if 0
-
-
-    /* Fixme!!! Quick and dirty and not exact. */
-    for (int i = 0; i < SPACE_DIMS; i++) {
-        if ((m_corners[0][i] > c.corner2[i]+g_geom_eps &&
-             m_corners[1][i] > c.corner2[i]+g_geom_eps &&
-             m_corners[2][i] > c.corner2[i]+g_geom_eps) ||
-            (m_corners[0][i] < c.corner1[i]-g_geom_eps &&
-             m_corners[1][i] < c.corner1[i]-g_geom_eps &&
-             m_corners[2][i] < c.corner1[i]-g_geom_eps))
-            return false;
+      return true;
     }
 
-// if
-//   (g1.x > 16.1 && g1.x < 17.9 &&
-//    g1.y > 1.6 && g1.y < 3.4 &&
-// 	    g1.z > -1.4 && g1.z < 0.6)
-// 	      MSG_DEBUG("WallTriangle::intersects(cuboid)", "END = true" << endl << "corner0 = " << m_corners[0] << endl << "corner1 = " << m_corners[1] << endl << "corner2 = " << m_corners[2]);
-
-//return true;
-#endif
-
-//#if 0
     /* Check if one of the edges of the cuboid cuts through
        the triangle. */
 	point_t pb, pc, pd, pe, pf, pg, dummy;
@@ -326,8 +315,11 @@ bool WallTriangle::intersects(const cuboid_t &c) const
 	TI(c.corner1, pb);
 	TI(c.corner1, pc);
 	TI(c.corner1, pd);
-	
+	// if(g1.x > -1. && g1.x < 1. && g1.y > 2. && g1.y < 3. && g1.z > 103. && g1.z < 104.)
+	//   MSG_DEBUG("WallTriangle::intersects(cuboid)","BEFORE TI of (c2,pe)=" << c.corner2 << pe);
 	TI(c.corner2, pe);
+	// if(g1.x > -1. && g1.x < 1. && g1.y > 2. && g1.y < 3. && g1.z > 103. && g1.z < 104.)
+	//   MSG_DEBUG("WallTriangle::intersects(cuboid)","AFTER TI of (c2,pe)=" << c.corner2 << pe);
 	TI(c.corner2, pf);
 	TI(c.corner2, pg);
 	
@@ -345,21 +337,28 @@ bool WallTriangle::intersects(const cuboid_t &c) const
         c.intersects(m_corners[1], m_corners[2]) ||
         c.intersects(m_corners[2], m_corners[0]))
       {
-/*if
-  (g1.x > 16.1 && g1.x < 17.9 &&
-   g1.y > 1.6 && g1.y < 3.4 &&
-	    g1.z > 0.5 && g1.z < 1.625)
-  {
-	      MSG_DEBUG("WallTriangle::intersects(cuboid)", "END = true" << endl << "corner0 = " << m_corners[0] << endl << "corner1 = " << m_corners[1] << endl << "corner2 = " << m_corners[2]);
-	      if(c.intersects(m_corners[0], m_corners[1])) cout << "0_1 true" << endl; 
-	      if(c.intersects(m_corners[1], m_corners[2])) cout << "1_2 true" << endl; 
-	      if(c.intersects(m_corners[2], m_corners[1])) cout << "2_0 true" << endl; 
-}    */
+	/*if
+	  (g1.x > 16.1 && g1.x < 17.9 &&
+	  g1.y > 1.6 && g1.y < 3.4 &&
+	  g1.z > 0.5 && g1.z < 1.625)
+	  {
+	  MSG_DEBUG("WallTriangle::intersects(cuboid)", "END = true" << endl << "corner0 = " << m_corners[0] << endl << "corner1 = " << m_corners[1] << endl << "corner2 = " << m_corners[2]);
+	  if(c.intersects(m_corners[0], m_corners[1])) cout << "0_1 true" << endl; 
+	  if(c.intersects(m_corners[1], m_corners[2])) cout << "1_2 true" << endl; 
+	  if(c.intersects(m_corners[2], m_corners[1])) cout << "2_0 true" << endl; 
+	  }    */
+	
+	// if(isTrackedCuboid)
+	//   MSG_DEBUG("WallTriangle::intersects(cuboid)", "END returning true for tracked cuboid");
+	
 	return true;
       }
+    
+    // if(isTrackedCuboid)
+    //   MSG_DEBUG("WallTriangle::intersects(cuboid)", "END returning false for tracked cuboid");
+    
+    return false;
 
-	return false;
-//#endif
 }
 
 
@@ -368,16 +367,6 @@ void WallTriangle::toVTK(ostream &s)
     s << "3 " << m_corners_v[0] << " " << m_corners_v[1] << " " << m_corners_v[2] << endl;
 }
 
-
-// void WallTriangle::solveIntegratorEquation(const Particle *p, const point_t &force, vector<double>* results, IntegratorPosition* integratorP)
-// {
-//   integratorP->solveHitTimeEquation(this, p, force, results);
-// }
-// 
-// void WallTriangle::integratorHitPos(const Particle *p, const point_t &force, double dt, IntegratorPosition* integratorP, point_t &hit_pos)
-// {
-//   integratorP->hitPos(this, dt, p, hit_pos, force);
-// }
 
 bool WallTriangle::operator==(const Wall& wall) const
 {
