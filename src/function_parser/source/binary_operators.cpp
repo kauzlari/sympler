@@ -635,22 +635,32 @@ public:
    * Calculates the expression in C notation.
    */
   virtual Variant toC() const {
+
     Variant va = m_a->toC();
     Variant vb = m_b->toC();
 
     if (va.typeId() == Variant::SCALAR_STRING && vb.typeId() == Variant::SCALAR_STRING) {
-      Variant r(Variant::SCALAR_STRING);
       
-      FUNCTION_PARSER_LOG("FNPower::toC()", "Now I check the second argument of the '^'-operator. If I boil out with s.th. like a seg.-fault, it is neither a real number nor an integer and you should check your expression.");    
-//       MSG_DEBUG("FNPower::toC()", "Now I check the second argument of the '^'-operator. If I boil out with s.th. like a seg.-fault, it is neither a real number nor an integer and you should check your expression.");    
+      Variant r(Variant::SCALAR_STRING);
+
+      // This message could be obsolete due to the added (2018-02-12)
+      // try .. catch that follow
+      // FUNCTION_PARSER_LOG("FNPower::toC()", "Now I check the second argument of the '^'-operator. If I boil out with s.th. like a seg.-fault, it is neither a real number nor an integer and you should check your expression.");    
+      
+      // if m_b is a non-primitive scalar, i.e., an expression with
+      // Symbols, then m_b->value() will throw an exception. This one
+      // we try to catch and see if we can create a "pow(..)" expression
+      // nonetheless
+      try {
       
       Variant vValB = m_b->value();
+
       int tmpInt = int(vValB.scalar());
-//       MSG_DEBUG("FNPower::toC()", "AFTER: b = " << vValB.scalar());    
+
       // is the second argument an integer?
       if(tmpInt == vValB.scalar())
       {
-        // yes, so we can do it the fast way
+	// yes, so we can do it the fast way
         if(tmpInt > 0)
         {
           r.scalarString() = "(";
@@ -661,13 +671,13 @@ public:
         }
         else
         {
-          // exponent is zero, so result is "1"
+	  // exponent is zero, so result is "1"
           if(tmpInt == 0) r.scalarString() = "(1)";
           else
           {
             // exponent b is negative, so compute 1/(a^(-b))
             tmpInt = -tmpInt;
-            r.scalarString() = "(1/(" + va.scalarString();
+            r.scalarString() = "(1.0/(" + va.scalarString();
             for(int i = 1; i < tmpInt; ++i)
               r.scalarString() += "*" + va.scalarString();
             r.scalarString() += "))";
@@ -680,7 +690,19 @@ public:
         r.scalarString() = "(pow(" + va.scalarString() + ", " + vb.scalarString() + "))";
       
       return r;
-    } else 
+
+      } // end of try{..}
+      catch(gError &err) {
+
+	FUNCTION_PARSER_LOG("FNPower::toC()", "Now I try to make a function with variables out of the second argument of the '^'-operator. If I boil out with s.th. like a seg.-fault, then I am probably not yet clever enough to digest your expression '" << vb.scalarString() << "'.");    
+
+	// try if we get something useful with the pow function
+        r.scalarString() = "(pow(" + va.scalarString() + ", " + vb.scalarString() + "))";
+
+	return r;
+      }
+
+      } else 
       throw gError
 	("FNPower::toC",
 	 "Both operands must be scalars for the power operand '^'.");
