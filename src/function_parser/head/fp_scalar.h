@@ -138,8 +138,17 @@ class FPScalarVariable: public FPScalar
    * Return the value
    */
   virtual Variant value() const {
+
     Variant v(Variant::SCALAR);
 
+    // FIXME: currently (2018-02-12) this check is only done here, but
+    // should be generally useful to avoid seg-faults. Put also at same
+    // places for vectors and tensors, and briefly think if there is a
+    // generalising refactoring that could be done to avoid code-
+    // repetition.
+    if(!m_value)
+      throw gError("FPScalarVariable::value()", "ERROR: Tried to return value of my non-initialised double* m_value = NULL.");
+    
     v.scalar() = *m_value;
 
     return v;
