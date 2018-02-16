@@ -58,26 +58,6 @@ class DensityCalculation: public ParticleCache
   string m_pressureName;
 
   /*!
-   * From which symbol to take the local maximum temperature
-   */
-  string m_temperatureMaxName;
-
-  /*!
-   * From which symbol to take the local maximum pressure
-   */
-  string m_pressureMaxName;
-
-  /*!
-   * From which symbol to take the local minimum temperature
-   */
-  string m_temperatureMinName;
-
-  /*!
-   * From which symbol to take the local minimum pressure
-   */
-  string m_pressureMinName;
-
-  /*!
    * Tag offset of the local temperature
    */
   size_t m_temperatureOffset;
@@ -86,26 +66,6 @@ class DensityCalculation: public ParticleCache
    * Tag offset of the local pressure
    */
   size_t m_pressureOffset;
-
-  /*!
-   * Tag offset of the local maximum temperature
-   */
-  size_t m_temperatureMaxOffset;
-
-  /*!
-   * Tag offset of the local maximum pressure
-   */
-  size_t m_pressureMaxOffset;
-
-  /*!
-   * Tag offset of the local minimum temperature
-   */
-  size_t m_temperatureMinOffset;
-
-  /*!
-   * Tag offset of the local minimum pressure
-   */
-  size_t m_pressureMinOffset;
 
   /*!
    * Value of the local minimum temperature
@@ -194,73 +154,73 @@ class DensityCalculation: public ParticleCache
    /*!
     * Constructor
     */
-  DensityCalculation
-    (Simulation* parent);
-
-  /*!
-   * Destructor
-   */
-  virtual ~DensityCalculation();
-
-  /*!
-   * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
-   * Bilinear interpolation is used for approximation.
-   */
-  virtual double calculateDensity(double inputT, double inputP);
-
-  /*!
-   * Precalculates the density in given temperature and pressure ranges.
-   * The density values are stored in a Look-Up table (2D Array) with fixed step sizes.
-   */
-  virtual void setupLUT();
-
-  /*!
-   * Calculates the density for the given particle
-   * @param p The given particle
-   */
-  virtual void computeCacheFor(Particle* p) {
-
-    Data& pTag = p->tag;
-    
-    pTag.doubleByOffset(m_offset) =
-      calculateDensity(
-		       pTag.doubleByOffset(m_temperatureOffset),
-		       pTag.doubleByOffset(m_pressureOffset)
-		       );
-  }
-
-  /*!
-   * Take steps necessary to register this calculator
-   */
-  virtual void registerWithParticle();
-
-  /*!
-   * Does this calculator equal \a c?
-   * @param c Other calculator
-   */
-  virtual bool operator==(const ParticleCache &c) const {
-
-    if (typeid(c) == typeid(*this)) {
-      return true;
-          /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
-    } else {
-      return false;
-    }
-  }
-  
-  /*!
-   * If it belongs to a Node structure, setup this instance of
-   * \a DensityCalculation
-   */
-  virtual void setup();
-
-  /*!
-   * Returns the values stored in the LUT
-   */ 
-  virtual double** returnLUTvals() {
-    return m_array_rho;
-  }
-
+   DensityCalculation
+     (Simulation* parent);
+   
+   /*!
+    * Destructor
+    */
+   virtual ~DensityCalculation();
+   
+   /*!
+    * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
+    * Bilinear interpolation is used for approximation.
+    */
+   virtual double calculateDensity(double inputT, double inputP);
+   
+   /*!
+    * Precalculates the density in given temperature and pressure ranges.
+    * The density values are stored in a Look-Up table (2D Array) with fixed step sizes.
+    */
+   virtual void setupLUT();
+   
+   /*!
+    * Calculates the density for the given particle
+    * @param p The given particle
+    */
+   virtual void computeCacheFor(Particle* p) {
+     
+     Data& pTag = p->tag;
+     
+     pTag.doubleByOffset(m_offset) =
+       calculateDensity(
+			pTag.doubleByOffset(m_temperatureOffset),
+			pTag.doubleByOffset(m_pressureOffset)
+			);
+   }
+   
+   /*!
+    * Take steps necessary to register this calculator
+    */
+   virtual void registerWithParticle();
+   
+   /*!
+    * Does this calculator equal \a c?
+    * @param c Other calculator
+    */
+   virtual bool operator==(const ParticleCache &c) const {
+     
+     if (typeid(c) == typeid(*this)) {
+       return true;
+       /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
+     } else {
+       return false;
+     }
+   }
+   
+   /*!
+    * If it belongs to a Node structure, setup this instance of
+    * \a DensityCalculation
+    */
+   virtual void setup();
+   
+   /*!
+    * Returns the values stored in the LUT
+    */ 
+   virtual double** returnLUTvals() {
+     return m_array_rho;
+   }
+   
 };
 
 #endif

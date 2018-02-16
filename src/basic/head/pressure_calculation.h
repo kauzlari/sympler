@@ -59,26 +59,6 @@ class PressureCalculation: public ParticleCache
   string m_densityName;
 
   /*!
-   * From which symbol to take the local maximum temperature
-   */
-  string m_temperatureMaxName;
-
-  /*!
-   * From which symbol to take the local maximum pressure
-   */
-  string m_densityMaxName;
-
-  /*!
-   * From which symbol to take the local minimum temperature
-   */
-  string m_temperatureMinName;
-
-  /*!
-   * From which symbol to take the local minimum pressure
-   */
-  string m_densityMinName;
-
-  /*!
    * Tag offset of the local temperature
    */
   size_t m_temperatureOffset;
@@ -87,26 +67,6 @@ class PressureCalculation: public ParticleCache
    * Tag offset of the local pressure
    */
   size_t m_densityOffset;
-
-  /*!
-   * Tag offset of the local maximum temperature
-   */
-  size_t m_temperatureMaxOffset;
-
-  /*!
-   * Tag offset of the local maximum pressure
-   */
-  size_t m_densityMaxOffset;
-
-  /*!
-   * Tag offset of the local minimum temperature
-   */
-  size_t m_temperatureMinOffset;
-
-  /*!
-   * Tag offset of the local minimum pressure
-   */
-  size_t m_densityMinOffset;
 
   /*!
    * Value of the local minimum temperature
@@ -143,8 +103,8 @@ class PressureCalculation: public ParticleCache
   /*!
    * Size of the array for temperature values.
    */
-
   int m_arraysize_temperature;
+
   /*!
    * Size of the array for pressure values.
    */
@@ -188,20 +148,20 @@ class PressureCalculation: public ParticleCache
    * @param offset Tag offset of the local density
    * @param wf The weighting function to use for the local density calculation
    */
-   PressureCalculation
-       (size_t colour, size_t offset, string symbolName);
+  PressureCalculation
+    (size_t colour, size_t offset, string symbolName);
   
-   /*!
-    * Constructor
-    */
-   PressureCalculation
+  /*!
+   * Constructor
+   */
+  PressureCalculation
     (Simulation* parent);
-
+  
   /*!
    * Destructor
    */
   virtual ~PressureCalculation(); 
-
+  
   /*!
    * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
    * Bilinear interpolation is used for approximation.
@@ -224,9 +184,9 @@ class PressureCalculation: public ParticleCache
     
     pTag.doubleByOffset(m_offset) =
       calculatePressure(
-		       pTag.doubleByOffset(m_temperatureOffset),
-		       pTag.doubleByOffset(m_densityOffset)
-		       ); 
+			pTag.doubleByOffset(m_temperatureOffset),
+			pTag.doubleByOffset(m_densityOffset)
+			); 
   }
 
   /*!
@@ -239,16 +199,16 @@ class PressureCalculation: public ParticleCache
    * @param c Other calculator
    */
   virtual bool operator==(const ParticleCache &c) const {
-
+    
     if (typeid(c) == typeid(*this)) {
-
+      
       return true;
-          /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
+      /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
     } else {
       return false;
     }
   } 
-
+  
   /*!
    * If it belongs to a Node structure, setup this instance of
    * \a PressureCalculation

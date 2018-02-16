@@ -35,8 +35,6 @@ extern "C" {
 #include "density_calculation.h"
 #include "simulation.h"
 #include "manager_cell.h"
-#include <iostream>
-#include <string>
 
 const SymbolRegister<DensityCalculation> DensityCalculation("DensityCalculation");
 

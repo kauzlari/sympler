@@ -38,8 +38,7 @@ extern "C" {
 #include "pressure_calculation.h"
 #include "simulation.h"
 #include "manager_cell.h"
-#include <iostream>
-#include <string>
+
 const SymbolRegister<PressureCalculation> PressureCalculation("PressureCalculation");
 
 #define M_SIMULATION ((Simulation *) m_parent)
@@ -92,7 +91,7 @@ void PressureCalculation::setupLUT() {
     }
     // Minimum density boarder along b23-line.
     double densityBoundary;
-    // Loop calculates the densities in an adjusted temperature and density range and
+    // Loop calculates the pressures in an adjusted temperature and density range and
     // stores them into the LUT.
     for(int j = 0; j < m_arraysize_density; j++) {
       for (int i = 0; i < m_arraysize_temperature; i++) {
