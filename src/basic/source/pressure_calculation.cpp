@@ -77,7 +77,6 @@ void PressureCalculation::setupLUT() {
   // auxiliary vaiables
   long double rho = 0;
   long double deltaT = 0;
-  double pressure;
 
   // Temperature boarders for Region 3. See IAPWS-IF97 for more information.
   if (m_Tmin > 623.15 && m_Tmax < 863.15) {
@@ -101,8 +100,8 @@ void PressureCalculation::setupLUT() {
         SteamState S = freesteam_set_pT(b23Pressure, deltaT + m_Tmin);
         densityBoundary = freesteam_rho(S);
         if (m_rhomin + rho > densityBoundary) {
-	  pressure = freesteam_region3_p_rhoT(m_rhomin + rho, m_Tmin + deltaT);
-          m_array_p[j][i] = pressure;
+	  m_array_p[j][i] =
+	    freesteam_region3_p_rhoT(m_rhomin + rho, m_Tmin + deltaT);
           deltaT += m_calcstepT;
         } else {
 	  throw gError("PressureCalculation::setup", "Requested density and temperature parameters aren't within region 3. (See IAPWS-IF97 for more information): Unsuccessfully tried to compute P(T=" + ObjToString(deltaT+m_Tmin) + ",rho=" + ObjToString(m_rhomin+rho) + ") crossing rho_min(T) = " + ObjToString(densityBoundary));

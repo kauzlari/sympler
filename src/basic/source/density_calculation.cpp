@@ -71,7 +71,7 @@ void DensityCalculation::setupLUT() {
   // auxiliary variables
   double pr = 0;
   double t = 0;
-  double density;
+
   // Step sizes depending on the size of the Array and the ranges of the input values.
   m_calcstepP= (m_pmax-m_pmin)/(m_arraysize_pressure-1);
   m_calcstepT= (m_Tmax-m_Tmin)/(m_arraysize_temperature-1);
@@ -85,8 +85,7 @@ void DensityCalculation::setupLUT() {
   for(int j = 0; j < m_arraysize_pressure; j++) {
     for (int i = 0; i < m_arraysize_temperature; i++) {  
       SteamState S = freesteam_set_pT(m_pmin + pr,m_Tmin + t);
-      density = freesteam_rho(S);
-      m_array_rho[j][i] = density;
+      m_array_rho[j][i] = freesteam_rho(S);
       t += m_calcstepT;
     }
     t = 0;
