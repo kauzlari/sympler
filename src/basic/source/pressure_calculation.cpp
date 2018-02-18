@@ -120,7 +120,7 @@ double PressureCalculation::calculatePressure(double inputT, double inputRho) {
 
   // out of bounds?
   if((inputRho < m_rhomin) || (inputT < m_Tmin) || (inputRho > m_rhomax) || (inputT > m_Tmax))
-    throw gError("DensityCalculation::calculatePressure", "(rho,T) pair out of bounds: rho=" + ObjToString(inputRho) + ", T=" + ObjToString(inputT) + ", admissible [rhomin,rhomax] = [" + ObjToString(m_rhomin) + "," + ObjToString(m_rhomax) + "], admissible [Tmin,Tmax] = [" + ObjToString(m_Tmin) + "," + ObjToString(m_Tmax) + "].");
+    throw gError("PressureCalculation::calculatePressure", "(rho,T) pair out of bounds: rho=" + ObjToString(inputRho) + ", T=" + ObjToString(inputT) + ", admissible [rhomin,rhomax] = [" + ObjToString(m_rhomin) + "," + ObjToString(m_rhomax) + "], admissible [Tmin,Tmax] = [" + ObjToString(m_Tmin) + "," + ObjToString(m_Tmax) + "].");
 
   // Calculation of the surrounding sampling points 
   int x_pressure_array_0 = (floor((inputRho-m_rhomin)/m_calcstepRho));
@@ -313,7 +313,7 @@ void PressureCalculation::setup()
     if(Particle::s_tag_format[m_colour].attrExists(m_symbolName))
     {
       if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_symbolName).datatype)
-        throw gError("ParticleCacheDensitySelfContribution::setup", "Symbol '" + m_symbolName + "' was already created by other module.");
+        throw gError("PressureCalculation::setup", "Symbol '" + m_symbolName + "' was already created by other module.");
     }
     else
       m_offset = Particle::s_tag_format[m_colour].addAttribute(m_symbolName, m_datatype, false/*persistency*/, m_symbolName).offset;

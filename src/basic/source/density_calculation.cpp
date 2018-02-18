@@ -193,10 +193,10 @@ void DensityCalculation::setup() {
     throw gError("DensityCalculation::setup", "Attribute 'arraysize_pressure' was not defined.");
 
   if(m_Tmin >= m_Tmax)
-    throw gError("PressureCalculation::setup", "Attribute 'temperatureMin' (= " + ObjToString(m_Tmin) + ") >= attribute 'temperatureMax' (= " + ObjToString(m_Tmax) + ") not meaningful!");
+    throw gError("DensityCalculation::setup", "Attribute 'temperatureMin' (= " + ObjToString(m_Tmin) + ") >= attribute 'temperatureMax' (= " + ObjToString(m_Tmax) + ") not meaningful!");
   
   if(m_pmin >= m_pmax)
-    throw gError("PressureCalculation::setup", "Attribute 'pressureMin' (= " + ObjToString(m_pmin) + ") >= attribute 'pressureMax' (= " + ObjToString(m_pmax) + ") not meaningful!");
+    throw gError("DensityCalculation::setup", "Attribute 'pressureMin' (= " + ObjToString(m_pmin) + ") >= attribute 'pressureMax' (= " + ObjToString(m_pmax) + ") not meaningful!");
 
   
   pair<size_t, size_t> tempPair;
@@ -297,17 +297,17 @@ void DensityCalculation::setup() {
 
     if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName)) {
       if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_temperatureName).datatype)
-        throw gError("PressureCalculation::setup", "Symbol '" + m_temperatureName + "' already exists as a non-scalar.");
+        throw gError("DensityCalculation::setup", "Symbol '" + m_temperatureName + "' already exists as a non-scalar.");
       else m_temperatureOffset = Particle::s_tag_format[m_colour].offsetByName(m_temperatureName);
     } else 
-      throw gError("PressureCalculation::setup", "Symbol '" + m_temperatureName + "' does not exist but required by this module.");
+      throw gError("DensityCalculation::setup", "Symbol '" + m_temperatureName + "' does not exist but required by this module.");
 
     if(Particle::s_tag_format[m_colour].attrExists(m_pressureName)) {
       if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_pressureName).datatype)
-	throw gError("PressureCalculation::setup", "Symbol '" + m_pressureName + "' already exists as a non-scalar.");
+	throw gError("DensityCalculation::setup", "Symbol '" + m_pressureName + "' already exists as a non-scalar.");
       else m_pressureOffset = Particle::s_tag_format[m_colour].offsetByName(m_pressureName);
     } else 
-      throw gError("PressureCalculation::setup", "Symbol '" + m_pressureName + "' does not exist but required by this module.");
+      throw gError("DensityCalculation::setup", "Symbol '" + m_pressureName + "' does not exist but required by this module.");
 
     if(m_phaseUser == 0)
       Particle::registerCache_0(this);
