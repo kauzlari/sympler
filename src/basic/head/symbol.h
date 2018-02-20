@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -168,6 +168,15 @@ class Symbol : public Node
    */
   virtual void cleanSymbol(string& name) const {
   }
+
+  // see CONVENTION5 for rule about persistencies
+  /*
+   * If this is true, the symbol cannot be cleared
+   * Currently (2018-02-20) = false for all \a Symbol s 
+   * (see symbol.cpp)
+   */
+  static const bool s_persistency;
+
   
  public:
   
@@ -190,8 +199,11 @@ class Symbol : public Node
   
   /*!
    * Setup this Symbol
+   * FIXME: This function was added pretty recently (2018-02-19), and 
+   * some of the children do not call it in their own setup(). It also
+   * does not yet setup all members it declares.
    */
-  /* virtual void setup() = 0; */
+  virtual void setup();
   
   /*!
    * Return a string identifier for the calculator of this symbol

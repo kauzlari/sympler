@@ -44,6 +44,10 @@
 
 using namespace std;
 
+
+const bool Symbol::s_persistency = false;
+
+
 REGISTER_SMART_ENUM
 (SymbolFactory,
  "Expression, computed and saved in a symbol, to be used in expression of other modules.");
@@ -81,6 +85,13 @@ void Symbol::init()
   m_overwrite = false;
 }
 
+
+void Symbol::setup()
+{
+  if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
+    throw gError("Symbol::setup for module " + className(), "Attribute 'stage' has none of the allowed values \"0\", \"1\", \"2\".");
+}
+ 
 
 #ifdef _OPENMP
 int Symbol::setNumOfDoubles() {

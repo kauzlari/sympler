@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -32,8 +32,15 @@
 
 #include "particle_cache.h"
 
-ParticleCache::ParticleCache(/*Node*/Simulation* parent/*size_t colour*/)
-/*: m_colour(colour), m_stage(0)*/
+#include "simulation.h"
+#include "manager_cell.h"
+
+#define M_SIMULATION ((Simulation *) m_parent)
+#define M_PHASE M_SIMULATION->phase()
+#define M_MANAGER M_PHASE->manager()
+
+
+ParticleCache::ParticleCache(/*Node*/Simulation* parent)
   : Symbol(parent)
 {
   init();
@@ -44,7 +51,6 @@ ParticleCache::ParticleCache(size_t colour, size_t offset, string symbolName)
 {
   m_colour = colour;
   m_offset = offset;
-//   m_symbolName = symbolName;
 }
 
 ParticleCache::~ParticleCache()
@@ -64,6 +70,94 @@ void ParticleCache::init()
 }
 
 
+void ParticleCache::checkOutputSymbolExistence(size_t colour) {
+
+  if(Particle::s_tag_format[m_colour].attrExists(m_symbolName)) {
+    if(m_overwrite) {
+      m_offset = Particle::s_tag_format[m_colour].offsetByName(m_symbolName);
+      DataFormat::attribute_t tempAttr
+	= Particle::s_tag_format[m_colour].attrByName(m_symbolName);
+      if(m_datatype != tempAttr.datatype)
+	throw gError
+	  ("ParticleCache::setup for module " + className(),
+	   "Symbol '" + m_symbolName + "' already exists, "
+	   "but with different datatype '"
+	   + tempAttr.datatypeAsString() + "' to be used due to "
+	   "your choice of 'overwrite = \"yes\"', instead of your "
+	   "desired datatype '"
+	   + DataFormat::attribute_t::datatypeAsString(m_datatype)
+	   + "'. Aborting.");
+    }
+    else
+      throw gError
+	("ParticleCache::setup for module " + className(), "Symbol '"
+	 + m_symbolName + "' was already created by other module "
+	 "for species " + M_MANAGER->species(m_colour) + ", and you "
+	 "have chosen overwrite = 'no'.");
+  } // end of if(Particle::s_tag_format[m_colour].attrExists(..))
+  else {
+    if(m_overwrite)
+      throw gError
+	("ParticleCache::setup for module " + className(), "You have "
+	 "chosen 'overwrite = \"yes\"', but symbol '" + m_symbolName +
+	 "' does not yet exist. Aborting.");
+    else
+      m_offset = Particle::s_tag_format[m_colour].addAttribute
+	(m_symbolName, m_datatype, Symbol::s_persistency, m_symbolName).offset;
+  } // end else of if(Particle::s_tag_format[m_colour].attrExists(..))
+  
+}
+
+
+void ParticleCache::setup()
+{
+  Symbol::setup();
+  
+  if(m_species == "undefined")
+    throw gError("ParticleCache::setup for module " + className(), "Attribute 'species' has value \"undefined\"");
+
+  // should we create a Cache for the other colours, too?
+  if(m_species == "ALL") {
+    // YES! Using m_colour in this loop is correct since we want to
+    // create one ParticleCache per colour
+    for (m_colour = 0; m_colour < M_MANAGER->nColours(); ++m_colour) {
+
+      checkOutputSymbolExistence(m_colour);
+
+      checkInputSymbolExistences(m_colour);      
+      // THE FOLLOWING IS A REMINDER HOW SUCH CHECKS IN CHILD CLASSES COULD LOOK LIKE
+      // SINCE STRUCTURE IS ALWAYS THE SAME THE SUBCLASS METHODS COULD CALL BACK A FUNCTION HERE WHICH JUST TAKES THE SPECIFICITIES AS ARGUMENTS (since structure of check is often the same)
+      // if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName)) {
+      //   if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_temperatureName).datatype)
+      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_temperatureName + "' already exists as a non-scalar.");
+      //   else m_temperatureOffset = Particle::s_tag_format[m_colour].offsetByName(m_temperatureName);
+      // } else 
+      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_temperatureName + "' does not exist but required by this module.");
+
+      // if(Particle::s_tag_format[m_colour].attrExists(m_densityName)) {
+      //   if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_densityName).datatype)
+      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_densityName + "' already exists as a non-scalar.");
+      //   else m_densityOffset = Particle::s_tag_format[m_colour].offsetByName(m_densityName);
+      // } else 
+      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_densityName + "' does not exist but required by this module.");
+
+      
+    }
+  } // end if(m_species == "ALL")
+  else { /*it is a Symbol limited to one colour*/
+    
+    m_colour = M_MANAGER->getColour(m_species);
+    
+    checkOutputSymbolExistence(m_colour);
+    
+    checkInputSymbolExistences(m_colour);
+    // SEE m_species == "all" case above for example-impl in subclass
+        
+  }
+  
+}
+
+  
 void ParticleCache::cleanSymbol(string& name) const
 {
   if(name[0] == '{' || name[0] == '[') {

@@ -197,9 +197,6 @@ void DensityCalculation::setup() {
   
   if(m_pmin >= m_pmax)
     throw gError("DensityCalculation::setup", "Attribute 'pressureMin' (= " + ObjToString(m_pmin) + ") >= attribute 'pressureMax' (= " + ObjToString(m_pmax) + ") not meaningful!");
-
-  
-  pair<size_t, size_t> tempPair;
   
   // should we create a Cache for the other colours, too?
   if(m_species == "ALL")

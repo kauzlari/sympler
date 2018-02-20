@@ -204,7 +204,7 @@ class ValCalculatorPair : public ValCalculator
  * Constructor
      */
   ValCalculatorPair(string symbol)
-  : ValCalculator(symbol)/*, m_persistency(false)*/
+  : ValCalculator(symbol)
   {}
 
     /*!
@@ -248,17 +248,11 @@ class ValCalculatorPair : public ValCalculator
 //  virtual void setup();
 
 protected:
+
   /*!
    * The tag offset of the data stored in a \a Pairdist
    */
   size_t m_slot;
-
-  // see CONVENTION5 for rule about persistencies
-
-  /*
-  * If this is true, the symbol cannot be cleared
-  */
-//   bool m_persistency;
 
   /*!
    * Initialise the property list

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -109,6 +109,42 @@ DataFormat::attribute_t DataFormat::addAttribute
 #endif
 	    );
     return it->second;
+  }
+}
+
+string DataFormat::attribute_t::datatypeAsString() const {
+
+  /*static*/ DataFormat::attribute_t::datatypeAsString(this->datatype);
+
+}
+
+/*static*/ string DataFormat::attribute_t::datatypeAsString(const datatype_t& datatype) {
+  switch (datatype) {
+  case DataFormat::INT:
+    return string("INT");
+  case DataFormat::DOUBLE:
+    return string("DOUBLE");
+  case DataFormat::POINT:
+    return string("POINT");
+  case DataFormat::TENSOR:
+    return string("TENSOR");
+  case DataFormat::STRING:
+    return string("STRING");
+  case DataFormat::VECTOR_DOUBLE:
+    return string("VECTOR_DOUBLE");
+  case DataFormat::VECTOR_INT:
+    return string("VECTOR_INT");
+  case DataFormat::VECTOR_POINT:
+    return string("VECTOR_POINT");
+#ifdef WITH_ARRAY_TYPES
+  case DataFormat::MArray2D:
+    return string("MArray2D");
+#endif
+  default:
+    throw gError
+      ("DataFormat::attribute_t::datatypeAsString",
+       "Don't know how to handle data type: "
+       + ObjToString(datatype));
   }
 }
 

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -79,8 +79,6 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
 
 /* That's it for now. New format should be described here. */
 
-/* Check if datatype is correct */
-
 /* Macro to perform operation on all SmartPointer datatypes */
 #define NOOP while(0)
 #ifdef WITH_ARRAY_TYPES
@@ -116,12 +114,12 @@ typedef SmartPointer<Data> data_sp;
  * A \a Data can be regarded as a run-time extensible structure.
  *
  * DataFormat conventions:
- * For certain output module the data must contain a field named '__data_format' of
+ * For certain output modules the data must contain a field named '__data_format' of
  * type int. This describes the kind of data passed on to postprocessors or
  * output modules.
  * The 'real' data begins AFTER the field '__data_format', additional information such 
  * as 'n_cells' or 'time' have to come BEFORE '__data_format'.
- * Currently, the following identifier are possible:
+ * Currently, the following identifiers are possible:
  */
 class DataFormat
 {
@@ -178,6 +176,19 @@ public:
      * Short description for use in user defined functions, i.e. n for density
      */
     string symbol;
+
+    /*!
+     * Return a string identifier of the datatype
+     * Member function version
+     */
+    string datatypeAsString() const;
+
+    /*!
+     * Return a string identifier of the datatype
+     * Static member function version
+     */
+    static string datatypeAsString(const datatype_t& attr);
+    
   };
 
   /*!

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -66,6 +66,31 @@ class ParticleCache : public Symbol
    * Initialise the PropertyList.
    */
   void init();
+
+  /*!
+   * If it belongs to a Node structure, setup this instance of
+   * \a ParticleCache
+   * FIXME: This function was added pretty recently (2018-02-19), and 
+   * most of the children do not yet call it in their own setup()
+   */
+  virtual void setup();
+
+  /*!
+   * Checks existence of output symbol given by \a m_symbolName and 
+   * reacts according to values for \a m_overwrite, etc.
+   * @param colour Particle colour to be checked
+   */
+  virtual void checkOutputSymbolExistence(size_t colour);
+
+  /*!
+   * Checks existence of input symbols required by this \a ParticleCache
+   * in a hard-coded fashion (i.e., not through runtime compiled 
+   * expressions).
+   * Default behaviour defined here: no input symbols
+   * @param colour Particle colour to be checked
+   */
+  virtual void checkInputSymbolExistences(size_t colour) {
+  }
 
   /*!
    * Helper function which removes brackets from single terms in \a Function. 
