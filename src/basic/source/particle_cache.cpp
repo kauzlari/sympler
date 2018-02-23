@@ -141,9 +141,42 @@ void ParticleCache::setup()
       // } else 
       //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_densityName + "' does not exist but required by this module.");
 
-      
-    }
-  } // end if(m_species == "ALL")
+
+      // is it the last cache to be created?
+      if(m_colour == M_MANAGER->nColours()-1)
+      {
+        if(m_phaseUser == 0)
+          Particle::registerCache_0(this);
+        else if(m_phaseUser == 1) 
+          Particle::registerCache(this);
+        else // so it is 2
+        {
+	  // FIXME: check if we should test all the copies below for
+	  // correctness (all members correctly copied). If yes, write
+	  // unittest(s)
+          ParticleCache* pc = copyMySelf();
+          Particle::registerCache(pc);
+          Particle::registerCache_0(this);
+        }
+      }
+      // No? Then make a copy
+      else 
+      {
+        ParticleCache* pc = copyMySelf();
+
+        if(m_phaseUser == 0)
+          Particle::registerCache_0(pc);
+        else if(m_phaseUser == 1)
+          Particle::registerCache(pc);
+        else // so it is 2
+        {
+          Particle::registerCache(pc);          
+          pc = copyMySelf();
+          Particle::registerCache_0(pc);
+        }
+      }
+    } // end: for(m_colour = 0;...)
+  } // end: if(m_species == "ALL")
   else { /*it is a Symbol limited to one colour*/
     
     m_colour = M_MANAGER->getColour(m_species);
@@ -152,9 +185,18 @@ void ParticleCache::setup()
     
     checkInputSymbolExistences(m_colour);
     // SEE m_species == "all" case above for example-impl in subclass
-        
-  }
-  
+   
+    if(m_phaseUser == 0)
+      Particle::registerCache_0(this);
+    else if(m_phaseUser == 1)
+      Particle::registerCache(this);
+    else
+    {
+      ParticleCache* pc = copyMySelf();
+      Particle::registerCache(pc);
+      Particle::registerCache_0(this);
+    }     
+  } // end: else of if(m_species == "ALL") 
 }
 
   

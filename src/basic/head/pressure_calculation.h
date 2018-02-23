@@ -119,6 +119,14 @@ class PressureCalculation: public ParticleCache
   * Initialise the property list
   */
   virtual void init();
+
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ParticleCache* copyMySelf()
+  {
+    return new PressureCalculation(*this);
+  }
   
   /*!
    * Adds the expressions used by this \a Symbol to the given list. 

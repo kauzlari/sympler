@@ -120,6 +120,14 @@ class DensityCalculation: public ParticleCache
   virtual void init();
 
   /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ParticleCache* copyMySelf()
+  {
+    return new DensityCalculation(*this);
+  }
+  
+  /*!
    * Adds the expressions used by this \a Symbol to the given list. 
    * @param usedSymbols List to be filled with own instances of \a TypedValue
    */

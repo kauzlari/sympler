@@ -63,6 +63,16 @@ class ParticleCacheDensitySelfContribution: public ParticleCache
   * Initialise the property list
   */
   virtual void init();
+
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ParticleCache* copyMySelf()
+  {
+    return new ParticleCacheDensitySelfContribution(*this);
+  }
+
+
   
  public:
   /*!

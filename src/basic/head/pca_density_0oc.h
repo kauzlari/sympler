@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -72,30 +72,26 @@ class ParticleCacheDensity0Oc: public ParticleCache
     * Initialise the property list
     */
     virtual void init();
-    
-  public:
-//  /*!
-//   * Constructor
-//   * @param cp The \a ParticleCache must be created for the colours of the given 
-//    * \a ColourPair
-//   * @param color The particle's color
-//   * @param density_offset Tag offset of the local density
-//   * @param wf The \a WeightingFunction to use
-//   * @param extra_string String for identification of \a ValCalculator s and 
-//    * their computed values
-//   * @param oneProp If true, the computed value is not specific for the 
-//    * \a ColourPair given as parameter
-    //   */
+
+    /*!
+     * Helper function for polymorphic copying
+     */
+    virtual ParticleCache* copyMySelf()
+    {
+      return new ParticleCacheDensity0Oc(*this);
+    }
+   
+ public:
     
     /*!
-    * Constructor
-    */
+     * Constructor
+     */
     ParticleCacheDensity0Oc
-        (/*Node*/Simulation* parent/*ColourPair* cp, size_t color, size_t density_offset, WeightingFunction *wf, string extra_string, bool oneProp*/);
+      (/*Node*/Simulation* parent);
 
-  /*!
+    /*!
      * Destructor
-   */
+     */
     virtual ~ParticleCacheDensity0Oc();
 
   /*!

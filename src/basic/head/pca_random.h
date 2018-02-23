@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -77,11 +77,25 @@ class PCaRandom: public ParticleCache
    * Type of the symbol. Can be scalar, vector or tensor.
    */
   string m_type;
-  
- 
+   
+  /*!
+   * Initialise the property list
+   */
   void init();
 
+  /*!
+   * Setup this \a PCaRandom
+   */
   void setup();
+
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ParticleCache* copyMySelf()
+  {
+    return new PCaRandom(*this);
+  }
+
   
  public:
   /*!

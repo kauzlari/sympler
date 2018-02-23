@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -126,6 +126,14 @@ class ParticleCacheEnergyEntropy: public ParticleCache
   */
   virtual void init();
   
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ParticleCache* copyMySelf()
+  {
+    return new ParticleCacheEnergyEntropy(*this);
+  }
+
  public:
   /*!
    * Constructor

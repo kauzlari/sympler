@@ -101,6 +101,12 @@ class ParticleCache : public Symbol
    */
   virtual void cleanSymbol(string& name) const;
 
+  /*!
+   * Return a copy of the current object
+   * Should be pure virtual if class is abstract anyways.
+   */
+  virtual ParticleCache* copyMySelf() = 0;
+
   
  public:
   /*!
