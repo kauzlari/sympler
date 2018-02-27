@@ -61,6 +61,12 @@ class ParticleCache : public Symbol
    * Color of the particles this cache is used for.
    */
   size_t m_colour;
+
+  /*!
+   * Tell weather \a ParticleCache::register() was called by the 
+   * setup() of the instance of a subclass
+   */
+  bool m_registered;
   
   /*!
    * Initialise the PropertyList.
@@ -75,6 +81,12 @@ class ParticleCache : public Symbol
    */
   virtual void setup();
 
+  /*!
+   * Registers the instance of the subclass and possibly copies of it
+   * for multiple colours
+   */
+  void registerCache();
+  
   /*!
    * Checks existence of output symbol given by \a m_symbolName and 
    * reacts according to values for \a m_overwrite, etc.
@@ -161,7 +173,14 @@ class ParticleCache : public Symbol
   size_t offset() const {
     return m_offset; 
   }
-  
+
+  /*!
+   * Run those setups requiring that \a Particle s have been created
+   * or that \a setup was already completed. 
+   * Here we check \a m_registered .
+   */
+  virtual void setupAfterParticleCreation();
+
 };
 
 #endif

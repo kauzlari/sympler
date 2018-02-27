@@ -41,13 +41,13 @@
 
 
 ParticleCache::ParticleCache(/*Node*/Simulation* parent)
-  : Symbol(parent)
+  : Symbol(parent), m_registered(false)
 {
   init();
 }
 
 ParticleCache::ParticleCache(size_t colour, size_t offset, string symbolName)
-  : Symbol(symbolName)
+  : Symbol(symbolName), m_registered(false)
 {
   m_colour = colour;
   m_offset = offset;
@@ -112,6 +112,8 @@ void ParticleCache::checkOutputSymbolExistence(size_t colour) {
 void ParticleCache::setup()
 {
   Symbol::setup();
+
+  M_SIMULATION->controller()->registerForSetupAfterParticleCreation(this);
   
   if(m_species == "undefined")
     throw gError("ParticleCache::setup for module " + className(), "Attribute 'species' has value \"undefined\"");
@@ -151,71 +153,66 @@ void ParticleCache::setup()
     // SEE m_species == "all" case above for example-impl in subclass
    
   } // end: else of if(m_species == "ALL") 
+  
+}
 
-  // START: REGISTRATION OF THIS PARTICLE_CACHE AND POSSIBLY COPIES OF
-  // IT
+void ParticleCache::registerCache() {
+  
+  m_registered = true;
   
   if(m_species == "ALL") {
     // YES! Using m_colour in this loop is correct since we want to
     // create one ParticleCache per colour
     for (m_colour = 0; m_colour < M_MANAGER->nColours(); ++m_colour) {
-
-            // is it the last cache to be created?
-      if(m_colour == M_MANAGER->nColours()-1)
-      {
-        if(m_phaseUser == 0)
-          Particle::registerCache_0(this);
-        else if(m_phaseUser == 1) 
-          Particle::registerCache(this);
-        else // so it is 2
-        {
+      
+      // is it the last cache to be created?
+      if(m_colour == M_MANAGER->nColours()-1) {
+	if(m_phaseUser == 0)
+	  Particle::registerCache_0(this);
+	else if(m_phaseUser == 1) 
+	  Particle::registerCache(this);
+	else { // so it is 2
+	  
 	  // FIXME: check if we should test all the copies below for
 	  // correctness (all members correctly copied). If yes, write
 	  // unittest(s)
           ParticleCache* pc = copyMySelf();
-          Particle::registerCache(pc);
-          Particle::registerCache_0(this);
-        }
+	  Particle::registerCache(pc);
+	  Particle::registerCache_0(this);
+	}
       }
       // No? Then make a copy
-      else 
-      {
+      else {
         ParticleCache* pc = copyMySelf();
-
+	
         if(m_phaseUser == 0)
           Particle::registerCache_0(pc);
         else if(m_phaseUser == 1)
           Particle::registerCache(pc);
-        else // so it is 2
-        {
+        else { // so it is 2
           Particle::registerCache(pc);          
           pc = copyMySelf();
           Particle::registerCache_0(pc);
         }
       }
-
-          } // end: for(m_colour = 0;...)
+      
+    } // end: for(m_colour = 0;...)
   } // end: if(m_species == "ALL")
   else { /*it is a Symbol limited to one colour*/
-
+    
     m_colour = M_MANAGER->getColour(m_species);
     
     if(m_phaseUser == 0)
       Particle::registerCache_0(this);
     else if(m_phaseUser == 1)
       Particle::registerCache(this);
-    else
-    {
+    else {
       ParticleCache* pc = copyMySelf();
       Particle::registerCache(pc);
       Particle::registerCache_0(this);
     }     
-
+    
   } // end: else of if(m_species == "ALL")
-
-  
-  // END: REGISTRATION OF THIS PARTICLE_CACHE AND POSSIBLY COPIES OF
-  // IT
   
 }
 
@@ -229,4 +226,10 @@ void ParticleCache::cleanSymbol(string& name) const
     name.erase(name.size()-1, name.size()-1);
   }
   MSG_DEBUG("ValCalculator::cleanPairSymbol", className() << ": shortened name of symbol: " << name);
+}
+
+void ParticleCache::setupAfterParticleCreation()
+{
+  if(!m_registered)
+    throw gError("ParticleCache::setupAfterParticleCreation for module " + className(), "ParticleCache::register() was not called. If you are not the author of module " + className() + ", then contact the responsible person.");
 }
