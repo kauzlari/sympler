@@ -118,13 +118,11 @@ void ParticleCache::setup()
 
   // should we create a Cache for the other colours, too?
   if(m_species == "ALL") {
-    // YES! Using m_colour in this loop is correct since we want to
-    // create one ParticleCache per colour
-    for (m_colour = 0; m_colour < M_MANAGER->nColours(); ++m_colour) {
+    for (size_t col = 0; col < M_MANAGER->nColours(); ++col) {
 
-      checkOutputSymbolExistence(m_colour);
+      checkOutputSymbolExistence(col);
 
-      checkInputSymbolExistences(m_colour);      
+      checkInputSymbolExistences(col);      
       // THE FOLLOWING IS A REMINDER HOW SUCH CHECKS IN CHILD CLASSES COULD LOOK LIKE
       // SINCE STRUCTURE IS ALWAYS THE SAME THE SUBCLASS METHODS COULD CALL BACK A FUNCTION HERE WHICH JUST TAKES THE SPECIFICITIES AS ARGUMENTS (since structure of check is often the same)
       // if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName)) {
@@ -141,8 +139,28 @@ void ParticleCache::setup()
       // } else 
       //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_densityName + "' does not exist but required by this module.");
 
+    } // end: for(colour = 0;...)
+  } // end: if(m_species == "ALL")
+  else { /*it is a Symbol limited to one colour*/
+    
+    m_colour = M_MANAGER->getColour(m_species);
+    
+    checkOutputSymbolExistence(m_colour);
+    
+    checkInputSymbolExistences(m_colour);
+    // SEE m_species == "all" case above for example-impl in subclass
+   
+  } // end: else of if(m_species == "ALL") 
 
-      // is it the last cache to be created?
+  // START: REGISTRATION OF THIS PARTICLE_CACHE AND POSSIBLY COPIES OF
+  // IT
+  
+  if(m_species == "ALL") {
+    // YES! Using m_colour in this loop is correct since we want to
+    // create one ParticleCache per colour
+    for (m_colour = 0; m_colour < M_MANAGER->nColours(); ++m_colour) {
+
+            // is it the last cache to be created?
       if(m_colour == M_MANAGER->nColours()-1)
       {
         if(m_phaseUser == 0)
@@ -175,17 +193,13 @@ void ParticleCache::setup()
           Particle::registerCache_0(pc);
         }
       }
-    } // end: for(m_colour = 0;...)
+
+          } // end: for(m_colour = 0;...)
   } // end: if(m_species == "ALL")
   else { /*it is a Symbol limited to one colour*/
-    
+
     m_colour = M_MANAGER->getColour(m_species);
     
-    checkOutputSymbolExistence(m_colour);
-    
-    checkInputSymbolExistences(m_colour);
-    // SEE m_species == "all" case above for example-impl in subclass
-   
     if(m_phaseUser == 0)
       Particle::registerCache_0(this);
     else if(m_phaseUser == 1)
@@ -196,7 +210,13 @@ void ParticleCache::setup()
       Particle::registerCache(pc);
       Particle::registerCache_0(this);
     }     
-  } // end: else of if(m_species == "ALL") 
+
+  } // end: else of if(m_species == "ALL")
+
+  
+  // END: REGISTRATION OF THIS PARTICLE_CACHE AND POSSIBLY COPIES OF
+  // IT
+  
 }
 
   
