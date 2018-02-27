@@ -69,6 +69,7 @@ include_HEADERS = \
 	pca_density_0oc.h \
 	pca_density_self_contribution.h \
 	pca_energy_entropy.h \
+	pca_iapws-if97.h \
 	pca_matrix_inverse.h \
 	pca_random.h \
 	pca_volume_self_contribution.h \
