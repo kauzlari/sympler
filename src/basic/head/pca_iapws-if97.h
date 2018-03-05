@@ -129,10 +129,10 @@ class PCacheIAPWSIF97: public ParticleCache
    * Helper function for polymorphic copying
    * Note the explicit copy of m_LUT
    */
-  virtual ParticleCache* copyMySelf()
-  {
+  virtual ParticleCache* copyMySelf() {
+
     // The RHS should be called for an instantiatable subclass
-    ParticleCache* tmpPC = this->newInstance();
+    ParticleCache* tmpPC = this->shallowCopy();
 
     // points to same instance
     PCacheIAPWSIF97* tmpPCIAPWS = (PCacheIAPWSIF97*) tmpPC;
@@ -149,20 +149,21 @@ class PCacheIAPWSIF97: public ParticleCache
     
     return tmpPC;
   }
-
   
   /*!
-   * Adds the expressions used by this \a Symbol to the given list. 
+   * Adds the expressions used by this \a Symbol to the given list.
+   * Yes, this function does not have any symbols to add here, but this 
+   * is an abstract class, so better make this function pure virtual.
    * @param usedSymbols List to be filled with own instances of \a TypedValue
    */
-  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
-  {
-    
-  }
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) = 0;
   
   /*!
-   * Returns the strings of those \a Symbols that the given class depends on
-   * due to hard-coded reasons (not due to runtime compiled expressions).
+   * Returns the strings of those \a Symbols that the given class 
+   * depends on due to hard-coded reasons (not due to runtime compiled 
+   * expressions).
+   * Here we know that any instantiatable subclass will have the two 
+   * symbols to add as done below.
    * @param usedSymbols List to add the strings to.
    */
   virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
@@ -170,27 +171,7 @@ class PCacheIAPWSIF97: public ParticleCache
     usedSymbols.push_back(m_var1Name);
     usedSymbols.push_back(m_var2Name);
   }
-
-  /*!
-   * General logic for determining the result by bilinear interpolation 
-   * based on the 4 support values of the LUT which surround 
-   * (\a inputVar1, \a inputVar2) 
-   * @param result Memory address for storing the result
-   * @param inputVar1 Value of thermodynamic input variable 'var1'
-   * @param inputVar2 Value of thermodynamic input variable 'var2'
-   */
-  void calculateResult(double& result, const double& inputVar1, const double& inputVar2) const;
-
-  
-  /*!
-   * In instances of subclasses, this function performs the actual
-   * call of the appropriate freesteam function  
-   * @param result Memory address for storing the result
-   * @param inputVar1 Value of thermodynamic input variable 'var1'
-   * @param inputVar2 Value of thermodynamic input variable 'var2'
-   */
-  virtual void freesteamCalculationForState(double& result, const double& inputVar1, const double& inputVar2) const = 0;
-  
+    
   /*!
    * Instances of subclasses check if their individual constraints are 
    * fulfilled
@@ -198,9 +179,10 @@ class PCacheIAPWSIF97: public ParticleCache
   virtual void checkConstraints() = 0;
 
   /*!
-   * Instances of subclasses return a new instance of their own class 
+   * Instances of subclasses return a new shallow copy by 
+   * copy-constructor of their own class 
    */
-  virtual ParticleCache* newInstance() = 0;
+  virtual ParticleCache* shallowCopy() = 0;
   
  public:
   /*!
@@ -223,14 +205,6 @@ class PCacheIAPWSIF97: public ParticleCache
    */
   virtual ~PCacheIAPWSIF97(); 
   
-  /*!
-   * Determines the result by bilinear interpolation based on the 4
-   * support values of the LUT which surround (\a var1, \a var2) 
-   * @param var1 Value of thermodynamic input variable 'var1'
-   * @param var2 Value of thermodynamic input variable 'var2'
-   */
-  /* virtual double calculateResult(const double& var1, const double& var2); */
-
   /*!
    * Precalculates the output value in the 'var1' and 'var2' ranges 
    * specified by the corresponding private member variables
@@ -258,6 +232,25 @@ class PCacheIAPWSIF97: public ParticleCache
   }
 
   /*!
+   * In instances of subclasses, this function performs the actual
+   * call of the appropriate freesteam function  
+   * @param result Memory address for storing the result
+   * @param inputVar1 Value of thermodynamic input variable 'var1'
+   * @param inputVar2 Value of thermodynamic input variable 'var2'
+   */
+  virtual void freesteamCalculationForState(double& result, const double& inputVar1, const double& inputVar2) const = 0;
+
+  /*!
+   * General logic for determining the result by bilinear interpolation 
+   * based on the 4 support values of the LUT which surround 
+   * (\a inputVar1, \a inputVar2) 
+   * @param result Memory address for storing the result
+   * @param inputVar1 Value of thermodynamic input variable 'var1'
+   * @param inputVar2 Value of thermodynamic input variable 'var2'
+   */
+  void calculateResult(double& result, const double& inputVar1, const double& inputVar2) const;
+  
+  /*!
    * Take steps necessary to register this calculator
    */
   virtual void registerWithParticle();
@@ -284,12 +277,27 @@ class PCacheIAPWSIF97: public ParticleCache
   virtual void setup();
 
   /*!
+   * Checks existence of input symbols required by this \a ParticleCache
+   * in a hard-coded fashion (i.e., not through runtime compiled 
+   * expressions).
+   * @param colour Particle colour to be checked
+   */
+  virtual void checkInputSymbolExistences(size_t colour);
+  
+  /*!
    * Returns the values stored in the LUT
    */ 
   virtual double** returnLUTvals() {
     return m_LUT;
   }
 
+  ////////// friends ///////////////
+  
+  /*!
+   * Class that is allowed to set protected members for unittesting
+   */
+  friend class PCacheIAPWSIF97TestGetter;
+  
 };
 
 #endif

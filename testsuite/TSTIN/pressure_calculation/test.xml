@@ -36,20 +36,20 @@
   <ParticleScalar
       species = "fluid"
       expression = "600"
-      symbol = "density"
+      symbol = "rho"
       />
 
 <!-- Pressure Calculation -->
   <PressureCalculation
       species = "fluid"
-      density = "density"      
-      temperature = "temperature"
-      temperatureMax = "750"
-      temperatureMin = "640"
-      densityMax = "650"
-      densityMin = "350"
-      arraysize_density = "100"
-      arraysize_temperature = "100" 
+      var1 = "rho"      
+      var2 = "temperature"
+      var2Max = "750"
+      var2Min = "640"
+      var1Max = "650"
+      var1Min = "350"
+      LUTsizeVar1 = "100"
+      LUTsizeVar2 = "100" 
       symbol = "pressure"
       />
   

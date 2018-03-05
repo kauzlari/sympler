@@ -29,124 +29,38 @@
  */
 
 
-
-#ifndef PRESSURECALCULATIONTEST_H
-#define PRESSURECALCULATIONTEST_H
+#ifndef __PRESSURE_CALCULATION_TEST_H
+#define __PRESSURE_CALCULATION_TEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include "pca_iapws-if97Test.h"
 #include "pressure_calculation.h"
 #include "simulation.h"
+
 using namespace std;
 
 
-/*!
- * Fake class for testing class \a PressureCalculation. Current resons 
- * for its need:
- * - private/protected member m_Tmax, m_pmax should be possible to set
- *   by public method
- */
-class FakePressureCalculation : public PressureCalculation
-{
-  
- public: 
-  
-  FakePressureCalculation (Simulation* parent)
-    : PressureCalculation (parent)
-  {}
-  
-  /*!
-   * Destructor
-   */
-  virtual ~FakePressureCalculation() {
-  }
-  
-  /*!
-   * Set private member \a m_Tmax to given value
-   * @param Tmax value that m_Tmax should be set to
-   */
-  void set_m_Tmax(const double& Tmax) {
-    m_Tmax = Tmax;
-  }
-  
-  /*!
-   * Set private member \a m_rhomax to given value
-   * @param rhomax value that m_rhomax should be set to
-   */
-  void set_m_rhomax(const double& rhomax) {
-    m_rhomax = rhomax;
-  }
-  
-  /*!
-   * Set private member \a m_Tmin to given value
-   * @param Tmin value that m_Tmin should be set to
-   */
-  void set_m_Tmin(const double& Tmin) {
-    m_Tmin = Tmin;
-  }
-  
-  /*!
-   * Set private member \a m_rhomin to given value
-   * @param rhomin value that m_rhomin should be set to
-   */
-  void set_m_rhomin(const double& rhomin) {
-    m_rhomin = rhomin;
-  }
-  
-  /*!
-   * Set private member \a m_arraysize_temperature to given value
-   * @param size value that m_arraysize_temperature should be set to
-   */
-  void set_m_arraysize_temperature(size_t size) {
-    m_arraysize_temperature = size;
-  }
-  
-  /*!
-   * Set private member \a m_arraysize_pressure to given value
-   * @param size value that m_arraysize_pressure should be set to
-   */
-  void set_m_arraysize_density(size_t size) {
-    m_arraysize_density = size;
-  }
-    
-}; // end of FakePressureCalculation
-
-
-class PressureCalculationTest : public CPPUNIT_NS :: TestFixture
+class PressureCalculationTest : public PCacheIAPWSIF97Test
 {
   CPPUNIT_TEST_SUITE (PressureCalculationTest);
+  // implemented in parent class
   CPPUNIT_TEST (setupLUTTest);
-  CPPUNIT_TEST (calculatePressureTest);
-  CPPUNIT_TEST_SUITE_END ();
+  // implemented in parent class
+  CPPUNIT_TEST (copyMySelfTest);
+  CPPUNIT_TEST (calculateResultTest);
+  CPPUNIT_TEST_SUITE_END ();  
   
  public:
 
-  void setUp (void);
-  void tearDown (void);
+  virtual void setUp (void);
+  virtual void tearDown (void);
 
  protected:
 
-  void setupLUTTest (void);
-  void calculatePressureTest (void);
+  virtual void calculateResultTest (void);
 
  private:
-
-  Simulation *m_simulation; 
-  FakePressureCalculation *m_ps;
-
-  double m_Tmax;
-  double m_rhomax;
-  double m_Tmin;
-  double m_rhomin;
-  size_t m_arraysize_temperature;
-  size_t m_arraysize_density;
-
-  /*!
-   * Helper for multiple execution
-   * @param density Density of the thermodynamic state
-   * @param tempersture Temperature of the thermodynamic state
-   */
-  void execPressureTest(const double& density, const double& temperature);
   
 };
 

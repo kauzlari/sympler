@@ -70,59 +70,31 @@ void PCacheIAPWSIF97::setupLUT() {
   double deltaVar1 = 0.;
   double deltaVar2 = 0.;
 
-  // Temperature boarders for Region 3. See IAPWS-IF97 for more information.
   checkConstraints();
-  // if (m_Tmin > 623.15 && m_Tmax < 863.15) {
   
   // Step sizes depending on the size of the Array and the ranges of the input values.
-  m_var1StepSize = (m_var1Max - m_var1Min)/(m_arraySizeVar1);
-  m_var2StepSize = (m_var2Max - m_var2Min)/(m_arraySizeVar2);
+  m_var1StepSize = (m_var1Max - m_var1Min)/(m_arraySizeVar1-1);
+  m_var2StepSize = (m_var2Max - m_var2Min)/(m_arraySizeVar2-1);
+
   // Initialization of the 2D Array, depending on the given temperature and pressure sizes.
-  m_LUT = new double*[m_arraySizeVar2+1];
+  m_LUT = new double*[m_arraySizeVar2];
   for (int i = 0; i <= m_arraySizeVar2; i++) {
-    m_LUT[i] = new double [m_arraySizeVar1+1];
+    m_LUT[i] = new double [m_arraySizeVar1];
   }
-  // // Minimum density boarder along b23-line.
-  // double densityBoundary;
-  // Loop calculates the pressures in an adjusted temperature and density range and
-  // stores them into the LUT.
+
+  // Calculate results at support points and store them into the LUT
   for(int j = 0; j < m_arraySizeVar1; j++) {
     for (int i = 0; i < m_arraySizeVar2; i++) {
-      ////// START: PressureCalculation::localConstraintsMet(i, j)
-      // // Calculates the minimum and maximum density boarders to check
-      // // if the given density is in Region 3.	  
-      // double b23Pressure = freesteam_b23_p_T(deltaT + m_Tmin);
-      // SteamState S = freesteam_set_pT(b23Pressure, deltaT + m_Tmin);
-      // densityBoundary = freesteam_rho(S);
-      ////// END: PressureCalculation::localConstraintsMet(i, j)
-      
-      // if (localConstraintsMet(i, j)) {
-      // if (m_rhomin + rho > densityBoundary) {
-      // NOTE: include if (localConstraintsMet(i, j)) in freesteamCalculationForState(i,j)
-      
-      /* m_LUT[j][i] = freesteam_region3_p_rhoT(m_rhomin + rho, m_Tmin + deltaT)*/;
+
       freesteamCalculationForState(m_LUT[j][i],
 				   m_var1Min + deltaVar1,
 				   m_var2Min + deltaVar2);
       
-      deltaVar2 += m_var2StepSize;
-      
-      // } else {
-      // 	  throw gError("PCacheIAPWSIF97::setup", "Requested density and temperature parameters aren't within region 3. (See IAPWS-IF97 for more information): Unsuccessfully tried to compute P(T=" + ObjToString(deltaT+m_Tmin) + ",rho=" + ObjToString(m_rhomin+rho) + ") crossing rho_min(T) = " + ObjToString(densityBoundary));
-      //   }
-      
+      deltaVar2 += m_var2StepSize;            
     }
-    
     deltaVar2 = 0.;
-    deltaVar1 += m_var1StepSize;
-    
+    deltaVar1 += m_var1StepSize; 
   }
-
-// NOTE: the following exception should be thrown in SubClass::checkConstraints()
-  // } else {
-  //    throw gError("PCacheIAPWSIF97::setup", "Requested temperature parameters aren't within region 3 (623.15K < T < 863.15K). (See IAPWS-IF97 for more information)");
-  // }     
-
 }
 
 void PCacheIAPWSIF97::calculateResult(double& result, const double& inputVar1, const double& inputVar2) const {
@@ -223,8 +195,6 @@ void PCacheIAPWSIF97::init()
 void PCacheIAPWSIF97::setup()
 {
 
-  ParticleCache::setup();
-
   if(m_var1Name == "undefined")
     throw gError("PCacheIAPWSIF97::setup for module " + className(), "Attribute 'var1' has value \"undefined\""); 
   if(m_var2Name == "undefined")
@@ -249,12 +219,33 @@ void PCacheIAPWSIF97::setup()
   if(m_var2Min >= m_var2Max)
     throw gError("PCacheIAPWSIF97::setup for module " + className(), "Attribute 'var2Min' (= " + ObjToString(m_var2Min) + ") >= attribute 'var1Max' (= " + ObjToString(m_var2Max) + ") not meaningful!");
 
+  ParticleCache::setup();
+  
   // setup the look-up table
   setupLUT();  
 
   // Now, if m_species == "all", we can freely copy this PCA including
   // m_LUT in function copyMySelf() called by registerCache()
   registerCache();
+
+}
+
+
+void PCacheIAPWSIF97::checkInputSymbolExistences(size_t colour) {
+
+  if(Particle::s_tag_format[m_colour].attrExists(m_var2Name)) {
+    if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_var2Name).datatype)
+      throw gError("PressureCalculation::setup", "Var2 " + m_var2Name + " already exists as a non-scalar.");
+    else m_var2Offset = Particle::s_tag_format[m_colour].offsetByName(m_var2Name);
+  } else 
+    throw gError("PressureCalculation::setup", "Symbol '" + m_var2Name + "' does not exist but required by this module.");
+  
+  if(Particle::s_tag_format[m_colour].attrExists(m_var1Name)) {
+    if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_var1Name).datatype)
+      throw gError("PressureCalculation::setup", "Var1 " + m_var1Name + " already exists as a non-scalar.");
+    else m_var1Offset = Particle::s_tag_format[m_colour].offsetByName(m_var1Name);
+  } else 
+    throw gError("PressureCalculation::setup", "Symbol '" + m_var1Name + "' does not exist but required by this module.");
 
 }
 

@@ -32,8 +32,7 @@
 #ifndef __PRESSURE_CALCULATION_H
 #define __PRESSURE_CALCULATION_H
 
-#include "particle_cache.h"
-
+#include "pca_iapws-if97.h"
 
 /*!
  * Local pressure at the particle computed from the local density
@@ -43,91 +42,24 @@
  * thermodynamic properties of water and steam. adadad, August
  * 2007).
  */
-class PressureCalculation: public ParticleCache
+class PressureCalculation: public PCacheIAPWSIF97
 {
   
  protected:
-
-  /*!
-   * From which symbol to take the local temperature
-   */
-  string m_temperatureName;
-
-  /*!
-   * From which symbol to take the local pressure
-   */
-  string m_densityName;
-
-  /*!
-   * Tag offset of the local temperature
-   */
-  size_t m_temperatureOffset;
-
-  /*!
-   * Tag offset of the local pressure
-   */
-  size_t m_densityOffset;
-
-  /*!
-   * Value of the local minimum temperature
-   */
-  double m_Tmin;
-
-  /*!
-   * Value of the local minimum pressure
-   */
-  double m_rhomin;
-
-  /*!
-   * Value of the local maximum temperature
-   */
-  double m_Tmax;
-
-  /*!
-   * Value of the local maximum pressure
-   */
-  double m_rhomax;
-
-  /*!
-   * Temperature step size for calculating new density values.
-   * The step size depends on the size of the LUT and the temperature range.
-   */
-  double m_calcstepT;
-
-  /*!
-   * Pressure step size for calculating new density values.
-   * The step size depends on the size of the LUT and the pressure range.
-   */
-  double m_calcstepRho;
-
-  /*!
-   * Size of the array for temperature values.
-   */
-  int m_arraysize_temperature;
-
-  /*!
-   * Size of the array for pressure values.
-   */
-  int m_arraysize_density;
-
-  /*!
-   * LUT (2D Array), where all density values are stored
-   */
-  double **m_array_p;
   
   /*!
-  * Initialise the property list
-  */
+   * Initialise the property list
+   */
   virtual void init();
 
   /*!
    * Helper function for polymorphic copying
    */
-  virtual ParticleCache* copyMySelf()
+  virtual ParticleCache* shallowCopy()
   {
     return new PressureCalculation(*this);
   }
-  
+    
   /*!
    * Adds the expressions used by this \a Symbol to the given list. 
    * @param usedSymbols List to be filled with own instances of \a TypedValue
@@ -138,15 +70,11 @@ class PressureCalculation: public ParticleCache
   }
   
   /*!
-   * Returns the strings of those \a Symbols that the given class depends on
-   * due to hard-coded reasons (not due to runtime compiled expressions).
-   * @param usedSymbols List to add the strings to.
+   * \a PressureCalculation checks here if a requested temperature is 
+   * within region 3 (623.15K < T < 863.15K). See IAPWS-IF97 for more 
+   * information
    */
-  virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
-  {
-    usedSymbols.push_back(m_temperatureName);
-    usedSymbols.push_back(m_densityName);
-  }
+  virtual void checkConstraints();
 
 
  public:
@@ -163,73 +91,33 @@ class PressureCalculation: public ParticleCache
    * Constructor
    */
   PressureCalculation
-    (Simulation* parent);
-  
-  /*!
-   * Destructor
-   */
-  virtual ~PressureCalculation(); 
-  
-  /*!
-   * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
-   * Bilinear interpolation is used for approximation.
-   */
-  virtual double calculatePressure(double inputT, double inputRho);
+    (Simulation* parent);  
 
   /*!
-   * Precalculates the pressure in given temperature and density ranges.
-   * The pressure values are stored in a Look-Up table (2D Array) with fixed step sizes.
+   * Performs the actual call of the appropriate freesteam function 
+   * which computes pressure from density (\a m_var1) and temperature 
+   * (\a m_var2)  
+   * @param result Memory address for storing the resulting pressure
+   * @param inputVar1 Value of thermodynamic input variable 'var1'
+   * (density)
+   * @param inputVar2 Value of thermodynamic input variable 'var2'
+   * (temperature)
    */
-  virtual void setupLUT();
-
-  /*!
-   * Calculates the pressure for the given particle
-   * @param p The given particle
-   */
-  virtual void computeCacheFor(Particle* p) {
-    
-    Data& pTag = p->tag;
-    
-    pTag.doubleByOffset(m_offset) =
-      calculatePressure(
-			pTag.doubleByOffset(m_temperatureOffset),
-			pTag.doubleByOffset(m_densityOffset)
-			); 
-  }
+  virtual void freesteamCalculationForState
+    (double& result, const double& inputVar1, const double& inputVar2)
+    const;
 
   /*!
    * Take steps necessary to register this calculator
    */
   virtual void registerWithParticle();
-
-  /*!
-   * Does this calculator equal \a c?
-   * @param c Other calculator
-   */
-  virtual bool operator==(const ParticleCache &c) const {
-    
-    if (typeid(c) == typeid(*this)) {
-      
-      return true;
-      /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
-    } else {
-      return false;
-    }
-  } 
   
   /*!
    * If it belongs to a Node structure, setup this instance of
    * \a PressureCalculation
    */
   virtual void setup();
-
-  /*!
-   * Returns the values stored in the LUT
-   */ 
-  virtual double** returnLUTvals() {
-    return m_array_p;
-  }
-
+  
 };
 
 #endif

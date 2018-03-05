@@ -98,10 +98,13 @@ class ParticleCache : public Symbol
    * Checks existence of input symbols required by this \a ParticleCache
    * in a hard-coded fashion (i.e., not through runtime compiled 
    * expressions).
-   * Default behaviour defined here: no input symbols
+   * Default behaviour defined here: forcing implementation in subclass 
    * @param colour Particle colour to be checked
    */
   virtual void checkInputSymbolExistences(size_t colour) {
+    
+    throw gError("ParticleCache::checkInputSymbolExistences for module " + className(), "Safety exception thrown: Somebody forgot to define this function for the given module. Contact the most recent programmer of " + className());
+
   }
 
   /*!

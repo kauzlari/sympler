@@ -1,5 +1,6 @@
 noinst_LTLIBRARIES = libbasicTest.la
 libbasicTest_la_SOURCES = \
+	pca_iapws-if97Test.cpp \
 	pressure_calculationTest.cpp \
 	density_calculationTest.cpp \
 	smart_enumTest.cpp
