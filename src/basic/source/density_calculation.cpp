@@ -42,6 +42,58 @@ const SymbolRegister<DensityCalculation> DensityCalculation("DensityCalculation"
 #define M_PHASE M_SIMULATION->phase()
 #define M_MANAGER M_PHASE->manager()
 
+
+DensityCalculation::DensityCalculation
+  (size_t colour, size_t offset, string symbolName)
+  : PCacheIAPWSIF97(colour, offset, symbolName) {
+}
+
+DensityCalculation::DensityCalculation
+    (/*Node*/Simulation* parent)
+  : PCacheIAPWSIF97(parent) {
+  init();
+}
+
+
+void DensityCalculation::checkConstraints() {}
+
+
+void DensityCalculation::freesteamCalculationForState
+(double& result, const double& inputVar1, const double& inputVar2)
+  const {
+  
+  SteamState S = freesteam_set_pT(inputVar1, inputVar2);
+  result = freesteam_rho(S);
+  
+}
+
+
+void DensityCalculation::init()
+{
+  m_properties.setClassName("DensityCalculation");
+  m_properties.setName("DensityCalculation");
+  m_properties.setDescription
+    (m_properties.description() +
+     "\nFor module DensityCalculation, var1 = pressure (p), var2 = "
+     "temperature (T)."
+     ); 
+}
+
+
+void DensityCalculation::setup()
+{
+  PCacheIAPWSIF97::setup();
+}
+
+
+void DensityCalculation::registerWithParticle() {}
+
+
+
+///////////////// OLD //////////////////
+
+#if 0
+
 DensityCalculation::DensityCalculation
   (size_t colour, size_t offset, string symbolName)
   : ParticleCache(colour, offset, symbolName) {
@@ -334,3 +386,4 @@ void DensityCalculation::registerWithParticle()
 {
 }
 
+#endif

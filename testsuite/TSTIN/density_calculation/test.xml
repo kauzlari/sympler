@@ -42,14 +42,14 @@
 <!-- Pressure Calculation -->
   <DensityCalculation
       species = "fluid"
-      pressure = "pressure"      
-      temperature = "temperature"
-      temperatureMax = "750"
-      temperatureMin = "640"
-      pressureMax = "25000000"
-      pressureMin = "23000000"
-      arraysize_pressure = "100"
-      arraysize_temperature = "100" 
+      var1 = "pressure"      
+      var2 = "temperature"
+      var2Max = "750"
+      var2Min = "640"
+      var1Max = "25000000"
+      var1Min = "23000000"
+      LUTsizeVar1 = "100"
+      LUTsizeVar2 = "100" 
       symbol = "density"
       />
   

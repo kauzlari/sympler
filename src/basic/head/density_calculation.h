@@ -32,7 +32,97 @@
 #ifndef __DENSITY_CALCULATION_H
 #define __DENSITY_CALCULATION_H
 
-#include "particle_cache.h"
+#include "pca_iapws-if97.h"
+
+/*!
+ * Local density at the particle computed from the local pressure
+ * and local temperature based on IAPWS-IF97 (International
+ * Association for the Properties of Water and Steam. Revised
+ * release on the IAPWS industrial formulation 1997 for the
+ * thermodynamic properties of water and steam. adadad, August
+ * 2007).
+ */
+class DensityCalculation: public PCacheIAPWSIF97
+{
+  
+ protected:
+  
+  /*!
+   * Initialise the property list
+   */
+  virtual void init();
+
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ParticleCache* shallowCopy()
+  {
+    return new DensityCalculation(*this);
+  }
+    
+  /*!
+   * Adds the expressions used by this \a Symbol to the given list. 
+   * @param usedSymbols List to be filled with own instances of \a TypedValue
+   */
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
+  {
+    
+  }
+
+  /*!
+   * \a DensityCalculation does not require any checks, hence function
+   * is emopty
+   */
+  virtual void checkConstraints();
+
+
+ public:
+  /*!
+   * Constructor
+   * @param colour The particle's color
+   * @param offset Tag offset of the local density
+   * @param wf The weighting function to use for the local density calculation
+   */
+  DensityCalculation
+    (size_t colour, size_t offset, string symbolName);
+  
+  /*!
+   * Constructor
+   */
+  DensityCalculation
+    (Simulation* parent);  
+
+  /*!
+   * Performs the actual call of the appropriate freesteam function 
+   * which computes density from pressure (\a m_var1) and temperature 
+   * (\a m_var2)  
+   * @param result Memory address for storing the resulting density
+   * @param inputVar1 Value of thermodynamic input variable 'var1'
+   * (pressure)
+   * @param inputVar2 Value of thermodynamic input variable 'var2'
+   * (temperature)
+   */
+  virtual void freesteamCalculationForState
+    (double& result, const double& inputVar1, const double& inputVar2)
+    const;
+
+  /*!
+   * Take steps necessary to register this calculator
+   */
+  virtual void registerWithParticle();
+  
+  /*!
+   * If it belongs to a Node structure, setup this instance of
+   * \a DensityCalculation
+   */
+  virtual void setup();
+  
+};
+
+
+/////////// OLD //////////////////////////
+
+/* #include "particle_cache.h" */
 
 
 /*!
@@ -43,112 +133,112 @@
  * thermodynamic properties of water and steam. adadad, August
  * 2007).
  */
-class DensityCalculation: public ParticleCache
-{
- protected:
+/* class DensityCalculation: public ParticleCache */
+/* { */
+/*  protected: */
 
   /*!
    * From which symbol to take the local temperature
    */
-  string m_temperatureName;
+  /* string m_temperatureName; */
 
   /*!
    * From which symbol to take the local pressure
    */
-  string m_pressureName;
+  /* string m_pressureName; */
 
   /*!
    * Tag offset of the local temperature
    */
-  size_t m_temperatureOffset;
+  /* size_t m_temperatureOffset; */
 
   /*!
    * Tag offset of the local pressure
    */
-  size_t m_pressureOffset;
+  /* size_t m_pressureOffset; */
 
   /*!
    * Value of the local minimum temperature
    */
-  double m_Tmin;
+  /* double m_Tmin; */
 
   /*!
    * Value of the local minimum pressure
    */
-  double m_pmin;
+  /* double m_pmin; */
 
   /*!
    * Value of the local maximum temperature
    */
-  double m_Tmax;
+  /* double m_Tmax; */
 
   /*!
    * Value of the local maximum pressure
    */
-  double m_pmax;
+  /* double m_pmax; */
 
   /*!
    * Temperature step size for calculating new density values.
    * The step size depends on the size of the LUT and the temperature range.
    */
-  double m_calcstepT;
+  /* double m_calcstepT; */
 
   /*!
    * Pressure step size for calculating new density values.
    * The step size depends on the size of the LUT and the pressure range.
    */
-  double m_calcstepP;
+  /* double m_calcstepP; */
 
   /*!
    * Size of the array for temperature values.
    */
-  int m_arraysize_temperature;
+  /* int m_arraysize_temperature; */
 
   /*!
    * Size of the array for pressure values.
    */
-  int m_arraysize_pressure;
+  /* int m_arraysize_pressure; */
 
   /*!
    * LUT (2D Array), where all density values are stored
    */
-  double **m_array_rho;
+  /* double **m_array_rho; */
   
   /*!
   * Initialise the property list
   */
-  virtual void init();
+  /* virtual void init(); */
 
   /*!
    * Helper function for polymorphic copying
    */
-  virtual ParticleCache* copyMySelf()
-  {
-    return new DensityCalculation(*this);
-  }
+  /* virtual ParticleCache* copyMySelf() */
+  /* { */
+  /*   return new DensityCalculation(*this); */
+  /* } */
   
   /*!
    * Adds the expressions used by this \a Symbol to the given list. 
    * @param usedSymbols List to be filled with own instances of \a TypedValue
    */
-  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols)
-  {
+  /* virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) */
+  /* { */
     
-  }
+  /* } */
   
   /*!
    * Returns the strings of those \a Symbols that the given class depends on
    * due to hard-coded reasons (not due to runtime compiled expressions).
    * @param usedSymbols List to add the strings to.
    */
-  virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
-  {
-    usedSymbols.push_back(m_temperatureName);
-    usedSymbols.push_back(m_pressureName);
-  }
+  /* virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const */
+  /* { */
+  /*   usedSymbols.push_back(m_temperatureName); */
+  /*   usedSymbols.push_back(m_pressureName); */
+  /* } */
 
   
- public:
+ /* public: */
 
   /*!
    * Constructor
@@ -156,79 +246,79 @@ class DensityCalculation: public ParticleCache
    * @param offset Tag offset of the local density
    * @param wf The weighting function to use for the local density calculation
    */
-   DensityCalculation
-       (size_t colour, size_t offset, string symbolName);
+   /* DensityCalculation */
+   /*     (size_t colour, size_t offset, string symbolName); */
   
    /*!
     * Constructor
     */
-   DensityCalculation
-     (Simulation* parent);
+   /* DensityCalculation */
+   /*   (Simulation* parent); */
    
    /*!
     * Destructor
     */
-   virtual ~DensityCalculation();
+   /* virtual ~DensityCalculation(); */
    
    /*!
     * Finds and approximate stored density values(LUT) with pressure and temperature values as input.
     * Bilinear interpolation is used for approximation.
     */
-   virtual double calculateDensity(double inputT, double inputP);
+   /* virtual double calculateDensity(double inputT, double inputP); */
    
    /*!
     * Precalculates the density in given temperature and pressure ranges.
     * The density values are stored in a Look-Up table (2D Array) with fixed step sizes.
     */
-   virtual void setupLUT();
+   /* virtual void setupLUT(); */
    
    /*!
     * Calculates the density for the given particle
     * @param p The given particle
     */
-   virtual void computeCacheFor(Particle* p) {
+   /* virtual void computeCacheFor(Particle* p) { */
      
-     Data& pTag = p->tag;
+   /*   Data& pTag = p->tag; */
      
-     pTag.doubleByOffset(m_offset) =
-       calculateDensity(
-			pTag.doubleByOffset(m_temperatureOffset),
-			pTag.doubleByOffset(m_pressureOffset)
-			);
-   }
+   /*   pTag.doubleByOffset(m_offset) = */
+   /*     calculateDensity( */
+   /* 			pTag.doubleByOffset(m_temperatureOffset), */
+   /* 			pTag.doubleByOffset(m_pressureOffset) */
+   /* 			); */
+   /* } */
    
    /*!
     * Take steps necessary to register this calculator
     */
-   virtual void registerWithParticle();
+   /* virtual void registerWithParticle(); */
    
    /*!
     * Does this calculator equal \a c?
     * @param c Other calculator
     */
-   virtual bool operator==(const ParticleCache &c) const {
+   /* virtual bool operator==(const ParticleCache &c) const { */
      
-     if (typeid(c) == typeid(*this)) {
-       return true;
-       /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
-     } else {
-       return false;
-     }
-   }
+   /*   if (typeid(c) == typeid(*this)) { */
+   /*     return true; */
+//       /*m_wf->name() == cc->m_wf->name() && m_colour == cc->m_colour && m_stage == cc->m_stage && m_offset == cc->m_offset && m_symbolName == cc->m_symbolName;*/
+   /*   } else { */
+   /*     return false; */
+   /*   } */
+   /* } */
    
    /*!
     * If it belongs to a Node structure, setup this instance of
     * \a DensityCalculation
     */
-   virtual void setup();
+   /* virtual void setup(); */
    
    /*!
     * Returns the values stored in the LUT
     */ 
-   virtual double** returnLUTvals() {
-     return m_array_rho;
-   }
+/*    virtual double** returnLUTvals() { */
+/*      return m_array_rho; */
+/*    } */
    
-};
+/* }; */
 
 #endif

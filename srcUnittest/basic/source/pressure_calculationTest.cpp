@@ -64,7 +64,7 @@ void PressureCalculationTest  :: tearDown (void)
 
 void PressureCalculationTest  :: calculateResultTest (void)
 {
-  // 1st arg: density, 2nd arg temperature 
+  // 1st arg: density, 2nd arg: temperature 
   execCalculationTest(350., 700.);
   execCalculationTest(600., 750.);
   execCalculationTest(300., 650.); 

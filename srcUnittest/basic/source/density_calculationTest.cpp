@@ -32,9 +32,46 @@
 extern "C" {
   #include <freesteam/steam_pT.h>
 }
+
 #include "density_calculationTest.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (DensityCalculationTest);
+
+void DensityCalculationTest  :: setUp (void)
+{
+  /*!
+   * Initialize objects
+   */
+  m_simulation = new Simulation();
+  m_pc = new DensityCalculation(m_simulation);
+
+  // Minimum and maximum Inputvalues
+  // pressure
+  m_var1Min = 23000000.;
+  m_var1Max = 25000000.;
+  // temperature
+  m_var2Min = 550.;
+  m_var2Max= 700;
+
+  PCacheIAPWSIF97Test::setUp();  
+}
+
+void DensityCalculationTest  :: tearDown (void) 
+{
+  PCacheIAPWSIF97Test::tearDown();
+}
+
+void DensityCalculationTest  :: calculateResultTest (void)
+{
+  // 1st arg: pressure, 2nd arg: temperature 
+  execCalculationTest(24000000., 650.);
+}
+
+
+//////////// OLD ////////////////////////////
+
+
+#if 0
 
 void DensityCalculationTest  :: setUp (void) {
   /*!
@@ -113,3 +150,4 @@ void DensityCalculationTest  :: calculateDensityTest (void)
 }
 
 
+#endif

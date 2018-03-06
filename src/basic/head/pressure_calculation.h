@@ -81,8 +81,8 @@ class PressureCalculation: public PCacheIAPWSIF97
   /*!
    * Constructor
    * @param colour The particle's color
-   * @param offset Tag offset of the local density
-   * @param wf The weighting function to use for the local density calculation
+   * @param offset Tag offset of the local pressure
+   * @param wf The weighting function to use for the local pressure calculation
    */
   PressureCalculation
     (size_t colour, size_t offset, string symbolName);

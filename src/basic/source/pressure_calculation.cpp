@@ -91,7 +91,7 @@ void PressureCalculation::init()
   m_properties.setName("PressureCalculation");
   m_properties.setDescription
     (m_properties.description() +
-     "For module PressureCalculation, var1 = density (rho), var2 = "
+     "\nFor module PressureCalculation, var1 = density (rho), var2 = "
      "temperature (T)."
      "NOTE: This module can currently only compute pressure, if "
      "(rho,T) is within region 3. See IAPWS-IF97 for more "

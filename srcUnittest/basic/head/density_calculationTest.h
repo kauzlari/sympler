@@ -30,15 +30,48 @@
 
 
 
-#ifndef DENSITYCALCULATIONTEST_H
-#define DENSITYCALCULATIONTEST_H
+#ifndef __DENSITY_CALCULATION_TEST_H
+#define __DENSITY_CALCULATION_TEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include "pca_iapws-if97Test.h"
 #include "density_calculation.h"
 #include "simulation.h"
+
 using namespace std;
 
+
+class DensityCalculationTest : public PCacheIAPWSIF97Test
+{
+  CPPUNIT_TEST_SUITE (DensityCalculationTest);
+  // implemented in parent class
+  CPPUNIT_TEST (setupLUTTest);
+  // implemented in parent class
+  CPPUNIT_TEST (copyMySelfTest);
+  CPPUNIT_TEST (calculateResultTest);
+  CPPUNIT_TEST_SUITE_END ();  
+  
+ public:
+
+  virtual void setUp (void);
+  virtual void tearDown (void);
+
+ protected:
+
+  virtual void calculateResultTest (void);
+
+ private:
+  
+};
+
+
+
+//////// OLD ///////////////////////////
+
+
+
+#if 0
 
 /*!
  * Fake class for testing class \a DensityCalculation. Current resons 
@@ -141,4 +174,7 @@ class DensityCalculationTest : public CPPUNIT_NS :: TestFixture
   size_t m_arraysize_pressure;
 
 };
+
+#endif // of #if 0
+
 #endif
