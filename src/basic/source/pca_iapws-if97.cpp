@@ -39,14 +39,14 @@
 
 PCacheIAPWSIF97::PCacheIAPWSIF97
   (size_t colour, size_t offset, string symbolName)
-  : ParticleCache(colour, offset, symbolName) {
+    : ParticleCache(colour, offset, symbolName), m_LUT(NULL) {
   m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
 }
 
 PCacheIAPWSIF97::PCacheIAPWSIF97
     (/*Node*/Simulation* parent)
-  : ParticleCache(parent) {
+      : ParticleCache(parent), m_LUT(NULL) {
   m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
   init();
