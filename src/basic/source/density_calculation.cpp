@@ -75,7 +75,7 @@ void DensityCalculation::init()
   m_properties.setDescription
     (m_properties.description() +
      "\nFor module DensityCalculation, var1 = pressure (p), var2 = "
-     "temperature (T)."
+     "temperature (T), and out = density (rho)."
      ); 
 }
 
