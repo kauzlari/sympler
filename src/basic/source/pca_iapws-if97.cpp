@@ -147,7 +147,7 @@ void PCacheIAPWSIF97::init()
      "thermodynamic properties of water and steam. adadad, August "
      "2007) using the freesteam-library "
      "(http://freesteam.sourceforge.net/). Calculations are performed "
-     "based on a preconsdtructed lookup table (LUT) in a predefined "
+     "based on a preconstructed lookup table (LUT) in a predefined "
      "range [m_var1Min, m_var2Min] x [m_var1Max, m_var2Max] that is "
      "constructed once in advance to speedup the computation."
      ); 
