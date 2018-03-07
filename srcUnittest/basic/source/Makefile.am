@@ -1,8 +1,9 @@
 noinst_LTLIBRARIES = libbasicTest.la
 libbasicTest_la_SOURCES = \
-	pca_iapws-if97Test.cpp \
-	pressure_calculationTest.cpp \
 	density_calculationTest.cpp \
+	pca_iapws-if97Test.cpp \
+	pca_iapws-if97_etaTest.cpp \
+	pressure_calculationTest.cpp \
 	smart_enumTest.cpp
 
 libbasicTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@

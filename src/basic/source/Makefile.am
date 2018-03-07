@@ -69,6 +69,7 @@ libbasic_la_SOURCES = \
 	pca_density_self_contribution.cpp \
 	pca_energy_entropy.cpp \
 	pca_iapws-if97.cpp \
+	pca_iapws-if97_eta.cpp \
 	pca_matrix_inverse.cpp \
 	pca_random.cpp \
 	pca_volume_self_contribution.cpp \
