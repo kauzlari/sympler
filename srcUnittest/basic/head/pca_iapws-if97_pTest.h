@@ -29,41 +29,39 @@
  */
 
 
-extern "C" {
-  #include <freesteam/steam_pT.h>
-}
+#ifndef __PCA_IAPWSIF97_P_TEST_H
+#define __PCA_IAPWSIF97_P_TEST_H
 
-#include "density_calculationTest.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include "pca_iapws-if97Test.h"
+#include "pca_iapws-if97_p.h"
+#include "simulation.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (DensityCalculationTest);
+using namespace std;
 
-void DensityCalculationTest  :: setUp (void)
+
+class PCacheIAPWSIF97pTest : public PCacheIAPWSIF97Test
 {
-  /*!
-   * Initialize objects
-   */
-  m_simulation = new Simulation();
-  m_pc = new DensityCalculation(m_simulation);
+  CPPUNIT_TEST_SUITE (PCacheIAPWSIF97pTest);
+  // implemented in parent class
+  CPPUNIT_TEST (setupLUTTest);
+  // implemented in parent class
+  CPPUNIT_TEST (copyMySelfTest);
+  CPPUNIT_TEST (calculateResultTest);
+  CPPUNIT_TEST_SUITE_END ();  
+  
+ public:
 
-  // Minimum and maximum Inputvalues
-  // pressure
-  m_var1Min = 23000000.;
-  m_var1Max = 25000000.;
-  // temperature
-  m_var2Min = 550.;
-  m_var2Max= 700;
+  virtual void setUp (void);
+  virtual void tearDown (void);
 
-  PCacheIAPWSIF97Test::setUp();  
-}
+ protected:
 
-void DensityCalculationTest  :: tearDown (void) 
-{
-  PCacheIAPWSIF97Test::tearDown();
-}
+  virtual void calculateResultTest (void);
 
-void DensityCalculationTest  :: calculateResultTest (void)
-{
-  // 1st arg: pressure, 2nd arg: temperature 
-  execCalculationTest(24000000., 650.);
-}
+ private:
+  
+};
 
+#endif

@@ -28,44 +28,42 @@
  * 
  */
 
+
 extern "C" {
   #include <freesteam/steam_pT.h>
-  #include <freesteam/region3.h>
-  #include <freesteam/b23.h>
 }
 
-#include "pressure_calculationTest.h"
+#include "pca_iapws-if97_rhoTest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION (PressureCalculationTest);
+CPPUNIT_TEST_SUITE_REGISTRATION (PCacheIAPWSIF97rhoTest);
 
-void PressureCalculationTest  :: setUp (void)
+void PCacheIAPWSIF97rhoTest  :: setUp (void)
 {
   /*!
    * Initialize objects
    */
   m_simulation = new Simulation();
-  m_pc = new PressureCalculation(m_simulation);
+  m_pc = new PCacheIAPWSIF97rho(m_simulation);
 
   // Minimum and maximum Inputvalues
-  // density
-  m_var1Min = 300;
-  m_var1Max = 600;
+  // pressure
+  m_var1Min = 23000000.;
+  m_var1Max = 25000000.;
   // temperature
-  m_var2Min = 650;
-  m_var2Max= 750;
+  m_var2Min = 550.;
+  m_var2Max= 700;
 
   PCacheIAPWSIF97Test::setUp();  
 }
 
-void PressureCalculationTest  :: tearDown (void) 
+void PCacheIAPWSIF97rhoTest  :: tearDown (void) 
 {
   PCacheIAPWSIF97Test::tearDown();
 }
 
-void PressureCalculationTest  :: calculateResultTest (void)
+void PCacheIAPWSIF97rhoTest  :: calculateResultTest (void)
 {
-  // 1st arg: density, 2nd arg: temperature 
-  execCalculationTest(350., 700.);
-  execCalculationTest(600., 750.);
-  execCalculationTest(300., 650.); 
+  // 1st arg: pressure, 2nd arg: temperature 
+  execCalculationTest(24000000., 650.);
 }
+

@@ -29,8 +29,8 @@
  */
 
 
-#ifndef __PRESSURE_CALCULATION_H
-#define __PRESSURE_CALCULATION_H
+#ifndef __PCA_IAPWSIF97_P_H
+#define __PCA_IAPWSIF97_P_H
 
 #include "pca_iapws-if97.h"
 
@@ -42,7 +42,7 @@
  * thermodynamic properties of water and steam. adadad, August
  * 2007).
  */
-class PressureCalculation: public PCacheIAPWSIF97
+class PCacheIAPWSIF97p: public PCacheIAPWSIF97
 {
   
  protected:
@@ -57,7 +57,7 @@ class PressureCalculation: public PCacheIAPWSIF97
    */
   virtual ParticleCache* shallowCopy()
   {
-    return new PressureCalculation(*this);
+    return new PCacheIAPWSIF97p(*this);
   }
     
   /*!
@@ -70,7 +70,7 @@ class PressureCalculation: public PCacheIAPWSIF97
   }
   
   /*!
-   * \a PressureCalculation checks here if a requested temperature is 
+   * \a PCacheIAPWSIF97p checks here if a requested temperature is 
    * within region 3 (623.15K < T < 863.15K). See IAPWS-IF97 for more 
    * information
    */
@@ -84,13 +84,13 @@ class PressureCalculation: public PCacheIAPWSIF97
    * @param offset Tag offset of the local pressure
    * @param wf The weighting function to use for the local pressure calculation
    */
-  PressureCalculation
+  PCacheIAPWSIF97p
     (size_t colour, size_t offset, string symbolName);
   
   /*!
    * Constructor
    */
-  PressureCalculation
+  PCacheIAPWSIF97p
     (Simulation* parent);  
 
   /*!
@@ -114,7 +114,7 @@ class PressureCalculation: public PCacheIAPWSIF97
   
   /*!
    * If it belongs to a Node structure, setup this instance of
-   * \a PressureCalculation
+   * \a PCacheIAPWSIF97p
    */
   virtual void setup();
   

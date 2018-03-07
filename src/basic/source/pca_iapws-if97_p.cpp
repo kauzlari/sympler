@@ -30,60 +30,83 @@
 
 
 extern "C" {
+  #include <freesteam/b23.h>
   #include <freesteam/steam_pT.h>
+  #include <freesteam/region3.h>
 }
-#include "density_calculation.h"
+
+#include "pca_iapws-if97_p.h"
 #include "simulation.h"
 #include "manager_cell.h"
 
-const SymbolRegister<DensityCalculation> DensityCalculation("DensityCalculation");
+const SymbolRegister<PCacheIAPWSIF97p> PCacheIAPWSIF97p("PCacheIAPWSIF97p");
 
 #define M_SIMULATION ((Simulation *) m_parent)
 #define M_PHASE M_SIMULATION->phase()
 #define M_MANAGER M_PHASE->manager()
 
-
-DensityCalculation::DensityCalculation
+PCacheIAPWSIF97p::PCacheIAPWSIF97p
   (size_t colour, size_t offset, string symbolName)
   : PCacheIAPWSIF97(colour, offset, symbolName) {
 }
 
-DensityCalculation::DensityCalculation
+PCacheIAPWSIF97p::PCacheIAPWSIF97p
     (/*Node*/Simulation* parent)
   : PCacheIAPWSIF97(parent) {
   init();
 }
 
 
-void DensityCalculation::checkConstraints() {}
+void PCacheIAPWSIF97p::checkConstraints() {
+
+  if (m_var2Min <= 623.15 || m_var2Max >= 863.15)
+     throw gError("PCacheIAPWSIF97p::setup", "Requested temperature parameters aren't within region 3 (623.15K < T < 863.15K). (See IAPWS-IF97 for more information)");
+
+}
 
 
-void DensityCalculation::freesteamCalculationForState
+void PCacheIAPWSIF97p::freesteamCalculationForState
 (double& result, const double& inputVar1, const double& inputVar2)
   const {
+
+  // Calculates the minimum and maximum density boarders to check
+  // if the given density is in Region 3.	  
+  double b23Pressure = freesteam_b23_p_T(inputVar2);
+  SteamState S = freesteam_set_pT(b23Pressure, inputVar2);
+  double densityBoundary = freesteam_rho(S);
   
-  SteamState S = freesteam_set_pT(inputVar1, inputVar2);
-  result = freesteam_rho(S);
+  if (inputVar1 > densityBoundary) {
+    result = freesteam_region3_p_rhoT(inputVar1, inputVar2);
+  }
+  else {
+    throw gError("PCacheIAPWSIF97::setup", "Requested density and temperature parameters aren't within region 3. (See IAPWS-IF97 for more information): Unsuccessfully tried to compute P(rho=" + ObjToString(inputVar1) + ",T=" + ObjToString(inputVar2) + ") crossing rho_min(T) = " + ObjToString(densityBoundary));
+  }
   
 }
 
 
-void DensityCalculation::init()
+void PCacheIAPWSIF97p::init()
 {
-  m_properties.setClassName("DensityCalculation");
-  m_properties.setName("DensityCalculation");
+  m_properties.setClassName("PCacheIAPWSIF97p");
+  m_properties.setName("PCacheIAPWSIF97p");
   m_properties.setDescription
     (m_properties.description() +
-     "\nFor module DensityCalculation, var1 = pressure (p), var2 = "
-     "temperature (T), and out = density (rho)."
+     "\nFor module PCacheIAPWSIF97p, var1 = density (rho), var2 = "
+     "temperature (T), and out = pressure (p)."
+     "NOTE: This module can currently only compute pressure, if "
+     "(rho,T) is within region 3. See IAPWS-IF97 for more "
+     "information."
      ); 
 }
 
 
-void DensityCalculation::setup()
+void PCacheIAPWSIF97p::setup()
 {
   PCacheIAPWSIF97::setup();
 }
 
 
-void DensityCalculation::registerWithParticle() {}
+void PCacheIAPWSIF97p::registerWithParticle()
+{
+}
+

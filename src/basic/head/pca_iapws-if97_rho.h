@@ -29,8 +29,8 @@
  */
 
 
-#ifndef __DENSITY_CALCULATION_H
-#define __DENSITY_CALCULATION_H
+#ifndef __PCA_IAPWSIF97_RHO_H
+#define __PCA_IAPWSIF97_RHO_H
 
 #include "pca_iapws-if97.h"
 
@@ -42,7 +42,7 @@
  * thermodynamic properties of water and steam. adadad, August
  * 2007).
  */
-class DensityCalculation: public PCacheIAPWSIF97
+class PCacheIAPWSIF97rho: public PCacheIAPWSIF97
 {
   
  protected:
@@ -57,7 +57,7 @@ class DensityCalculation: public PCacheIAPWSIF97
    */
   virtual ParticleCache* shallowCopy()
   {
-    return new DensityCalculation(*this);
+    return new PCacheIAPWSIF97rho(*this);
   }
     
   /*!
@@ -70,7 +70,7 @@ class DensityCalculation: public PCacheIAPWSIF97
   }
 
   /*!
-   * \a DensityCalculation does not require any checks, hence function
+   * \a PCacheIAPWSIF97rho does not require any checks, hence function
    * is emopty
    */
   virtual void checkConstraints();
@@ -83,13 +83,13 @@ class DensityCalculation: public PCacheIAPWSIF97
    * @param offset Tag offset of the local density
    * @param wf The weighting function to use for the local density calculation
    */
-  DensityCalculation
+  PCacheIAPWSIF97rho
     (size_t colour, size_t offset, string symbolName);
   
   /*!
    * Constructor
    */
-  DensityCalculation
+  PCacheIAPWSIF97rho
     (Simulation* parent);  
 
   /*!
@@ -113,7 +113,7 @@ class DensityCalculation: public PCacheIAPWSIF97
   
   /*!
    * If it belongs to a Node structure, setup this instance of
-   * \a DensityCalculation
+   * \a PCacheIAPWSIF97rho
    */
   virtual void setup();
   

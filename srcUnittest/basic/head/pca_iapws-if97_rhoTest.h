@@ -29,21 +29,22 @@
  */
 
 
-#ifndef __PRESSURE_CALCULATION_TEST_H
-#define __PRESSURE_CALCULATION_TEST_H
+
+#ifndef __PCA_IAPWSIF97_RHO_TEST_H
+#define __PCA_IAPWSIF97_RHO_TEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "pca_iapws-if97Test.h"
-#include "pressure_calculation.h"
+#include "pca_iapws-if97_rho.h"
 #include "simulation.h"
 
 using namespace std;
 
 
-class PressureCalculationTest : public PCacheIAPWSIF97Test
+class PCacheIAPWSIF97rhoTest : public PCacheIAPWSIF97Test
 {
-  CPPUNIT_TEST_SUITE (PressureCalculationTest);
+  CPPUNIT_TEST_SUITE (PCacheIAPWSIF97rhoTest);
   // implemented in parent class
   CPPUNIT_TEST (setupLUTTest);
   // implemented in parent class

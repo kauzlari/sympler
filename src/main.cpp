@@ -281,6 +281,8 @@ void sayHello() {
 #include "pca_eigensystem.h"
 #include "pca_density_0oc.h"
 #include "pca_iapws-if97_eta.h"
+#include "pca_iapws-if97_p.h"
+#include "pca_iapws-if97_rho.h"
 #include "pca_matrix_inverse.h"
 #include "particle_rand_norm_scalar.h"
 #include "particle_rand_norm_vector.h"
@@ -288,8 +290,6 @@ void sayHello() {
 #include "particle_tensor.h"
 #include "particle_vector.h"
 #include "pca_random.h"
-#include "density_calculation.h"
-#include "pressure_calculation.h"
 // commented out because of complaint about redefinition
 // #include "pca_density_self_contribution.h"
 // #include "pca_energy_entropy.h"
@@ -506,8 +506,8 @@ void link_all_properly()
   new ParticleCacheDensity0Oc(NULL);
   new ParticleCacheDensitySelfContribution(NULL);
 //   new ParticleCacheShearSelfContribution(NULL);
-  new DensityCalculation(NULL);
-  new PressureCalculation(NULL);
+  new PCacheIAPWSIF97p(NULL);
+  new PCacheIAPWSIF97rho(NULL);
   new ParticleCacheVolumeSelfContribution(NULL);
   new ParticleRandNormScalar(NULL);
   new ParticleRandNormVector(NULL);

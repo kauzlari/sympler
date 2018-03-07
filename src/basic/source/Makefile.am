@@ -52,8 +52,6 @@ libbasic_la_SOURCES = \
 	pair_tensor.cpp\
 	pair_vector.cpp\
 	particle.cpp \
-        density_calculation.cpp \
-        pressure_calculation.cpp \
 	particle_cache.cpp \
 	particle_cache_arbitrary.cpp \
 	particle_cache_arb_rng.cpp \
@@ -70,6 +68,8 @@ libbasic_la_SOURCES = \
 	pca_energy_entropy.cpp \
 	pca_iapws-if97.cpp \
 	pca_iapws-if97_eta.cpp \
+	pca_iapws-if97_p.cpp \
+	pca_iapws-if97_rho.cpp \
 	pca_matrix_inverse.cpp \
 	pca_random.cpp \
 	pca_volume_self_contribution.cpp \

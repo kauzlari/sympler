@@ -53,8 +53,6 @@ include_HEADERS = \
 	pair_tensor.h\
 	pair_vector.h\
 	particle.h \
-        density_calculation.h \
-        pressure_calculation.h \
 	particle_cache.h \
 	particle_cache_arbitrary.h \
 	particle_cache_arb_rng.h \
@@ -71,6 +69,8 @@ include_HEADERS = \
 	pca_energy_entropy.h \
 	pca_iapws-if97.h \
 	pca_iapws-if97_eta.h \
+	pca_iapws-if97_p.h \
+	pca_iapws-if97_rho.h \
 	pca_matrix_inverse.h \
 	pca_random.h \
 	pca_volume_self_contribution.h \

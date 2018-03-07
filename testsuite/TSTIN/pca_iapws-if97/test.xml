@@ -60,7 +60,7 @@
       />
 
 <!-- Density Calculation -->
-  <DensityCalculation
+  <PCacheIAPWSIF97rho
       species = "fluid"
       var1 = "pressureConstIn"      
       var2 = "temperatureIn"
@@ -74,7 +74,7 @@
       />
 
 <!-- Pressure Calculation -->
-  <PressureCalculation
+  <PCacheIAPWSIF97p
       species = "fluid"
       var1 = "rhoConstIn"      
       var2 = "temperatureIn"
