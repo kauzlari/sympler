@@ -68,6 +68,7 @@ libbasic_la_SOURCES = \
 	pca_energy_entropy.cpp \
 	pca_iapws-if97.cpp \
 	pca_iapws-if97_eta.cpp \
+	pca_iapws-if97_kappa.cpp \
 	pca_iapws-if97_p.cpp \
 	pca_iapws-if97_rho.cpp \
 	pca_matrix_inverse.cpp \

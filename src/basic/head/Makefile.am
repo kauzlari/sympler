@@ -69,6 +69,7 @@ include_HEADERS = \
 	pca_energy_entropy.h \
 	pca_iapws-if97.h \
 	pca_iapws-if97_eta.h \
+	pca_iapws-if97_kappa.h \
 	pca_iapws-if97_p.h \
 	pca_iapws-if97_rho.h \
 	pca_matrix_inverse.h \

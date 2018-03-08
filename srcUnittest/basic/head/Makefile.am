@@ -1,6 +1,7 @@
 include_HEADERS = \
 	pca_iapws-if97Test.h \
 	pca_iapws-if97_etaTest.h \
+	pca_iapws-if97_kappaTest.h \
 	pca_iapws-if97_pTest.h \
 	pca_iapws-if97_rhoTest.h \
 	smart_enumTest.h

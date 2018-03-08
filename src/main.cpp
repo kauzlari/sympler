@@ -281,6 +281,7 @@ void sayHello() {
 #include "pca_eigensystem.h"
 #include "pca_density_0oc.h"
 #include "pca_iapws-if97_eta.h"
+#include "pca_iapws-if97_kappa.h"
 #include "pca_iapws-if97_p.h"
 #include "pca_iapws-if97_rho.h"
 #include "pca_matrix_inverse.h"
@@ -515,6 +516,7 @@ void link_all_properly()
   new ParticleTensor(NULL);
   new ParticleVector(NULL);
   new PCacheIAPWSIF97eta(NULL);
+  new PCacheIAPWSIF97kappa(NULL);
   new PCaEigensystem(NULL);
   new PCaMatrixInverse(NULL);
   new PCaRandom(NULL);
