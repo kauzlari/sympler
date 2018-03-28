@@ -33,7 +33,6 @@
 
 #include "simulation.h"
 
-// CPPUNIT_TEST_SUITE_REGISTRATION (PressureCalculationTest);
 
 void PCacheIAPWSIF97Test  :: setUp (void)
 {
@@ -76,11 +75,13 @@ void PCacheIAPWSIF97Test  :: setupLUTTest (void) {
 
   double result;
 
+  // test of minimum
   m_pc -> freesteamCalculationForState(result, m_var1Min, m_var2Min);
-  CPPUNIT_ASSERT_EQUAL (m_pc -> returnLUTvals()[0][0], result);
+  CPPUNIT_ASSERT_EQUAL (m_pc -> returnLUTvals()[0], result);
 
+  // test of maximum
   m_pc -> freesteamCalculationForState(result, m_var1Max, m_var2Max);
-  CPPUNIT_ASSERT_EQUAL (m_pc -> returnLUTvals()[m_arraySizeVar1 - 1][m_arraySizeVar2 - 1], result);
+  CPPUNIT_ASSERT_EQUAL (m_pc -> returnLUTvals()[m_arraySizeVar1*m_arraySizeVar2 - 1], result);
 
 }
 
@@ -89,14 +90,14 @@ void PCacheIAPWSIF97Test  :: copyMySelfTest (void) {
 
   PCacheIAPWSIF97* tmpPCIAPWS = (PCacheIAPWSIF97*)(m_pcGetter->get_m_pc_copyMySelf());
 
-  // double** pointer should NOT be equal
+  // double* pointer should NOT be equal
   CPPUNIT_ASSERT_EQUAL (tmpPCIAPWS->returnLUTvals() != m_pc->returnLUTvals(), true);
   for(size_t i = 0; i < m_arraySizeVar1; ++i) {
-    // double* pointers should NOT be equal
-    CPPUNIT_ASSERT_EQUAL (tmpPCIAPWS->returnLUTvals()[i] != m_pc->returnLUTvals()[i], true);
+    size_t slot = i*m_arraySizeVar2;
     for(size_t j = 0; j < m_arraySizeVar2; ++j) {
       // values should be equal
-      CPPUNIT_ASSERT_EQUAL (tmpPCIAPWS->returnLUTvals()[i][j], m_pc->returnLUTvals()[i][j]);
+      CPPUNIT_ASSERT_EQUAL (tmpPCIAPWS->returnLUTvals()[slot], m_pc->returnLUTvals()[slot]);
+      ++slot;
     }
   } 
 }

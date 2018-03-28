@@ -71,7 +71,7 @@ class PCacheIAPWSIF97rho: public PCacheIAPWSIF97
 
   /*!
    * \a PCacheIAPWSIF97rho does not require any checks, hence function
-   * is emopty
+   * is empty
    */
   virtual void checkConstraints();
 

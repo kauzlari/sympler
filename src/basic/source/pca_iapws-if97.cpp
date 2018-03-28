@@ -56,10 +56,6 @@ PCacheIAPWSIF97::PCacheIAPWSIF97
 PCacheIAPWSIF97::~PCacheIAPWSIF97()
 {
   if(m_LUT) {
-    for (int i = 0; i < m_arraySizeVar2; ++i) {
-      if(m_LUT[i])
-	delete [] m_LUT[i];
-    }
     delete [] m_LUT;
   }
 }
@@ -69,28 +65,28 @@ void PCacheIAPWSIF97::setupLUT() {
   // auxiliary variables
   double deltaVar1 = 0.;
   double deltaVar2 = 0.;
-
+  size_t slot;
+  
   checkConstraints();
   
   // Step sizes depending on the size of the Array and the ranges of the input values.
   m_var1StepSize = (m_var1Max - m_var1Min)/(m_arraySizeVar1-1);
   m_var2StepSize = (m_var2Max - m_var2Min)/(m_arraySizeVar2-1);
 
-  // Initialization of the 2D Array, depending on the given temperature and pressure sizes.
-  m_LUT = new double*[m_arraySizeVar2];
-  for (int i = 0; i <= m_arraySizeVar2; i++) {
-    m_LUT[i] = new double [m_arraySizeVar1];
-  }
+  // Allocation of the 2D Array, depending on the given sizes.
+  m_LUT = new double[m_arraySizeVar1*m_arraySizeVar2];
 
   // Calculate results at support points and store them into the LUT
-  for(int j = 0; j < m_arraySizeVar1; j++) {
-    for (int i = 0; i < m_arraySizeVar2; i++) {
+  for(size_t i = 0; i < m_arraySizeVar1; ++i) {
+    slot = i*m_arraySizeVar2;
+    for (size_t j = 0; j < m_arraySizeVar2; ++j) {
 
-      freesteamCalculationForState(m_LUT[j][i],
+      freesteamCalculationForState(m_LUT[slot],
 				   m_var1Min + deltaVar1,
 				   m_var2Min + deltaVar2);
       
-      deltaVar2 += m_var2StepSize;            
+      deltaVar2 += m_var2StepSize;
+      ++slot;
     }
     deltaVar2 = 0.;
     deltaVar1 += m_var1StepSize; 
@@ -104,29 +100,32 @@ void PCacheIAPWSIF97::calculateResult(double& result, const double& inputVar1, c
      || (inputVar1 > m_var1Max) || (inputVar2 > m_var2Max))    
     throw gError("PCacheIAPWSIF97::calculateResult for module " + className(), "(" + m_var1Name + "," + m_var2Name + ") pair out of bounds: " + m_var1Name + "=" + ObjToString(inputVar1) + ", " + m_var2Name + "=" + ObjToString(inputVar2) + ", admissible [" + m_var1Name + "Min," + m_var1Name + "Max] = [" + ObjToString(m_var1Min) + "," + ObjToString(m_var1Max) + "], admissible [" + m_var2Name + "Min," + m_var2Name + "Max] = [" + ObjToString(m_var2Min) + "," + ObjToString(m_var2Max) + "].");
 
-  // Calculation of the surrounding sampling points 
-  int var1Point0 = (floor((inputVar1-m_var1Min)/m_var1StepSize));
-  int var2Point0 =(floor((inputVar2-m_var2Min)/m_var2StepSize));
-  int var1Point1 = (floor((inputVar1-m_var1Min)/m_var1StepSize)+1);
-  int var2Point1 =(floor((inputVar2-m_var2Min)/m_var2StepSize)+1);
+  // Calculation of the surrounding sampling points in 2D LUT
+  size_t var1Slot0 = (floor((inputVar1-m_var1Min)/m_var1StepSize));
+  size_t var2Slot0 =(floor((inputVar2-m_var2Min)/m_var2StepSize));
+  size_t var1Slot1 = (floor((inputVar1-m_var1Min)/m_var1StepSize)+1);
+  size_t var2Slot1 =(floor((inputVar2-m_var2Min)/m_var2StepSize)+1);
 
   // Normalisation of the input values.
   double var1Normalised =
-    ((inputVar1 - (var1Point0*m_var1StepSize + m_var1Min))
+    ((inputVar1 - (var1Slot0*m_var1StepSize + m_var1Min))
      / m_var1StepSize);
   double var2Normalised =
-    ((inputVar2 - (var2Point0*m_var2StepSize + m_var2Min))
+    ((inputVar2 - (var2Slot0*m_var2StepSize + m_var2Min))
      / m_var2StepSize);
 
   // Bilinear interpolation of the normalized values.
+  // FIXME: Cache optimisation would require, e.g., that the 4 entries of the used square occupy adjacent array entries. Currently, at least 2x2 are adjacent, which might already be good enough. Also a 2x2 square-wise ordering will fail (cache-wise) in 50%(?) of the cases because any square, shifted by 1 index in any direction is a valid square. Maybe bigger squares? Investigate if you have too much time ;)
+  size_t var1Slot0Shift = var1Slot0*m_arraySizeVar2;
+  size_t var1Slot1Shift = var1Slot1*m_arraySizeVar2;
   result
-    = m_LUT[var1Point0][var2Point0]
+    = m_LUT[var2Slot0 + var1Slot0Shift]
     *(1-var1Normalised)*(1-var2Normalised)
-    + m_LUT[var1Point1][var2Point0]
+    + m_LUT[var2Slot0 + var1Slot1Shift]
     *var1Normalised*(1-var2Normalised)
-    + m_LUT[var1Point0][var2Point1]
+    + m_LUT[var2Slot1 + var1Slot0Shift]
     *(1-var1Normalised)*var2Normalised
-    + m_LUT[var1Point1][var2Point1]
+    + m_LUT[var2Slot1 + var1Slot1Shift]
     *var2Normalised*var1Normalised;
 }
 

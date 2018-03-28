@@ -96,12 +96,12 @@ class PCacheIAPWSIF97: public ParticleCache
   /*!
    * Number of look-up values for variable 'var1' in the LUT.
    */
-  int m_arraySizeVar1;
+  size_t m_arraySizeVar1;
 
   /*!
    * Number of look-up values for variable 'var2' in the LUT.
    */
-  int m_arraySizeVar2;
+  size_t m_arraySizeVar2;
 
   /*!
    * Step size of look-up values for variable 'var2' internally derived 
@@ -118,7 +118,7 @@ class PCacheIAPWSIF97: public ParticleCache
   /*!
    * Look-up table (LUT, 2D Array), where all look-up values are stored
    */
-  double **m_LUT;
+  double *m_LUT;
 
   /*!
   * Initialise the property list
@@ -136,15 +136,17 @@ class PCacheIAPWSIF97: public ParticleCache
 
     // points to same instance
     PCacheIAPWSIF97* tmpPCIAPWS = (PCacheIAPWSIF97*) tmpPC;
- 
-    tmpPCIAPWS->m_LUT = new double*[m_arraySizeVar2+1];
-    for (int i = 0; i <= m_arraySizeVar2; i++) {
-      tmpPCIAPWS->m_LUT[i] = new double [m_arraySizeVar1+1];
-    }
-    for(int j = 0; j < m_arraySizeVar1; j++) {
-      for (int i = 0; i < m_arraySizeVar2; i++) {
-	tmpPCIAPWS->m_LUT[j][i] = m_LUT[j][i];
-      }
+
+    size_t totSize = (m_arraySizeVar1)*(m_arraySizeVar2);
+    
+    tmpPCIAPWS->m_LUT = new double[totSize];
+    /* tmpPCIAPWS->m_LUT = new double*[m_arraySizeVar2+1]; */
+    /* for (int i = 0; i <= m_arraySizeVar2; i++) { */
+    /*   tmpPCIAPWS->m_LUT[i] = new double [m_arraySizeVar1+1]; */
+    /* } */
+
+    for (size_t i = 0; i < totSize; ++i) {
+      tmpPCIAPWS->m_LUT[i] = m_LUT[i];
     }
     
     return tmpPC;
@@ -287,7 +289,7 @@ class PCacheIAPWSIF97: public ParticleCache
   /*!
    * Returns the values stored in the LUT
    */ 
-  virtual double** returnLUTvals() {
+  virtual double* returnLUTvals() {
     return m_LUT;
   }
 
