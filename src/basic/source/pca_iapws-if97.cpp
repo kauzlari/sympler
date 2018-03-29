@@ -102,9 +102,9 @@ void PCacheIAPWSIF97::calculateResult(double& result, const double& inputVar1, c
 
   // Calculation of the surrounding sampling points in 2D LUT
   size_t var1Slot0 = (floor((inputVar1-m_var1Min)/m_var1StepSize));
-  size_t var2Slot0 =(floor((inputVar2-m_var2Min)/m_var2StepSize));
-  size_t var1Slot1 = (floor((inputVar1-m_var1Min)/m_var1StepSize)+1);
-  size_t var2Slot1 =(floor((inputVar2-m_var2Min)/m_var2StepSize)+1);
+  size_t var2Slot0 = (floor((inputVar2-m_var2Min)/m_var2StepSize));
+  // size_t var1Slot1 = var1Slot0+1;
+  // size_t var2Slot1 = var2Slot0+1;
 
   // Normalisation of the input values.
   double var1Normalised =
@@ -115,17 +115,17 @@ void PCacheIAPWSIF97::calculateResult(double& result, const double& inputVar1, c
      / m_var2StepSize);
 
   // Bilinear interpolation of the normalized values.
-  // FIXME: Cache optimisation would require, e.g., that the 4 entries of the used square occupy adjacent array entries. Currently, at least 2x2 are adjacent, which might already be good enough. Also a 2x2 square-wise ordering will fail (cache-wise) in 50%(?) of the cases because any square, shifted by 1 index in any direction is a valid square. Maybe bigger squares? Investigate if you have too much time ;)
+  // FIXME: Cache optimisation would require, e.g., that the 4 entries of the used square occupy adjacent array entries. Currently, at least two times 2 values are adjacent, which might already be good enough. Also a 2x2 square-wise ordering will fail (cache-wise) in 50%(?) of the cases because any square, shifted by 1 index in any direction is a valid square. Maybe bigger squares? Investigate if you have too much time ;)
   size_t var1Slot0Shift = var1Slot0*m_arraySizeVar2;
-  size_t var1Slot1Shift = var1Slot1*m_arraySizeVar2;
+  size_t var1Slot1Shift = var1Slot0Shift + m_arraySizeVar2;
   result
     = m_LUT[var2Slot0 + var1Slot0Shift]
     *(1-var1Normalised)*(1-var2Normalised)
     + m_LUT[var2Slot0 + var1Slot1Shift]
     *var1Normalised*(1-var2Normalised)
-    + m_LUT[var2Slot1 + var1Slot0Shift]
+    + m_LUT[var2Slot0 + 1 + var1Slot0Shift]
     *(1-var1Normalised)*var2Normalised
-    + m_LUT[var2Slot1 + var1Slot1Shift]
+    + m_LUT[var2Slot0 + 1 + var1Slot1Shift]
     *var2Normalised*var1Normalised;
 }
 
@@ -232,17 +232,17 @@ void PCacheIAPWSIF97::setup()
 
 void PCacheIAPWSIF97::checkInputSymbolExistences(size_t colour) {
 
-  if(Particle::s_tag_format[m_colour].attrExists(m_var2Name)) {
-    if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_var2Name).datatype)
+  if(Particle::s_tag_format[colour].attrExists(m_var2Name)) {
+    if(m_datatype != Particle::s_tag_format[colour].attrByName(m_var2Name).datatype)
       throw gError("PressureCalculation::setup", "Var2 " + m_var2Name + " already exists as a non-scalar.");
-    else m_var2Offset = Particle::s_tag_format[m_colour].offsetByName(m_var2Name);
+    else m_var2Offset = Particle::s_tag_format[colour].offsetByName(m_var2Name);
   } else 
     throw gError("PressureCalculation::setup", "Symbol '" + m_var2Name + "' does not exist but required by this module.");
   
-  if(Particle::s_tag_format[m_colour].attrExists(m_var1Name)) {
-    if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_var1Name).datatype)
+  if(Particle::s_tag_format[colour].attrExists(m_var1Name)) {
+    if(m_datatype != Particle::s_tag_format[colour].attrByName(m_var1Name).datatype)
       throw gError("PressureCalculation::setup", "Var1 " + m_var1Name + " already exists as a non-scalar.");
-    else m_var1Offset = Particle::s_tag_format[m_colour].offsetByName(m_var1Name);
+    else m_var1Offset = Particle::s_tag_format[colour].offsetByName(m_var1Name);
   } else 
     throw gError("PressureCalculation::setup", "Symbol '" + m_var1Name + "' does not exist but required by this module.");
 

@@ -140,10 +140,6 @@ class PCacheIAPWSIF97: public ParticleCache
     size_t totSize = (m_arraySizeVar1)*(m_arraySizeVar2);
     
     tmpPCIAPWS->m_LUT = new double[totSize];
-    /* tmpPCIAPWS->m_LUT = new double*[m_arraySizeVar2+1]; */
-    /* for (int i = 0; i <= m_arraySizeVar2; i++) { */
-    /*   tmpPCIAPWS->m_LUT[i] = new double [m_arraySizeVar1+1]; */
-    /* } */
 
     for (size_t i = 0; i < totSize; ++i) {
       tmpPCIAPWS->m_LUT[i] = m_LUT[i];

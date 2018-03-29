@@ -125,21 +125,6 @@ void ParticleCache::setup()
       checkOutputSymbolExistence(col);
 
       checkInputSymbolExistences(col);      
-      // THE FOLLOWING IS A REMINDER HOW SUCH CHECKS IN CHILD CLASSES COULD LOOK LIKE
-      // SINCE STRUCTURE IS ALWAYS THE SAME THE SUBCLASS METHODS COULD CALL BACK A FUNCTION HERE WHICH JUST TAKES THE SPECIFICITIES AS ARGUMENTS (since structure of check is often the same)
-      // if(Particle::s_tag_format[m_colour].attrExists(m_temperatureName)) {
-      //   if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_temperatureName).datatype)
-      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_temperatureName + "' already exists as a non-scalar.");
-      //   else m_temperatureOffset = Particle::s_tag_format[m_colour].offsetByName(m_temperatureName);
-      // } else 
-      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_temperatureName + "' does not exist but required by this module.");
-
-      // if(Particle::s_tag_format[m_colour].attrExists(m_densityName)) {
-      //   if(m_datatype != Particle::s_tag_format[m_colour].attrByName(m_densityName).datatype)
-      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_densityName + "' already exists as a non-scalar.");
-      //   else m_densityOffset = Particle::s_tag_format[m_colour].offsetByName(m_densityName);
-      // } else 
-      //     throw gError("PCacheIAPWSIF97::setup", "Symbol '" + m_densityName + "' does not exist but required by this module.");
 
     } // end: for(colour = 0;...)
   } // end: if(m_species == "ALL")
