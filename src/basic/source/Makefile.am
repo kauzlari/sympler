@@ -67,6 +67,8 @@ libbasic_la_SOURCES = \
 	pca_density_self_contribution.cpp \
 	pca_energy_entropy.cpp \
 	pca_iapws-if97.cpp \
+	pca_iapws-if97_1var.cpp \
+	pca_iapws-if97_cp.cpp \
 	pca_iapws-if97_eta.cpp \
 	pca_iapws-if97_kappa.cpp \
 	pca_iapws-if97_p.cpp \
