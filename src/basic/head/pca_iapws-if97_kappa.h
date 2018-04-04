@@ -32,7 +32,7 @@
 #ifndef __PCA_IAPWSIF97_KAPPA_H
 #define __PCA_IAPWSIF97_KAPPA_H
 
-#include "pca_iapws-if97.h"
+#include "pca_iapws-if97_2var.h"
 
 /*!
  * Local thermal conductivity at the particle computed from the local 
@@ -42,7 +42,7 @@
  * thermodynamic properties of water and steam. adadad, August
  * 2007).
  */
-class PCacheIAPWSIF97kappa: public PCacheIAPWSIF97
+class PCacheIAPWSIF97kappa: public PCacheIAPWSIF97TwoVar
 {
   
  protected:
@@ -101,9 +101,7 @@ class PCacheIAPWSIF97kappa: public PCacheIAPWSIF97
    * @param inputVar2 Value of thermodynamic input variable 'var2'
    * (temperature)
    */
-  virtual void freesteamCalculationForState
-    (double& result, const double& inputVar1, const double& inputVar2)
-    const;
+  virtual void freesteamCalculationForState(double& result) const;
 
   /*!
    * Take steps necessary to register this calculator

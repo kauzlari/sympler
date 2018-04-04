@@ -45,12 +45,12 @@ const SymbolRegister<PCacheIAPWSIF97kappa> PCacheIAPWSIF97kappa("PCacheIAPWSIF97
 
 PCacheIAPWSIF97kappa::PCacheIAPWSIF97kappa
   (size_t colour, size_t offset, string symbolName)
-  : PCacheIAPWSIF97(colour, offset, symbolName) {
+  : PCacheIAPWSIF97TwoVar(colour, offset, symbolName) {
 }
 
 PCacheIAPWSIF97kappa::PCacheIAPWSIF97kappa
     (/*Node*/Simulation* parent)
-  : PCacheIAPWSIF97(parent) {
+  : PCacheIAPWSIF97TwoVar(parent) {
   init();
 }
 
@@ -60,12 +60,10 @@ void PCacheIAPWSIF97kappa::checkConstraints() {
 }
 
 
-void PCacheIAPWSIF97kappa::freesteamCalculationForState
-(double& result, const double& inputVar1, const double& inputVar2)
-  const {
+void PCacheIAPWSIF97kappa::freesteamCalculationForState(double& result) const {
 
-  result = freesteam_k_rhoT(inputVar1, inputVar2);
-
+  result = freesteam_k_rhoT(*(m_inputVarPtrs[0])/*density*/,
+			    *(m_inputVarPtrs[1])/*temperature*/);
 }
 
 
@@ -83,7 +81,7 @@ void PCacheIAPWSIF97kappa::init()
 
 void PCacheIAPWSIF97kappa::setup()
 {
-  PCacheIAPWSIF97::setup();
+  PCacheIAPWSIF97TwoVar::setup();
 }
 
 
