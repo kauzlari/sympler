@@ -43,7 +43,7 @@ PCacheIAPWSIF97TwoVar::PCacheIAPWSIF97TwoVar
   m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
   // create space for one pointer to one thermodynamic input variable
-  m_inputVarPtrs.resize(1);
+  m_inputVarPtrs.resize(2);
 }
 
 PCacheIAPWSIF97TwoVar::PCacheIAPWSIF97TwoVar
@@ -51,19 +51,13 @@ PCacheIAPWSIF97TwoVar::PCacheIAPWSIF97TwoVar
       : PCacheIAPWSIF97OneVar(parent) {
   m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
+
   // create space for one pointer to one thermodynamic input variable
-  m_inputVarPtrs.resize(1);
+  m_inputVarPtrs.resize(2);
 
   init();
 }
 
-
-PCacheIAPWSIF97TwoVar::~PCacheIAPWSIF97TwoVar()
-{
-  if(m_LUT) {
-    delete [] m_LUT;
-  }
-}
 
 void PCacheIAPWSIF97TwoVar::setupLUT() {
 
@@ -104,6 +98,7 @@ void PCacheIAPWSIF97TwoVar::setupLUT() {
     inputVar1 += m_var1StepSize; 
     // deltaVar1 += m_var1StepSize; 
   }
+
 }
 
 void PCacheIAPWSIF97TwoVar::calculateResult(double& result/* , const double& inputVar1, const double& inputVar2*/) const {
@@ -148,6 +143,9 @@ void PCacheIAPWSIF97TwoVar::calculateResult(double& result/* , const double& inp
     *(1-var1Normalised)*var2Normalised
     + m_LUT[var2Slot0 + 1 + var1Slot1Shift]
     *var2Normalised*var1Normalised;
+
+  // MSG_DEBUG("PCacheIAPWSIF97TwoVar::calculateResult for module " + className(), "m_LUT[" << var1Slot0 << "," << var2Slot0 << "]" << " = m_LUT[" << var2Slot0 + var1Slot0Shift << "] = " << m_LUT[var2Slot0 + var1Slot0Shift] << ", m_LUT[" << var1Slot0+1 << "," << var2Slot0 << "]=" << " = m_LUT[" << var2Slot0 + var1Slot1Shift << "]" << m_LUT[var2Slot0 + var1Slot1Shift] << ", m_LUT[" << var1Slot0 << "," << var2Slot0+1 << "]=" << " = m_LUT[" << var2Slot0 + 1 + var1Slot0Shift << "]" << m_LUT[var2Slot0 + 1 + var1Slot0Shift] << ", m_LUT[" << var1Slot0+1 << "," << var2Slot0+1 << "] = " << " m_LUT[" << var2Slot0 + 1 + var1Slot1Shift << "] = " << m_LUT[var2Slot0 + 1 + var1Slot1Shift]);
+  
 }
 
 void PCacheIAPWSIF97TwoVar::init()
@@ -173,9 +171,6 @@ void PCacheIAPWSIF97TwoVar::init()
      ); 
 
   STRINGPC
-      (symbol, m_symbolName,
-       "Symbol name for the computed output 'out'.");
-  STRINGPC
       (var2, m_var2Name,
        "Symbol name for 'var2'.");
   DOUBLEPC
@@ -193,11 +188,12 @@ void PCacheIAPWSIF97TwoVar::init()
   m_var2Min = HUGE_VAL;
   m_var2Max = -HUGE_VAL;
   m_arraySizeVar2 = 0;
+
 }
 
 void PCacheIAPWSIF97TwoVar::setup()
 {
-  
+
   if(m_var2Name == "undefined")
     throw gError("PCacheIAPWSIF97TwoVar::setup for module " + className(), "Attribute 'var2' has value \"undefined\""); 
   if(m_var2Min == HUGE_VAL)
@@ -213,7 +209,7 @@ void PCacheIAPWSIF97TwoVar::setup()
 
   // calls setupLUT() and registerCache()
   PCacheIAPWSIF97OneVar::setup();
-  
+
 }
 
 

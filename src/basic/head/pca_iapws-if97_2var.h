@@ -129,12 +129,7 @@ class PCacheIAPWSIF97TwoVar: public PCacheIAPWSIF97OneVar
    */
   PCacheIAPWSIF97TwoVar
     (Simulation* parent);
-  
-  /*!
-   * Destructor
-   */
-  virtual ~PCacheIAPWSIF97TwoVar(); 
-  
+    
   /*!
    * Precalculates the output value in the 'var1' and 'var2' ranges 
    * specified by the corresponding private member variables
@@ -179,7 +174,7 @@ class PCacheIAPWSIF97TwoVar: public PCacheIAPWSIF97OneVar
    * required as arguments since they are accessed by \a m_inputVarPtrs 
    * @param result Memory address for storing the result
    */
-  void calculateResult(double& result) const;
+  virtual void calculateResult(double& result) const;
 
   
   /*!

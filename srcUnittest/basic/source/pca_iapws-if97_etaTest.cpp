@@ -38,6 +38,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION (PCacheIAPWSIF97etaTest);
 
 void PCacheIAPWSIF97etaTest  :: setUp (void)
 {
+
   /*!
    * Initialize objects
    */
@@ -52,12 +53,13 @@ void PCacheIAPWSIF97etaTest  :: setUp (void)
   m_var2Min = 650;
   m_var2Max= 750;
 
-  PCacheIAPWSIF97Test::setUp();  
+  PCacheIAPWSIF97TwoVarTest::setUp();
+
 }
 
 void PCacheIAPWSIF97etaTest  :: tearDown (void) 
 {
-  PCacheIAPWSIF97Test::tearDown();
+  PCacheIAPWSIF97TwoVarTest::tearDown();
 }
 
 void PCacheIAPWSIF97etaTest  :: calculateResultTest (void)

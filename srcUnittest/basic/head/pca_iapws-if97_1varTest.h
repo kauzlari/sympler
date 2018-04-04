@@ -102,7 +102,7 @@ class PCacheIAPWSIF97OneVarTestGetter
   }
 
   /*!
-   * Call \a PCacheIAPWSIF97OneVar::copyMySelf()
+   * Call \a PCacheIAPWSIF97OneVar::copyMySelf() or of childclass
    */
   ParticleCache* get_m_pc_copyMySelf() {
     return m_pc->copyMySelf();

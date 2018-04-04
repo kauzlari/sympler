@@ -72,7 +72,8 @@ class PCacheIAPWSIF97TwoVarTestGetter : public PCacheIAPWSIF97OneVarTestGetter
    * @param var2Max Value that m_var2Max should be set to
    */
   void set_m_var2Max(const double& var2Max) {
-    m_pc->m_var2Max = var2Max;
+    // type cast to access PCacheIAPWSIF97TwoVar-specific method
+    ((PCacheIAPWSIF97TwoVar*) m_pc)->m_var2Max = var2Max;
   }
   
   /*!
@@ -81,7 +82,8 @@ class PCacheIAPWSIF97TwoVarTestGetter : public PCacheIAPWSIF97OneVarTestGetter
    * @param var2Min Value that m_var2Min should be set to
    */
   void set_m_var2Min(const double& var2Min) {
-    m_pc->m_var2Min = var2Min;
+    // type cast to access PCacheIAPWSIF97TwoVar-specific method
+    ((PCacheIAPWSIF97TwoVar*) m_pc)->m_var2Min = var2Min;
   }
   
   /*!
@@ -90,21 +92,14 @@ class PCacheIAPWSIF97TwoVarTestGetter : public PCacheIAPWSIF97OneVarTestGetter
    * @param arraysizeVar2 Value that m_arraySizeVar2 should be set to
    */
   void set_m_arraySizeVar2(const double& arraySizeVar2) {
-    m_pc->m_arraySizeVar2 = arraySizeVar2;
-  }
-    
-  /*!
-   * Call \a PCacheIAPWSIF97TwoVar::copyMySelf()
-   */
-  ParticleCache* get_m_pc_copyMySelf() {
-    return m_pc->copyMySelf();
+    // type cast to access PCacheIAPWSIF97TwoVar-specific method
+    ((PCacheIAPWSIF97TwoVar*) m_pc)->m_arraySizeVar2 = arraySizeVar2;
   }
     
 
  protected:
   
-  PCacheIAPWSIF97TwoVar* m_pc;
-  
+
 }; // end of PCacheIAPWSIF97TwoVarTestGetter
 
 

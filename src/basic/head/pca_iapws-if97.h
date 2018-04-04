@@ -246,7 +246,7 @@ class PCacheIAPWSIF97: public ParticleCache
    * @param inputVar1 Value of thermodynamic input variable 'var1'
    * @param inputVar2 Value of thermodynamic input variable 'var2'
    */
-  void calculateResult(double& result, const double& inputVar1, const double& inputVar2) const;
+  virtual void calculateResult(double& result, const double& inputVar1, const double& inputVar2) const;
   
   /*!
    * Take steps necessary to register this calculator

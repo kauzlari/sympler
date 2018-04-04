@@ -32,7 +32,7 @@
 #ifndef __PCA_IAPWSIF97_ETA_H
 #define __PCA_IAPWSIF97_ETA_H
 
-#include "pca_iapws-if97.h"
+#include "pca_iapws-if97_2var.h"
 
 /*!
  * Local dynamic viscosity at the particle computed from the local 
@@ -42,7 +42,7 @@
  * thermodynamic properties of water and steam. adadad, August
  * 2007).
  */
-class PCacheIAPWSIF97eta: public PCacheIAPWSIF97
+class PCacheIAPWSIF97eta: public PCacheIAPWSIF97TwoVar
 {
   
  protected:
@@ -93,17 +93,18 @@ class PCacheIAPWSIF97eta: public PCacheIAPWSIF97
 
   /*!
    * Performs the actual call of the appropriate freesteam function 
-   * which computes viscosity from density (\a m_var1) and temperature 
-   * (\a m_var2)  
+   * which computes viscosity from density (\a m_varPtrs[0]) and 
+   * temperature (\a m_varPtrs[1]).
    * @param result Memory address for storing the resulting viscosity
+   */
+  /*
+   * old parameters:
    * @param inputVar1 Value of thermodynamic input variable 'var1'
    * (density)
    * @param inputVar2 Value of thermodynamic input variable 'var2'
    * (temperature)
    */
-  virtual void freesteamCalculationForState
-    (double& result, const double& inputVar1, const double& inputVar2)
-    const;
+  virtual void freesteamCalculationForState(double& result) const;
 
   /*!
    * Take steps necessary to register this calculator
