@@ -133,7 +133,7 @@ class PCacheIAPWSIF97OneVar: public ParticleCache
    * value m_arraySizeVar1. Inheriting classes might have 2D or 3D
    * LUTs and hence a different computation of the total LUT size.
    */
-  virtual size_t returnTotSize() {
+  virtual size_t returnTotSize() const {
 
     return m_arraySizeVar1;
   }

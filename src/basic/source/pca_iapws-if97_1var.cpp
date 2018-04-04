@@ -92,11 +92,13 @@ void PCacheIAPWSIF97OneVar::setupLUT() {
 
 void PCacheIAPWSIF97OneVar::calculateResult(double& result) const {
 
-  // assuming m_inputVars[0] has been set correctly beforehand by the
-  // caller of this function
+  // assuming m_inputVarPtrs[0] has been set correctly beforehand by
+  // the caller of this function
   double& inputVar1 = *(m_inputVarPtrs[0]);
   
   // out of bounds?
+  // FIXME: introduce a debug or safety mode and only activate the
+  // following in this mode
   if((inputVar1 < m_var1Min) || (inputVar1 > m_var1Max))    
     throw gError("PCacheIAPWSIF97OneVar::calculateResult for module " + className(), m_var1Name + " out of bounds: " + m_var1Name + "=" + ObjToString(inputVar1) + ", admissible [" + m_var1Name + "Min," + m_var1Name + "Max] = [" + ObjToString(m_var1Min) + "," + ObjToString(m_var1Max) + "].");
 
@@ -137,7 +139,7 @@ void PCacheIAPWSIF97OneVar::init()
      "based on a preconstructed lookup table (LUT) in a predefined "
      "range, e.g. in 2D:\n"
      "[m_var1Min, m_var2Min] x [m_var1Max, m_var2Max] that is "
-     "constructed once in advance to speedup the computation."
+     "constructed once in advance to speed up the computation."
      ); 
 
   STRINGPC
@@ -195,10 +197,10 @@ void PCacheIAPWSIF97OneVar::checkInputSymbolExistences(size_t colour) {
   
   if(Particle::s_tag_format[colour].attrExists(m_var1Name)) {
     if(m_datatype != Particle::s_tag_format[colour].attrByName(m_var1Name).datatype)
-      throw gError("PressureCalculation::setup", "Var1 " + m_var1Name + " already exists as a non-scalar.");
+      throw gError("PCacheIAPWSIF97OneVar::checkInputSymbolExistences for module " + className(), "Var1 " + m_var1Name + " already exists as a non-scalar.");
     else m_var1Offset = Particle::s_tag_format[colour].offsetByName(m_var1Name);
   } else 
-    throw gError("PressureCalculation::setup", "Symbol '" + m_var1Name + "' does not exist but required by this module.");
+    throw gError("PCacheIAPWSIF97OneVar::checkInputSymbolExistence for module " + className(), "Symbol '" + m_var1Name + "' does not exist but required by this module.");
 
 }
 

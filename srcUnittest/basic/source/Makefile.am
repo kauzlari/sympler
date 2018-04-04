@@ -2,6 +2,7 @@ noinst_LTLIBRARIES = libbasicTest.la
 libbasicTest_la_SOURCES = \
 	pca_iapws-if97Test.cpp \
 	pca_iapws-if97_1varTest.cpp \
+	pca_iapws-if97_2varTest.cpp \
 	pca_iapws-if97_cpTest.cpp \
 	pca_iapws-if97_etaTest.cpp \
 	pca_iapws-if97_kappaTest.cpp \
