@@ -46,12 +46,12 @@ const SymbolRegister<PCacheIAPWSIF97rho> PCacheIAPWSIF97rho("PCacheIAPWSIF97rho"
 
 PCacheIAPWSIF97rho::PCacheIAPWSIF97rho
   (size_t colour, size_t offset, string symbolName)
-  : PCacheIAPWSIF97(colour, offset, symbolName) {
+  : PCacheIAPWSIF97TwoVar(colour, offset, symbolName) {
 }
 
 PCacheIAPWSIF97rho::PCacheIAPWSIF97rho
     (/*Node*/Simulation* parent)
-  : PCacheIAPWSIF97(parent) {
+  : PCacheIAPWSIF97TwoVar(parent) {
   init();
 }
 
@@ -59,11 +59,11 @@ PCacheIAPWSIF97rho::PCacheIAPWSIF97rho
 void PCacheIAPWSIF97rho::checkConstraints() {}
 
 
-void PCacheIAPWSIF97rho::freesteamCalculationForState
-(double& result, const double& inputVar1, const double& inputVar2)
+void PCacheIAPWSIF97rho::freesteamCalculationForState(double& result)
   const {
   
-  SteamState S = freesteam_set_pT(inputVar1, inputVar2);
+  SteamState S = freesteam_set_pT(*(m_inputVarPtrs[0])/*pressure*/,
+				  *(m_inputVarPtrs[1])/*temperature*/);
   result = freesteam_rho(S);
   
 }
@@ -83,7 +83,7 @@ void PCacheIAPWSIF97rho::init()
 
 void PCacheIAPWSIF97rho::setup()
 {
-  PCacheIAPWSIF97::setup();
+  PCacheIAPWSIF97TwoVar::setup();
 }
 
 

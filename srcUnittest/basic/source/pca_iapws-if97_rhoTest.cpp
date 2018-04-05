@@ -53,12 +53,12 @@ void PCacheIAPWSIF97rhoTest  :: setUp (void)
   m_var2Min = 550.;
   m_var2Max= 700;
 
-  PCacheIAPWSIF97Test::setUp();  
+  PCacheIAPWSIF97TwoVarTest::setUp();  
 }
 
 void PCacheIAPWSIF97rhoTest  :: tearDown (void) 
 {
-  PCacheIAPWSIF97Test::tearDown();
+  PCacheIAPWSIF97TwoVarTest::tearDown();
 }
 
 void PCacheIAPWSIF97rhoTest  :: calculateResultTest (void)
