@@ -97,13 +97,6 @@ class PCacheIAPWSIF97eta: public PCacheIAPWSIF97TwoVar
    * temperature (\a m_varPtrs[1]).
    * @param result Memory address for storing the resulting viscosity
    */
-  /*
-   * old parameters:
-   * @param inputVar1 Value of thermodynamic input variable 'var1'
-   * (density)
-   * @param inputVar2 Value of thermodynamic input variable 'var2'
-   * (temperature)
-   */
   virtual void freesteamCalculationForState(double& result) const;
 
   /*!

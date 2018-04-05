@@ -32,7 +32,7 @@
 #ifndef __PCA_IAPWSIF97_P_H
 #define __PCA_IAPWSIF97_P_H
 
-#include "pca_iapws-if97.h"
+#include "pca_iapws-if97_2var.h"
 
 /*!
  * Local pressure at the particle computed from the local density
@@ -42,7 +42,7 @@
  * thermodynamic properties of water and steam. adadad, August
  * 2007).
  */
-class PCacheIAPWSIF97p: public PCacheIAPWSIF97
+class PCacheIAPWSIF97p: public PCacheIAPWSIF97TwoVar
 {
   
  protected:
@@ -98,14 +98,8 @@ class PCacheIAPWSIF97p: public PCacheIAPWSIF97
    * which computes pressure from density (\a m_var1) and temperature 
    * (\a m_var2)  
    * @param result Memory address for storing the resulting pressure
-   * @param inputVar1 Value of thermodynamic input variable 'var1'
-   * (density)
-   * @param inputVar2 Value of thermodynamic input variable 'var2'
-   * (temperature)
    */
-  virtual void freesteamCalculationForState
-    (double& result, const double& inputVar1, const double& inputVar2)
-    const;
+  virtual void freesteamCalculationForState(double& result) const;
 
   /*!
    * Take steps necessary to register this calculator

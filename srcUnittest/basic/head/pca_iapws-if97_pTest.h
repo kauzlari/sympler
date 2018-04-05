@@ -34,14 +34,14 @@
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "pca_iapws-if97Test.h"
+#include "pca_iapws-if97_2varTest.h"
 #include "pca_iapws-if97_p.h"
 #include "simulation.h"
 
 using namespace std;
 
 
-class PCacheIAPWSIF97pTest : public PCacheIAPWSIF97Test
+class PCacheIAPWSIF97pTest : public PCacheIAPWSIF97TwoVarTest
 {
   CPPUNIT_TEST_SUITE (PCacheIAPWSIF97pTest);
   // implemented in parent class

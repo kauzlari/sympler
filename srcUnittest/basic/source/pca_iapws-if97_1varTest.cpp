@@ -90,7 +90,7 @@ void PCacheIAPWSIF97OneVarTest  :: setupLUTTest (void) {
   *inputVar = &m_var1Max;
   m_pc -> freesteamCalculationForState(result);
   // due to summation we get a slight error here, so far below 1/1e11
-  CPPUNIT_ASSERT_DOUBLES_EQUAL (m_pc -> returnLUTvals()[m_arraySizeVar1 - 1], result, result/1e11);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL (m_pc -> returnLUTvals()[m_arraySizeVar1 - 1], result, result/1.0e11);
 
 }
 

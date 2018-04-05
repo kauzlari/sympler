@@ -96,10 +96,6 @@ class PCacheIAPWSIF97kappa: public PCacheIAPWSIF97TwoVar
    * which computes viscosity from density (\a m_var1) and temperature 
    * (\a m_var2)  
    * @param result Memory address for storing the resulting viscosity
-   * @param inputVar1 Value of thermodynamic input variable 'var1'
-   * (density)
-   * @param inputVar2 Value of thermodynamic input variable 'var2'
-   * (temperature)
    */
   virtual void freesteamCalculationForState(double& result) const;
 

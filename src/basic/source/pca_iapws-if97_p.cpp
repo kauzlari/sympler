@@ -47,12 +47,12 @@ const SymbolRegister<PCacheIAPWSIF97p> PCacheIAPWSIF97p("PCacheIAPWSIF97p");
 
 PCacheIAPWSIF97p::PCacheIAPWSIF97p
   (size_t colour, size_t offset, string symbolName)
-  : PCacheIAPWSIF97(colour, offset, symbolName) {
+  : PCacheIAPWSIF97TwoVar(colour, offset, symbolName) {
 }
 
 PCacheIAPWSIF97p::PCacheIAPWSIF97p
     (/*Node*/Simulation* parent)
-  : PCacheIAPWSIF97(parent) {
+  : PCacheIAPWSIF97TwoVar(parent) {
   init();
 }
 
@@ -60,26 +60,31 @@ PCacheIAPWSIF97p::PCacheIAPWSIF97p
 void PCacheIAPWSIF97p::checkConstraints() {
 
   if (m_var2Min <= 623.15 || m_var2Max >= 863.15)
-     throw gError("PCacheIAPWSIF97p::setup", "Requested temperature parameters aren't within region 3 (623.15K < T < 863.15K). (See IAPWS-IF97 for more information)");
+     throw gError
+       ("PCacheIAPWSIF97p::setup", "Requested temperature parameters "
+	"aren't within region 3 (623.15K < T < 863.15K). (See "
+	"IAPWS-IF97 for more information)");
 
 }
 
 
-void PCacheIAPWSIF97p::freesteamCalculationForState
-(double& result, const double& inputVar1, const double& inputVar2)
-  const {
+void PCacheIAPWSIF97p::freesteamCalculationForState(double& result) const {
 
   // Calculates the minimum and maximum density boarders to check
-  // if the given density is in Region 3.	  
-  double b23Pressure = freesteam_b23_p_T(inputVar2);
-  SteamState S = freesteam_set_pT(b23Pressure, inputVar2);
+  // if the given density is in Region 3.
+  double& Tin = *(m_inputVarPtrs[1]);
+  double& densityIn = *(m_inputVarPtrs[0]);
+  
+  double b23Pressure = freesteam_b23_p_T(Tin);
+  SteamState S = freesteam_set_pT(b23Pressure, Tin);
   double densityBoundary = freesteam_rho(S);
   
-  if (inputVar1 > densityBoundary) {
-    result = freesteam_region3_p_rhoT(inputVar1, inputVar2);
+  if (densityIn > densityBoundary) {
+    result =
+      freesteam_region3_p_rhoT(densityIn, Tin/*temperature*/);
   }
   else {
-    throw gError("PCacheIAPWSIF97::setup", "Requested density and temperature parameters aren't within region 3. (See IAPWS-IF97 for more information): Unsuccessfully tried to compute P(rho=" + ObjToString(inputVar1) + ",T=" + ObjToString(inputVar2) + ") crossing rho_min(T) = " + ObjToString(densityBoundary));
+    throw gError("PCacheIAPWSIF97::setup", "Requested density and temperature parameters aren't within region 3. (See IAPWS-IF97 for more information): Unsuccessfully tried to compute P(rho=" + ObjToString(*(m_inputVarPtrs[0])) + ",T=" + ObjToString(Tin) + ") crossing rho_min(T) = " + ObjToString(densityBoundary));
   }
   
 }
@@ -102,7 +107,7 @@ void PCacheIAPWSIF97p::init()
 
 void PCacheIAPWSIF97p::setup()
 {
-  PCacheIAPWSIF97::setup();
+  PCacheIAPWSIF97TwoVar::setup();
 }
 
 
