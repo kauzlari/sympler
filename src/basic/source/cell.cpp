@@ -697,7 +697,7 @@ void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force
     cout << "Cell::doCollision: tracking particle " << TRACK_PARTICLE << " !!! " << m_all_walls.size() << " walls in cell." << endl;
 
 #endif
-  double iterations = 0;
+  size_t iterations = 0;
   while (hit) {      
     ++iterations;
     if(iterations > 100)
