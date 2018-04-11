@@ -162,7 +162,6 @@ protected:
    */
   size_t m_rotmatT_offset;
   /*!
-  /*!
    * Time step
    */
   double m_dt;
