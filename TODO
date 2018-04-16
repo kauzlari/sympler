@@ -13,6 +13,8 @@ PRIMARY:
 
 (III) Allow for cache-coherence: Store all particle-DOFs (and pair-DOFs) in separate continuous-memory arrays, probably using SmartLists as now for the particles and pairs.
 
+(I): The Callable hierarchy is a mess with a lot of duplicate code. Clean this. For example you could introduce ParticleCallable and Pair(Particle)Callable and define declare members such as m_species only once. Besides that you also need some renaming from Thermostat-like names to general Callable names for some members.
+
 (II) Currently (2014-09-09), we can not use a Symbol "x" in a runtime compiled expression, which only occurs as a column in a particle file for ParticleCreatorFile. The Symbol will be unknown because the runtime compiled expressions do not check for its existence in the particle file. So, either realise this somehow, maybe with ParticleCreatorFile::setupBeforeParticleCreation (of course you should also avoid to reserve memory for unused garbage columns in the particle file). Or create a PseudoIntegrator for constants (which is at least one reason why we need the mentioned feature), which does not create forces for this Symbol, avoiding the current workaround of using an IntegratorScalar/Vector/Tensor for the Symbol "x".
 
 (I) Change the setting of seeds in all modules with random number generators to the new style (PairRandScalar, etc.) of setting a default seed and enabling the user to set an own one with an XML-attribute.
