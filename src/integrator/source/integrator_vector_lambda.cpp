@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -49,7 +49,7 @@ const Integrator_Register<IntegratorVectorLambda> integrator_vector_lambda("Inte
 
 //---- Constructors/Destructor ----
 
-IntegratorVectorLambda::IntegratorVectorLambda(Controller *controller): IntegratorVector(controller), m_laterStep(false)
+IntegratorVectorLambda::IntegratorVectorLambda(Controller *controller): IntegratorVector(controller)
 {
   init();
 }
@@ -59,37 +59,26 @@ IntegratorVectorLambda::~IntegratorVectorLambda()
 {
 }
 
-
-
 //---- Methods ----
 
 void IntegratorVectorLambda::init()
 {
-//   MSG_DEBUG("IntegratorScalar::init()", "running");
 
   m_properties.setClassName("IntegratorVectorLambda");
 
-  m_properties.setDescription(
-      "Adds an additional vector degree of freedom, "
-      "to the particles specified and integrates it with a second order "
-      "accurate predictor-corrector scheme."
-      "\nPredictor step: predicted = old + lambda*dt*f_new"
-      "\nCorrector step: new = predicted + (0.5-lambda)*dt*f_old + 0.5*dt*f_new"
-      "\nUsually, the forces are updated between the two steps. So f_new from " 
-      "the predictor step is equal to f_old from the corrector step."
-      "\nNote that, currently, after the first predictor step, the corrector " 
-      "step is merged into the further predictor steps giving:"
-      "\nLater predictor step: new = old + (0.5-lambda)*dt*f_old + " 
-      "(0.5+lambda)*dt*f_new"
-      "\nLater corrector step: does nothing"
-      
-                             );
+  m_properties.setDescription
+    (
+     "Adds an additional vector degree of freedom, "
+     "to the particles specified and integrates it with a second "
+     "order accurate predictor-corrector scheme."
+     "\nPredictor step: predicted = old + lambda*dt*f_new"
+     "\nCorrector step: new = predicted + 0.5*dt*(f_new - f_old)"
+     "\nUsually, the forces are updated between the two steps. "
+     );
 
   DOUBLEPC
-      (lambda,
-       m_lambda,
-       0,
-       "Lambda parameter for adjustement of predictor-corrector scheme.");
+    (lambda, m_lambda, 0,
+     "Lambda parameter for adjustement of predictor-corrector scheme.");
 
   m_lambda = 0.5;
 }
@@ -97,11 +86,6 @@ void IntegratorVectorLambda::init()
 void IntegratorVectorLambda::setup()
 {
   IntegratorVector::setup();
-  
-  m_laterStep = false;
-  
-  m_lambda_diff = 0.5 - m_lambda;
-  m_lambda_sum = 0.5 + m_lambda;
 }
 
 
@@ -110,49 +94,51 @@ void IntegratorVectorLambda::integrateStep1()
   Phase *phase = M_PHASE;
 
   size_t force_index = M_CONTROLLER->forceIndex();
-  size_t other_force_index = (force_index+1)&(FORCE_HIST_SIZE-1);
 
-  if(m_laterStep)
-  {
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-        (phase, m_colour, this,
-         
-	 for(size_t j = 0; j < SPACE_DIMS; ++j) {  
-  
-	   i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] += 
-             ((IntegratorVectorLambda*) data)->m_dt *
-             (
-             (m_lambda_diff)*i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-             -> m_force_offset[other_force_index])[j] + 
-             (m_lambda_sum)*i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
-             -> m_force_offset[force_index])[j]
-             );
-                              
-         }
-        );
-  }
-  else
-  {
-    
-    FOR_EACH_FREE_PARTICLE_C__PARALLEL
-        (phase, m_colour, this,
-          
-         for(size_t j = 0; j < SPACE_DIMS; ++j)
-         {
-         i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_vector_offset)[j] += 
-             ((IntegratorVectorLambda*) data)->m_dt *
-             (
-             m_lambda*i->tag.pointByOffset(((IntegratorVectorLambda*) data)->m_force_offset[force_index])[j]
-             );
-
-         }
-        );
-        m_laterStep = true;
-  }
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_colour, this,
+     
+     for(size_t j = 0; j < SPACE_DIMS; ++j) {  
+       
+       i->tag.pointByOffset(((IntegratorVectorLambda*) data)
+			    -> m_vector_offset)[j] +=
+	 
+	 ((IntegratorVectorLambda*) data)->m_dt *
+	 
+	 m_lambda *
+	 i->tag.pointByOffset(((IntegratorVectorLambda*) data) 
+			      -> m_force_offset[force_index])[j];
+     }
+     );
 }
 
 
 void IntegratorVectorLambda::integrateStep2()
 {
+
+  Phase *phase = M_PHASE;
+
+  size_t force_index = M_CONTROLLER->forceIndex();
+  size_t other_force_index = (force_index+1)&(FORCE_HIST_SIZE-1);
+
+  FOR_EACH_FREE_PARTICLE_C__PARALLEL
+    (phase, m_colour, this,
+     
+     i->tag.pointByOffset(((IntegratorVectorLambda*) data)
+			  ->m_vector_offset) +=
+     ((IntegratorVectorLambda*) data)->m_dt *
+     0.5*(
+	  // new flux
+	  i->tag.pointByOffset(((IntegratorVectorLambda*) data)
+				 -> m_force_offset[force_index]
+				 )
+	  -
+	  // old flux
+	  i->tag.pointByOffset(((IntegratorVectorLambda*) data)
+				 -> m_force_offset[other_force_index]
+				 )    
+	  );
+     );  
+  
 }
 

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -32,80 +32,61 @@
 #ifndef __INTEGRATOR_VECTOR_LAMBDA_H
 #define __INTEGRATOR_VECTOR_LAMBDA_H
 
-
 #include <math.h>
 
-// #include "function.h"
-// #include "particle.h"
 #include "integrator_vector.h"
 
 using namespace std;
 
-// class GenF;
-// class Phase;
-// class Controller;
-
 /*!
- * Second order accurate integrator of a vector field
+ * Adds an additional vector degree of freedom,
+ * to the particles specified and integrates it with a second
+ * order accurate predictor-corrector scheme.
+ * Predictor step: predicted = old + lambda*dt*f_new
+ * Corrector step: new = predicted + 0.5*dt*(f_new - f_old)
+ * Usually, the forces are updated between the two steps.
  */
 class IntegratorVectorLambda: public IntegratorVector
 {
-  protected:
+ protected:
   
   /*!
-   * Factor for choice of predictor-corrector scheme. Note that, currently,
-   * the predictor and corrector steps are merged together, since it is 
-   * assumed that only the predicted value is needed for computation of the 
-   * other quantities
+   * Factor for choice of predictor-corrector scheme.
    */
-    double m_lambda;
-
-    /*! helper
-     */
-    double m_lambda_sum;
-    
-    /*! helper
-     */
-    double m_lambda_diff;
-    
-    /*!
-     * Boolean helper for distinguishing between the first integration and 
-     * later ones
-     */
-    bool m_laterStep;
-    
+  double m_lambda;
+  
   /*!
-     * Initialize the property list
+   * Initialize the property list
    */
-    void init();
-
-  public:
+  void init();
+  
+ public:
   /*!
    * Constructor
    * @param controller Pointer to the \a Controller object this \a Integrator belongs to
    */  
-    IntegratorVectorLambda(Controller *controller);
-
+  IntegratorVectorLambda(Controller *controller);
+  
   /*!
-     * Destructor
+   * Destructor
    */
-    virtual ~IntegratorVectorLambda();
-
-    /*!
-     * Register the field and the force of the field with the \a Particle
-     */
-    virtual void setup();
-
-    
+  virtual ~IntegratorVectorLambda();
+  
   /*!
-     * Integrate the field
+   * Register the field and the force of the field with the \a Particle
    */
-    virtual void integrateStep1();
-
+  virtual void setup();
+  
   /*!
-     * Does nothing, because the predictor and corrector steps are merged
+   * Integrate the field
    */
-    virtual void integrateStep2();
+  virtual void integrateStep1();
+  
+  /*!
+   * Does nothing, because the predictor and corrector steps are merged
+   */
+  virtual void integrateStep2();
+
 };
 
 #endif
