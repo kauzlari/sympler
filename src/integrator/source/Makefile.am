@@ -3,6 +3,8 @@ noinst_LTLIBRARIES = libintegrator.la
 
 libintegrator_la_SOURCES = \
 	integrator_energy.cpp \
+	integrator_ISPH_const_rho.cpp \
+	integrator_ISPH_const_rho_FDRHS.cpp \
 	integrator_lse.cpp \
 	integrator_omelyan.cpp \
 	integrator_omelyan_NR.cpp \

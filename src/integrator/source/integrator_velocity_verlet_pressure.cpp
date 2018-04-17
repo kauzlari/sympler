@@ -178,7 +178,7 @@ void IntegratorVelocityVerletPressure::integrateStep2() {
 	 i->v += i->dt/2 * i->force[/*((IntegratorPosition*) data)->m_*/force_index]/m_mass;	 
 	 );
 
- 	phase->invalidate();
+ 	phase->invalidateVelocities();
 
 	//numberOfParticles = M_PHASE->returnNofPartC(m_colour);
 	/*Construction of the LAPLACE COEFFICIENT MATRIX BEGIN ************************************************************/
