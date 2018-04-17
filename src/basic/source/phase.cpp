@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2015, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -160,14 +160,20 @@ Particle* Phase::newParticle(size_t colour)
 Particle *Phase::addFrozenParticle(const Particle &particle)
 {
 	Particle &p = m_frozen_particles[particle.c].newEntry();
-	p.r = particle.r;
+	/*p.r = particle.r;
 	p.v = particle.v;
 	p.g = particle.g;
 	p.setColour(particle.c);
 	p.isFrozen = 1;
+        p.tag.doubleByOffset(0) = particle.tag.doubleByOffset(0);
+	*/
+        p = particle ; 
+        p.setColour(particle.c);
+         ++nOfFrozenP;
 
-	++nOfFrozenP;
-
+       /* if(p.mySlot == 0)
+            MSG_DEBUG("Phase::addFrozenParticle", "p.tag(0) = " << p.tag.doubleByOffset(0) << ", particle.tag(0) = " << particle.tag.doubleByOffset(0));
+        */
     return &p;
 }
 
@@ -243,7 +249,7 @@ void Phase::setup()
 
 }
 
-void Phase::invalidate()
+void Phase::invalidateVelocities()
 {
     velCMold = true;
 }

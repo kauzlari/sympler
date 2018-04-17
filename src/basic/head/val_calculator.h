@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -55,7 +55,8 @@ class ColourPair;
  */
 class ValCalculator : public Symbol
 {
-protected:
+
+ protected:
 
   /*!
   * The species of the ColourPair this Calculator should belong to
@@ -81,6 +82,14 @@ protected:
   */
   virtual void init();
 
+  /*!
+   * Helper function which removes indices and brackets from single terms in \a Function 
+   * expressions. E.g.: "[rij]" becomes "r" or "rhoi" becomes "rho"
+   * @param name Single term from a \a Function expression
+   */
+  virtual void cleanSymbol(string& name) const;
+
+  
 public:
   /*!
  * Constructor

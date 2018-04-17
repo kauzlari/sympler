@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -88,12 +88,6 @@ void IEHeatConduction::computeForces(Pairdist* pair, int force_index)
 void IEHeatConduction::computeForces(Pairdist* pair, int force_index, int thread_no)
 #endif
 {
-//   M_PAIRCREATOR->createDistances();
-  //RandomNumberGenerator m_rng;
-
-//   FOR_EACH_PAIR__PARALLEL
-//     (IEHeatConduction,
-//      m_cp,
      if (pair->abs() < this->m_cutoff) {
        double weight =
          (pair->tag.doubleByOffset(this->m_compute_ri_offset) - this->m_rcinv)*pair->abs();
@@ -111,11 +105,6 @@ void IEHeatConduction::computeForces(Pairdist* pair, int force_index, int thread
        /* because of CONVENTION 2 in pairdist.h, actsOn*() will always return false for a
           frozen particle and there is consequently no danger, e.g., of modifying a force
           acting on a frozen particle, which does not exist in memory */
-
-#ifdef ENABLE_PTHREADS
-       pair->firstPart()->lock();
-       pair->secondPart()->lock();
-#endif
 
        if (pair->actsOnFirst()) {
 #ifndef _OPENMP
@@ -144,12 +133,7 @@ void IEHeatConduction::computeForces(Pairdist* pair, int force_index, int thread
 #endif
        }
 
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
      }
-//     );
 }
 
 void IEHeatConduction::computeForces(Particle* part, int force_index)

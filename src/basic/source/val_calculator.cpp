@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -75,6 +75,24 @@ void ValCalculator::init()
   m_species.first = "undefined";
   m_species.second = "undefined";
  
+}
+
+void ValCalculator::cleanSymbol(string& name) const
+{
+  if(name[0] == '{' || name[0] == '[') {
+    // remove the first bracket
+    name.erase(0, 1);
+    // remove the last bracket; don't know why, but with these arguments it works
+    name.erase(name.size()-1, name.size()-1);
+  }
+  // and the "i", "j" and "ij" of the pair expression have to be removed
+  if(name[name.size()-2] == 'i' && name[name.size()-1] == 'j')
+    // remove "ij"
+    name.erase(name.size()-2, name.size()-1); 
+  else
+    // remove "i" or "j"
+    name.erase(name.size()-1, name.size()-1);
+  MSG_DEBUG("ValCalculator::cleanPairSymbol", className() << ": shortened name of symbol: " << name);
 }
 
 ValCalculatorPair::ValCalculatorPair(/*Node*/Simulation* parent): ValCalculator(parent)/*, m_persistency(false)*/

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -38,8 +38,6 @@
 #include "function_particle.h"
 #include "symbol.h"
 
-// #define PCA_MAX_STAGE 2
-
 /*!
  * Functions to cache completely user-defined properties for the 
  * particles, which depend only on other particle properties.
@@ -58,12 +56,6 @@ class ParticleCacheArbitrary : public ParticleCache
     */
     FunctionParticle m_function;
     
-    /*! This is now a member of \a Symbol
-   * Is this calculator allowed to overwrite already existing symbols 
-   * with name \a m_symbolName ?
-     */
-/*     bool m_overwrite; */
-    
     /*!
      * Initialise the PropertyList.
      */
@@ -71,42 +63,46 @@ class ParticleCacheArbitrary : public ParticleCache
   
     /*!
      * Helper for setting m_offset
-   */
+     */
     virtual void setupOffset();
     
     /*!
-    * Return a copy of the current object
-    */
+     * Return a copy of the current object
+     */
     virtual ParticleCache* copyMySelf() = 0;
      
+    /*!
+     * Adds the expressions used by this \a Symbol to the given list. 
+     * @param usedSymbols List to be filled with own instances of \a TypedValue
+     */
+    virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
+
+    /*!
+     * Returns the strings of those \a Symbols that the given class depends on
+     * due to hard-coded reasons (not due to runtime compiled expressions).
+     * @param usedSymbols List to add the strings to.
+     */
+    virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+    {
+
+    }
+
     
   public:
-  /*!
-   * Constructor
-   */
+    /*!
+     * Constructor
+     */
     ParticleCacheArbitrary(/*Node*/Simulation* parent);
 
-  /*!
+    /*!
      * Destructor
-   */
+     */
     virtual ~ParticleCacheArbitrary();
 
-  /*!
+    /*!
      * Setup this ParticleCache
-   */
+     */
     virtual void setup();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has 
-     * to determine its stage during run-time
-     */
-    virtual bool findStage();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has 
-     * to determine its stage during run-time
-     */
-    virtual bool findStage_0();
 
 };
 

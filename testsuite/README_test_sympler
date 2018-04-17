@@ -29,3 +29,10 @@ HOW TO DEAL WITH THE SCRIPT'S OUTPUT:
 - For a "RESULTS CHANGED FOR" message you should check the differences in the results and judge carefully whether they are caused by a bug in your changes or due to numerical precision issues you can not influence. For example:
   + If you get 1.534678 instead of 1.489561, this is a BUG!
   + If you get -1.40545e-20 instead of 1.30506e-19, this may be fine. But THINK about it! 
+
+
+HOW TO ADD YOUR OWN TEST
+
+You only have to add a complete test-input in testsuite/TSTIN/ and a reference output (created by the input) in testsuite/RESULTS. 
+Note the naming rules! And note that the run should not take longer than 5 seconds. So, take one of your examples and reduce it 
+(fewer particles, timesteps) such that it fulfils these needs.

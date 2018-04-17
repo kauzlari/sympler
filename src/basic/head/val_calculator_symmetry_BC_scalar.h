@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -96,7 +96,19 @@ class ValCalculatorSymmetryBCScalar : public ValCalculatorBC
      * @param outerDist variable for distance of wall particle to wall
      */ 
     virtual void computeDists(Pairdist* pair, double& innerDist, double& outerDist); //FIXME: inline ?
-  
+
+    /*!
+     * Returns the strings of those \a Symbols that the given class depends on
+     * due to hard-coded reasons (not due to runtime compiled expressions).
+     * @param usedSymbols List to add the strings to.
+     */
+    virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+    {
+      throw gError("ValCalculatorSymmetryBCScalar", "This exception was created while this module was inactive (not compiled), and it is meant to force you to at least consider the creation of a common parent class together with ValCalculatorDicrichletBCScalar");
+      usedSymbols.push_back(m_scalarName);
+    }
+
+    
   public:
   /*!
    * Constructor

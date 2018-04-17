@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -150,63 +150,24 @@ class ValCalculatorRho : public NonBondedPairParticleCalculator
       Wi = m_wf->interpolate(pD, first->r);
       Wj = m_wf->interpolate(pD, second->r);
 
-//       MSG_DEBUG("ValCalculatorRho::compute","Wi = " << Wi << ", Wj = " << Wj << ", slots = " << m_slots.first << "," << m_slots.second);
-
-
-//       assert(first->c == m_cp->firstColour());
-//       assert(second->c == m_cp->secondColour());
-
-//       if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "01:Wi=" << Wi << ", Wj=" << Wj );
-//       if(first->c == 1 && second->c == 0) MSG_DEBUG("ValCalculatorRho::compute", "10:Wi=" << Wi << ", Wj=" << Wj );
-
-/*			assert(m_colour2Slot.find(first->c) != m_colour2Slot.end());
-			assert(m_colour2Slot.find(second->c) != m_colour2Slot.end());
-
-			first->tag.doubleByOffset(m_colour2Slot[first->c]) += temp;
-			second->tag.doubleByOffset(m_colour2Slot[second->c]) += temp;*/
-
       if(pD->actsOnFirst())
       {
-/*if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "01:0=TRUE");*/
-#ifdef ENABLE_PTHREADS
-        first->lock();
-#endif
 
 #ifndef _OPENMP
         first->tag.doubleByOffset(m_slots.first) += Wj;
 #else
 
-/* 	MSG_DEBUG("ValCalculatorRho::compute", "m_vector_slots.first = " << m_vector_slots.first ); */
-
         (*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first))[m_vector_slots.first] += Wj;
 #endif
 
-// MSG_DEBUG("ValCalculatorRho::compute", "firstafter=" << first->tag.doubleByOffset(m_slots.second));
-#ifdef ENABLE_PTHREADS
-        first->unlock();
-#endif
       }
 
       if(pD->actsOnSecond())
       {
-/*if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "01:1=TRUE");*/
-#ifdef ENABLE_PTHREADS
-        second->lock();
-#endif
-//       if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "01:secondbefore=" << second->tag.doubleByOffset(m_slots.second));
 #ifndef _OPENMP
         second->tag.doubleByOffset(m_slots.second) += Wi;
 #else
         (*second->tag.vectorDoubleByOffset(m_copy_slots[thread_no].second))[m_vector_slots.second] += Wi;
-#endif
-// MSG_DEBUG("ValCalculatorRho::compute", "secondafter=" << second->tag.doubleByOffset(m_slots.second));
-
-//      if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "2ndslot=" << m_slots.second);
-
-
-
-#ifdef ENABLE_PTHREADS
-        second->unlock();
 #endif
       }
     }
@@ -223,23 +184,15 @@ class ValCalculatorRho : public NonBondedPairParticleCalculator
    * Register all degrees of freedom (i.e., the local density)
    */
   virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp) {
-    // see CONVENTION5 for rule about persistencies
-//     pair<bool, bool> persist(false, false);
 
-//     m_cp = cp;
-
-    /*m_*/cp->setCutoff(m_cutoff);
-    /*m_*/cp->setNeedPairs(true);
+    cp->setCutoff(m_cutoff);
+    cp->setNeedPairs(true);
 
 #define M_SIMULATION ((Simulation*) cp->manager()->phase()->parent())
 
-/*    MSG_DEBUG
-      ("ValCalculatorRho::setSlots",
-       "Registering degree of freedom, cut-off = " << m_cutoff);*/
-
 string colourString;
     // are the properties ColourPair-UNSPECIFIC?
-    if(/*M_SIMULATION->*/oneProp/*()*/)
+    if(oneProp)
     {
       colourString = "";
     }
@@ -259,8 +212,7 @@ string colourString;
 
     Particle::registerCache
       (new ParticleCacheDensitySelfContribution
-       (/*m_*/cp->firstColour(), m_slots.first, m_wf, m_symbolName));
-
+       (cp->firstColour(), m_slots.first, m_wf, m_symbolName));
 
     if(cp->firstColour() == cp->secondColour()) {
       m_slots.second = m_slots.first;
@@ -272,7 +224,7 @@ string colourString;
 
     Particle::registerCache
       (new ParticleCacheDensitySelfContribution
-       (/*m_*/cp->secondColour(), m_slots.second, m_wf, m_symbolName));
+       (cp->secondColour(), m_slots.second, m_wf, m_symbolName));
     }
 
     theSlots = m_slots;

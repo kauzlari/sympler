@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -70,20 +70,42 @@ class BondedPairArbitrary : public ValCalculatorPair
    * Initialise the property list
    */
   virtual void init();
-  
 
+  /*!
+   * The returned string contains those terms from runtime compiled expressions, 
+   * which should be ignored when determining the stage. The expressions are separated by " | ".
+   * An "empty" string must have the form "---".
+   */
+  virtual string usedSymbolsIgnoredForStaging() const {
+    return m_oldSymbols;
+  }
+
+  /*!
+   * Adds the expressions used by this \a Symbol to the given list. 
+   * @param usedSymbols List to be filled with own instances of \a TypedValue
+   */
+  virtual void addMyUsedSymbolsTo(typed_value_list_t& usedSymbols);
+  
+  /*!
+   * Returns the strings of those \a Symbols that the given class depends on
+   * due to hard-coded reasons (not due to runtime compiled expressions).
+   * @param usedSymbols List to add the strings to.
+   */
+  virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+  {
+    
+  }
+  
   /*!
    * Helper function for polymorphic copying
    */
   virtual ValCalculatorPair* copyMySelf() = 0;
-  /*         { */
-  /*           return new BondedPairArbitrary(*this); */
-  /*         } */
   
-    /*!
+  /*!
      * copies the members of this class to \a vc
      */
     virtual void copyMembersTo(ValCalculator* vc);
+
 
   public:
     
@@ -123,13 +145,12 @@ class BondedPairArbitrary : public ValCalculatorPair
 	}
 
 #ifndef _OPENMP
-      virtual void compute(Pairdist* pD) = 0;
+
+	virtual void compute(Pairdist* pD) = 0;
+
 #else
-      virtual void compute(Pairdist* pD, int thread_no)/* = 0;*/ {
-	  // does the same as in serial mode at the moment; 
-	  // it writes into pairs, so should work
-	  compute(pD);
-	}
+
+	virtual void compute(Pairdist* pD, int thread_no) = 0;
 
 #endif
     
@@ -151,18 +172,6 @@ class BondedPairArbitrary : public ValCalculatorPair
      * Setup this Calculator
      */
     virtual void setup();
-
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage();
-    
-    /*!
-     * Diffenrently to the function in \a Symbol, this class really has
-     * to determine its stage during run-time
-     */
-    virtual bool findStage_0();
     
 };
 

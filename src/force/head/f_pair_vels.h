@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -106,10 +106,6 @@ void computeForces(Pairdist* pair, int force_index, int thread_no)
     {                                    
       point_t temp;
 
-#ifdef ENABLE_PTHREADS
-      pair->firstPart()->lock();
-      pair->secondPart()->lock();
-#endif
       this->m_pairFactor(&temp, &(*pair));
             
       point_t fi;
@@ -152,10 +148,6 @@ void computeForces(Pairdist* pair, int force_index, int thread_no)
      }
 #endif 
        
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
     }                                                                      
 }
 

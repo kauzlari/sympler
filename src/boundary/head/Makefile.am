@@ -8,5 +8,5 @@ include_HEADERS = \
 	boundary_obstacle.h \
 	boundary_step.h \
 	boundary_stl.h \
+	boundary_stl_periodic.h \
 	boundary_with_inlet.h
-	

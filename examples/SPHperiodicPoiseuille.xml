@@ -79,13 +79,6 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
       />
   -->
 
-  <!-- Computes the symbol 'F' which is usually used as 'Fij' below. As the name indicates, Fij = -(dW(rij)/drij)/rij -->
-  <ValCalculatorNegDKernelDivr
-      allPairs = "yes"
-      symbol = "F"
-      weightingFunction="M5"
-      />
-
   <!-- This provides the symbol with default name 'vBC' (usable as 'vBCij' in pair expressions), which allows to enforce no-slip boundary conditions by replacing the velocity of the wall-particle with this one. The word 'Dirichlet' is a bit misleading and too general. For each pair of fluid and wall particles, 'vBC' is an extrapolation of the fluid-particle velocity onto the wall particle, such that the velocity at the intersection-point of the line connecting the two particles with the wall is zero. -->
   <DirichletBCVels
       wallSpecies = "wall"
@@ -130,7 +123,6 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
       particleFactor_i = "-2*1*([vi]-[vBCij])/(nj*nj)"
       particleFactor_j = "idVec(0)"
       weightingFunction = "M5"
-      symmetry = "1"
       />
   
   <!-- Pressure gradient forces for weakly compressible SPH. We use here for the pressure the linear artificial equation of state P = c^2*(rho-rho0), where c is the artificial speed of sound and rho_0 = 17.576 is the equilibrium density. This choice is not typical but possible and does not make a huge difference to the usual (also artificial) choice P = P0*((rho/rho0)^7-1) with P0 = c^2*rho0/7. In both cases, c^2 must be chosen as

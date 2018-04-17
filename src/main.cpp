@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2016, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -46,13 +46,7 @@
 
 #ifdef HAVE_SDL
   // We need to do this, otherwise SDL doesn't work...
-  #include <SDL.h>
-#endif
-
-#ifdef ENABLE_PTHREADS
-  #include "threads.h"
-
-  #include <pthread.h>
+  #include <SDL/SDL.h>
 #endif
 
 #ifdef _MPI
@@ -75,11 +69,6 @@ int main(int argc, char *argv[])
 //  link_all_properly();
 
 	int exitValue = 0;
-
-#ifdef ENABLE_PTHREADS
-  pthread_mutexattr_init(&g_mutex_attr);
-  pthread_mutexattr_settype(&g_mutex_attr, PTHREAD_MUTEX_ERRORCHECK);
-#endif
 
 //#ifdef _MPI
 //  MPI_Init(&argc,&argv);
@@ -127,9 +116,6 @@ int main(int argc, char *argv[])
   } else
     syntax();
 
-#ifdef ENABLE_PTHREADS
-  pthread_mutexattr_destroy(&g_mutex_attr);
-#endif
 
 //#ifdef _MPI
 //  MPI::Finalize();
@@ -141,7 +127,7 @@ int main(int argc, char *argv[])
 
 void sayHello() {
   cout << endl << "SYMPLER: SYMbolic ParticLE simulatoR" << endl
-       << "Copyright 2002-2015, David Kauzlaric and " << endl
+       << "Copyright 2002-2017, David Kauzlaric and " << endl
        << "other authors listed in the AUTHORS file." << endl
        << "This program comes with ABSOLUTELY NO WARRANTY;" << endl
        << "for details see the LICENSE file." << endl
@@ -159,6 +145,7 @@ void sayHello() {
 #include "boundary_diffusor.h"
 #include "boundary_obstacle.h"
 #include "boundary_stl.h"
+#include "boundary_stl_periodic.h"
 #include "boundary_step.h"
 
 #include "pair_creator.h"
@@ -228,6 +215,7 @@ void sayHello() {
 
 // Integrators
 #include "integrator_energy.h"
+#include "integrator_ISPH_const_rho_FDRHS.h"
 #include "integrator_lse.h"
 #include "integrator_IISPH_const_rho.h"
 #include "integrator_omelyan.h"
@@ -388,6 +376,7 @@ void link_all_properly()
   new BoundaryDiffusor(NULL);
   new BoundaryObstacle(NULL);
   new BoundarySTL(NULL);
+  new BoundaryStlPeriodic(NULL);
   new BoundaryStep(NULL);
 
   new PairCreator(NULL);
@@ -458,6 +447,9 @@ void link_all_properly()
   // Integrators
   new IntegratorEnergy(NULL);
   new IntegratorIISPHconstRho(NULL);
+  new IntegratorISPHconstRhoFDRHS(NULL);
+  new IntegratorOmelyan(NULL);
+  new IntegratorOmelyanNR(NULL);
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H
   new IntegratorLSE(NULL);

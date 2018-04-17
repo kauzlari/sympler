@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -69,7 +69,7 @@ void FPairScalar::init()
     "     = particleFactor_i*Sum_j(pairFactor_ij*weight_ij)*dt\n"
       "\nwhere particleFactor_i(j) is a sum of quantities related to particle i(j),\n"
       "      pairFactor_ij includes all pair contributions of the pair ij,\n"
-      "      weight_ij represents the derivative of the weighting function.\n"
+      "      weight_ij represents -W'(rij)/rij of the used weighting function W.\n"
     "\nNote that the expression has to give a scalar in the end,"
     "otherwise the compiler will report an error.");
 
@@ -101,12 +101,6 @@ void FPairScalar::computeForces(Pairdist* pair, int force_index, int thread_no)
     {
       double temp;
 
-#ifdef ENABLE_PTHREADS
-         pair->firstPart()->lock();
-         pair->secondPart()->lock();
-#endif
-
-
     double fi;
     double fj;
 
@@ -136,11 +130,6 @@ void FPairScalar::computeForces(Pairdist* pair, int force_index, int thread_no)
        }
 #endif
 
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
-
      }
 }
 
@@ -161,54 +150,37 @@ void FPairScalar::setup()
 {
   FPairArbitraryWF::setup();
 
-  ColourPair *m_cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second));
+  ColourPair *cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second));
 
   m_1stparticleFactor.setReturnType(Variant::SCALAR);
   m_2ndparticleFactor.setReturnType(Variant::SCALAR);
   m_pairFactor.setReturnType(Variant::SCALAR);
 
   DataFormat::attribute_t firstAttr =
-    Particle::s_tag_format[m_cp->firstColour()].attrByName(m_scalar_name);
+    Particle::s_tag_format[cp->firstColour()].attrByName(m_scalar_name);
 
   DataFormat::attribute_t secondAttr =
-    Particle::s_tag_format[m_cp->secondColour()].attrByName(m_scalar_name);
+    Particle::s_tag_format[cp->secondColour()].attrByName(m_scalar_name);
 
   if(firstAttr.datatype != DataFormat::DOUBLE)
     throw gError("FPairScalar::setup", "the symbol " + m_scalar_name +
     " is registerd as a non-scalar for species " +
-    m_cp->manager()->species(m_cp->firstColour()));
+    cp->manager()->species(cp->firstColour()));
 
   if(secondAttr.datatype != DataFormat::DOUBLE)
     throw gError("FPairScalar::setup", "the symbol " + m_scalar_name +
     " is registerd as a non-scalar for species " +
-    m_cp->manager()->species(m_cp->secondColour()));
+    cp->manager()->species(cp->secondColour()));
 
   // FIXME: This is general for each FPairArbitrary except for FPairVels. That's why it's still here  => refine hierarchy or remove FPairVels
   for(size_t i = 0; i < FORCE_HIST_SIZE; ++i)
   {
     m_force_offset[i].first =
-      Particle::s_tag_format[m_cp->firstColour()].attrByName(string("force_"
+      Particle::s_tag_format[cp->firstColour()].attrByName(string("force_"
         + m_scalar_name + "_" + ObjToString(i))).offset;
     m_force_offset[i].second =
-      Particle::s_tag_format[m_cp->secondColour()].attrByName(string("force_"
+      Particle::s_tag_format[cp->secondColour()].attrByName(string("force_"
         + m_scalar_name + "_" + ObjToString(i))).offset;
-  }
-
-// Setting the colours this force works on
-  size_t col1 = M_MANAGER->getColour(m_species.first);
-  size_t col2 = M_MANAGER->getColour(m_species.second);
-  ColourPair *cp = M_MANAGER->cp(col1, col2);
-
-  if ((col1 == cp->secondColour()) && (col2 == cp->firstColour())) {
-    size_t dummy = col1;
-    col1 = col2;
-    col1 = dummy;
-  }
-  else if ((col1 == cp->firstColour()) && (col2 == cp->secondColour())) {
-//    MSG_DEBUG("FPairScalar::setup", "Force colours same order as ColourPair's colours");
-  }
-  else {
-    throw gError("FPairScalar::setup", "No ColourPair for these colours. Contact the programmer.");
   }
   
 }

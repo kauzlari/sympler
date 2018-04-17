@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -192,13 +192,6 @@ protected:
    */
   size_t m_n_active_cells;
 
-#ifdef ENABLE_PTHREADS
-  /*!
-   * Mutex for access to the cell list
-   */
-  pthread_mutex_t m_cells__mutex;
-#endif
-
   /*!
    * List of all cell links in the system
    */
@@ -222,12 +215,6 @@ protected:
 #else
   CellLink* m_first_link;
 #endif  
-#ifdef ENABLE_PTHREADS
-  /*!
-   * Mutex for access to the cell link list
-   */
-  pthread_mutex_t m_links__mutex;
-#endif
 
   /*!
    * List of all regions
@@ -337,7 +324,7 @@ public:
   /*!
    * Thread-number counter
    */
-  static int thread_counter;
+  static size_t thread_counter;
 
   /*!
    * Create the pair list

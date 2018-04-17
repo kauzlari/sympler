@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -35,7 +35,6 @@
 #include "general.h"
 #include "simulation.h"
 #include "manager_cell.h"
-/* #include "val_calculator_arbitrary.h" */
 #include "bonded_pair_particle_arbitrary.h"
 #include "colour_pair.h"
 #include "function_pair.h"
@@ -120,25 +119,10 @@ class BondedPairParticleVector : public BondedPairParticleArbitrary
             {
               for(size_t i = 0; i < SPACE_DIMS; ++i)
                 tempFirst[i] *= temp[i];
-#ifdef ENABLE_PTHREADS
-              first->lock();
-#endif
 	      
 #ifndef _OPENMP
-/* 	      MSG_DEBUG("BondedPairParticleVector::compute", "firstP = " << first->mySlot << ", first c = " << first->c << ", second c = " << second->c << ", r = " << first->r << ", slot.first = " << m_slots.first << ", slot.second = " << m_slots.second);   */
-
-/* 	      MSG_DEBUG("BondedPairParticleVector::compute", "offsets for 2:" << endl << "n = " << Particle::s_tag_format[first->c].offsetByName("n") << endl << "force_n_0 = " << Particle::s_tag_format[first->c].offsetByName("force_n_0") << endl << "force_n_1 = " << Particle::s_tag_format[first->c].offsetByName("force_n_1") << endl << "N = " << Particle::s_tag_format[first->c].offsetByName("N") << endl << "TF = " << Particle::s_tag_format[first->c].offsetByName("TF") << endl << "Ntot = " << Particle::s_tag_format[first->c].offsetByName("Ntot") << endl << "Fmean = " << Particle::s_tag_format[first->c].offsetByName("Fmean") << endl << "FC = " << Particle::s_tag_format[first->c].offsetByName("FC") << endl << "Vmean = " << Particle::s_tag_format[first->c].offsetByName("Vmean") << endl << "Fmean_F = " << Particle::s_tag_format[first->c].offsetByName("Fmean_F")); */
-
-/* 	      MSG_DEBUG("BondedPairParticleVector::compute", "offsets for 1:" << endl << "n = " << Particle::s_tag_format[1].offsetByName("n") << endl << "force_n_0 = " << Particle::s_tag_format[1].offsetByName("force_n_0") << endl << "force_n_1 = " << Particle::s_tag_format[1].offsetByName("force_n_1") << endl << "N = " << Particle::s_tag_format[1].offsetByName("N") << endl << "FEta = " << Particle::s_tag_format[1].offsetByName("FEta") << endl << "FP = " << Particle::s_tag_format[1].offsetByName("FP") << endl << "FPWall = " << Particle::s_tag_format[1].offsetByName("FPWall") << endl << "FEtaWall = " << Particle::s_tag_format[1].offsetByName("FEtaWall") << endl << "voxel = " << Particle::s_tag_format[1].offsetByName("voxel") << endl << "Fsum = " << Particle::s_tag_format[1].offsetByName("Fsum") << endl << "FC = " << Particle::s_tag_format[1].offsetByName("FC") << endl << "Vmean = " << Particle::s_tag_format[1].offsetByName("Vmean") << endl << "Fmean_F = " << Particle::s_tag_format[1].offsetByName("Fmean_F")); */
-
-          
-/* 	      MSG_DEBUG("BondedPairParticleVector::compute", "tag-data BEFORE = " << first->tag.pointByOffset(m_slots.first));             */
-
 
                first->tag.pointByOffset(m_slots.first) += tempFirst;
-
-/* 	      MSG_DEBUG("BondedPairParticleVector::compute", "tag-data AFTER = " << first->tag.pointByOffset(m_slots.first));             */
-
 
 #else
               first->tag.pointByOffset(m_slots.first) += tempFirst;
@@ -151,19 +135,12 @@ class BondedPairParticleVector : public BondedPairParticleArbitrary
 /*               } */
 #endif
 	      
-	      //     MSG_DEBUG("BondedPairParticleVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));            
-#ifdef ENABLE_PTHREADS
-              first->unlock();
-#endif
             }
 	  
 	  if(pD->actsOnSecond())
             {
               for(size_t i = 0; i < SPACE_DIMS; ++i)
                 tempSecond[i] *= temp[i];
-#ifdef ENABLE_PTHREADS
-              second->lock();
-#endif
 	      
 #ifndef _OPENMP
               second->tag.pointByOffset(m_slots.second) += m_symmetry*(tempSecond);
@@ -177,10 +154,6 @@ class BondedPairParticleVector : public BondedPairParticleArbitrary
 /*               } */
 #endif
 	      
-	      //     MSG_DEBUG("BondedPairParticleVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              second->unlock();
-#endif
             }
 	  
         }

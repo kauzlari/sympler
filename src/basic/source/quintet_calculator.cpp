@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2015, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -256,6 +256,8 @@ void QuintetCalculator::setupAfterParticleCreation()
 //     throw gError("QuintetCalculator::setupAfterParticleCreation", "Inconsistency between the attribute'species3' of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
 
 }
+
+
 /*!
  * Determines \a m_stage of the current \a Symbol.
  * By default, we assume that the stage is fixed and known during compile-time, 
@@ -280,15 +282,15 @@ void QuintetCalculator::checkConsistency() {
 //MSG_DEBUG("QuintetCalculator::checkConsistency", ": Iterate.");    
   
   if(M_MANAGER->getColour(m_species[0]) != firstQuin->p00->c)
-    throw gError("QuintetCalculator::findStage", "For module " + name() + ": Inconsistency between the attribute species1=\"" + m_species[0] + "\" of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
+    throw gError("QuintetCalculator::checkConsistency", "For module " + name() + ": Inconsistency between the attribute species1=\"" + m_species[0] + "\" of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
   if(M_MANAGER->getColour(m_species[1]) != firstQuin->p02->c)
-    throw gError("QuintetCalculator::findStage", "For module " + name() + ": Inconsistency between the attribute species2=\"" + m_species[1] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
+    throw gError("QuintetCalculator::checkConsistency", "For module " + name() + ": Inconsistency between the attribute species2=\"" + m_species[1] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
   if(M_MANAGER->getColour(m_species[2]) != firstQuin->p22->c)
-    throw gError("QuintetCalculator::findStage", "For module " + name() + ": Inconsistency between the attribute species3=\"" + m_species[2] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
+    throw gError("QuintetCalculator::checkConsistency", "For module " + name() + ": Inconsistency between the attribute species3=\"" + m_species[2] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
   if(M_MANAGER->getColour(m_species[3]) != firstQuin->p20->c)
-    throw gError("QuintetCalculator::findStage", "For module " + name() + ": Inconsistency between the attribute species4=\"" + m_species[3] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
+    throw gError("QuintetCalculator::checkConsistency", "For module " + name() + ": Inconsistency between the attribute species4=\"" + m_species[3] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
   if(M_MANAGER->getColour(m_species[4]) != firstQuin->p11->c)
-    throw gError("QuintetCalculator::findStage", "For module " + name() + ": Inconsistency between the attribute species5=\"" + m_species[4] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
+    throw gError("QuintetCalculator::checkConsistency", "For module " + name() + ": Inconsistency between the attribute species5=\"" + m_species[4] + "\"  of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
 
 }   
 
@@ -302,20 +304,6 @@ void QuintetCalculator::checkConsistency() {
  */
 bool QuintetCalculator::findStage_0()
 {
-//   // Following check done here because only suitable function after setupAfterParticleCreation() (see also comment there)
-//   // check for consistency of calculator's and quintets' species
-  
-//   quintetList* trl = M_PHASE->returnQuintetList(m_listName);
-  
-//   quintetList::iterator firstTr = trl->begin();
-  
-//   if(M_MANAGER->getColour(m_species[0]) != firstTr->a->c)
-//     throw gError("QuintetCalculator::findStage_0", "Inconsistency between the attribute 'species1' of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
-//   if(M_MANAGER->getColour(m_species[1]) != firstTr->b->c)
-//     throw gError("QuintetCalculator::findStage_0", "Inconsistency between the attribute 'species2' of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
-//   if(M_MANAGER->getColour(m_species[2]) != firstTr->c->c)
-//     throw gError("QuintetCalculator::findStage_0", "Inconsistency between the attribute'species3' of this calculator and the first species in the assigned list '" + m_listName + "'. This is currently not allowed.");
-  
   // currently (2009/07/28) this always returns true
   return Symbol::findStage_0();
 }

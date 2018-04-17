@@ -219,6 +219,17 @@ class Wall: public NodeOneChild
    */
   virtual void toVTK(ostream &s) {
   }
+    /*!
+   * Returns m_corner[i] of wall
+   */
+  virtual point_t returnCorner(int i)=0;
+  /*
+  {
+      point_t k; k.x=0; k.y=0; k.z=0 ;
+      return k ; // 
+  } // warning: extended initializer lists only available with -std=c++11 or -std=gnu++11 [enabled by default]
+    //   return ={0,0,0} ;
+*/
 };
 
 

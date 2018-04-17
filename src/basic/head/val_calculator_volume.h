@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -170,24 +170,8 @@ class ValCalculatorVolume : public NonBondedPairParticleCalculator
         assert(second->tag.doubleByOffset(m_density_offset.second) != 0);
         Wj /= second->tag.doubleByOffset(m_density_offset.second);
 
-//         assert(first->c == m_cp->firstColour());
-//         assert(second->c == m_cp->secondColour());
-
-//       if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "01:Wi=" << Wi << ", Wj=" << Wj );
-//       if(first->c == 1 && second->c == 0) MSG_DEBUG("ValCalculatorRho::compute", "10:Wi=" << Wi << ", Wj=" << Wj );
-
-/*			assert(m_colour2Slot.find(first->c) != m_colour2Slot.end());
-        assert(m_colour2Slot.find(second->c) != m_colour2Slot.end());
-
-        first->tag.doubleByOffset(m_colour2Slot[first->c]) += temp;
-        second->tag.doubleByOffset(m_colour2Slot[second->c]) += temp;*/
-
         if(pD->actsOnFirst())
         {
-//           if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorVolume::compute", "01:0=TRUE");
-#ifdef ENABLE_PTHREADS
-        first->lock();
-#endif
 
 #ifndef _OPENMP
         first->tag.doubleByOffset(m_slots.first) += Wj;
@@ -195,33 +179,16 @@ class ValCalculatorVolume : public NonBondedPairParticleCalculator
         (*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first))[m_vector_slots.first] += Wj;
 #endif
 
-#ifdef ENABLE_PTHREADS
-        first->unlock();
-#endif
         }
 
         if(pD->actsOnSecond())
         {
-//           if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorVolume::compute", "01:1=TRUE");
-#ifdef ENABLE_PTHREADS
-        second->lock();
-#endif
-//       if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "01:secondbefore=" << second->tag.doubleByOffset(m_slots.second));
 #ifndef _OPENMP
         second->tag.doubleByOffset(m_slots.second) += Wi;
 #else
         (*second->tag.vectorDoubleByOffset(m_copy_slots[thread_no].second))[m_vector_slots.second] += Wi;
 #endif
-//      if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "01:secondafter=" << second->tag.doubleByOffset(m_slots.second));
-
-//      if(first->c == 0 && second->c == 1) MSG_DEBUG("ValCalculatorRho::compute", "2ndslot=" << m_slots.second);
-
-#ifdef ENABLE_PTHREADS
-        second->unlock();
-#endif
         }
-/*        MSG_DEBUG("ValCalculatorVolume::compute","AFTER: first->rho = " << first->tag.doubleByOffset(m_density_offset.first) << ", second->rho = " << second->tag.doubleByOffset(m_density_offset.second));
-        MSG_DEBUG("ValCalculatorVolume::compute","AFTER: first->V = " << first->tag.doubleByOffset(m_slots.first) << ", second->V = " << second->tag.doubleByOffset(m_slots.second));*/
       }
     }
 
@@ -237,11 +204,6 @@ class ValCalculatorVolume : public NonBondedPairParticleCalculator
      * Register all degrees of freedom (i.e., the local density)
    */
     virtual void setSlots(ColourPair* cPair, pair<size_t, size_t> &theSlots, bool oneProp) {
-      // see CONVENTION5 for rule about persistencies
-//       pair<bool, bool> persist(false, false);
-
-//       m_cp = cp;
-
       cPair->setCutoff(m_cutoff);
       cPair->setNeedPairs(true);
       MSG_DEBUG("ValCalculatorVolume::setSlots", "creating ValCalculatorRho now");
@@ -262,19 +224,6 @@ class ValCalculatorVolume : public NonBondedPairParticleCalculator
 #define M_SIMULATION ((Simulation*) cPair->manager()->phase()->parent())
 #define M_CONTROLLER M_SIMULATION->controller()
 
-// see CONVENTION5 for rule about persistencies
-#if 0
-// new rules
-// FIXME: not checked how meaningful this is for the case that both species don't have an IntegratorPosition
-// by the way, how meaningful is this case itself ?!?
-      if (!M_CONTROLLER->findIntegrator("IntegratorPosition", cPair->firstSpecies()) &&
-        !M_CONTROLLER->findIntegrator("IntegratorPosition", cPair->secondSpecies()))
-{
-        persist.first = true;
-        persist.second = true;
-}
-#endif
-
 #undef M_CONTROLLER
 
     MSG_DEBUG
@@ -288,7 +237,7 @@ class ValCalculatorVolume : public NonBondedPairParticleCalculator
     {
       if(Particle::s_tag_format[cPair->firstColour()].attrByName(m_symbolName).datatype == DataFormat::DOUBLE)
         m_slots.first =
-            Particle::s_tag_format[cPair->firstColour()]./*indexOf*/offsetByName(m_symbolName);
+            Particle::s_tag_format[cPair->firstColour()].offsetByName(m_symbolName);
       else
         throw gError("ValCalculatorVolume::setSlots", "Symbol + " + m_symbolName + " already existing as a non-scalar.");
     }
@@ -296,8 +245,7 @@ class ValCalculatorVolume : public NonBondedPairParticleCalculator
       // see CONVENTION5 for rule about persistencies
       m_slots.first =
         Particle::s_tag_format[cPair->firstColour()].addAttribute
-        (/*string(VAL_V_STR) + "_" + m_extra_string + colourString + "_" + m_wf->name()*/m_symbolName,
-         DataFormat::DOUBLE, /*persist.first*/false, m_symbolName/*"V[" + m_wf->name() + "]"*/).offset;
+        (m_symbolName, DataFormat::DOUBLE, /*persist.first*/false, m_symbolName).offset;
 
     Particle::registerCache
         (new ParticleCacheVolumeSelfContribution
@@ -319,8 +267,7 @@ class ValCalculatorVolume : public NonBondedPairParticleCalculator
         // see CONVENTION5 for rule about persistencies
         m_slots.second =
             Particle::s_tag_format[cPair->secondColour()].addAttribute
-            (/*string(VAL_V_STR) + "_" + m_extra_string + colourString + "_" + m_wf->name()*/m_symbolName,
-             DataFormat::DOUBLE, /*persist.second*/false, m_symbolName/*"V[" + m_wf->name() + "]"*/).offset;
+            (m_symbolName, DataFormat::DOUBLE, /*persist.second*/false, m_symbolName).offset;
 
       Particle::registerCache
           (new ParticleCacheVolumeSelfContribution

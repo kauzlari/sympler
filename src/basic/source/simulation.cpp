@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -50,7 +50,7 @@
 
 using namespace std;
 
-int global::n_threads;
+size_t global::n_threads;
 // vector<int> Simulation::nDoublesProCol;
 
 
@@ -99,14 +99,13 @@ void Simulation::setSymbolStages()
     }
     for(vector<ParticleCache*>::iterator i = Particle::s_cached_flat_properties_0.begin(); i != Particle::s_cached_flat_properties_0.end(); ++i)
     {
-      finished = (*i)->findStage_0() && finished /*&& temp*/;
+      finished = (*i)->findStage_0() && finished;
     }
     ++counter;
   }
 }
 
-void Simulation::sortSymbolStages() {
-  // now we can sort the Symbols by stages
+void Simulation::sortSymbolsByStages() {
   phase()->sortStages();
   phase()->sortStages_0();
   FOR_EACH_COLOUR_PAIR
@@ -150,7 +149,7 @@ void Simulation::setupCopyVectors()
 
 		// The vector doubles have to be filled with 0s at the end of every stage
 
-                for (int t = 0; t < global::n_threads; t++) {
+                for (size_t t = 0; t < global::n_threads; t++) {
                   if (!Particle::s_tag_format[cp->firstColour()].attrExists(tempStrFirst + ObjToString(t))) {
 		            throw gError("Simulation::setupCopyVectors", "copy-vector \"" + tempStrFirst + ObjToString(t) + "\" not found! Contact a programmer.");
                   }
@@ -254,7 +253,7 @@ void Simulation::setupCopyVectors()
 	temp_nd[_c] += ((Integrator*)(*integr))->numCopyDoubles();
 
 	// loop over the threads used
-	for (int t = 0; t < global::n_threads; t++) {
+	for (size_t t = 0; t < global::n_threads; t++) {
 	  if (Particle::s_tag_format[_c].attrExists("copy" + ObjToString(_c) + ObjToString(t))) {
 	    if (Particle::s_tag_format[_c].vectorDoubleByName("copy" + ObjToString(_c) + ObjToString(t))->size() < temp_nd[_c])
 	      Particle::s_tag_format[_c].vectorDoubleByName("copy" + ObjToString(_c) + ObjToString(t))->resize(temp_nd[_c]);
@@ -386,12 +385,6 @@ void Simulation::init()
     (simName, m_name,
      "Name of the simulation. Used for filename generation.");
 
-#ifdef ENABLE_PTHREADS
-  INTPC
-    (nThreads, global::n_threads, 0,
-     "Number of parallel threads to use in this calculation.");
-#endif
-
 #ifdef _OPENMP
   INTPC
     (nThreads, global::n_threads, 0,
@@ -496,7 +489,7 @@ void Simulation::setup()
 
 #ifdef _OPENMP
 //   add copy-slot attributes
-  for (int t = 0; t < global::n_threads; t++) {
+  for (size_t t = 0; t < global::n_threads; t++) {
     for (size_t col = 0; col < m_phase->manager()->nColours(); ++col) {
       Particle::s_tag_format[col].addAttribute
 	("copy" + ObjToString(col) + ObjToString(t), 

@@ -48,7 +48,7 @@ class Cell;
 
 /*!
  * Modified Velocity-Verlet integrator for the positions and velocities
- * See: R. D. Groot and P. B. Warren, J. Cham. Phys. 107, 4423-4435 (1997)
+ * See: R. D. Groot and P. B. Warren, J. Chem. Phys. 107, 4423-4435 (1997)
  */
 
 class IntegratorVelocityVerlet: public IntegratorPosition
@@ -59,9 +59,14 @@ protected:
    */
   void init();
   /*!
-   * Mass for the species this integrator works for.
+   * Lambda of Warren and Groot paper
    */
-  double m_mass;
+  double m_lambda;
+  /*!
+   * Difference to lambda = 1/2 (the standard Velocity-Verlet)
+   */
+  double m_lambda_diff;
+
 
 
 public:

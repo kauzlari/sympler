@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -28,24 +28,20 @@
  * 
  */
 
-
-
 #include <fstream>
-
 #include <iostream>
 #include <cstring>
 #include <string>
-using namespace std;
-
-
 #include "cell.h"
 #include "phase.h"
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
 #include "particle_cache.h"
-
+#include "boundary.h"
 #include "pc_file.h"
+
+using namespace std;
 
 /* Register this ParticleCreator with the factory. */
 const ParticleCreator_Register<ParticleCreatorFile>
@@ -85,22 +81,13 @@ string ParticleCreatorFile::readNext(ifstream &pos) {
     c = pos.get();
   }
   
-  /*
-    if (pos.peek() == '(') {
-    char c;
-    while ((c = pos.get()) != ')')
-    s += c;
-    s += ")";
-    } else
-    pos >> s;
-  */
 //    MSG_DEBUG("ParticleCreatorFile::readNext(ifstream &pos)", "END: c = " << c << "; s = " << s);
   
   return s;
 }
 
-void ParticleCreatorFile::createParticles()
-{
+void ParticleCreatorFile::createParticles() {
+
   MSG_DEBUG("ParticleCreatorFile::createParticles","start");
     
   Phase *phase = M_PHASE;
@@ -122,34 +109,26 @@ void ParticleCreatorFile::createParticles()
   pos >> skipws >> s;
   // 1st while
   while (s != "!!!" && !pos.eof()) {
-MSG_DEBUG("ParticleCreatorFile::createParticles","start of 1st file-read-while; s = " << s);
-
+    
     size_t c;
 
     species = s;
     if (m_species == "UNDEF" || m_species == species){ 
       c = manager->getColour(s);
-      MSG_DEBUG("ParticleCreatorFile::createParticles", "requesting colour for species" << s << " and got " << c);
     }
 
     pos >> skipws >> s;
-//     MSG_DEBUG("ParticleCreatorFile::createParticles","before 2nd file-read-while; s = " << s);
 
     // 2nd while: this loop is just entered if there are declared tag-fields
-    while (s != "!!!" && !pos.eof()) 
-    {
-MSG_DEBUG("ParticleCreatorFile::createParticles","start of 2nd file-read-while");
+    while (s != "!!!" && !pos.eof()) {
       if (m_species == "UNDEF" || m_species == species) { 
-MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 	
 	size_t slot, offset;
         bool tempBool = true;
 
-	MSG_DEBUG("ParticleCreatorFile::createParticles", "exists-check: now at string " << s);
 	if(Particle::s_tag_format[c].attrExists(s)) {
 	  slot = Particle::s_tag_format[c].attrByName(s).index;
 	  offset = Particle::s_tag_format[c].attrByName(s).offset;
-	  MSG_DEBUG("ParticleCreatorFile::createParticles", "EXISTS: now at string " << s << " with offset " << offset << " and slot(index) " << slot);
 	}
 	// don't write because not used in this simulation
 	else {
@@ -161,14 +140,12 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 	// c always has a meaningful value because of if (m_species == "UNDEF" || m_species == species)
         tags[c].push_back(pair<string, int>(s, slot));
         
-//         MSG_DEBUG
-//           ("ParticleCreatorFile::createParticles",
-//           "Found tag '" << s << "' for species '" << species << "'. Now"
-//           " searching for ValCalculator for this tag");
-        
 	if(tempBool) {
+
+	  // FIXME: from here, the next ~300 lines are a huge mess! Clean up and refactor! Compare how Symbol::findStage() was refactored. Can you use some of that? Do you have to loop over the sorted stages or can you take the unsorted ones as in Symbol::findStage()? Why this special loop over vCPs in case of OpenMP? 
 	  
 	  pair<size_t, size_t> theSlots;
+
 	  // in the following loops we check, whether there exists a
 	  // ValCalculator for the found tag. If yes, this ParticleCreator 
 	  // WILL NOT write the values from the file into the particles, since 
@@ -179,11 +156,6 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 	    (
 	     manager,
 
-	     // next "if" not needed anymore (2011-05-18) because Calcs from any colour may generally write in any c 
-// 	     if(cp->firstColour() == c || cp->secondColour() == c)
-// 	       {
-		 // MSG_DEBUG("ParticleCreatorFile::createParticles", "CP correct" << cp->toString());
-		 
 		 // loop over stages: should be OK, because Symbols are already sorted
 		 // see in Controller::run()
 		 
@@ -216,7 +188,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 				 if(theSlots.first == offset) 
 				   {
 				     if((*vCIt)->mySymbolName() != s) {
-				       MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
+				       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
 				       abort();
 				     }
 				     if(!(*vCIt)->doesOverwrite()) {
@@ -236,7 +208,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 
 				   if(theSlots.second == offset) {
 				     if((*vCIt)->mySymbolName() != s) {
-				       MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
+				       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
 				       abort();
 				     }
 				     if(!(*vCIt)->doesOverwrite()) {
@@ -324,7 +296,6 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 			 
 		   } // end of for(size_t stage = 0 ...)... 
 		 for(size_t stage = 0; (stage <= cp->maxStage_0()/*ColourPair::s_maxStage*/ /*VC_MAX_STAGE*/ && tempBool); ++stage) {
-		   // MSG_DEBUG("ParticleCreatorFile::createParticles", "stage = " << stage);
 		   
 		   vector<ValCalculator*>& vCs = cp->valCalculators_0(stage);
 #ifdef _OPENMP
@@ -333,16 +304,8 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 		   // loop over ValCalculators
 		   for(vector<ValCalculator*>::iterator vCIt = vCs.begin(); 
 		       (vCIt != vCs.end() && tempBool); ++vCIt) {
-		     // MSG_DEBUG("ParticleCreatorFile::createParticles", "now VC = " << (*vCIt)->myName());
-		     // the FOR_EACH_COLOUR_PAIR does not seem to like the comma 
-		     // in pair<...
-		     //               pair<size_t, size_t> theSlots;
 		     try {
 		       (*vCIt)->mySlots(theSlots);
-		       // MSG_DEBUG("ParticleCreatorFile::createParticles", "theSlots = (" << theSlots.first << ", " << theSlots.second << "), offset = " << offset );
-
-
-
 
 		       // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
 		       // if(cp->firstColour() == c) {
@@ -350,7 +313,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 
 			 if(theSlots.first == offset) {
 			   if((*vCIt)->mySymbolName() != s) {
-			     MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			     MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
 			     abort();
 			   }
 			   if(!(*vCIt)->doesOverwrite()) {
@@ -370,7 +333,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 
 			   if(theSlots.second == offset) {
 			     if((*vCIt)->mySymbolName() != s) {
-			       MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
 			       abort();
 			     }
 			     if(!(*vCIt)->doesOverwrite()) {
@@ -394,13 +357,8 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 #ifdef _OPENMP
 		   for(vector<ValCalculator*>::iterator vCIt = vCPs.begin(); 
 		       (vCIt != vCPs.end() && tempBool); ++vCIt) {
-		     // MSG_DEBUG("ParticleCreatorFile::createParticles", "now VC = " << (*vCIt)->myName());
-		     // the FOR_EACH_COLOUR_PAIR does not seem to like the comma 
-		     // in pair<...
-		     //               pair<size_t, size_t> theSlots;
 		     try {
 		       (*vCIt)->mySlots(theSlots);
-		       // MSG_DEBUG("ParticleCreatorFile::createParticles", "theSlots = (" << theSlots.first << ", " << theSlots.second << "), offset = " << offset );
 
 		       // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
 		       // if(cp->firstColour() == c) {
@@ -408,7 +366,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 
 			 if(theSlots.first == offset) {
 			   if((*vCIt)->mySymbolName() != s) {
-			     MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			     MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
 			     abort();
 			   }
 			   if(!(*vCIt)->doesOverwrite()) {
@@ -428,7 +386,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 
 			   if(theSlots.second == offset) {
 			     if((*vCIt)->mySymbolName() != s) {
-			       MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
 			       abort();
 			     }
 			     if(!(*vCIt)->doesOverwrite()) {
@@ -459,16 +417,15 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 		     // important because there still comes the ++__cp from the loop
 		     --__cp;
 		   }
-// 	       } // end if(cp->firstColour == c || cp->secondColour == c) (see above why commented out)
+
 	     );
 	     
 	     // do we also have to search in the ParticleCaches? ...
 	     if(tempBool)
 	       {// ... yes we have to search in the ParticleCaches
 
-		 // also loop over colours now (2011-05-18) because a ParticleCache my generally write in any colour;
+		 // also loop over colours because a ParticleCache my generally write in any colour;
 		 for(size_t col = 0; col < phase->nColours(); ++col) {
-
 		   
 		   // loop over stages
 		   for(size_t stage = 0; stage <= Particle::s_maxStage && tempBool; ++stage)
@@ -478,7 +435,7 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 			   (vector<ParticleCache*>,
 			    Particle::s_cached_properties[col][stage],
 
-			    // also check colours now (2011-05-18) because a ParticleCache my generally write in any colour;
+			    // also check colours because a ParticleCache my generally write in any colour;
 			    if ((*(*__iFE)).writeColour() == c && (*(*__iFE)).offset() == offset) {
 				if((*(*__iFE)).mySymbolName() != s)
 				  throw gError("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ParticleCache (stage 1) calculating symbol " + (*(*__iFE)).mySymbolName() + " at same memory position. Contact the programmers. Read-species of this ParticleCache: " + manager->species(col) + ". Write-species of this ParticleCache: " + manager->species(c));
@@ -492,7 +449,6 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
 				    tempBool = false;
 				  }
 				}
-				
 			    }
 			    // may we abort the loop over the ParticleCaches?
 			    if(!tempBool)
@@ -551,8 +507,6 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
       
       pos >> skipws >> s;
 
-// MSG_DEBUG("ParticleCreatorFile::createParticles", "end of 2nd while (s != \"!!!\" && !pos.eof()); s = " << s);
-
     } // end of 2nd while (s != "!!!" && !pos.eof()) (just entered if tag-fields have been declared in the file)
     
     if (pos.eof())
@@ -564,47 +518,27 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
   
   // initial read for species of real particle data starting now   
   pos >> skipws >> species;
+
   // 3rd while (for the real particle data)
   while (species != "!!!" && !pos.eof()) {
-    
-//     MSG_DEBUG("ParticleCreatorFile::createParticles", "start of 3rd while (species != \"!!!\" && !pos.eof()); species =  " << species << "; m_species = " << m_species);
-    
+
     Particle p;
     Cell *c;
     size_t colour;
     string freeOrFrozen = "free";
     
     // if this is a species to be ignored (false case), read to end of line without doing anything
-    //     bool reallyCreate;
     if (m_species == "UNDEF" || m_species == species) {
       colour = manager->getColour(species);
-      //       reallyCreate = true;
       
-      pos >> skipws >> freeOrFrozen;
-      //     MSG_DEBUG("ParticleCreatorFile::createParticles", "freeOrFrozen = " << freeOrFrozen);
-      if (freeOrFrozen == "free" || freeOrFrozen == "frozen") {
-	pos >> skipws >> p.r.x >> skipws >> p.r.y >> skipws >> p.r.z
-	    >> skipws >> p.v.x >> skipws >> p.v.y >> skipws >> p.v.z;
-      } else {
-	p.r.x = atof(freeOrFrozen.c_str());
-	pos >> skipws >> p.r.y >> skipws >> p.r.z >> skipws >> p.v.x
-	    >> skipws >> p.v.y >> skipws >> p.v.z;
-	freeOrFrozen = "free";
-      }
-      
+      readParticle(p,pos,freeOrFrozen);
       p.setColour(colour);
-      
-      // old (BUGGY! 2013-07-29) style of species checking
-      //     if (m_species == "UNDEF" || m_species == species){
+
       list<bool>::iterator boolIt = writeTags[colour].begin();
       for (list<pair<string, int> >::iterator j = tags[colour].begin(); j != tags[colour].end(); j++) {
 
-//  	MSG_DEBUG("ParticleCreatorFile::createParticles", "tags loop; colour = " << colour << "; tagname = " << j->first << "; s before readNext = " << s);
-
 	s = readNext(pos);
 
-// 	MSG_DEBUG("ParticleCreatorFile::createParticles", "before p.tag.fromStringByIndex: now at symbol " << j->first << ", index = " << j->second << ", just read s = " << s);
-	
 	if(*boolIt) {
 	  p.tag.fromStringByIndex(j->second, s);
 	}
@@ -614,39 +548,68 @@ MSG_DEBUG("ParticleCreatorFile::createParticles","in if " << species);
       transformPos(p);
       
       c = manager->findCell(p.r);
-      
       if (c) {
-	if (M_BOUNDARY->isInside(p.r)) {
-	  p.g = c->group();
+    
+        if(m_particlesInside){
+         if (M_BOUNDARY->isInside(p.r)) {
+           p.g = c->group();
 	  
-	  if (freeOrFrozen == "frozen")
+           if (freeOrFrozen == "frozen")
 	    m_particles_frozen[p.g].newEntry() = p;
 	  else
 	    m_particles[p.g].newEntry() = p;
+          }
+	}
+        if(!m_particlesInside){        
+         if (!(M_BOUNDARY->isInside(p.r))) {
+           p.g = c->group();
+	  
+           if (freeOrFrozen == "frozen")
+	    m_particles_frozen[p.g].newEntry() = p;
+	  else
+	    m_particles[p.g].newEntry() = p;
+          }
 	}
       }
       //     } // end of if(m_species ...)
     } // end of if(m_species ...)
-    else {// ignore this line since species not used in this simulation
+    else {
+      // ignore this line since species not used in this simulation
       getline(pos, species);
-//       MSG_DEBUG("ParticleCreatorFile::createParticles", "ignored the species and read the whole line '" << species << "' without doing anything.");
     }
 
     // read species at beginning of next line for next round of loop
     pos >> skipws >> species;
-//     MSG_DEBUG("ParticleCreatorFile::createParticles", "end of 3rd while(species != \"!!!\" && !pos.eof()); next species = " << species << "; s = " << s << ", p.v.z = " << p.v.z);
+
   } // end of 3rd while(species != "!!!" ...) (for the real particle data)
   pos.close();
-  
   /* next will call the one in ParticleCreatorFree */
   flushParticles();
 }
 
 
+void ParticleCreatorFile::readParticle(Particle &p, ifstream &pos, string &freeOrFrozen ) {
+    
+      pos >> skipws >> freeOrFrozen;
+
+      if (freeOrFrozen == "free" || freeOrFrozen == "frozen") {
+	pos >> skipws >> p.r.x >> skipws >> p.r.y >> skipws >> p.r.z
+	    >> skipws >> p.v.x >> skipws >> p.v.y >> skipws >> p.v.z;
+      } else {
+	p.r.x = atof(freeOrFrozen.c_str());
+	pos >> skipws >> p.r.y >> skipws >> p.r.z >> skipws >> p.v.x
+	    >> skipws >> p.v.y >> skipws >> p.v.z;
+	freeOrFrozen = "free";
+      }
+
+ }
+
 void ParticleCreatorFile::setup() {
   //	ParticleCreatorFree::setup();
   // this PC uses m_species as filter for the given input file
-  if (m_species != "UNDEF") {
+ 
+    myCutoff = M_PHASE->pairCreator()->interactionCutoff(); //as in pc_wall for adjustBoxSize()
+      if (m_species != "UNDEF") {
     m_colour = M_MANAGER->getColour/*AndAdd*/(m_species);
   } else {
     //   m_colour = ALL_COLOURS;
@@ -670,7 +633,7 @@ void ParticleCreatorFile::setup() {
     }
     pos.close();
     
-  }
+}
 }
 
 
@@ -708,14 +671,21 @@ void ParticleCreatorFile::init() {
      "Then, in another new line this section is terminated by another '!!!'.\n"
      "The particles are defined one per row, starting with their species, optionally followed by the label \"free\" or \"frozen\", and then followed by three position-values, three velocity values, and then the values of the additional attributes in the order specified in the header.\n"
      "After the last particle, the file is terminated by another new line containing '!!!'.\n"
+  
      );
 
-	STRINGPCINF
-	(name, m_filename,
-			"File containing the position and velocity information.")
-	;
-
-	m_filename = "default.pos";
+  STRINGPCINF
+    (name, m_filename,
+     "File containing the position and velocity information.")
+    ;
+  BOOLPC
+    (particlesInside, m_particlesInside,
+     " true if particles are inside inside of geometry (fluid particles), false"
+     " if they are outside (wall particles). Useful when working with STL geometries. Default is true so that it is backwards compatible. ");
+  
+  m_filename = "default.pos";
+  m_particlesInside = "true";
+      
 }
 
 void ParticleCreatorFile::flushParticles() {
@@ -748,4 +718,55 @@ void ParticleCreatorFile::flushParticles() {
 	MSG_DEBUG("ParticleCreatorFile::flushParticles" , counter << " particles added");
 	m_particles_frozen.clear();
 	m_particles.clear();
+}
+void ParticleCreatorFile::adjustBoxSize(point_t &size, bool_point_t& frameRCfront,  bool_point_t& frameRCend){
+
+    ifstream pos(m_filename.c_str());
+    string s ;
+    pos >> skipws >> s;
+        while (s != "!!!" && !pos.eof()) {
+
+          pos >> skipws >> s;
+          while (s != "!!!" && !pos.eof()){
+            pos >> skipws >> s;
+          }
+          pos >> skipws >> s;              
+        }
+     Particle p;
+   
+	bool_point_t periodicityFront = ((Boundary*) m_parent)->periodicityFront();
+	MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "periodicityFront = " << periodicityFront);
+	bool_point_t periodicityBack = ((Boundary*) m_parent)->periodicityBack();
+	MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "periodicityBack = " 
+	<< periodicityBack);
+	
+        string freeOrFrozen = "free";
+        /* peek() looks at what the next character is without extracting it. This loop 
+         * continues until the first '!' at the end of the input file is seen. 
+         */
+        
+        while(!pos.eof() && pos.peek() != '!' ){ 
+           pos >> skipws >> freeOrFrozen ;  //first species, dismissed.
+	   MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "second call of readParticle");
+           readParticle(p,pos,freeOrFrozen);
+	   // ignore the remaining attributes if there are any
+	   pos.ignore(HUGE_VAL,'\n');
+           if(!m_particlesInside){        
+                if (!(M_BOUNDARY->isInside(p.r))) {
+                 
+                    for(int i = 0 ; i< SPACE_DIMS; i++){
+                        if((p.r[i]-size[i]) <=0){ //smaller than box
+                            frameRCfront[i] = frameRCfront[i] || !periodicityFront[i] ;
+                        }
+                        if((size[i]-p.r[i])<=0){ //bigger than box
+                            frameRCend[i] = frameRCend[i] || !periodicityBack[i];
+                        }          
+                    }
+                }
+            }   
+        
+        }
+        
+	MSG_DEBUG("ParticleCreatorFile::adjustBoxSize","frameRCfront = " << frameRCfront << ", frameRCend = " << frameRCend);
+
 }

@@ -1,0 +1,93 @@
+------------------
+NOTE(from DK): The solutions below still fail as one user commented:
+
+...................
+pal666 commented on 24 Dec 2015
+
+offsetof's behavior is undefined because standard does not guarantee that z will lay after y. and no amount of constexpr trickery will change that, if your code depends on members laid out sequentially, they all have to be defined in one class.
+...................
+
+But for our purposes, it should hold true that "members [are] laid out sequentially, they all have to be [and are] defined in one class." We are currently (2017-08-07) talking about the Particle and the PAirdist class, and there is not (yet) any inheritence from them.
+
+But restructuring the memory managment to global fields with entries for each Particle instead of local entries within each Particle object might resolve this issue anyway, at least for Particles. Also Pairdist might then not be needed anymore in the current form. (See TODO and/or DEBUG file)
+------------------
+
+from https://gist.github.com/graphitemaster/494f21190bb2c63c5516
+
+Working around offsetof limitations in C++:
+
+There is sometimes a situation in which one needs to get the relative offset of a structure field, common examples of this include serialization frameworks which aid to serialize objects, vertex attributes for rendering (D3D, GL.), etc.
+
+The most common technique for getting this information is through the offsetof macro defined in stddef.h. Unfortunately using the macro in C++ comes with a new set of restrictions that prevent some (subjectively valid) uses of it.
+
+Intuition would have you believe that using offsetof on classes/structures with standard-layout would work. However when a base class has data members, the deriving class is not considered standard-layout. Presumably the reason for this is that C++ wants to beable to permit very unusual layouts where a given inherited class might not have the same offset in all instances?
+
+A less relaxed compiler will emit diagnostic for this as a result:
+
+struct vec2 { float x, y; };
+struct vec3 : vec2 { float z; };
+struct vec4 : vec3 { float w; };
+
+y_offset = offsetof(vec4, y);
+
+Even though vec4 definitely has the following memory layout:
+
+  0   4   8   C
+| x | y | z | w |
+
+This becomes a problem and often leads to techniques that lead to illegal code such as the following technique present in many game engines:
+
+vec4 *v = 0;
+y_offset = &v->y;
+
+Various people would have you believe it's not undefined since it tends to be the common technique implored to implement the offsetof macro. Modern compilers do provide intrinsics however; (GCC, Clang) now use __builtin_offsetof because they're now beginning to optimize based on the assumption code does not depend on undefined behavior. For more information on why you should no longer write code like that, check out these in depth analysis of the technique:
+
+https://software.intel.com/en-us/blogs/2015/04/20/null-pointer-dereferencing-causes-undefined-behavior
+
+http://www.viva64.com/en/b/0306/
+
+This leaves us in a tough position however. How can we work around this limitation without invoking undefined behavior?
+
+One technique would be to create an object on stack and calculate the offset like so:
+
+vec4 v;
+v_offset = size_t(&v.y) - size_t(&v);
+
+However this is not a valid analog for offsetof which is usuable in constant expressions as it yields a constant value. Which means code like the following:
+
+enum { memory_needed = offsetof(vec4, y) };
+unsigned char memory_for_x_and_y[memory_needed];
+
+Cannot be realized with this technique.
+
+Unfortunately C++11s constexpr rules are too restrictive to allow us to have a local object in the function, but C++14 did relax those rules allowing us to achieve what we want:
+
+template <typename T1, typename T2>
+inline size_t constexpr offset_of(T1 T2::*member) {
+    constexpr T2 object {};
+    return size_t(&(object.*member)) - size_t(&object);
+}
+
+As long as T2 has a default constructor which is constexpr this works. The implicit default constructors for our vec classes are implicitly constexpr so this works:
+
+y_offset = offset_of(&vec4::y);
+
+However C++14 is fairly new and I needed a C++11 compatible option which yields constant values. After a little bit of work, I came up with the following solution:
+
+template <typename T1, typename T2>
+struct offset_of_impl {
+    static T2 object;
+    static constexpr size_t offset(T1 T2::*member) {
+        return size_t(&(offset_of_impl<T1, T2>::object.*member)) -
+               size_t(&offset_of_impl<T1, T2>::object);
+    }
+};
+template <typename T1, typename T2>
+T2 offset_of_impl<T1, T2>::object;
+
+template <typename T1, typename T2>
+inline constexpr size_t offset_of(T1 T2::*member) {
+    return offset_of_impl<T1, T2>::offset(member);
+}
+
+Not as pretty but gets the job done. The compiler diagnostics for misusing this tend to be legible, if you're feeling a bit zealous you could use enable_if to check if the type has a default constructor before stamping out the function. But I found that the diagnostics for that were less legible than not having any check at all.

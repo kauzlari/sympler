@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -65,7 +65,7 @@ void FPairVector::init()
      "dv_i = FPV*dt\n"
      "     = particleFactor_i*Sum_j(pairFactor_ij*weight_ij)*dt\n"
       "\nwhere particleFactor_i(j) is a vector and a sum of quantities related to particle i(j),\n"     "pairFactor_ij is a vector and includes all pair contributions of the pair ij,\n"
-     "weight_ij represents the derivative of the used weighting function.\n"
+     " weight_ij represents -W'(rij)/rij of the used weighting function W.\n"
      );
 
   STRINGPC
@@ -100,48 +100,18 @@ void FPairVector::computeForces(Pairdist* pair, int force_index)
 void FPairVector::computeForces(Pairdist* pair, int force_index, int thread_no)
 #endif
 {
-/*  M_PAIRCREATOR->createDistances();
-
-  FOR_EACH_PAIR__PARALLEL
-      (FPairVector,
-       m_cp, */
-
        if (this->m_cutoff > pair->abs())
        {
          point_t temp;
 
-#ifdef ENABLE_PTHREADS
-	 pair->firstPart()->lock();
-	 pair->secondPart()->lock();
-#endif
     this->m_pairFactor(&temp, &(*pair));
-
-// 	 MSG_DEBUG("FPairVector::computeForces", "temp = " << temp);
 
     point_t fi;
     point_t fj;
 
-//     MSG_DEBUG("FPairVector::computeForces", "fi before = " << fi);
-//     MSG_DEBUG("FPairVector::computeForces", "fj before = " << fj);
-
     // compute the particle-expressions
     this->m_1stparticleFactor(&fi, &(*pair));
     this->m_2ndparticleFactor(&fj, &(*pair));
-
-//     MSG_DEBUG("FPairVector::computeForces", "fi after function = " << fi);
-//     MSG_DEBUG("FPairVector::computeForces", "fj after function = " << fj);
-
-/*    point_t tester;
-    double arg[3];
-    for (size_t i = 0; i < 3; ++i)
-    {
-    tester[i] = 0;
-    arg[i] = i;
-       }
-    MSG_DEBUG("FPairVector::computeForces", "tester before function = " << tester);
-    MSG_DEBUG("FPairVector::computeForces", "velfirst = " << pair->firstPart()->v);
-    self->m_fpf(&tester, arg, &(*pair));
-    MSG_DEBUG("FPairVector::computeForces", "tester after function = " << tester);*/
 
     // loop necessary because operator* of math_vector_t does scalar product
     for(size_t i = 0; i < SPACE_DIMS; ++i)
@@ -150,18 +120,8 @@ void FPairVector::computeForces(Pairdist* pair, int force_index, int thread_no)
       fj[i] *= temp[i];
     }
 
-//     MSG_DEBUG("FPairVector::computeForces", "fi after temp = " << fi);
-//     MSG_DEBUG("FPairVector::computeForces", "fj after temp = " << fj);
-
-
     fi *= this->m_wf->weight(pair, pair->secondPart()->r);
     fj *= this->m_wf->weight(pair, pair->firstPart()->r);
-
-//     MSG_DEBUG("FPairVector::computeForces", "fi after weight = " << fi);
-//     MSG_DEBUG("FPairVector::computeForces", "fj after weight = " << fj);
-
-
-// 	 MSG_DEBUG("FPairVector::computeForces", " second r = " << pair->secondPart()->r << "first r = " << pair->firstPart()->r);
 
 #ifndef _OPENMP
     if (pair->actsOnFirst())
@@ -181,12 +141,7 @@ void FPairVector::computeForces(Pairdist* pair, int force_index, int thread_no)
     }
 #endif
 
-#ifdef ENABLE_PTHREADS
-	 pair->secondPart()->unlock();
-	 pair->firstPart()->unlock();
-#endif
        }
-//       );
 }
 
 

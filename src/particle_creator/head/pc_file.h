@@ -34,7 +34,6 @@
 #define __PC_FILE_H
 
 #include <fstream>
-
 #include "pc_free_pcalc.h"
 
 
@@ -47,6 +46,14 @@ protected:
   string m_filename;
   /* list of frozen particles */
   	map<int, ParticleList> m_particles_frozen;
+  /*!
+   * is particle inside geometry or not? default yes      
+   */
+  bool m_particlesInside ; 
+  /*!
+   * Takes the cutoff from Simulation before the "skin" from the Verlet List is added
+   */
+  double myCutoff;
 
   void init();
 
@@ -57,7 +64,19 @@ public:
 
   virtual void createParticles();
   virtual void flushParticles();
-		
+   /*!
+  * In principle for adjusting the box size proposed by the boundary. But in fact, 
+  * this ParticleCreator adjusts the box size only indirectly via the second and 
+  * third argument
+  * @param size the box size proposed by the \a Boundary , this 
+  * \a ParticleCreator belongs to 
+   * @param frameRCfront Should the 'lower end' of the simulation box be extended 
+   * in order to put wall \a Particle s there?
+   * @param frameRCend Should the 'upper end' of the simulation box be extended 
+   * in order to put wall \a Particle s there?
+  */
+  virtual void adjustBoxSize(point_t &size, bool_point_t& frameRCfront, bool_point_t& frameRCend);
+  void readParticle(Particle &p, ifstream &pos, string &freeOrFrozen );
   virtual void setup();
 };
 

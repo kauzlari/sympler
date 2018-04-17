@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -143,13 +143,10 @@ void IntegratorTensor::unprotect(size_t index)
 }
 
 
-
 void IntegratorTensor::integrateStep1()
 {
   Phase *phase = M_PHASE;
 
-  //  MSG_DEBUG("IntegratorTensor::integrateStep1", "m_dt = " << m_dt);
-//   m_force_index = M_CONTROLLER->forceIndex();
   size_t force_index = M_CONTROLLER->forceIndex();
 
   FOR_EACH_FREE_PARTICLE_C__PARALLEL
@@ -158,19 +155,9 @@ void IntegratorTensor::integrateStep1()
        for(size_t j = 0; j < SPACE_DIMS; ++j)
          for(size_t k = 0; k < SPACE_DIMS; ++k)
        {
-         if (isnan(i->tag.tensorByOffset(((IntegratorTensor*) data)->m_force_offset[/*m_*/force_index])(j, k))) {
-           cout << "slot = " << i->mySlot << ", "
-               << ((IntegratorTensor*) data)->m_tensor_name << " = "
-               << i->tag.tensorByOffset(((IntegratorTensor*) data)->m_tensor_offset) << ", "
-               << "force = "
-               << i->tag.tensorByOffset(((IntegratorTensor*) data)->m_force_offset[/*m_*/force_index])
-               << endl;
-
-           throw gError("IntegratorTensor::integrateStep1", "Force was not-a-number!");
-         }
 
          i->tag.tensorByOffset(((IntegratorTensor*) data)->m_tensor_offset)(j, k) +=
-             ((IntegratorTensor*) data)->m_dt * i->tag.tensorByOffset(((IntegratorTensor*) data)->m_force_offset[/*m_*/force_index])(j, k);
+             ((IntegratorTensor*) data)->m_dt * i->tag.tensorByOffset(((IntegratorTensor*) data)->m_force_offset[force_index])(j, k);
        }
       );
 

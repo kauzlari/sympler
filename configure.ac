@@ -1,14 +1,13 @@
 dnl 
 
 dnl AC_PREREQ(2.57)
-AC_INIT(sympler, 0.1, david.kauzlaric@frias.uni-freiburg.de)
-AM_INIT_AUTOMAKE
+AC_INIT(sympler, 0.1, david.kauzlaric@imtek.uni-freiburg.de)
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_SRCDIR([src/main.cpp])
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
-AM_INIT_AUTOMAKE
 AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_CPP
@@ -38,17 +37,15 @@ AC_CHECK_LIB(z, gzread)
 
 AC_C_BIGENDIAN(ENDIAN="big", ENDIAN="little")
 
-#HAVE_SDL="no"
-
-
 #AC_SUBST(AM_CPPFLAGS)
 
-#SDL_CFLAGS=""
-#AC_SUBST(SDL_CFLAGS)
-#SDL_LIBS=""
-#AC_SUBST(SDL_LIBS)
+SDL_CFLAGS=""
+AC_SUBST(SDL_CFLAGS)
+SDL_LIBS=""
+AC_SUBST(SDL_LIBS)
 
 CHECK_SDL="yes"
+HAVE_SDL="no"
 
 # Static compile??
 AC_ARG_ENABLE(all-static,
@@ -60,34 +57,54 @@ AC_ARG_ENABLE(all-static,
     fi
   ]) 
 
+USER_SDL="no"
+
+# SDL-activation by user (Since I don't understand autotools, this is the only solution I am able to implement)
+AC_ARG_ENABLE(meter-lives,
+  [  --enable-meter-lives     enables 2 MeterLive modules and requires SDL-library >=1.2.0 and <2.0], 
+  [ 
+    if test "$enableval" = "yes" ; then  
+      USER_SDL="yes"
+    fi
+  ]) 
+
 AC_SUBST(LT_LDFLAGS)
 
 if test "${CHECK_SDL}" = "no"; then
    HAVE_SDL="no"
 else
-   AM_PATH_SDL(1.2.0, HAVE_SDL="yes", HAVE_SDL="no")
+   if test "${USER_SDL}" = "yes"; then
+      HAVE_SDL="yes"
+# Since I don't understand autotools, the next does not work if SDL not installed: therefore commented out
+#      AM_PATH_SDL(1.2.0, HAVE_SDL="yes", HAVE_SDL="no")
+      # Next is hopefully true on most systems. Don't know better since I don't understand...
+      SDL_LIBS="-lSDL"
+      AC_SUBST(SDL_LIBS)
+   fi
 fi
 
 if test "${HAVE_SDL}" = "yes"; then
   AC_DEFINE(HAVE_SDL, 1, Is the SDL library present?)
+  AC_MSG_WARN(Compiling with SDL library for modules such as MeterLive.)
+  AC_MSG_WARN(Make sure you have libsdl1.2 or newer but NOT libsdl2.0 or newer!)
 else
   AC_MSG_WARN(Compiling without MeterLive)
 fi
 
 
 # Use pthreads?
-AC_ARG_ENABLE(pthreads,
-  [  --enable-pthreads       build multithreaded code using pthreads (currently unstable)],
-  [
-    if test "$enableval" = "yes"; then
-      ENABLE_PTHREADS="yes"
-    fi
-  ])
-
-if test "${ENABLE_PTHREADS}" = "yes"; then
-  AC_DEFINE(ENABLE_PTHREADS, 1, Compile multithreaded code using pthreads)
-#  CFLAGS="-pthread -D__USE_MALLOC $CFLAGS"
-fi
+#AC_ARG_ENABLE(pthreads,
+#  [  --enable-pthreads       build multithreaded code using pthreads (currently unstable)],
+#  [
+#    if test "$enableval" = "yes"; then
+#      ENABLE_PTHREADS="yes"
+#    fi
+#  ])
+#
+#if test "${ENABLE_PTHREADS}" = "yes"; then
+#  AC_DEFINE(ENABLE_PTHREADS, 1, Compile multithreaded code using pthreads)
+##  CFLAGS="-pthread -D__USE_MALLOC $CFLAGS"
+#fi
 
 #AC_SUBST(CFLAGS)
 
@@ -367,5 +384,53 @@ AC_CONFIG_FILES([Makefile
 		 src/weighting_function/Makefile
 		 src/weighting_function/head/Makefile
 		 src/weighting_function/source/Makefile
-		 src/tools/Makefile])
+		 src/tools/Makefile
+
+		 srcUnittest/Makefile
+		 srcUnittest/basic/Makefile
+		 srcUnittest/basic/head/Makefile
+		 srcUnittest/basic/source/Makefile
+		 srcUnittest/boundary/Makefile
+		 srcUnittest/boundary/head/Makefile
+		 srcUnittest/boundary/source/Makefile
+		 srcUnittest/calculator/Makefile
+		 srcUnittest/calculator/head/Makefile
+		 srcUnittest/calculator/source/Makefile
+		 srcUnittest/force/Makefile
+		 srcUnittest/force/head/Makefile
+		 srcUnittest/force/source/Makefile
+		 srcUnittest/function_parser/Makefile
+		 srcUnittest/function_parser/head/Makefile
+		 srcUnittest/function_parser/source/Makefile
+		 srcUnittest/geometry/Makefile
+		 srcUnittest/geometry/head/Makefile
+		 srcUnittest/geometry/source/Makefile
+		 srcUnittest/geometry/stl/Makefile
+		 srcUnittest/geometry/stl/head/Makefile
+		 srcUnittest/geometry/stl/source/Makefile
+		 srcUnittest/integrator/Makefile
+		 srcUnittest/integrator/head/Makefile
+		 srcUnittest/integrator/source/Makefile
+		 srcUnittest/meter/Makefile
+		 srcUnittest/meter/head/Makefile
+		 srcUnittest/meter/source/Makefile
+		 srcUnittest/meter/grid_meter/Makefile
+		 srcUnittest/meter/grid_meter/head/Makefile
+		 srcUnittest/meter/grid_meter/source/Makefile
+		 srcUnittest/particle_creator/Makefile
+		 srcUnittest/particle_creator/head/Makefile
+		 srcUnittest/particle_creator/source/Makefile
+		 srcUnittest/postprocessor/Makefile
+		 srcUnittest/postprocessor/head/Makefile
+		 srcUnittest/postprocessor/source/Makefile
+		 srcUnittest/reflector/Makefile
+		 srcUnittest/reflector/head/Makefile
+		 srcUnittest/reflector/source/Makefile
+		 srcUnittest/thermostat/Makefile
+		 srcUnittest/thermostat/head/Makefile
+		 srcUnittest/thermostat/source/Makefile
+		 srcUnittest/weighting_function/Makefile
+		 srcUnittest/weighting_function/head/Makefile
+		 srcUnittest/weighting_function/source/Makefile
+		 srcUnittest/tools/Makefile])
 AC_OUTPUT

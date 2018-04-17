@@ -17,7 +17,7 @@
 #	-ldl
 
 
-#INCLUDES = \
+#AM_CPPFLAGS = \
 #	-I$(top_srcdir)/basic/head \
 #	-I$(top_srcdir)/function_parser/head \
 #	-I$(top_srcdir)/geometry/head

@@ -3,11 +3,17 @@ PRIMARY and SECONDARY tells you how important this new feature is. The features 
 
 PRIMARY:
 
-TASK TAKEN: (II) Implement Cell-subdivision with cell-sizes >= 0.5*cutoff. Implement the choice of the factor (0.5 or 1) either as option in current ManagerCell, or in new class. In the latter case you maybe do not have to make the choice between two modules in the XML, but a parent class can decide based on an attribute, which ManagerCell it creates.
+(II) Let the autotools (or their successor, e.g., cmake) autocheck if Cppunit is installed on the system
+
+(II) Every ASCII and BINARY output should contain a header with the version number of SYMPLER used for producing the output.
+
+(II) FIRST VERSION in branch improved_neighbor_search, but seems to work more slowly than the cell-sizes >= 1*cutoff case: Implement Cell-subdivision with cell-sizes >= 0.5*cutoff. Implement the choice of the factor (0.5 or 1) either as option in current ManagerCell, or in new class. In the latter case you maybe do not have to make the choice between two modules in the XML, but a parent class can decide based on an attribute, which ManagerCell it creates.
 
 (II) The fact that ParticleCreatorWall creates a cubic lattice of wall particles starting half a lattice spacing "a" from the box-rim extended "outwards" by 1rc complicates the creation of symmetric walls and the easy adjustment of wall spacings for arbitrary rc with mod(rc,a)!=0. Doesn't starting a/2 from the wall and then going with the wall-particle creation 1rc "outwards" solve all the problems? NOTE: This change will most likely require to adapt some of the testsuite and/or example files.
 
 (III) Allow for cache-coherence: Store all particle-DOFs (and pair-DOFs) in separate continuous-memory arrays, probably using SmartLists as now for the particles and pairs.
+
+(I): The Callable hierarchy is a mess with a lot of duplicate code. Clean this. For example you could introduce ParticleCallable and Pair(Particle)Callable and define declare members such as m_species only once. Besides that you also need some renaming from Thermostat-like names to general Callable names for some members.
 
 (II) Currently (2014-09-09), we can not use a Symbol "x" in a runtime compiled expression, which only occurs as a column in a particle file for ParticleCreatorFile. The Symbol will be unknown because the runtime compiled expressions do not check for its existence in the particle file. So, either realise this somehow, maybe with ParticleCreatorFile::setupBeforeParticleCreation (of course you should also avoid to reserve memory for unused garbage columns in the particle file). Or create a PseudoIntegrator for constants (which is at least one reason why we need the mentioned feature), which does not create forces for this Symbol, avoiding the current workaround of using an IntegratorScalar/Vector/Tensor for the Symbol "x".
 
@@ -71,13 +77,13 @@ other:
 
 (II) check, how the GSL that we use is compiled. If it is not optimized, compare optimized GSL functions with the ones from random.* (only what we need) and decide, what is faster. Currently, the random.* routines are faster (because optimized?)
 
-(II)  Fix all the hacks marked by "fixme!"
+(II) Fix all the hacks marked by "fixme!"
 
 (II) For the case that once, frozenP without walls will become necessary: give atribute frozen = 0/1 to every ParticleCreator (for PCWall it is always 1, i.e., has no effect). Each PC with frozen=1 will write ITSELF in the output-file and NOT a PCFile.
 
-(II)  Look at MeterVisco. Probably doesn't work anymore.
+(II) Look at MeterVisco. Probably doesn't work anymore.
 
-(III)  Adaptive cell subdivision. Would be really nice regarding parallelization: The number of particles per cell could be kept constant so the load can be distributed uniformely across the machines
+(III) Adaptive cell subdivision. Would be really nice regarding parallelization: The number of particles per cell could be kept constant so the load can be distributed uniformely across the machines
 
 (III) implement a function freezeParticle() (and maybe unfreeze...) and test if we can use that for solidification; e.g. if(p.Ekin<limit) freezeParticle(p) -> size of frozen Arrays would also become variable !!!
 
@@ -85,4 +91,3 @@ other:
 	- run this sim directly before
 	- or take the coords from an other available output file
 	- repeat the coordinates periodically, if the input system is too small for the desired simulation
-

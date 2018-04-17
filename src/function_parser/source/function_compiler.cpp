@@ -191,10 +191,10 @@ s << pTemp << "/" << C_FC_PREFIX << s_function_counter;
   /* Fixme!!! Check for installed compilers, temp directory, etc... */
 #ifdef __APPLE__
   r = system
-    (("gcc -O3 -dynamiclib -fPIC -nostartfiles -lm -o " + m_so_filename + " " + s.str() + ".c").c_str());
+    (("gcc -O3 -dynamiclib -fPIC -nostartfiles -o " + m_so_filename + " " + s.str() + ".c -lm").c_str());
 #else
   r = system
-    (("gcc -O3 -shared -fPIC -nostartfiles -lm -o " + m_so_filename + " " + s.str() + ".c").c_str());
+    (("gcc -O3 -shared -fPIC -nostartfiles -o " + m_so_filename + " " + s.str() + ".c -lm").c_str());
 #endif
 
   remove((s.str() + ".c").c_str());

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -98,17 +98,12 @@ class PairParticleTensor : public ValCalculatorArbitrary
 
         Particle* first = pD->firstPart();
         Particle* second = pD->secondPart();
-//             MSG_DEBUG("PairParticleVector::compute", "temp = " << temp);
-
 
         if(pD->actsOnFirst())
         {
           for(size_t i = 0; i < SPACE_DIMS; ++i)
             for(size_t j = 0; j < SPACE_DIMS; ++j)
               tempFirst(i, j) *= temp(i, j);
-#ifdef ENABLE_PTHREADS
-              first->lock();
-#endif
 
 #ifndef _OPENMP
               first->tag.tensorByOffset(m_slots.first) += tempFirst;
@@ -122,10 +117,6 @@ class PairParticleTensor : public ValCalculatorArbitrary
               }
 #endif
 
-//     MSG_DEBUG("PairParticleVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              first->unlock();
-#endif
         }
 
         if(pD->actsOnSecond())
@@ -133,9 +124,6 @@ class PairParticleTensor : public ValCalculatorArbitrary
           for(size_t i = 0; i < SPACE_DIMS; ++i)
             for(size_t j = 0; j < SPACE_DIMS; ++j)
               tempSecond(i, j) *= temp(i, j);
-#ifdef ENABLE_PTHREADS
-              second->lock();
-#endif
 
 #ifndef _OPENMP
               second->tag.tensorByOffset(m_slots.second) += m_symmetry*(tempSecond);
@@ -149,10 +137,6 @@ class PairParticleTensor : public ValCalculatorArbitrary
               }
 #endif
 
-//     MSG_DEBUG("PairParticleVector::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              second->unlock();
-#endif
         }
       }
     }

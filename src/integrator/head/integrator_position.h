@@ -47,26 +47,22 @@ class Cell;
 //---- IntegratorPosition ----
 
 /*!
- * Modified Velocity-Verlet integrator for the positions and velocities.
- * See: R. D. Groot and P. B. Warren, J. Chem. Phys. 107, 4423-4435 (1997)
+ * Parent class for \a Integrator s integrating particle positions (and maybe other variables as well)
+ * FIXME: We should make this an abstract class with pure virtual functions!
  */
 class IntegratorPosition: public Integrator
 {
 protected:
-  /*!
-   * Lambda of Warren and Groot paper
-   */
-  double m_lambda;
-
-  /*!
-   * Difference to lambda = 1/2 (the standard Velocity-Verlet)
-   */
-  double m_lambda_diff;
 
   /*!
    * Timestep
    */
   double m_dt;
+
+  /*!
+   * Mass for the species this integrator works for.
+   */
+  double m_mass;
 
   /*!
    * Timestep divided by particle mass

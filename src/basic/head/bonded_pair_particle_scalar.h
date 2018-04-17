@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -99,7 +99,6 @@ class BondedPairParticleScalar : public BondedPairParticleArbitrary
         virtual void compute(Pairdist* pD, int thread_no)
 #endif
         {
-	  //           MSG_DEBUG("PairParticleVector::compute", "START, m_cutoff = " << m_cutoff << ", slots = (" << m_slots.first << ", " << m_slots.second << ")");            
 	  double temp;
           
 	  // compute the pair-expression
@@ -113,65 +112,44 @@ class BondedPairParticleScalar : public BondedPairParticleArbitrary
           
 	  Particle* first = pD->firstPart(); 
 	  Particle* second = pD->secondPart();
-	  //             MSG_DEBUG("BondedPairParticleScalar::compute", "temp = " << temp);            
-	  
           
-	  if(pD->actsOnFirst())
-            {
-	      tempFirst *= temp;
-#ifdef ENABLE_PTHREADS
-              first->lock();
+	  if(pD->actsOnFirst()) {
+	    tempFirst *= temp;
+	    
+#ifndef _OPENMP
+	    
+	    first->tag.doubleByOffset(m_slots.first) += tempFirst;
+	    
+	    
+#else
+	    first->tag.doubleByOffset(m_slots.first) += tempFirst;
+	    
+	    // FIXME: parallelise!
+	    
+	    // this is how the parallel version could look like
+	    /*               for (size_t a = 0; a < SPACE_DIMS; ++a) { */
+	    /*                 (*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first))[m_vector_slots.first + a] += tempFirst[a]; */
+	    /*               } */
 #endif
+	    
+	  }
+	  
+	  if(pD->actsOnSecond()) {
+	    tempSecond *= temp;
 	      
 #ifndef _OPENMP
-
-               first->tag.doubleByOffset(m_slots.first) += tempFirst;
-
-/* 	      MSG_DEBUG("BondedPairParticleScalar::compute", "tag-data AFTER = " << first->tag.pointByOffset(m_slots.first));             */
-
-
+	    second->tag.doubleByOffset(m_slots.second) += m_symmetry*(tempSecond);
 #else
-              first->tag.doubleByOffset(m_slots.first) += tempFirst;
-
-	      // FIXME: parallelise!
-
-	      // this is how the parallel version could look like
-/*               for (size_t a = 0; a < SPACE_DIMS; ++a) { */
-/*                 (*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first))[m_vector_slots.first + a] += tempFirst[a]; */
-/*               } */
+	    // FIXME: parallelise
+	    second->tag.doubleByOffset(m_slots.second) += m_symmetry*(tempSecond);
+	    
+	    // this is how the parallel version could look like
+	    /*               for (size_t a = 0; a < SPACE_DIMS; ++a) { */
+	    /*                 (*second->tag.vectorDoubleByOffset(m_copy_slots[thread_no].second))[m_vector_slots.second + a] += m_symmetry*tempSecond[a]; */
+	    /*               } */
 #endif
-	      
-	      //     MSG_DEBUG("BondedPairParticleScalar::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));            
-#ifdef ENABLE_PTHREADS
-              first->unlock();
-#endif
-            }
-	  
-	  if(pD->actsOnSecond())
-            {
-	      tempSecond *= temp;
-#ifdef ENABLE_PTHREADS
-              second->lock();
-#endif
-	      
-#ifndef _OPENMP
-              second->tag.doubleByOffset(m_slots.second) += m_symmetry*(tempSecond);
-#else
-	      // FIXME: parallelise
-              second->tag.doubleByOffset(m_slots.second) += m_symmetry*(tempSecond);
-
-	      // this is how the parallel version could look like
-/*               for (size_t a = 0; a < SPACE_DIMS; ++a) { */
-/*                 (*second->tag.vectorDoubleByOffset(m_copy_slots[thread_no].second))[m_vector_slots.second + a] += m_symmetry*tempSecond[a]; */
-/*               } */
-#endif
-	      
-	      //     MSG_DEBUG("BondedPairParticleScalar::compute", "AFTER: first->point = " << first->tag.pointByOffset(m_slots.first));
-#ifdef ENABLE_PTHREADS
-              second->unlock();
-#endif
-            }
-	  
+	    
+	  } 
         }
 
 	/*!

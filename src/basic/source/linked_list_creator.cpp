@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -116,14 +116,12 @@ void LinkedListCreator::createDistances()
 // int count =0;
 
 #pragma omp for ordered
-  for (int t = 0; t < global::n_threads; ++t) {
+  for (size_t t = 0; t < global::n_threads; ++t) {
     CellLink* first = M_MANAGER->firstLink()[t];
     for (CellLink* cl = first; cl != NULL; cl = cl->next) {	   
       cl->createDistances(t);
-//       ++count;
     }
   }
-//  MSG_DEBUG("LinkedListCreator::createDistances", "count = " << count << " active links = " << M_MANAGER->activeLinks()[t]);
 
 #else
   LL_FOR_EACH__PARALLEL
@@ -134,7 +132,7 @@ void LinkedListCreator::createDistances()
    
      i->createDistances();
   );
-     // MSG_DEBUG("LinkedListCreator::createDistances", "number of links = " << M_MANAGER->activeLinks());
+
 #endif
 
     // randomize pairs if wished
@@ -143,7 +141,7 @@ void LinkedListCreator::createDistances()
       FOR_EACH_COLOUR_PAIR
       (M_MANAGER,
 
-        for (int t = 0; t < global::n_threads; ++t) {
+        for (size_t t = 0; t < global::n_threads; ++t) {
 
           // free pairs
           size_t listSize = cp->freePairs()[t].size();

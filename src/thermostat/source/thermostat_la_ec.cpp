@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -173,14 +173,6 @@ void ThermostatLAEnergyConserving::thermalize(Phase* phase)
            sqrt(4/(m_ie->reciprocalTemperature(*pair->firstPart())+
            m_ie->reciprocalTemperature(*pair->secondPart())));*/
 
-#ifdef ENABLE_PTHREADS
-         pair->firstPart()->lock();
-         pair->secondPart()->lock();
-#endif
-
-//         maxwell_factor = 
-//           sqrt(self->m_ie.first->temperature(*pair->firstPart())+self->m_ie.second->temperature(*pair->secondPart()));
-
          maxwell_factor = sqrt
            (4/
             (self->m_ie.first->reciprocalTemperature(*pair->firstPart())
@@ -228,10 +220,6 @@ void ThermostatLAEnergyConserving::thermalize(Phase* phase)
          }
        }
 
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
      }	
   );
 }

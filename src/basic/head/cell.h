@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -109,13 +109,6 @@ protected:
    * itself is deactivated.
    */
   int m_n_active_cells;
-
-#ifdef ENABLE_PTHREADS
-  /*!
-   * Mutex for concurrent access to m_n_active_cells
-   */
-  pthread_mutex_t m_activation__mutex;
-#endif
 
   /*!
    * Stores the relative distance of the
@@ -329,13 +322,6 @@ protected:
    * List of all frozen particles currently in a cell.
    */
   vector<list<Particle*> > m_frozen_particles;
-
-#ifdef ENABLE_PTHREADS
-  /*!
-   * Mutex for access to m_injected_particles
-   */
-  vector<pthread_mutex_t> m_injected_particles__mutex;
-#endif
 
   /*!
    * List of all FREE particles to be newly injected.

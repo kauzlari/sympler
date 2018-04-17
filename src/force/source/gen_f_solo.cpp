@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -68,26 +68,13 @@ void GenFSolo::computeForces(Pairdist* pair, int force_index)
 void GenFSolo::computeForces(Pairdist* pair, int force_index, int thread_no)
 #endif
 {
-//   assert(m_cp);
-
   m_force_index = force_index;
 
-//   computeForceFactors();
-
-//   FOR_EACH_PAIR__PARALLEL
-//     (GenFSolo,
-//      m_cp,
      if (pair->abs() < this->m_cutoff) {
        point_t g = {{{ 0, 0, 0 }}};
-//        g.assign(0);
        double weight = this->m_wf->interpolate(pair, g);
 
        point_t f = this->computeForceFactor(&(*pair)) * weight * pair->cartesian()/pair->abs();
-
-#ifdef ENABLE_PTHREADS
-       pair->firstPart()->lock();
-       pair->secondPart()->lock();
-#endif
 
        /* because of CONVENTION 2 in pairdist.h, actsOn*() will always return false for a
           frozen particle and there is consequently no danger, e.g., of modifying a force
@@ -122,12 +109,7 @@ void GenFSolo::computeForces(Pairdist* pair, int force_index, int thread_no)
 
 #endif
 
-#ifdef ENABLE_PTHREADS
-       pair->secondPart()->unlock();
-       pair->firstPart()->unlock();
-#endif
      }
-//      );
 }
 
 

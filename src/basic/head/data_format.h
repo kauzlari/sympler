@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -84,7 +84,7 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
 /* Macro to perform operation on all SmartPointer datatypes */
 #define NOOP while(0)
 #ifdef WITH_ARRAY_TYPES
-//auch
+
 #define	DATAFORMAT_ARRAY_SWITCH(attr,m_data,oper) \
 	case DataFormat::MArray2D:\
 		oper(attr,m_data,array2d_double_sp); break
@@ -92,28 +92,19 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
 #define	DATAFORMAT_ARRAY_SWITCH(attr,m_data,oper) NOOP
 #endif
 
-#define DATAFORMAT_VECTOR_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
-	case DataFormat::VECTOR_DOUBLE:\
-		oper((attr),(m_data),vector_double_sp); break; \
-	case DataFormat::VECTOR_INT:\
-		oper((attr),(m_data),vector_int_sp); break; \
-	case DataFormat::VECTOR_POINT:\
-		oper((attr),(m_data),vector_point_sp); break; \
-	case DataFormat::VECTOR_TENSOR:\
-		oper((attr),(m_data),vector_tensor_sp); break; \
+#define DATAFORMAT_CONTAINER_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
+  case DataFormat::VECTOR_DOUBLE:				       \
+    oper((attr),(m_data),vector_double_sp); break;		       \
+  case DataFormat::VECTOR_INT:					       \
+    oper((attr),(m_data),vector_int_sp); break;			       \
+  case DataFormat::VECTOR_POINT:				       \
+    oper((attr),(m_data),vector_point_sp); break;		       \
+  case DataFormat::VECTOR_TENSOR:				       \
+    oper((attr),(m_data),vector_tensor_sp); break;		       \
+    DATAFORMAT_ARRAY_SWITCH((attr),(m_data),oper);			\
+  default: /*Yes, it will be called for other formats and should then do NOTHING!*/ break; \
 }
 
-#define DATAFORMAT_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
-	case DataFormat::VECTOR_DOUBLE:\
-		oper((attr),(m_data),vector_double_sp); break; \
-	case DataFormat::VECTOR_INT:\
-		oper((attr),(m_data),vector_int_sp); break; \
-	case DataFormat::VECTOR_POINT:\
-		oper((attr),(m_data),vector_point_sp); break; \
-	case DataFormat::VECTOR_TENSOR:\
-		oper((attr),(m_data),vector_tensor_sp); break; \
-	DATAFORMAT_ARRAY_SWITCH((attr),(m_data),oper); \
-}
 
 //---- Classes ----
 
@@ -165,13 +156,13 @@ public:
     /*!
      * Index of the attribute.
      */
-    int index;
+    size_t index;
 
     /*!
      * Start of the attribute's data from the beginning of the overall data
      * stored in a \a Data.
      */
-    ptrdiff_t offset;
+    size_t offset;
 
     /*!
      * Type of data.
@@ -190,6 +181,11 @@ public:
   };
 
   /*!
+   * Helper method for setup of memory offsets in the \a Particle tag for newly created attributes
+   */
+  static size_t addNewAttribute(size_t colour, string symbolName, DataFormat::datatype_t datatype, bool persistency = true);
+  
+  /*!
    * Setup c_size_of_datatype array in such a way, that the data
    * is always aligned to a 2^align bit boundary. I hope this ensures cache
    * coherency, but someone with more experience in this stuff should have
@@ -204,7 +200,7 @@ public:
    */
   static int getNumOfDoubles(datatype_t datatype);
 #endif
-
+  
 protected:
   /*!
    * A vector for access to attributes by index

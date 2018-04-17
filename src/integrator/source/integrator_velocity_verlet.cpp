@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -71,40 +71,23 @@ void IntegratorVelocityVerlet::init()
   m_properties.setName("IntegratorVelocityVerlet");
 
   m_properties.setDescription("Integrates the position and momentum coordinates of each particle according to the Velocity-Verlet Algorithm");
-  DOUBLEPC
-  	    (mass, m_mass,0,
-  	     "Mass of the species this integrator is intended for. Default mass = 1. Pay attention the mass is only "
-  	     "effective for the integrator and does not affect the thermostat for instance");
-  m_mass = 1;
+
+    DOUBLEPC
+    (lambda,
+     m_lambda,
+     0,
+     "Lambda parameter for modified velocity verlet algorithm.");
+
+  m_lambda = 0.5;
+
 }
 
 
 void IntegratorVelocityVerlet::isAboutToStart()
 {
-  Phase *phase = M_PHASE;
-  double invMass;
+  IntegratorPosition::isAboutToStart();
 
-  m_dt = M_CONTROLLER->dt();
-
-  if(m_mass <=0)
-    throw gError("IntegratorVelocityVerlet::isAboutToStart", "Invalid value \"" + ObjToString(m_mass) + "\" for attribute 'mass'. Must be >0!");
-  invMass = 1/m_mass;
-  m_dt_div_mass = m_dt*invMass;
-  m_dt_div2_mass = m_dt_div_mass / 2;
   m_lambda_diff = 0.5 - m_lambda;
-
-  size_t counter = 0;
-  FOR_EACH_FREE_PARTICLE_C
-    (phase, m_colour,
-     for (int j = 0; j < FORCE_HIST_SIZE; j++)
-       __iSLFE->force[j].assign(0);
-     ++counter;
-    );
-  if(counter == 0)
-    throw gError("IntegratorVelocityVerlet::isAboutToStart", "no free particles found for species " + m_species + "! Don't instantiate an Integrator for positions and velocities in that case. Use another module to create the species.");
-  // FIXME: so we need some SpeciesCreator to make it more transparent
-  // FIXME: put all in this function into the general setup for Nodes after the particle creation or into s.th. even more general
-
 }
 
 
@@ -145,7 +128,7 @@ void IntegratorVelocityVerlet::integrateStep2()
 //      MSG_DEBUG("IntegratorVelocityVerlet::integrateStep2", name() << "v AFTER = " << i->force[force_index]);
     );
 
-   phase->invalidate();
+   phase->invalidateVelocities();
 }
 
 
@@ -154,11 +137,11 @@ void IntegratorVelocityVerlet::integratePosition(Particle* p, Cell* cell)
   size_t force_index;
   force_index = ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
 
-  const point_t& pt = p->force[force_index]/m_mass;
+  point_t accel = p->force[force_index]/m_mass;
   // Currently (2010-05-05), pt is a const point& argument, so using it in the p->r += ... line is safe
-  cell->doCollision(p, p->r, p->v, pt, (IntegratorPosition*) this);
+  cell->doCollision(p, p->r, p->v, accel, (IntegratorPosition*) this);
 
-  p->r += p->dt * (p->v + 0.5 * p->dt * pt/* p->force[force_index]/m_mass*/);
+  p->r += p->dt * (p->v + 0.5 * p->dt * accel);
   //MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "pos_force= " <<  p->force[force_index]);
   //MSG_DEBUG("IntegratorVelocityVerlet::integratePosition", name() << "position= " <<  p->r);
 
