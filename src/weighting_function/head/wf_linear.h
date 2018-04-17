@@ -51,7 +51,14 @@ class Linear: public WeightingFunction
   virtual ~Linear();
 
   virtual double interpolate(const Pairdist *r, const point_t &p, double *dist_from_wall = NULL) const {
-    return m_factor * (m_cutoff - r->abs());
+    double d = m_cutoff;
+  
+    // since the function may be called with r=NULL, next line 
+    // checks that; if it's so, we assume r->abs() = 0, which, 
+    // e.g., for particle self-contributions is reasonable
+    if(r) d -= r->abs();
+    
+    return m_factor * d;
   }
 
   virtual double weight(const Pairdist *r, const point_t &p, double *dist_from_wall = NULL) const {
@@ -67,7 +74,7 @@ class Linear: public WeightingFunction
     throw gError
       ("Linear::localGradient",
        "Please use a different weighting function. This one is not "
-       "differential at r=rc.");
+       "differentiable at r=rc.");
 
     point_t g = {{{ 0, 0, 0 }}};
     return g;

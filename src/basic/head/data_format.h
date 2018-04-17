@@ -192,6 +192,11 @@ public:
   };
 
   /*!
+   * Helper method for setup of memory offsets in the \a Particle tag for newly created attributes
+   */
+  static size_t addNewAttribute(size_t colour, string symbolName, DataFormat::datatype_t datatype, bool persistency = true);
+  
+  /*!
    * Setup c_size_of_datatype array in such a way, that the data
    * is always aligned to a 2^align bit boundary. I hope this ensures cache
    * coherency, but someone with more experience in this stuff should have
@@ -206,7 +211,7 @@ public:
    */
   static int getNumOfDoubles(datatype_t datatype);
 #endif
-
+  
 protected:
   /*!
    * A vector for access to attributes by index

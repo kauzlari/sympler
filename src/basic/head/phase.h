@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2015, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -426,11 +426,6 @@ public:
   size_t returnNOfFreeParticlesPerGroup(size_t group);
 
   /*!
-   * Invalidate tells phase that the coordinates have been updated.
-   */
-  void invalidate();
-
-  /*!
    * Clear the tags for new calculation of cached quantities
    * currently, only additional doubles of particles are reset to zero
    * Fixme!!! what else could be done here?
@@ -501,7 +496,12 @@ public:
   void invalidatePositions(IntegratorPosition *integrator);
 
   /*!
-   * Is the center of mass velocity still valid. Obsolete?
+   * Tells phase that the velocities have been updated.
+   */
+  void invalidateVelocities();
+  
+  /*!
+   * Is the center of mass velocity still valid. FIXME: Obsolete?
    */
   bool velCMIsOld();
 

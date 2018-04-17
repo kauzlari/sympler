@@ -32,6 +32,8 @@
 
 #include <algorithm>
 
+#include "particle.h"
+
 #include "data_format.h"
 
 //---- DataFormat ----
@@ -112,11 +114,13 @@ DataFormat::attribute_t DataFormat::addAttribute
   }
 }
 
+
 string DataFormat::attribute_t::datatypeAsString() const {
 
   /*static*/ DataFormat::attribute_t::datatypeAsString(this->datatype);
 
 }
+
 
 /*static*/ string DataFormat::attribute_t::datatypeAsString(const datatype_t& datatype) {
   switch (datatype) {
@@ -147,6 +151,18 @@ string DataFormat::attribute_t::datatypeAsString() const {
        + ObjToString(datatype));
   }
 }
+
+
+/*static*/
+size_t DataFormat::addNewAttribute(size_t colour, string symbolName, DataFormat::datatype_t datatype, bool persistency/* = true*/)
+{
+  if(Particle::s_tag_format[colour].attrExists(symbolName))
+    throw gError("DataFormat::addNewAttribute", ": Symbol " + symbolName + " is already existing for colour '" + ObjToString(colour) + "'. If you have chosen this name for one of your other Symbols, choose a different one! If you haven't then this is an internal error and you should file a bug report.");
+
+  // OK, we can create it and return the offset
+  return Particle::s_tag_format[colour].addAttribute(symbolName, datatype, persistency, symbolName).offset;
+}
+
 
 struct alloc_smart_pointer: public unary_function<DataFormat::attribute_t, void> 
 {

@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
+ * Copyright 2002-2017, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -220,7 +220,12 @@ static /*double*/int time_for_parallel2;
 /*     m_toSetupAfterParticleCreation.push_back(callable);  */
 /*   } */
 
+  /*!
+   * Tells all objects that update neighbour lists to do so
+   */
+  void triggerNeighbourUpdate() const;
 
+  
  private:
 
   double m_pairCreateTime;
