@@ -5,6 +5,7 @@ libthermostat_la_SOURCES = \
 	apply_vector_field.cpp \
 	apply_vector_field_file.cpp \
 	apply_vel_field.cpp \
+	shift_particle.cpp \
 	thermostat.cpp \
 	thermostat_energy_rescaling.cpp \
 	thermostat_la.cpp \
