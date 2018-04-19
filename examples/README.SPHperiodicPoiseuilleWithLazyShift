@@ -1,0 +1,3 @@
+Minimal weakly compressible SPH-simulation of Poiseuille flow. SPHperiodicPoiseuilleWithLazyShift.xml is a small extension of SPHperiodicPoiseuille.xml.
+
+The input file is heavily commented. Please continue reading there for further documentation.

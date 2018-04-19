@@ -95,6 +95,31 @@ ManagerCell::~ManagerCell()
 }
 
 
+void ManagerCell::invalidatePositions(size_t colour)
+{
+  
+  /* Tell cells that positions of particles have changed. */
+  LL_FOR_EACH__PARALLEL
+    (Cell,
+     m_first_cell,
+     m_n_active_cells,
+     NULL,
+     i->updatePositions(colour);
+    );
+
+  /* All particles that left cell in the above step are in an
+     additional commit list in the new cells to avoid updating
+     them twice. Insert them into the real particle lists now. */
+  FOR_EACH__PARALLEL
+    (vector<Cell*>,
+     m_cells,
+     //NULL,
+     (*__iFE)->commitInjections();
+    );
+
+}
+
+
 void ManagerCell::invalidatePositions(IntegratorPosition *integrator)
 {
 /* --- Checking if adaptive cell subdivision works! DEBUG CODE! --- */
@@ -146,6 +171,10 @@ void ManagerCell::invalidatePositions(IntegratorPosition *integrator)
     );
 
   /*Tell the ParticleCreators to create additional particles if they plan to*/
+  // FIXME: This smells like a very dangerous call! What if this
+  // function is called at a different place than where it is used to
+  // be called right now? Maybe we do not wish new particles to be
+  // created there? Seems as if you should disentangle that!
   phase()->boundary()->createMoreParticles();
 
   /* All particles that left cell in the above step are in an

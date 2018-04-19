@@ -128,12 +128,19 @@ void ShiftParticle::thermalize(Phase* phase)
      m_colour,
      this,
      
-     i->r += __iSLFE->tag.pointByOffset(m_shiftOffset);
+     i->r += i->tag.pointByOffset(m_shiftOffset);
      
      );
 
   // notify cells and neighbour list of new positions
-  phase -> invalidatePositions(m_shiftOffset);
+  // FIXME: Currently we do not pass the commented out argument, which
+  // would be a way to let the Phase and the Cells check for wall
+  // collisions based on the shift. If there is a hit, the walls could
+  // move the particle back along the line r_vec - shift_vec until it
+  // is back inside and a "sufficiently large epsilon" away from the
+  // walls. This is not yet (2018-04-17) implemented within the
+  // Cell-Wall logic
+  phase -> invalidatePositions(m_colour/*, m_shiftOffset*/);
 
   // update neighbour-list such that shifting immediately effective
   // for further computations requiring neighbour information
