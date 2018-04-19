@@ -246,13 +246,24 @@ where we choose for the maximum allowed flow velocity v0 = 0.1 m/s ~ 1.68*[l]/[t
           w = "0"
           />
 
-      <!-- Wall particles on a simple-cubic lattice outside the walls and within a range of 1cutoff to at least one wall segment.-->
+      <!-- Wall particles on a simple-cubic lattice outside the walls and within a range of 1cutoff to at least one wall segment.
+
+/////// START: differences to SPHperiodicPoiseuille.xml //////////////
+
+Note the initial value for numDens that was added. Otherwise, the wall
+frozen particles will constantly have numDens = 0 leading to division
+by zero in the modules using it above.
+
+      -->
       <ParticleCreatorWall
           density = "17.576"
           species = "wall"
           n = "17.576"
 	  numDens = "17.5663"
           />
+<!--
+/////// END: differences to SPHperiodicPoiseuille.xml //////////////
+-->
       
     </BoundaryCuboid>
     
