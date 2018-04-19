@@ -783,6 +783,15 @@ void Cell::doCollision(Particle *p, point_t& r, point_t& v, const point_t &force
   } // end of while(hit)
 }
 
+// Check of position updates not caused by integrators
+void Cell::updatePositions(size_t colour)
+{
+  list<Particle*>::iterator m_particles_end = m_particles[colour].end();
+  for (list<Particle*>::iterator i = m_particles[colour].begin(); i != m_particles_end; ) {
+
+    i = checkNewPosition(i);
+  }
+}
 
 /* Main integration and collision detection logic. */
 void Cell::updatePositions(IntegratorPosition *integrator)
@@ -792,7 +801,6 @@ void Cell::updatePositions(IntegratorPosition *integrator)
   double dt;
   int force_index;
   size_t colour;
-  //	forces_t *forces;
 
   dt = integrator->dt();
   colour = integrator->colour();
@@ -800,39 +808,37 @@ void Cell::updatePositions(IntegratorPosition *integrator)
   list<Particle*>::iterator m_particles_end = m_particles[colour].end();
   for (list<Particle*>::iterator i = m_particles[colour].begin(); i != m_particles_end; ) {
 
-//     MSG_DEBUG("Cell::updatePositions", "now at p =  " << (*i)->mySlot << ", c = " << (*i)->c);
-
-/*    if((*i)->mySlot == 52)
-    {
-      if(phase->boundary()->isInside((*i)->r))
-        MSG_DEBUG("Cell::updatePositionsSTART", "52 INSIDE");
-      else MSG_DEBUG("Cell::updatePositionsSTART", "52 NOT INSIDE");
-    }*/
-
-    bool erase = false;
-    bool total_erase = false;
     Particle *p = *i;
-
-    int_point_t off = {0, 0, 0};
-    int n;
 
     p->dt = dt;
 
     integrator->integratePosition(p, this);
     integrator->integrateVelocity(p);
 
+    i = checkNewPosition(i);
+  }
+}
 
-//     if((*i)->mySlot == 52)
-//     {
-//       if(phase->boundary()->isInside((*i)->r))
-//         MSG_DEBUG("Cell::updatePositions", "after doCollision: 52 INSIDE:" << endl << "p->r = " << p->r << endl << "p->v = " << p->v << endl << "p->dt = " <<  p->dt << endl << "force = " <<  p->force[force_index]);
-//       else MSG_DEBUG("Cell::updatePositionsSTART", "after doCollision: 52 NOT INSIDE");
-//     }
+// Checks if new position of given Particle requires finding a new Cell
+// Return value: valid iterator to next particle
+   list<Particle*>::iterator Cell::checkNewPosition(list<Particle*>::iterator i) {
 
+  Phase *phase = m_manager->phase();
+     
+    Particle *p = *i;
 
+    size_t colour = p->c;
+
+    bool erase = false;
+    bool total_erase = false;
+
+    int_point_t off = {0, 0, 0};
+    int n;
+    
     // Last modified: 2007-12-27: changed from isInside to isInsideEps due to problem with geometrical epsilons. There was an inconsistency due to a small epsilon between the isInside of the cell the particle is leaving and isInside of the cell the particle should enter (see below)
     if (!isInsideEps(p->r, g_geom_eps)) {
 
+      
       // if((*i)->mySlot == 399) MSG_DEBUG("Cell::updatePositions", "particle 399 left cell");
 
       for (int j = 0; j < SPACE_DIMS; j++)
@@ -868,8 +874,11 @@ void Cell::updatePositions(IntegratorPosition *integrator)
             /* Notify any subclass that a particle has left the cell in a certain direction. */
             particleLeftCell(off, n);
           } else {
+
+	    Controller* controller = ((Simulation*) phase->parent())->controller();
+	    size_t force_index = controller->forceIndex();
+	    
             MSG_DEBUG("Cell::updatePositions", "Particle did not enter neighboring cell:");
-		force_index = ((Controller*) integrator->parent())->forceIndex();
 
 	    cout << "=== DEBUGING INFORMATION: PARTICLE ===" << endl;
             cout << "particle id (slot)               = " << p->mySlot << endl;
@@ -906,7 +915,6 @@ void Cell::updatePositions(IntegratorPosition *integrator)
 //       else MSG_DEBUG("Cell::updatePositionsEND", "52 NOT INSIDE");
 //     }
 
-
     if (erase) {
 /*      if((*i)->mySlot == 52) MSG_DEBUG("Cell::updatePositions", "52: erase = TRUE");*/
 
@@ -938,9 +946,10 @@ void Cell::updatePositions(IntegratorPosition *integrator)
       }
     } else
       i++;
-  }
-}
 
+    return i;
+    }
+ 
 void Cell::init()
 {
   m_local_link = new CellLink(this, this, -1);

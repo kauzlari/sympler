@@ -364,20 +364,28 @@ void Phase::assignParticlesToCells()
 }
 
 
-
 Boundary *Phase::boundary()
 {
     return m_boundary;
 }
+
 
 PairCreator *Phase::pairCreator()
 {
     return m_pairCreator;
 }
 
+
 void Phase::invalidatePositions(IntegratorPosition *integrator)
 {
   m_manager->invalidatePositions(integrator);
+  m_pairCreator->invalidatePositions();
+}
+
+
+void Phase::invalidatePositions(size_t colour)
+{
+  m_manager->invalidatePositions(colour);
   m_pairCreator->invalidatePositions();
 }
 

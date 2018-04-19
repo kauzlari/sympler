@@ -311,6 +311,7 @@ void sayHello() {
 #include "apply_vector_field_file.h"
 #include "apply_vel_field.h"
 #include "energy_pump.h"
+#include "shift_particle.h"
 #include "triangle_CGMD_interpolation.h"
 #include "triangle_CGMD_interpolation2points.h"
 #include "thermostat_energy_rescaling.h"
@@ -558,6 +559,7 @@ void link_all_properly()
   new ApplyVectorFieldFile(NULL);
   new ApplyVelField(NULL);
   new EnergyPump(NULL);
+  new ShiftParticle(NULL);
   new TriangleCGMDInterpolation(NULL);
   new TriangleCGMDInterpolation2Points(NULL);
   new ThermostatEnergyRescaling(NULL);
