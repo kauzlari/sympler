@@ -35,6 +35,7 @@
 
 
 #include "val_calculator.h"
+#include "val_calculator_pair.h"
 #include "function_pair.h"
 #include "general.h"
 

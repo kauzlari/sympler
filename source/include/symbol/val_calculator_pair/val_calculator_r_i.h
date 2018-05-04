@@ -34,6 +34,7 @@
 #define __VAL_CALCULATOR_R_I_H
 
 #include "val_calculator.h"
+#include "val_calculator_pair.h"
 
 //---- newclass -----------------------------------------------------------
 

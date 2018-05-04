@@ -33,6 +33,7 @@
 #define __VAL_CALCULATOR_BC_H
 
 #include "val_calculator.h"
+#include "val_calculator_pair.h"
 
 // #include "wall.h"
 

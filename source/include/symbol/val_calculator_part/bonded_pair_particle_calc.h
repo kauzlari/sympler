@@ -36,6 +36,7 @@
 #include "simulation.h"
 #include "manager_cell.h"
 #include "colour_pair.h"
+#include "non_bonded_pair_particle_calculator.h"
 
 
 /*!

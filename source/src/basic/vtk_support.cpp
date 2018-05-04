@@ -29,8 +29,6 @@
  */
 
 
-#include "config.h"
-
 #include "vtk_support.h"
 
 
