@@ -32,7 +32,6 @@
 #ifndef __THREADS_H
 #define __THREADS_H
 
-#include "config.h"
 #include "colour_pair.h"
 
 /*! 

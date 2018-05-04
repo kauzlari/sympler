@@ -33,8 +33,6 @@
 #ifndef __METER_LIVE_H
 #define __METER_LIVE_H
 
-#include "config.h"
-
 #ifdef HAVE_SDL
 
 #include <SDL/SDL.h>

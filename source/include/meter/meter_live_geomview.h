@@ -33,7 +33,6 @@
 #ifndef __METER_LIVE_GEOMVIEW_H_
 #define __METER_LIVE_GEOMVIEW_H_
 
-#include "config.h"
 #include "meter.h"
 #include <stdio.h>
 

@@ -30,8 +30,6 @@
 
 
 
-#include "config.h"
-
 #ifdef HAVE_SDL
 
 #include <string>

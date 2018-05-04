@@ -33,6 +33,7 @@
 #define __VAL_CALCULATOR_NEG_DKERNEL_DIVR_H
 
 #include "val_calculator.h"
+#include "val_calculator_pair.h"
 #include "weighting_function.h"
 
 //---- newclass -----------------------------------------------------------

@@ -30,7 +30,6 @@
 
 
 
-#include "config.h"
 #include "meter_live_geomview.h"
 #include "phase.h"
 #include "simulation.h"

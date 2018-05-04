@@ -54,8 +54,6 @@ Parts of the code in this file are based on code from E. Rudnyi's tdlib http://e
 #include "misc.h"
 #include "consts.h"
 
-#include "config.h"
-
 #include<typeinfo>
 #include<algorithm>
 #include<string.h>

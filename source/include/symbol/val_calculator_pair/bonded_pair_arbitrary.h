@@ -37,6 +37,7 @@
 #include "manager_cell.h"
 #include "colour_pair.h"
 #include "function_pair.h"
+#include "val_calculator_pair.h"
 
 
 /*!

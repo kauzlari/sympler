@@ -37,6 +37,7 @@
 #include "simulation.h"
 #include "manager_cell.h"
 #include "val_calculator.h"
+#include "non_bonded_pair_particle_calculator.h"
 #include "weighting_function.h"
 #include "pca_density_self_contribution.h"
 #include "colour_pair.h"
