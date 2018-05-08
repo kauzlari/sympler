@@ -1,5 +1,5 @@
 # Specify cmake version
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required(VERSION 3.2)
 project(sympler)
 
 
@@ -7,41 +7,61 @@ project(sympler)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 
-# Add subdirectories to the build.
-add_subdirectory(source/src)
-add_subdirectory(source/src_test)
+# Specify libraries to link executables
+set(link_lib
+-lgsl
+-lgslcblas
+-ldl
+-lxml2
+-lm
+)
 
 
 # Find required and optional libs
-find_package(LibXml2 REQUIRED)					# sympler definitely needs XML2
 
-find_package(GSL REQUIRED)		 				# sympler definitely needs GSL
+# XML2 is required
+find_package(LibXml2 REQUIRED)
 
-FIND_PATH(CPPUNIT_INCLUDE_DIR cppunit/Test.h)	# sympler definitely needs CPPUNIT
-FIND_LIBRARY(CPPUNIT_LIBRARY NAMES cppunit)
-IF (CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
-  MESSAGE(STATUS "Found CppUnit: ${CPPUNIT_LIBRARY}")
-ELSE (CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
-  MESSAGE(FATAL_ERROR "Could not find CppUnit")
-ENDIF (CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
+# GSL is required
+find_package(GSL REQUIRED)		 				
 
-find_package(SDL)								# looking for optional SDL
+# CPPUNIT is required
+find_path(CPPUNIT_INCLUDE_DIR cppunit/Test.h)
+find_library(CPPUNIT_LIBRARY NAMES cppunit)
+if(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
+  message(STATUS "Found CppUnit: ${CPPUNIT_LIBRARY}")
+else(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
+  message(FATAL_ERROR "Could not find CppUnit")
+endif(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
+
+# SDL is optional
+find_package(SDL)
 if(SDL_FOUND)
   add_definitions(-DHAVE_SDL)
 endif(SDL_FOUND)
 
-execute_process(COMMAND freesteam-config --version OUTPUT_VARIABLE freesteam_version)	# looking for optional FREESTEAM
+# FREESTEAM is optional
+execute_process(COMMAND freesteam-config --version OUTPUT_VARIABLE freesteam_version OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(${freesteam_version} GREATER 1.0)
+  message("-- Found Freesteam (found version ${freesteam_version})")
   add_definitions(-DHAVE_FREESTEAM)
+  set(link_lib ${link_lib} -lfreesteam)
 else(${freesteam_version} GREATER 1.0)
   message("-- Could NOT find FREESTEAM")
 endif(${freesteam_version} GREATER 1.0)
 
-include (TestBigEndian)							# Test Endian System
+
+# Test Endian System
+include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 if(IS_BIG_ENDIAN)
   add_definitions(-DIS_BIG_ENDIAN)
 endif()
+
+
+# Add subdirectories to the build
+add_subdirectory(source/src)
+add_subdirectory(source/src_test)
 
 
 #add_definitions(-DHAVE_JAMA_JAMA_LU_H)

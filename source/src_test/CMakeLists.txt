@@ -135,17 +135,11 @@ callable
 symbol
 weighting_function
 cppunit
--lgsl
--lgslcblas
--lfreesteam
-${CMAKE_DL_LIBS} 
-${LIBXML2_LIBRARIES}
--lxml2
--lm
+${link_lib}
 )
 
 
-# Execute tests after building symplerTest
+# Execute tests after build
 enable_testing()
 ADD_CUSTOM_COMMAND(TARGET symplerTest POST_BUILD COMMAND ${CMAKE_BINARY_DIR}/symplerTest)
 

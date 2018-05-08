@@ -28,6 +28,7 @@
  * 
  */
 
+#ifdef HAVE_FREESTEAM
 
 #include "pca_iapws-if97_1varTest.h"
 
@@ -130,3 +131,5 @@ void PCacheIAPWSIF97OneVarTest  :: execCalculationTest(const double& var1) {
   CPPUNIT_ASSERT_DOUBLES_EQUAL (interpol, result, interpol/100.); // relativ delta: 1% of expected
   
 }
+
+#endif    // HAVE_FREESTEAM

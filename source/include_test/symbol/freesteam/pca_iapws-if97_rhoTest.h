@@ -33,6 +33,8 @@
 #ifndef __PCA_IAPWSIF97_RHO_TEST_H
 #define __PCA_IAPWSIF97_RHO_TEST_H
 
+#ifdef HAVE_FREESTEAM
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "pca_iapws-if97_2varTest.h"
@@ -64,5 +66,7 @@ class PCacheIAPWSIF97rhoTest : public PCacheIAPWSIF97TwoVarTest
  private:
   
 };
+
+#endif    // HAVE_FREESTEAM
 
 #endif

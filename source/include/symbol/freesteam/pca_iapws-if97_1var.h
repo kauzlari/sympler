@@ -32,6 +32,8 @@
 #ifndef __PCA_IAPWS_IF97_1VAR_H
 #define __PCA_IAPWS_IF97_1VAR_H
 
+#ifdef HAVE_FREESTEAM
+
 #include "particle_cache.h"
 
 /*!
@@ -307,5 +309,7 @@ class PCacheIAPWSIF97OneVar: public ParticleCache
   friend class PCacheIAPWSIF97OneVarTestGetter;
   
 };
+
+#endif    // HAVE_FREESTEAM
 
 #endif

@@ -32,6 +32,8 @@
 #ifndef __PCA_IAPWSIF97_RHO_H
 #define __PCA_IAPWSIF97_RHO_H
 
+#ifdef HAVE_FREESTEAM
+
 #include "pca_iapws-if97_2var.h"
 
 /*!
@@ -117,5 +119,6 @@ class PCacheIAPWSIF97rho: public PCacheIAPWSIF97TwoVar
   
 };
 
+#endif    // HAVE_FREESTEAM
 
 #endif

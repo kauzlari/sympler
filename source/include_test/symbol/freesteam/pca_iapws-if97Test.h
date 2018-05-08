@@ -33,6 +33,8 @@
 #ifndef __PCA_IAPWSIF97_TEST_H
 #define __PCA_IAPWSIF97_TEST_H
 
+#ifdef HAVE_FREESTEAM
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "pca_iapws-if97.h"
@@ -177,5 +179,7 @@ class PCacheIAPWSIF97Test : public CPPUNIT_NS :: TestFixture
   virtual void execCalculationTest(const double& var1, const double& var2);
   
 };
+
+#endif    // HAVE_FREESTEAM
 
 #endif

@@ -28,6 +28,7 @@
  * 
  */
 
+#ifdef HAVE_FREESTEAM
 
 extern "C" {
   #include <freesteam/steam_pT.h>
@@ -74,3 +75,4 @@ void PCacheIAPWSIF97CpTest  :: calculateResultTest (void)
   execCalculationTest(650.);
 }
 
+#endif    // HAVE_FREESTEAM

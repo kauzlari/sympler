@@ -32,6 +32,8 @@
 #ifndef __PCA_IAPWSIF97_P_H
 #define __PCA_IAPWSIF97_P_H
 
+#ifdef HAVE_FREESTEAM
+
 #include "pca_iapws-if97_2var.h"
 
 /*!
@@ -113,5 +115,7 @@ class PCacheIAPWSIF97p: public PCacheIAPWSIF97TwoVar
   virtual void setup();
   
 };
+
+#endif    // HAVE_FREESTEAM
 
 #endif

@@ -28,6 +28,9 @@
  * 
  */
 
+
+#ifdef HAVE_FREESTEAM
+
 extern "C" {
   #include <freesteam/viscosity.h>
 }
@@ -69,3 +72,5 @@ void PCacheIAPWSIF97etaTest  :: calculateResultTest (void)
   execCalculationTest(600., 750.);
   execCalculationTest(300., 650.); 
 }
+
+#endif    // HAVE_FREESTEAM
