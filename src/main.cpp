@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -310,6 +310,7 @@ void sayHello() {
 #include "apply_vector_field.h"
 #include "apply_vector_field_file.h"
 #include "apply_vel_field.h"
+#include "cbl_pair_particle_tensor.h"
 #include "energy_pump.h"
 #include "shift_particle.h"
 #include "triangle_CGMD_interpolation.h"
@@ -558,6 +559,7 @@ void link_all_properly()
   new ApplyVectorField(NULL);
   new ApplyVectorFieldFile(NULL);
   new ApplyVelField(NULL);
+  new CblPairParticleTensor(NULL);
   new EnergyPump(NULL);
   new ShiftParticle(NULL);
   new TriangleCGMDInterpolation(NULL);
