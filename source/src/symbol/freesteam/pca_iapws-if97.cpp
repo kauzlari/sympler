@@ -29,6 +29,8 @@
  */
 
 
+#ifdef HAVE_FREESTEAM
+
 #include "pca_iapws-if97.h"
 #include "simulation.h"
 #include "manager_cell.h"
@@ -252,4 +254,6 @@ void PCacheIAPWSIF97::checkInputSymbolExistences(size_t colour) {
 void PCacheIAPWSIF97::registerWithParticle()
 {
 }
+
+#endif    // HAVE_FREESTEAM
 

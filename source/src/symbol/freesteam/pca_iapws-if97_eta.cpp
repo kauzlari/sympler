@@ -29,6 +29,8 @@
  */
 
 
+#ifdef HAVE_FREESTEAM
+
 extern "C" {
   #include <freesteam/viscosity.h>
 }
@@ -93,4 +95,6 @@ void PCacheIAPWSIF97eta::setup()
 void PCacheIAPWSIF97eta::registerWithParticle()
 {
 }
+
+#endif    // HAVE_FREESTEAM
 

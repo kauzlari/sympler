@@ -33,6 +33,8 @@
 #ifndef __PCA_IAPWSIF97_2VAR_TEST_H
 #define __PCA_IAPWSIF97_2VAR_TEST_H
 
+#ifdef HAVE_FREESTEAM
+
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 #include "pca_iapws-if97_2var.h"
@@ -166,5 +168,7 @@ class PCacheIAPWSIF97TwoVarTest : public PCacheIAPWSIF97OneVarTest
   virtual void execCalculationTest(const double& var1, const double& var2);
   
 };
+
+#endif    // HAVE_FREESTEAM
 
 #endif

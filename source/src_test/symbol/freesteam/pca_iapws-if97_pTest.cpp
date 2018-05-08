@@ -28,6 +28,8 @@
  * 
  */
 
+#ifdef HAVE_FREESTEAM
+
 extern "C" {
   #include <freesteam/steam_pT.h>
   #include <freesteam/region3.h>
@@ -69,3 +71,5 @@ void PCacheIAPWSIF97pTest  :: calculateResultTest (void)
   execCalculationTest(600., 750.);
   execCalculationTest(300., 650.); 
 }
+
+#endif    // HAVE_FREESTEAM

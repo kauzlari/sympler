@@ -29,6 +29,8 @@
  */
 
 
+#ifdef HAVE_FREESTEAM
+
 extern "C" {
   #include <freesteam/thcond.h>
 }
@@ -88,4 +90,6 @@ void PCacheIAPWSIF97kappa::setup()
 void PCacheIAPWSIF97kappa::registerWithParticle()
 {
 }
+
+#endif    // HAVE_FREESTEAM
 

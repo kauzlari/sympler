@@ -29,6 +29,8 @@
  */
 
 
+#ifdef HAVE_FREESTEAM
+
 extern "C" {
   #include <freesteam/b23.h>
   #include <freesteam/steam_pT.h>
@@ -114,4 +116,6 @@ void PCacheIAPWSIF97p::setup()
 void PCacheIAPWSIF97p::registerWithParticle()
 {
 }
+
+#endif    // HAVE_FREESTEAM
 
