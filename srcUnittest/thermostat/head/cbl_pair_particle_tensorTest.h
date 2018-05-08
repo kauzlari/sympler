@@ -30,29 +30,46 @@
 
 
 
-#ifndef EXAMPLETEST_H
-#define EXAMPLETEST_H
+#ifndef __CBL_PAIR_PARTICLE_TENSOR_TEST_H
+#define __CBL_PAIR_PARTICLE_TENSOR_TEST_H
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "cbl_pair_particle_arbitraryTest.h"
+
+#include "cbl_pair_particle_tensor.h"
 
 using namespace std;
 
-class ExampleTest : public CPPUNIT_NS :: TestFixture
+/*!
+ * Test class for class \a CblPairParticleTensor
+ * FIXME: setup() and call() not tested yet!
+ */
+class CblPairParticleTensorTest : public CblPairParticleArbitraryTest
 {
-  CPPUNIT_TEST_SUITE (ExampleTest);
-  CPPUNIT_TEST (functionTest);
+  CPPUNIT_TEST_SUITE (CblPairParticleTensorTest);
+  CPPUNIT_TEST (initTest);
   CPPUNIT_TEST_SUITE_END ();
-
-  public:
-    void setUp (void);
-    void tearDown (void);
-
-  protected:
-    void functionTest (void);
-
-  private:
-//    Example *a, *b;
+  
+ public:
+  
+  /*!
+   * Initialise used objects
+   */
+  virtual void setUp (void);
+  
+  /*!
+   * Delete used objects
+   */
+  virtual void tearDown (void);
+  
+ protected:
+  
+  /*!
+   * Test init function
+   */
+  virtual void initTest (void);
+  
+ private:
+  
 };
 
 #endif
