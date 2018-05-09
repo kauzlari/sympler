@@ -86,7 +86,7 @@ class ValCalculatorArbitrary : public NonBondedPairParticleCalculator
     /*!
     * This string holds the symbols, which are not waited for to be computed beforehand
     */
-    string m_oldSymbols;
+    /* string m_oldSymbols; */
 
     /*! This is now a member of \a Symbol
      * Is this calculator allowed to overwrite already existing symbols
@@ -116,9 +116,9 @@ class ValCalculatorArbitrary : public NonBondedPairParticleCalculator
      * which should be ignored when determining the stage. The expressions are separated by " | ".
      * An "empty" string must have the form "---".
      */
-    virtual string usedSymbolsIgnoredForStaging() const {
-      return m_oldSymbols;
-    }
+    /* virtual string usedSymbolsIgnoredForStaging() const { */
+    /*   return m_oldSymbols; */
+    /* } */
 
     /*!
      * Adds the expressions used by this \a Symbol to the given list. 

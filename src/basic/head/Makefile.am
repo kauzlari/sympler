@@ -63,6 +63,7 @@ include_HEADERS = \
 	particle_scalar.h \
 	particle_tensor.h \
 	particle_vector.h \
+	particle_vels.h \
 	pca_eigensystem.h \
 	pca_density_0oc.h \
 	pca_density_self_contribution.h \

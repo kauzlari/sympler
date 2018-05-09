@@ -29,18 +29,22 @@
  */
 
 
-#ifndef __PARTICLE_VECTOR_H
-#define __PARTICLE_VECTOR_H
+
+#ifndef __PARTICLE_VELS_H
+#define __PARTICLE_VELS_H
 
 #include "particle_cache_arbitrary.h"
 
+#include "function_particle.h"
+#include "symbol.h"
+
+
 /*!
- * User-defined vector symbol for a particle that depends only
- * on previously computed particle properties.
+ * Will not introduce any new Symbol but set the velocity of each 
+ * particle to the value computed by the given expression.
  */
-class ParticleVector : public ParticleCacheArbitrary
+class ParticleVels : public ParticleCacheArbitrary
 {
-  
  protected:
   
   /*!
@@ -49,11 +53,21 @@ class ParticleVector : public ParticleCacheArbitrary
   void init();
   
   /*!
+   * Helper for setting m_offset. This one overwrites 
+   * \a ParticleCacheArbitrary::setupOffset, since 
+   * \a ParticleVels modifies \a Particle::v and hence does not 
+   * require any offset, hence no usage of 
+   * \a Particle::s_tag_format[m_colour] methods such as 
+   * addAttribute(..)
+   */
+  virtual void setupOffset();
+  
+  /*!
    * Helper function for polymorphic copying
    */
   virtual ParticleCache* copyMySelf()
   {
-    return new ParticleVector(*this);
+    return new ParticleVels(*this);
   }
 
   /*!
@@ -64,44 +78,60 @@ class ParticleVector : public ParticleCacheArbitrary
   }
   
  public:
-  
+
   /*!
    * Constructor
    */
-  ParticleVector(/*Node*/Simulation* parent);
+  ParticleVels(/*Node*/Simulation* parent);
   
   /*!
    * Destructor
    */
-  virtual ~ParticleVector();
+  virtual ~ParticleVels();
+  
+  /*!
+   * Setup this ParticleCache
+   */
+  virtual void setup();
   
   /*!
    * Compute the cache for particle \a p
-   * @param[out] p The particle to compute values for
+   * @param[out] p The particle to compute a new velocity for
    */
   virtual void computeCacheFor(Particle* p) {
     
-    (*m_function)(&(p->tag.pointByOffset(m_offset)), p);            
+    (*m_function)(&(p->v), p);            
   }
   
   /*!
-   * Register the additional degrees of freedom with the \a Particle s \a DataFormat
+   * Register the additional degrees of freedom with the 
+   * \a Particle s \a DataFormat
+   * FIXME: Somehow, most of the classes do not use this function 
+   * anymore. So CHECK if it is:
+   * - A: Deprecated?
+   * - B: A useful refactoring that you forgot to use? (Note that 
+   * there is also the more recently created 
+   * ParticleCacheArbitrary::setupOffset()!)
    */
   virtual void registerWithParticle()
   {
   }
   
   /*!
-   * Are those two caches identical?
-   * @param c Is this the same cache?
+   * Is this \a ParticleCache identical to the given one?
+   * @param c \a ParticleCache to compare to
+   * FIXME: Essentially copy&pasted from \a ParticleVector, so is
+   * there some refactoring possible? Why does the parent 
+   * \a ParticleCacheArbitrary not define anything? Because of some 
+   * nasty children?
    */
   virtual bool operator==(const ParticleCache &c) const
   {
     if (typeid(c) == typeid(*this)) 
       {
-        ParticleVector *cc = (ParticleVector*) &c;
+	ParticleVels *cc = (ParticleVels*) &c;
 	
-        return
+	return
 	(
 	 m_expression == cc->m_expression &&
 	 m_overwrite == cc->m_overwrite &&
@@ -115,10 +145,6 @@ class ParticleVector : public ParticleCacheArbitrary
     else return false;
   }
   
-  /*!
-   * Setup this ParticleCache
-   */
-  virtual void setup();
 };
 
 #endif

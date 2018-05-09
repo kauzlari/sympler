@@ -62,6 +62,7 @@ libbasic_la_SOURCES = \
 	particle_scalar.cpp \
 	particle_tensor.cpp \
 	particle_vector.cpp \
+	particle_vels.cpp \
 	pca_eigensystem.cpp \
 	pca_density_0oc.cpp \
 	pca_density_self_contribution.cpp \

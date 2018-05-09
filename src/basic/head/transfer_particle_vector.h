@@ -89,6 +89,14 @@ class TransferParticleVector : public ParticleCacheArbitrary
      * Setup the offsets calling ParticleCacheArbitrary::setupOffset() and the additional ones of this class
      */
     virtual void setupOffset();
+
+  /*!
+   * Helper function for setting the return type of \a m_function
+   */
+  virtual void setFunctionReturnType(){
+    m_function->setReturnType(Variant::VECTOR);
+  }
+
     
   public:
   /*!
@@ -113,15 +121,9 @@ class TransferParticleVector : public ParticleCacheArbitrary
 
       point_t temp;
 
-      m_function(&temp, sourceP);
-
-/*       if(targetP->mySlot == 100) */
-/* 	MSG_DEBUG("TransferParticleVector::computeCacheFor", "p100:BEFORE " << m_expression << ", " + m_symbolName << " = " << targetP->tag.pointByOffset(m_offset) << "stage=" << m_stage); */
+      (*m_function)(&temp, sourceP);
       
       targetP->tag.pointByOffset(m_offset) += temp;
-
-/*       if(targetP->mySlot == 100) */
-/* 	MSG_DEBUG("TransferParticleVector::computeCacheFor", "p100:AFTER " << m_expression << ", " + m_symbolName << " = " << targetP->tag.pointByOffset(m_offset) << "stage=" << m_stage); */
       
     }
 

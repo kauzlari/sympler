@@ -54,7 +54,7 @@ class ParticleCacheArbitrary : public ParticleCache
     /*!
     * The \a FunctionParticle computing \a m_expression
     */
-    FunctionParticle m_function;
+    FunctionParticle* m_function;
     
     /*!
      * Initialise the PropertyList.
@@ -87,6 +87,10 @@ class ParticleCacheArbitrary : public ParticleCache
 
     }
 
+    /*!
+     * Helper function for setting the return type of \a m_function
+     */
+    virtual void setFunctionReturnType() = 0;
     
   public:
     /*!
@@ -104,6 +108,18 @@ class ParticleCacheArbitrary : public ParticleCache
      */
     virtual void setup();
 
+    /*!
+     * Delete old function and set \a m_function to the new one given
+     * @param[in] Pointer to new function
+     */
+    virtual void setFunctionParticle(FunctionParticle* fp) {
+
+      delete m_function;
+
+      m_function = fp;
+
+      setFunctionReturnType();
+    }
 };
 
 #endif

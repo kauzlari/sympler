@@ -2,6 +2,8 @@
 noinst_LTLIBRARIES = libbasicTest.la
 
 libbasicTest_la_SOURCES = \
+	fake_function_particle.cpp \
+	particle_velsTest.cpp \
 	smart_enumTest.cpp
 
 libbasicTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@

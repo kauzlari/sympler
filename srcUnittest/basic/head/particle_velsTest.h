@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -30,29 +30,67 @@
 
 
 
-#ifndef __EXAMPLETEST_H
-#define __EXAMPLETEST_H
+#ifndef __PARTICLE_VELS_TEST_H
+#define __PARTICLE_VELS_TEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "particle_vels.h"
+
 using namespace std;
 
-class ExampleTest : public CPPUNIT_NS :: TestFixture
+class ParticleVelsTest : public CPPUNIT_NS :: TestFixture
 {
-  CPPUNIT_TEST_SUITE (ExampleTest);
-  CPPUNIT_TEST (functionTest);
+  CPPUNIT_TEST_SUITE (ParticleVelsTest);
+  CPPUNIT_TEST (computeCacheForTest);
+  CPPUNIT_TEST (initTest);
+  CPPUNIT_TEST (setupTest);
+  CPPUNIT_TEST (setupOffsetTest);
   CPPUNIT_TEST_SUITE_END ();
+  
+ public:
+  /*!
+   * Initialize objects
+   */
+  void setUp (void);
 
-  public:
-    void setUp (void);
-    void tearDown (void);
+  /*!
+   * Delete objects
+   */
+  void tearDown (void);
 
-  protected:
-    void functionTest (void);
+  
+ protected:
+  
+  /*!
+   * Test \a ParticleVels::computeCacheFor(Particle* p)
+   */
+  void computeCacheForTest (void);
+  
+  /*!
+   * Test \a ParticleVels::init(Particle* p)
+   */
+  void initTest (void);
+  
+  /*!
+   * Test \a ParticleVels::setup()
+   * FIXME: This test only checks what can go wrong on the 
+   * \a ParticleVels level and not responsibilities of parent classes.
+   * This is a good thing! So fix this by extending the test-hierarchy 
+   * to the parents and NOT by adding more test code here!
+   */
+  void setupTest (void);
+  
+  /*!
+   * Test \a ParticleVels::setupOffset(Particle* p)
+   */
+  void setupOffsetTest (void);
+  
+ private:
+  
+  ParticleVels *m_particleVels;
 
-  private:
-//    Example *a, *b;
 };
 
 #endif

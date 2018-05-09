@@ -287,6 +287,7 @@ void sayHello() {
 #include "particle_scalar.h"
 #include "particle_tensor.h"
 #include "particle_vector.h"
+#include "particle_vels.h"
 // commented out because of complaint about redefinition
 // #include "pca_density_self_contribution.h"
 // #include "pca_energy_entropy.h"
@@ -510,6 +511,7 @@ void link_all_properly()
   new ParticleScalar(NULL);
   new ParticleTensor(NULL);
   new ParticleVector(NULL);
+  new ParticleVels(NULL);
   new PCaEigensystem(NULL);
   new PCaMatrixInverse(NULL);
   new PairRandScalar(NULL);

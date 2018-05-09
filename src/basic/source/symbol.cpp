@@ -49,12 +49,12 @@ REGISTER_SMART_ENUM
  "Expression, computed and saved in a symbol, to be used in expression of other modules.");
 
 Symbol::Symbol(string symbol)
-  : Node(NULL), m_stage(-1), m_phase(1), m_symbolName(symbol/*"undefined"*/), m_datatype(DataFormat::DOUBLE), m_overwrite(false)
+  : Node(NULL), m_stage(-1), m_phase(1), m_symbolName(symbol/*"undefined"*/), m_datatype(DataFormat::DOUBLE), m_overwrite(false), m_persistency(false), m_oldSymbols("---")
 {
 }
 
 Symbol::Symbol(/*Node*/Simulation *parent)
-  : Node((Node*) parent), m_stage(-1), m_phase(1)
+  : Node((Node*) parent), m_stage(-1), m_phase(1), m_persistency(false), m_oldSymbols("---")
 {
   init();
 }
@@ -79,6 +79,11 @@ void Symbol::init()
   // We set this as the default value for m_overwrite even though only selected 
   // sub-classes provide an XML-attribute for this member
   m_overwrite = false;
+}
+
+void Symbol::setup()
+{
+  Node::setup();
 }
 
 
