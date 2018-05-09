@@ -30,29 +30,54 @@
 
 
 
-#ifndef EXAMPLETEST_H
-#define EXAMPLETEST_H
+#ifndef __CBL_PAIR_PARTICLE_ARBITRARY_TEST_H
+#define __CBL_PAIR_PARTICLE_ARBITRARY_TEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "cbl_pair_particle_arbitrary.h"
+
 using namespace std;
 
-class ExampleTest : public CPPUNIT_NS :: TestFixture
+
+/*!
+ * Abstract parent for test classes of children of abstract class 
+ * \a CblPairParticleArbitrary
+ * FIXME: setup() not tested yet!
+ */
+class CblPairParticleArbitraryTest : public CPPUNIT_NS :: TestFixture
 {
-  CPPUNIT_TEST_SUITE (ExampleTest);
-  CPPUNIT_TEST (functionTest);
-  CPPUNIT_TEST_SUITE_END ();
+  /* CPPUNIT_TEST_SUITE (CblPairParticleArbitraryTest); */
+  /* CPPUNIT_TEST (initTest); */
+  /* CPPUNIT_TEST_SUITE_END (); */
+  
+ public:
+  
+  /*!
+   * Initialise used objects
+   */
+  virtual void setUp (void) = 0;
+  
+  /*!
+   * Delete used objects
+   */
+  virtual void tearDown (void) = 0;
+  
+ protected:
+  
+  /*!
+   * Test init function
+   */
+  virtual void initTest (void);
 
-  public:
-    void setUp (void);
-    void tearDown (void);
-
-  protected:
-    void functionTest (void);
-
-  private:
-//    Example *a, *b;
+  /*!
+   * Instance of tested class
+   */
+  CblPairParticleArbitrary *m_callable;
+  
+ private:
+  
 };
 
 #endif

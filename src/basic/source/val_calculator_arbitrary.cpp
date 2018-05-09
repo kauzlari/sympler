@@ -324,7 +324,7 @@ void ValCalculatorArbitrary::setup()
     if(m_species.first == "undefined")
       throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
     if(m_species.second == "undefined")
-      throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled."); 
 
     ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
     
