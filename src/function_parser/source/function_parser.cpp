@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -468,9 +468,7 @@ FUNCTION_PARSER_LOG("FunctionParser::parseThis", "start-expression = " << expres
 	if((*s)->name() == cur)
 	  symbolsToRemove.push_back(*s);
       }
-      if(symbolsToRemove.empty())
-	throw gError("Symbol::findStage", "Unable to find old symbol '" + cur + "' among used symbols");
-      // remove all
+      // remove all (or none if(symbolsToRemove.empty()) )
       for(typed_value_list_t::const_iterator s = symbolsToRemove.begin(); s != symbolsToRemove.end(); ++s)
 	usedSymbols.remove(*s);
     }
