@@ -28,31 +28,50 @@
  * 
  */
 
+#include "cbl_pair_particle_tensorTest.h"
 
+#include "simulation.h"
 
-#ifndef EXAMPLETEST_H
-#define EXAMPLETEST_H
+CPPUNIT_TEST_SUITE_REGISTRATION (CblPairParticleTensorTest);
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-
-using namespace std;
-
-class ExampleTest : public CPPUNIT_NS :: TestFixture
+void CblPairParticleTensorTest :: setUp (void)
 {
-  CPPUNIT_TEST_SUITE (ExampleTest);
-  CPPUNIT_TEST (functionTest);
-  CPPUNIT_TEST_SUITE_END ();
+  /*!
+   * Initialize objects
+   */
+  Simulation* sim = new Simulation();
+  
+  m_callable = new CblPairParticleTensor(sim);
+}
 
-  public:
-    void setUp (void);
-    void tearDown (void);
+void CblPairParticleTensorTest :: tearDown (void) 
+{
+  /*!
+   * Delete objects
+   */
+  delete m_callable;
+}
 
-  protected:
-    void functionTest (void);
+void CblPairParticleTensorTest :: initTest (void)
+{
+  /*!
+   * Test init function. init() should have been called in constructor.
+   */
 
-  private:
-//    Example *a, *b;
-};
+  CblPairParticleArbitraryTest :: initTest();
+  
+  const PropertyList& properties = m_callable -> returnProperties();
 
-#endif
+  CPPUNIT_ASSERT_EQUAL
+    (string("CblPairParticleTensor"), m_callable -> name());
+  CPPUNIT_ASSERT_EQUAL
+    (string("CblPairParticleTensor"), m_callable -> className());
+  CPPUNIT_ASSERT_EQUAL
+    (string("unitMat(1)"), m_callable -> returnPairExpression());
+  CPPUNIT_ASSERT_EQUAL
+    (string("unitMat(1)"), m_callable -> return1stParticleExpression());
+  CPPUNIT_ASSERT_EQUAL
+    (string("unitMat(1)"), m_callable -> return2ndParticleExpression());
+  
+}
+
