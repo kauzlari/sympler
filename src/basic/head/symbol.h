@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -177,7 +177,10 @@ class Symbol : public Node
    */
   virtual string usedSymbolsIgnoredForStaging() const {
     /* return "---"; */
-    return m_oldSymbols;
+
+    if(m_oldSymbols == "---")
+      return m_symbolName;
+    else return string(m_oldSymbols + "|" + m_symbolName);
   }
   
   /*!
