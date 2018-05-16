@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -29,14 +29,10 @@
  */
 
 
-
 #include "manager_cell.h"
 #include "val_calculator.h"
 #include "simulation.h"
 #include "colour_pair.h"
-/*#include "val_calculator_rho.h"
-#include "val_calculator_volume.h"*/
-// #include "val_calculator_kernel.h"
 
 #define M_SIMULATION ((Simulation *) m_parent)
 #define M_PHASE M_SIMULATION->phase()
@@ -47,17 +43,13 @@ using namespace std;
 
 ValCalculator::ValCalculator(string symbol): Symbol(symbol)
 {
-//   m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
-  //   MSG_DEBUG("ValCalculator::ValCalculator", "CONSTRUCTOR");
 }
 
 ValCalculator::ValCalculator(/*Node*/Simulation* parent): Symbol(parent)
 {
-//   m_stage = 0;
   m_datatype = DataFormat::DOUBLE;
   init();
-//   MSG_DEBUG("ValCalculator::ValCalculator", "NODE-CONSTRUCTOR");
 }
 
 void ValCalculator::init()
@@ -73,8 +65,12 @@ void ValCalculator::init()
        "Name for the second species of the pairs, this Symbol is used for.");
   
   m_species.first = "undefined";
-  m_species.second = "undefined";
- 
+  m_species.second = "undefined"; 
+}
+
+void ValCalculator::setup()
+{
+  Symbol::setup();
 }
 
 void ValCalculator::cleanSymbol(string& name) const
@@ -92,20 +88,23 @@ void ValCalculator::cleanSymbol(string& name) const
   else
     // remove "i" or "j"
     name.erase(name.size()-1, name.size()-1);
-  MSG_DEBUG("ValCalculator::cleanPairSymbol", className() << ": shortened name of symbol: " << name);
+  
 }
 
-ValCalculatorPair::ValCalculatorPair(/*Node*/Simulation* parent): ValCalculator(parent)/*, m_persistency(false)*/
+ValCalculatorPair::ValCalculatorPair(/*Node*/Simulation* parent)
+  : ValCalculator(parent)
 {
   init();
-//   MSG_DEBUG("ValCalculator::ValCalculator", "CONSTRUCTOR");
 }
 
 void ValCalculatorPair::init()
 {
   m_properties.setClassName("ValCalculatorPair");
 
-  BOOLPC(allPairs, m_allPairs, "Should the quantity be computed for all colour combinations? If yes, this disables 'species1' and 'species2'. NOTE: This feature is currently not supported for bonded pairs.");
+  BOOLPC(allPairs, m_allPairs, "Should the quantity be computed for "
+	 "all colour combinations? If yes, this disables 'species1' "
+	 "and 'species2'. NOTE: This feature is currently not "
+	 "supported for bonded pairs.");
 
   m_allPairs = false;
 
@@ -114,91 +113,112 @@ void ValCalculatorPair::init()
 void ValCalculatorPair::setup()
 {
   
-  if(m_allPairs)
-  {
+  if(m_allPairs) {
     FOR_EACH_COLOUR_PAIR
     (
       M_MANAGER,
       if(cp->tagFormat().attrExists(m_symbolName))
-        throw gError("ValCalculatorPair::setup", "Symbol " + m_symbolName + " already existing. Second definition is not allowed for this Calculator.");
+        throw
+	  gError("ValCalculatorPair::setup", "Symbol " + m_symbolName
+		 + " already existing. Second definition is not "
+		 "allowed for this Calculator.");
 
       // see CONVENTION5 for rule about persistencies
-#if 0
-      // new rules
-      // FIXME: not checked how meaningful this is for the case that both species don't have an IntegratorPosition
-      // by the way, how meaningful is this case itself ?!?
-      if (!M_CONTROLLER->findIntegrator("IntegratorPosition", cp->firstSpecies()) && 
-           !M_CONTROLLER->findIntegrator("IntegratorPosition", cp->secondSpecies()))
-        m_persistency = true;
-#endif
-      m_slot = cp->tagFormat().addAttribute(m_symbolName, m_datatype, false/*persistency*//*m_persistency*/, m_symbolName).offset;
+      m_slot =
+      cp->tagFormat().addAttribute
+      (m_symbolName, m_datatype, false/*persistency*/, m_symbolName)
+      .offset;
 
       vector<ColourPair*>::iterator cpTester = __cp;
-    // is it the last calculator to be created?
+
+      // is it the last calculator to be created?
       if(++cpTester == __end)
         cp -> registerCalc(this);
-        // No? Then make a copy
-      else 
-      {
+      // No? Then make a copy
+      else {
         ValCalculator* vc = copyMySelf()/*new ValCalculatorPair(*this)*/;
         assert(((ValCalculatorPair*) vc)->m_symbolName == m_symbolName);
         assert(((ValCalculatorPair*) vc)->stage() == m_stage);
-//         assert(vc->m_wf == m_wf);
-//         assert(vc->m_wfName == m_wfName);
         assert(((ValCalculatorPair*) vc)->m_slot == m_slot);
         assert(((ValCalculatorPair*) vc)->m_parent == m_parent);
         assert(((ValCalculatorPair*) vc)->m_species.first == m_species.first);
         assert(((ValCalculatorPair*) vc)->m_species.second == m_species.second);
-
+	
         cp->registerCalc(vc);
       }
-    );    
-  }
-  else
-  {
+     );
+    
+  } // end of if(m_allPairs)
+  else {
+
     if(m_species.first == "undefined")
-      throw gError("ValCalculatorPair::setup", "Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw
+	gError("ValCalculatorPair::setup", "Attribute 'species1' has "
+	       "value \"undefined\" and 'allPairs' is disabled."); 
+
     if(m_species.second == "undefined")
-      throw gError("ValCalculatorPair::setup", "Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw
+	gError("ValCalculatorPair::setup", "Attribute 'species1' has "
+	       "value \"undefined\" and 'allPairs' is disabled."); 
 
-    ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
+    ColourPair* cp =
+      M_MANAGER->cp
+      (M_MANAGER->getColour(m_species.first),
+       M_MANAGER->getColour(m_species.second));
 
-    // see CONVENTION5 for rule about persistencies
-#if 0
-    // new rules
-    // FIXME: not checked how meaningful this is for the case that both species don't have an IntegratorPosition
-    // by the way, how meaningful is this case itself ?!?
-    if (!M_CONTROLLER->findIntegrator("IntegratorPosition", cp->firstSpecies()) && 
-         !M_CONTROLLER->findIntegrator("IntegratorPosition", cp->secondSpecies()))
-      m_persistency = true;
-#endif
-      
+    // see CONVENTION5 for rule about persistencies      
     if(cp->tagFormat().attrExists(m_symbolName))
-      throw gError("ValCalculatorPair::setup", "Symbol " + m_symbolName + " already existing. Second definition is not allowed for this Calculator.");
+      throw
+	gError("ValCalculatorPair::setup", "Symbol " + m_symbolName +
+	       " already existing. Second definition is not allowed "
+	       "for this Calculator.");
       
-    m_slot = cp->tagFormat().addAttribute(m_symbolName, m_datatype, false/*persistency*//*m_persistency*/, m_symbolName).offset;
+    m_slot =
+      cp->tagFormat().addAttribute
+      (m_symbolName, m_datatype, false/*persistency*/, m_symbolName)
+      .offset;
     
     cp -> registerCalc(this);
-  }
+    
+  } // end of else of if(m_allPairs)
 
 }
 
-void /*pair<size_t, size_t>*/ ValCalculatorPair::setSlot(ColourPair* cp, size_t& slot, bool oneProp)
+void ValCalculatorPair::setSlot(ColourPair* cp, size_t& slot, bool oneProp)
 {
   m_slot = slot = cp->tagFormat().addAttribute
-      ("ValCalculator_" + myName() + "_" + cp->toString(), m_datatype).offset;
+    ("ValCalculator_" + myName() + "_" + cp->toString(), m_datatype
+     /*, persistency = false, symbol = ""*/).offset;
 }
 
-ValCalculatorPart::ValCalculatorPart(/*Node*/Simulation* parent): ValCalculator(parent)
+ValCalculatorPart::ValCalculatorPart(/*Node*/Simulation* parent)
+  : ValCalculator(parent)
 {
   init();
-//   MSG_DEBUG("ValCalculator::ValCalculator", "CONSTRUCTOR");
 }
 
 void ValCalculatorPart::init()
 {
   m_properties.setClassName("ValCalculatorPart");
- 
+
+  // START: unfinished stuff from 2018-05-08 ////////////////////
+  
+  // BOOLPC
+  //   (selfReset, m_selfReset, "Should this module protect its computed "
+  //    "symbol from automatic resetting (to zero) and reset it by "
+  //    "itself? The self-reset will be done"
+  //    "immediately before the start of computations by any Symbols, "
+  //    "including this one in stage 0 and/or 1 as selected. This may be "
+  //    "useful to prevent a too early reset, for example by a triggered "
+  //    "position update or neighbour list rebuild. In selfReset "
+  //    "mode, overwriting existing symbols "
+  //    "('overrite = \"yes\"') by this module is forbidden.");
+
+  // m_selfReset = false;
+
+  // END: unfinished stuff from 2018-05-08 ////////////////////
+
+  
 #ifdef _OPENMP
   m_copy_slots.resize(global::n_threads);
 #endif
@@ -207,8 +227,36 @@ void ValCalculatorPart::init()
 
 void ValCalculatorPart::setup()
 {
+  ValCalculator::setup();
 
-  throw gError("ValCalculatorPart::setup", "Shouldn't currently be called. Contact the programmer.");
+  // START: unfinished stuff from 2018-05-08 ////////////////////
+  
+  // if(m_selfReset) {
+  //   if(m_overwrite)
+  //     // Not all children allow to control m_overwrite via XML-input. 
+  //     // But since the default in class Symbol is m_overwrite = false,
+  //     // this exception and its message should always make sense when
+  //     // thrown, since m_overwrite = true is either set via XML or via
+  //     // an error in the implementation of a child class. The latter
+  //     // should only be metioned in this comment and *not* in the
+  //     // exception message, such that we don't confuse users.
+  //     throw gError("ValCalculatorPart::setup for module " + className(),
+  // 		   "'overwrite = \"yes\"' is not allowed together with "
+  // 		   "'selfReset = \"yes\"'.");
+  //   m_persistency = true;
+
+  //   // The resetting will be done by an overriden Node::precompute()
+  //   if(m_phase == 0) M_CONTROLLER->registerForPrecomputation_0(this);
+  //   if(m_phase == 1) M_CONTROLLER->registerForPrecomputation(this);
+  //   if(m_phase == 2) {
+  //     M_CONTROLLER->registerForPrecomputation(this);
+  //     M_CONTROLLER->registerForPrecomputation_0(this);
+  //   }
+  // } // end of if if(m_selfReset)
+  // else
+  //   m_persistency = false;
+
+  // END: unfinished stuff from 2018-05-08 ////////////////////
   
 }
 
@@ -219,7 +267,10 @@ NonBondedPairParticleCalculator::NonBondedPairParticleCalculator(string symbol)
 
 }
 
-NonBondedPairParticleCalculator::NonBondedPairParticleCalculator(/*Node*/Simulation* parent): ValCalculatorPart(parent)
+
+NonBondedPairParticleCalculator::NonBondedPairParticleCalculator
+(/*Node*/Simulation* parent)
+  : ValCalculatorPart(parent)
 {
   init();
 }
@@ -227,11 +278,11 @@ NonBondedPairParticleCalculator::NonBondedPairParticleCalculator(/*Node*/Simulat
 
 void NonBondedPairParticleCalculator::init()
 {
-  BOOLPC(allPairs, m_allPairs, "Should the quantity be computed for all colour combinations? If yes, this disables 'species1' and 'species2'");
-
+  BOOLPC(allPairs, m_allPairs,
+	 "Should the quantity be computed for all colour combinations? "
+	 "If \"yes\", this disables 'species1' and 'species2'");
+  
   m_allPairs = false;
-
-
 }
 
 

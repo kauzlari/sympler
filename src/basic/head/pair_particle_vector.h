@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -45,121 +45,115 @@
  */
 class PairParticleVector : public ValCalculatorArbitrary
 {
-  protected:
-
+ protected:
+  
   /*!
-     * Initialise the property list
+   * Initialise the property list
    */
-    virtual void init();
-
-    /*!
-     * Helper function for polymorphic copying
-     */
-    virtual ValCalculator* copyMySelf()
-    {
-      return new PairParticleVector(*this);
-    }
-
-  public:
-
-    /*!
+  virtual void init();
+  
+  /*!
+   * Helper function for polymorphic copying
+   */
+  virtual ValCalculator* copyMySelf()
+  {
+    return new PairParticleVector(*this);
+  }
+  
+ public:
+  
+  /*!
    * Constructor for the \a Node hierarchy
-     */
-    PairParticleVector(/*Node*/Simulation* parent);
-
-  /*!
-     * Destructor
    */
-    virtual ~PairParticleVector();
+  PairParticleVector(/*Node*/Simulation* parent);
+  
+  /*!
+   * Destructor
+   */
+  virtual ~PairParticleVector();
 
 #ifdef _OPENMP
-    /*!
-     * Merge the copies of all threads together
-     */
-    virtual void mergeCopies(ColourPair* cp, int thread_no);
-#endif
-
-    /*!
-     * Compute the user defined expression for pair \a pD
-     * @param pD \a Pairdist whose contribution we calculate
-     */
-#ifndef _OPENMP
-        virtual void compute(Pairdist* pD)
-#else
-        virtual void compute(Pairdist* pD, int thread_no)
-#endif
-        {
-//           MSG_DEBUG("PairParticleVector::compute", "START, m_cutoff = " << m_cutoff << ", slots = (" << m_slots.first << ", " << m_slots.second << ")");
-          if(pD->abs() < m_cutoff)
-          {
-//             double temp;
-            point_t temp;
-
-            // compute the pair-expression
-            m_function(&temp, pD);
-
-            point_t tempFirst;
-            point_t tempSecond;
-            // compute the particle-expressions
-            m_1stparticleFactor(&tempFirst, pD);
-            m_2ndparticleFactor(&tempSecond, pD);
-
-            Particle* first = pD->firstPart();
-            Particle* second = pD->secondPart();
-//             MSG_DEBUG("PairParticleVector::compute", "temp = " << temp);
-
-
-            if(pD->actsOnFirst())
-            {
-              for(size_t i = 0; i < SPACE_DIMS; ++i)
-                tempFirst[i] *= temp[i];
-
-#ifndef _OPENMP
-              first->tag.pointByOffset(m_slots.first) += tempFirst;
-#else
-              for (size_t a = 0; a < SPACE_DIMS; ++a) {
-                (*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first))[m_vector_slots.first + a] += tempFirst[a];
-              }
-#endif
-
-            }
-
-            if(pD->actsOnSecond())
-            {
-              for(size_t i = 0; i < SPACE_DIMS; ++i)
-                tempSecond[i] *= temp[i];
-
-#ifndef _OPENMP
-              second->tag.pointByOffset(m_slots.second) += m_symmetry*(tempSecond);
-#else
-              for (size_t a = 0; a < SPACE_DIMS; ++a) {
-                (*second->tag.vectorDoubleByOffset(m_copy_slots[thread_no].second))[m_vector_slots.second + a] += m_symmetry*tempSecond[a];
-              }
-#endif
-
-            }
-          }
-        }
-
   /*!
-         * Returns the symbol name as defined in the input file.
+   * Merge the copies of all threads together
    */
-        virtual string myName() {
-          return m_symbolName;
-        }
-
+  virtual void mergeCopies(ColourPair* cp, int thread_no);
+#endif
+  
   /*!
-         * Register all degrees of freedom (i.e., the local density)
+   * Compute the user defined expression for pair \a pD
+   * @param pD \a Pairdist whose contribution we calculate
    */
-        virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp)
-        {
-          throw gError("PairParticleVector::setSlots", "should not have been called! Contact the programmer.");
-        }
+#ifndef _OPENMP
+  virtual void compute(Pairdist* pD)
+#else
+    virtual void compute(Pairdist* pD, int thread_no)
+#endif
+  {
+    if(pD->abs() < m_cutoff) {
 
+      point_t temp;
+      
+      // compute the pair-expression
+      m_function(&temp, pD);
+      
+      point_t tempFirst;
+      point_t tempSecond;
+      // compute the particle-expressions
+      m_1stparticleFactor(&tempFirst, pD);
+      m_2ndparticleFactor(&tempSecond, pD);
+      
+      Particle* first = pD->firstPart();
+      Particle* second = pD->secondPart();
+
+      if(pD->actsOnFirst()) {
+	for(size_t i = 0; i < SPACE_DIMS; ++i)
+	  tempFirst[i] *= temp[i];
+	
+#ifndef _OPENMP
+	first->tag.pointByOffset(m_slots.first) += tempFirst;
+#else
+	for (size_t a = 0; a < SPACE_DIMS; ++a) {
+	  (*first->tag.vectorDoubleByOffset(m_copy_slots[thread_no].first))[m_vector_slots.first + a] += tempFirst[a];
+	}
+#endif
+	
+      }
+      
+      if(pD->actsOnSecond()) {
+	for(size_t i = 0; i < SPACE_DIMS; ++i)
+	  tempSecond[i] *= temp[i];
+	
+#ifndef _OPENMP
+	second->tag.pointByOffset(m_slots.second) += m_symmetry*(tempSecond);
+#else
+	for (size_t a = 0; a < SPACE_DIMS; ++a) {
+	  (*second->tag.vectorDoubleByOffset(m_copy_slots[thread_no].second))[m_vector_slots.second + a] += m_symmetry*tempSecond[a];
+	}
+#endif
+	
+      }
+    }
+  }
+  
   /*!
-         * Setup this Calculator
+   * Returns the symbol name as defined in the input file.
    */
-        virtual void setup();
+  virtual string myName() {
+    return m_symbolName;
+  }
+  
+  /*!
+   * Register all degrees of freedom (i.e., the local density)
+   */
+  virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp)
+  {
+    throw gError("PairParticleVector::setSlots", "should not have been called! Contact the programmer.");
+  }
+  
+  /*!
+   * Setup this Calculator
+   */
+  virtual void setup();
 
 };
 

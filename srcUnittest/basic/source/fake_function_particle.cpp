@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -29,33 +29,18 @@
  */
 
 
-#include "particle_vector.h"
-
-const SymbolRegister<ParticleVector> particle_vector("ParticleVector");
+#include "fake_function_particle.h"
 
 
-ParticleVector::ParticleVector(Simulation* parent)
-  : ParticleCacheArbitrary(parent)
-{
-  setFunctionReturnType();
-  m_datatype = DataFormat::POINT;
-  init();
-}
-
-ParticleVector::~ParticleVector()
+FakeFunctionParticle::FakeFunctionParticle()
 {
 }
 
-void ParticleVector::init()
+
+FakeFunctionParticle::~FakeFunctionParticle()
 {
-  m_properties.setClassName("ParticleVector");
-  m_properties.setDescription("User defined vector-type particle property, which depends exclusively on other properties of the same particle. It may be defined by the attribute 'expression'.");
 }
 
-void ParticleVector::setup()
-{
-//   MSG_DEBUG("ParticleVector::setup", "START");
-  ParticleCacheArbitrary::setup();
-//   MSG_DEBUG("ParticleVector::setup", "END");
-}
+
+
 

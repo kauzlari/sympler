@@ -62,7 +62,14 @@ class ParticleScalar : public ParticleCacheArbitrary
       return new ParticleScalar(*this);
     }
     
-  public:
+    /*!
+     * Helper function for setting the return type of \a m_function
+     */
+    virtual void setFunctionReturnType(){
+      m_function->setReturnType(Variant::SCALAR);
+    }
+
+ public:
   /*!
    * Constructor
    */
@@ -80,7 +87,7 @@ class ParticleScalar : public ParticleCacheArbitrary
     virtual void computeCacheFor(Particle* p)
     {
       
-      m_function(&(p->tag.doubleByOffset(m_offset)), p);
+      (*m_function)(&(p->tag.doubleByOffset(m_offset)), p);
       
     }
 

@@ -43,7 +43,7 @@ const SymbolRegister<TransferParticleVector> transfer_particle_vector("TransferP
 TransferParticleVector::TransferParticleVector(Simulation* parent)
   : ParticleCacheArbitrary(parent), m_pointerToParticleList(NULL), m_targetColour(100000)
 {
-  m_function.setReturnType(Variant::VECTOR);
+  setFunctionReturnType();
   m_datatype = DataFormat::POINT;
   init();
 }

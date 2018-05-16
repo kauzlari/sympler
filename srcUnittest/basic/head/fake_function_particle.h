@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -30,62 +30,63 @@
 
 
 
-#ifndef __FUNCTION_PARTICLE_H
-#define __FUNCTION_PARTICLE_H 
+#ifndef __FAKE_FUNCTION_PARTICLE_H
+#define __FAKE_FUNCTION_PARTICLE_H 
 
-#include "function_arbitrary.h"
-// #include "colour_pair.h"
-// #include "weighting_function.h"
-#include "particle.h"
+#include "function_particle.h"
 
 
 /*!
- * A function which takes a particle as its argument
+ * Fake class for function particle. Current(2018-04-20) purpose:
+ * - replace operator() by simple non-runtime-compiled function
  */
-class FunctionParticle: public FunctionArbitrary
+class FakeFunctionParticle: public FunctionParticle
 {
- protected:
-  /*!
-   * The particle color
-   */
-  size_t m_colour;
-
-//  /*!
-//   * The \a ColourPair , the colour of the particles belongs to
-  //   */
-//  ColourPair* m_cp;                                    
+ /* protected: */
                                         
-public:
+ public:
   /*!
    * Constructor
    */
-  FunctionParticle();
-
+  FakeFunctionParticle();
+  
   /*!
    * Destructor
    */
-  virtual ~FunctionParticle();
-
-  /*!
-   * Compile to C code
-   */
-  virtual void compile();
-
-  /*!
-   * Set the color pair and the color
-   */
-  void setColour/*Pair*/(/*ColourPair* cp, */size_t colour) {
-//     m_cp = cp;
-    m_colour = colour;
-  }
+  virtual ~FakeFunctionParticle();
 
   /*!
    * Call the function
-   * @param val Return value
-   * @param p Particle the function takes as the argument
+   * @param[out] val Return value
+   * @param[in] p Particle the function takes as the argument
    */
   virtual void operator()(void* val, Particle* p) const {
-    m_compiler.fn()(val, p, p->tag.data());
+    switch(m_returnType) {
+
+    case Variant::SCALAR : 
+      *((double*) val) =  3.;
+      break;
+
+    case Variant::VECTOR : 
+      for(size_t i = 0; i < SPACE_DIMS; ++i) 
+	(*((point_t*) val))[i] = i;
+      break;
+
+    case Variant::TENSOR :
+      for(size_t i = 0; i < SPACE_DIMS; ++i) {
+	for(size_t j = 0; j < SPACE_DIMS; ++j) {
+	  (*((tensor_t*) val)) (i,j) = j + i*SPACE_DIMS;
+	}
+      }
+      break;
+
+    default:
+      throw gError
+          ("FakeFunctionParticle::operator()",
+           "Don't know how to handle return type "
+	   + ObjToString(m_returnType));
+
+    }
   }
 };
 

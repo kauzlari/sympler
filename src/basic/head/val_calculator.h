@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -35,8 +35,6 @@
 
 #include "symbol.h"
 
-// #define VC_MAX_STAGE 1
-
 /* This file contains definitions of
 
 ValCalculator
@@ -49,26 +47,18 @@ ValCalcPartArbitrary
 class Pairdist;
 class ColourPair;
 
-
 /*!
  * Calculator for cached properties computed during a loop over pairs
  */
 class ValCalculator : public Symbol
 {
-
+  
  protected:
-
+  
   /*!
-  * The species of the ColourPair this Calculator should belong to
-  */
+   * The species of the ColourPair this Calculator should belong to
+   */
   pair<string, string> m_species;
-
-  // now moved to NonBondedPairParticleCalculator and ValCalculatorPair
-
-  //  /*!
-  //  * Should all colour combinations be considered. This disables \a m_species.
-  //  */
-  //  bool m_allPairs;
 
 #ifdef _OPENMP
   /*!
@@ -76,32 +66,32 @@ class ValCalculator : public Symbol
    */
   bool m_particleCalculator;
 #endif
-
+  
   /*!
-  * Initialise the property list
-  */
+   * Initialise the property list
+   */
   virtual void init();
 
   /*!
-   * Helper function which removes indices and brackets from single terms in \a Function 
-   * expressions. E.g.: "[rij]" becomes "r" or "rhoi" becomes "rho"
-   * @param name Single term from a \a Function expression
+   * Helper function which removes indices and brackets from single 
+   * terms in \a Function expressions. E.g.: "[rij]" becomes "r" or 
+   * "rhoi" becomes "rho"
+   * @param[out] name Term from a \a Function expression to be cleaned
    */
   virtual void cleanSymbol(string& name) const;
 
   
-public:
+ public:
+  
   /*!
- * Constructor
+   * Constructor
    */
-  ValCalculator(string symbol);/*: m_stage(0) {
-}*/
+  ValCalculator(string symbol);
 
   /*!
    * Constructor
    */
-  ValCalculator(/*Node*/Simulation* parent);/*: m_stage(0) {
-}*/
+  ValCalculator(/*Node*/Simulation* parent);
 
   /*!
    * Destructor
@@ -110,6 +100,11 @@ public:
   }
 
   /*!
+   * Setup the variables of this \a Symbol
+   */
+  virtual void setup();
+  
+  /*!
    * Compute cached properties for \a Pairdist \a pD
    * @param pD The \a Pairdist for which to compute the cached properties
    */
@@ -117,12 +112,12 @@ public:
   virtual void compute(Pairdist* pD) = 0;
 #else
   virtual void compute(Pairdist* pD, int thread_no) = 0;
-
+  
   virtual bool particleCalculator() {
     return m_particleCalculator;
   }
 #endif
-
+  
   /*!
    * Return a string identifier for this calculator
    */
@@ -132,9 +127,10 @@ public:
    * Return the offset for the data stored by this calculator in a \a Pairdist
    */
   virtual void mySlot(size_t& slot) const = 0;
-
+  
   /*!
-   * Return the offset for the data stored by this calculator in the \a Particle s
+   * Return the offset for the data stored by this calculator in the 
+   * \a Particle s
    */
   virtual void mySlots(pair<size_t, size_t> &theSlots) = 0;
 
@@ -148,25 +144,20 @@ public:
    * Register this calculator and return the offset for the data stored
    * in the \a Particle s
    */
-  virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool
-			oneProp) = 0;
-  
-  //  /*!
-  //   * Return the stage at which this calculator is being called.
-  //   */
-  //  virtual size_t stage() {
-  //    return m_stage;
-  //  }
-  
+  virtual void setSlots
+    (ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp) = 0;
+    
   /*!
-   * return cutoff
+   * Return cutoff.
+   * @return Cutoff returned here serves for child-debugging only
    */
   virtual double cutoff() {
     return -1;
   }
 
   /*!
-   * Return the first species this calculator writes into. Here, the default behaviour is implemented
+   * Return the first species this calculator writes into. Here, the 
+   * default behaviour is implemented
    */
   virtual string firstWriteSpecies() {
     return m_species.first;
@@ -179,75 +170,22 @@ public:
     return m_species.second;
   }
 
-
-
 };
 
 
 /*!
- * Base class for all \a ValCcalculator s that store information within a \a Pairdist
+ * Base class for all \a ValCcalculator s that store information within 
+ * a \a Pairdist
  */
 class ValCalculatorPair : public ValCalculator
 {
 
  protected:
 
-/*!
- * Should all colour combinations be considered. This disables \a m_species.
- */
-  bool m_allPairs;
-
-
- public:
-
-    /*!
- * Constructor
-     */
-  ValCalculatorPair(string symbol)
-  : ValCalculator(symbol)
-  {}
-
-    /*!
-   * Constructor for Node hierarchy
-     */
-  ValCalculatorPair(/*Node*/Simulation* parent);
-
   /*!
-   * Destructor
+   * Should all colour combinations be considered. This disables \a m_species.
    */
-  virtual ~ValCalculatorPair() {
-  }
-
-  virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp);
-
-  virtual void setSlots(ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp) {
-    throw gError
-      ("ValCalculatorPair::setSlots", "(ColourPair*, "
-       "pair<size_t, size_t>&, bool ) should not be called! Contact the programmers.");
-  }
-
-  void mySlot(size_t& slot) const
-  {
-    slot = m_slot;
-  }
-
-  void mySlots(pair<size_t, size_t> &theSlots)
-  {
-    throw gError("ValCalculatorPair::mySlots(pair<size_t, size_t>*) should "
-                 "not be called!");
-  }
-
-  /*!
-  * Setup this Calculator
-  */
-  virtual void setup();
-
-//  /*!
-//  * Setup the Calculator if used in a Node hierarchy
-  //  */
-//  virtual void setup();
-
-protected:
+  bool m_allPairs;
 
   /*!
    * The tag offset of the data stored in a \a Pairdist
@@ -263,6 +201,54 @@ protected:
    * Helper function for returning a copy of itself
    */
   virtual ValCalculatorPair* copyMySelf() = 0;
+
+  
+ public:
+
+  /*!
+   * Constructor
+   */
+  ValCalculatorPair(string symbol)
+    : ValCalculator(symbol)
+  {}
+  
+  /*!
+   * Constructor for Node hierarchy
+   */
+  ValCalculatorPair(/*Node*/Simulation* parent);
+  
+  /*!
+   * Destructor
+   */
+  virtual ~ValCalculatorPair() {
+  }
+  
+  virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp);
+  
+  virtual void setSlots
+    (ColourPair* cp, pair<size_t, size_t> &theSlots, bool oneProp) {
+    throw gError
+      ("ValCalculatorPair::setSlots for module " + className(),
+       "(ColourPair*, pair<size_t, size_t>&, bool ) should not be "
+       "called! Contact the programmer of the module.");
+  }
+
+  void mySlot(size_t& slot) const
+  {
+    slot = m_slot;
+  }
+  
+  void mySlots(pair<size_t, size_t> &theSlots)
+  {
+    throw gError("ValCalculatorPair::mySlots for module " + className(),
+		 "should not be called!");
+  }
+
+  /*!
+   * Setup this Calculator if used in a Node hierarchy
+   */
+  virtual void setup();
+
 };
 
 
@@ -271,85 +257,86 @@ protected:
  */
 class ValCalculatorPart : public ValCalculator
 {
-  public:
-
+  
+ public:
+  
   /*!
    * Constructor
    */
-    ValCalculatorPart(string symbol)
-  : ValCalculator(symbol)
-    {
-//       m_symbolName = symbol;
-    }
+ ValCalculatorPart(string symbol)
+   : ValCalculator(symbol)
+    {}
+  
+  /*!
+   * Constructor for Node hierarchy
+   */
+  ValCalculatorPart(/*Node*/Simulation* parent);
+  
+  /*!
+   * Destructor
+   */
+  virtual ~ValCalculatorPart() {
+  }
+  
+  /*!
+   * Will throw an exception
+   */
+  virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp) {
+    throw gError("ValCalculatorPart::setSlot for module " + className(),
+		 "should not be called!");
+  }
 
   /*!
-     * Constructor for Node hierarchy
+   * Will throw an exception
    */
-    ValCalculatorPart(/*Node*/Simulation* parent);
+  void mySlot(size_t& slot) const
+  {
+    throw gError("ValCalculatorPart::mySlot for module " + className(),
+		 "should not be called!");
+  }
 
   /*!
-     * Destructor
+   * Return the offset for the data stored by this calculator in the 
+   * \a Particle s
+   * @param[out] theSlots Storage for the returned offsets (may be 
+   * different for different colours)
    */
-    virtual ~ValCalculatorPart() {
-    }
-
+  void mySlots(pair<size_t, size_t> &theSlots)
+  {
+    theSlots = m_slots;
+  }
+  
   /*!
-     * Will throw an exception
+   * Return the offset for the data stored by this calculator in the 
+   \a Particle s
+   * @return The offsets for both particles (may be different for 
+   * different colours)
    */
-    virtual void setSlot(ColourPair* cp, size_t& slot, bool oneProp)
-    {
-      throw gError("ValCalculatorPart::setSlot(ColourPair*, size_t&) should "
-          "not be called!");
-//  /*!
-//     * Setup the Calculator if used in a Node hierarchy
-      //   */
-//    virtual void setup();
-    }
-
-  /*!
-     * Will throw an exception
-   */
-    void mySlot(size_t& slot) const
-    {
-      throw gError("ValCalculatorPart::mySlot(size_t&) should not be called!");
-    }
-
-  /*!
-   * Return the offset for the data stored by this calculator in the \a Particle s
-   */
-    void mySlots(pair<size_t, size_t> &theSlots)
-    {
-      theSlots = m_slots;
-    }
-
-
-  /*!
-   * Return the offset for the data stored by this calculator in the \a Particle s
-   */
-    virtual pair<size_t, size_t> vcSlots()
-    {
-      return m_slots;
-    }
+  virtual pair<size_t, size_t> vcSlots() {
+    return m_slots;
+  }
 
 #ifdef _OPENMP
   /*!
-   * Return the offset for the data stored by this calculator in the \a Particle s
+   * Return the offset in the \a Particle tag to the data copies for 
+   * each thread stored by this calculator 
    */
-    virtual vector<pair<int, int> > &copySlots() {
-      return m_copy_slots;
-    }
+  virtual vector<pair<int, int> > &copySlots() {
+    return m_copy_slots;
+  }
 
   /*!
-   * Return the offset for the data inside the copy vector in the \a Particle s tag.
+   * Return the actual slot to the data inside the copy vector 
+   * (accessed in the \a Particle tag by \a m_copy_slots)
    */
-    virtual pair<int, int> &vectorSlots() {
-      return m_vector_slots;
-    }
+  virtual pair<int, int> &vectorSlots() {
+    return m_vector_slots;
+  }
 
   /*!
    * Merging the copies among different threads (processors) together
    */
-    virtual void mergeCopies(ColourPair* cp, int thread_no) = 0;
+  virtual void mergeCopies(ColourPair* cp, int thread_no) = 0;
 #endif
 
    /*!
@@ -357,69 +344,77 @@ class ValCalculatorPart : public ValCalculator
     */
     virtual void setup();
 
-  protected:
-  /*!
-   * The tag offset of the data stored in a \a Particle
-   */
-    pair<size_t, size_t> m_slots;
-
-#ifdef _OPENMP
-  /*!
-   * The tag offset of the copy data stored in a \a Particle.
-   * The vector size equals the number of threads used.
-   */
-    vector<pair<int, int> > m_copy_slots;
-
+    
+ protected:
+    
     /*!
-     * The offset to the copy-slots inside a vector
+     * The tag offset of the data stored in a \a Particle
+     */
+    pair<size_t, size_t> m_slots;
+    
+#ifdef _OPENMP
+    
+    /*!
+     * The offset in the \a Particle tag to the data copies for 
+     * each thread stored by this calculator 
+     */
+    vector<pair<int, int> > m_copy_slots;
+    
+    /*!
+     * The actual slot to the data inside the copy vector 
+     * (accessed in the \a Particle tag by \a m_copy_slots)
      */
     pair<int, int> m_vector_slots;
+    
 #endif
-
-  /*!
-   * Initialise the property list
-   */
+    
+    /*!
+     * Initialise the property list
+     */
     virtual void init();
+    
 };
 
-
+/*!
+ * Parent class of all \a ValcalculatorPart which loop over the 
+ * non-bonded neighbour list
+ */
 class NonBondedPairParticleCalculator : public ValCalculatorPart
 {
-
+  
  protected:
 
-/*!
- * Should all colour combinations be considered. This disables \a m_species.
- */
+  /*!
+   * Should all colour combinations be considered. This disables \a m_species.
+   */
   bool m_allPairs;
-
 
   /*!
    * initialise this Caluclator
-  */
+   */
   virtual void init();
 
-  public:
-
+  
+ public:
+  
   /*!
    * Constructor
    */
   NonBondedPairParticleCalculator(string symbol);
-
-
+  
+  
   /*!
-     * Constructor for Node hierarchy
+   * Constructor for Node hierarchy
    */
-    NonBondedPairParticleCalculator(/*Node*/Simulation* parent);
-
+  NonBondedPairParticleCalculator(/*Node*/Simulation* parent);
+  
   /*!
-     * Destructor
+   * Destructor
    */
-    virtual ~NonBondedPairParticleCalculator() {
-    }
+  virtual ~NonBondedPairParticleCalculator() {
+  }
 
 };
-
 
 
 #endif

@@ -699,6 +699,8 @@ void Controller::integrate()
 
 void Controller::runSymbols() {
 
+  // MSG_DEBUG("Controller::runSymbols()", "START");
+  
   clock_t tInitStart;
   clock_t tInitEnd;
 //   time_t tInitStart;
@@ -974,6 +976,8 @@ void Controller::runSymbols() {
 
 void Controller::runSymbols_0() {
 
+  // MSG_DEBUG("Controller::runSymbols_0()", "START");
+  
   clock_t tInitStart;
   clock_t tInitEnd;
 //   time_t tInitStart;
