@@ -37,7 +37,7 @@ const SymbolRegister<ParticleScalar> particle_scalar("ParticleScalar");
 ParticleScalar::ParticleScalar(Simulation* parent)
   : ParticleCacheArbitrary(parent)
 {
-  m_function.setReturnType(Variant::SCALAR);
+  setFunctionReturnType();
   m_datatype = DataFormat::DOUBLE;
   init();
 }

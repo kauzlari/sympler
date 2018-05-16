@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -46,6 +46,7 @@ ParticleCacheArbitrary::ParticleCacheArbitrary(/*Node*/Simulation* parent/*size_
 /*: m_colour(colour), m_stage(0)*/
   : ParticleCache(parent)
 {
+  m_function = new FunctionParticle();
   init();
 }
 
@@ -71,6 +72,12 @@ void ParticleCacheArbitrary::init()
        "Is this calculator allowed to overwrite already existing symbols " 
            "with name 'symbol' ?");
 
+  STRINGPC
+      (useOldFor, m_oldSymbols,
+       "Here, you can list the used symbols, which should be treated as \"old\", i.e., this calculator will not wait for those symbols to be computed beforehand, but it will take what it finds. Separate the symbols by the \"|\"- (\"pipe\"-) symbol."
+      );
+
+  m_oldSymbols = "---";
   m_overwrite = false;
   m_expression = "undefined";
   m_symbolName = "undefined";
@@ -109,10 +116,10 @@ void ParticleCacheArbitrary::setup()
           ParticleCache* pc = copyMySelf()/*new ParticleCacheArbitrary(*this)*/;
           // Absolutely important because setExpression adds the function 
           // to the "toBeCompiled"-list
-          ((ParticleCacheArbitrary*) pc)->m_function.setExpression(m_expression);
-          ((ParticleCacheArbitrary*) pc)->m_function.setColour(m_colour);
+          ((ParticleCacheArbitrary*) pc)->m_function->setExpression(m_expression);
+          ((ParticleCacheArbitrary*) pc)->m_function->setColour(m_colour);
           
-          assert(((ParticleCacheArbitrary*) pc)->m_function.returnType() == m_function.returnType()); 
+          assert(((ParticleCacheArbitrary*) pc)->m_function->returnType() == m_function->returnType()); 
           assert(((ParticleCacheArbitrary*) pc)->mySymbolName() == m_symbolName);
           assert(((ParticleCacheArbitrary*) pc)->stage() == m_stage);
           assert(((ParticleCacheArbitrary*) pc)->m_colour == m_colour);
@@ -128,10 +135,10 @@ void ParticleCacheArbitrary::setup()
             ParticleCache* pc = copyMySelf()/*new ParticleCacheArbitrary(*this)*/;
           // Absolutely important because setExpression adds the function 
           // to the "toBeCompiled"-list
-            ((ParticleCacheArbitrary*) pc)->m_function.setExpression(m_expression);
-            ((ParticleCacheArbitrary*) pc)->m_function.setColour(m_colour);
+            ((ParticleCacheArbitrary*) pc)->m_function->setExpression(m_expression);
+            ((ParticleCacheArbitrary*) pc)->m_function->setColour(m_colour);
           
-            assert(((ParticleCacheArbitrary*) pc)->m_function.returnType() == m_function.returnType()); 
+            assert(((ParticleCacheArbitrary*) pc)->m_function->returnType() == m_function->returnType()); 
             assert(((ParticleCacheArbitrary*) pc)->mySymbolName() == m_symbolName);
             assert(((ParticleCacheArbitrary*) pc)->stage() == m_stage);
             assert(((ParticleCacheArbitrary*) pc)->m_colour == m_colour);
@@ -147,9 +154,9 @@ void ParticleCacheArbitrary::setup()
 
   // next lines are done in any case 
   setupOffset();
-
-  m_function.setExpression(m_expression);
-  m_function.setColour(m_colour);
+  
+  m_function->setExpression(m_expression);
+  m_function->setColour(m_colour);
   
   if(m_phaseUser == 0)
     Particle::registerCache_0(this);
@@ -162,10 +169,10 @@ void ParticleCacheArbitrary::setup()
     ParticleCache* pc = copyMySelf()/*new ParticleCacheArbitrary(*this)*/;
           // Absolutely important because setExpression adds the function 
           // to the "toBeCompiled"-list
-    ((ParticleCacheArbitrary*) pc)->m_function.setExpression(m_expression);
-    ((ParticleCacheArbitrary*) pc)->m_function.setColour(m_colour);
+    ((ParticleCacheArbitrary*) pc)->m_function->setExpression(m_expression);
+    ((ParticleCacheArbitrary*) pc)->m_function->setColour(m_colour);
           
-    assert(((ParticleCacheArbitrary*) pc)->m_function.returnType() == m_function.returnType()); 
+    assert(((ParticleCacheArbitrary*) pc)->m_function->returnType() == m_function->returnType()); 
     assert(((ParticleCacheArbitrary*) pc)->mySymbolName() == m_symbolName);
     assert(((ParticleCacheArbitrary*) pc)->stage() == m_stage);
     assert(((ParticleCacheArbitrary*) pc)->m_colour == m_colour);
@@ -177,6 +184,7 @@ void ParticleCacheArbitrary::setup()
 
 void ParticleCacheArbitrary::setupOffset()
 {
+
   if(m_overwrite)
   { 
     // so the attribute should already exist
@@ -207,7 +215,7 @@ void ParticleCacheArbitrary::setupOffset()
 
 void ParticleCacheArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) {
 
-  FunctionParser::addToTypedValueList(m_function.usedSymbols(), usedSymbols);      
+  FunctionParser::addToTypedValueList(m_function->usedSymbols(), usedSymbols);      
 }
 
 

@@ -63,6 +63,7 @@ include_HEADERS = \
 	particle_scalar.h \
 	particle_tensor.h \
 	particle_vector.h \
+	particle_vels.h \
 	pca_eigensystem.h \
 	pca_density_0oc.h \
 	pca_density_self_contribution.h \
@@ -76,7 +77,6 @@ include_HEADERS = \
 	pca_iapws-if97_p.h \
 	pca_iapws-if97_rho.h \
 	pca_matrix_inverse.h \
-	pca_random.h \
 	pca_volume_self_contribution.h \
 	phase.h \
 	postprocessor.h \

@@ -41,7 +41,7 @@ const SymbolRegister<ParticleRandNormScalar> particle_rand_norm_scalar("Particle
 ParticleRandNormScalar::ParticleRandNormScalar(Simulation* parent)
   : ParticleCacheArbRNG(parent)
 {
-  m_function.setReturnType(Variant::SCALAR);
+  setFunctionReturnType();
   m_datatype = DataFormat::DOUBLE;
   init();
 }

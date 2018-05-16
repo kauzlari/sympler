@@ -7,6 +7,8 @@ include_HEADERS = \
 	pca_iapws-if97_kappaTest.h \
 	pca_iapws-if97_pTest.h \
 	pca_iapws-if97_rhoTest.h \
+	fake_function_particle.h \
+	particle_velsTest.h \
 	smart_enumTest.h
 
 AM_CPPFLAGS = -I$(top_srcdir)/src/basic/head

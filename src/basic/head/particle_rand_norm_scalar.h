@@ -56,6 +56,13 @@ class ParticleRandNormScalar : public ParticleCacheArbRNG
     {
       return new ParticleRandNormScalar(*this);
     }
+
+    /*!
+     * Helper function for setting the return type of \a m_function
+     */
+    virtual void setFunctionReturnType(){
+      m_function->setReturnType(Variant::SCALAR);
+    }
     
   public:
   /*!
@@ -125,7 +132,7 @@ class ParticleRandNormScalar : public ParticleCacheArbRNG
     {
       
       double temp;
-      m_function(&temp, p);
+      (*m_function)(&temp, p);
 
       // new style: random number (zero mean, unit variance) was already precomputed in the corresponding tag-slot
       p->tag.doubleByOffset(m_offset) *= temp;

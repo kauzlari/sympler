@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -86,6 +86,24 @@ class Symbol : public Node
    * an XML-attribute but only in selected sub-classes
    */
   bool m_overwrite;
+
+  /*!
+   * Will the symbol introduced by this \a Symbol be protected from 
+   * automatic reset (=0)? The default value in the constructor is 
+   * 'false' for class \a Symbol.
+   * FIXME: currently (2018-05-09) not used, but could be useful, 
+   * especially if we add the feature, that the \a Symbol takes itself 
+   * control over the resetting while \a m_persistency = true to 
+   * protect from automatic reset. First incomplete code related to 
+   * this feature exists in some \a Symbol s, but is commented out due 
+   * to a vanished need for it. 
+   */
+  bool m_persistency;
+  
+  /*!
+   * This string holds the symbols, which are not waited for to be computed beforehand
+   */
+  string m_oldSymbols;
   
   /*!
    * Initialise the PropertyList.
@@ -158,7 +176,11 @@ class Symbol : public Node
    * An "empty" string must have the form "---".
    */
   virtual string usedSymbolsIgnoredForStaging() const {
-    return "---";
+    /* return "---"; */
+
+    if(m_oldSymbols == "---")
+      return m_symbolName;
+    else return string(m_oldSymbols + "|" + m_symbolName);
   }
   
   /*!
@@ -198,7 +220,7 @@ class Symbol : public Node
   }
   
   /*!
-   * Setup this Symbol
+   * Initialise all variables of this \a Symbol
    * FIXME: This function was added pretty recently (2018-02-19), and 
    * some of the children do not call it in their own setup(). It also
    * does not yet setup all members it declares.

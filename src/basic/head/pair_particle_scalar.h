@@ -87,13 +87,19 @@ class PairParticleScalar : public ValCalculatorArbitrary
     virtual void compute(Pairdist* pD, int thread_no)
 #endif
     {
+
       if(pD->abs() < m_cutoff)
       {
+      
         double temp;
 
         // compute the expression
         m_function(&temp, pD);
 
+	if(mySymbolName() == "sumw") {
+	  //	  MSG_DEBUG("PairParticleScalar::compute", "NOW for symbol " << mySymbolName() << ": expression = " << temp << ", tag-w=" << pD->tag.doubleByOffset(0));
+	}
+	  
         double tempFirst;
         double tempSecond;
             // compute the particle-expresions
