@@ -34,12 +34,6 @@ else(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
   message(FATAL_ERROR "Could not find CppUnit")
 endif(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
 
-# SDL is optional
-find_package(SDL)
-if(SDL_FOUND)
-  add_definitions(-DHAVE_SDL)
-endif(SDL_FOUND)
-
 # FREESTEAM is optional
 execute_process(COMMAND freesteam-config --version OUTPUT_VARIABLE freesteam_version OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(${freesteam_version} GREATER 1.0)
@@ -65,6 +59,8 @@ add_subdirectory(source/src_test)
 
 
 #add_definitions(-DHAVE_JAMA_JAMA_LU_H)
+
+#add_definitions(-DHAVE_SDL)
 
 #add_definitions(-DHAVE_TNT_TNT_H)
 
