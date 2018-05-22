@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -219,7 +219,7 @@ void Controller::run() {
      ((Integrator*) *__iFE)->deriveQuantities();
      );
   
-  M_SIMULATION->phase()->setForNewIntegration();
+  M_SIMULATION->phase()->clearParticleData();
 
   tInitEnd = clock();
 //   std::time(&tInitEnd);
@@ -504,7 +504,7 @@ void Controller::integrate()
      );
 
   /* Integrators, which use forces in the particle tag, must protect the current forces because
-  otherwise they would be deleted by setForNewIntegration() below. At the same time, the
+  otherwise they would be deleted by clearParticleData() below. At the same time, the
   previous forces are unprotected, because they must be overwritten. Integrators that don't use
   such forces do nothing.*/
   FOR_EACH
@@ -513,9 +513,9 @@ void Controller::integrate()
        ((Integrator*) *__iFE)->unprotect(other_force_index);
       );
 
-
-  // the name is wrong. This clears the unprotected tag, nothing else
-  phase->setForNewIntegration();
+  // since particle DOFs have been integrated, all additional data is
+  // most likely invalid...
+  phase->clearParticleData();
 
   tInitEnd = clock();
 //   std::time(&tInitEnd);
