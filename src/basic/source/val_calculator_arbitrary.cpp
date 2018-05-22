@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -133,7 +133,7 @@ void ValCalculatorArbitrary::setup()
       for (colour = 0; colour < M_MANAGER->nColours(); ++colour)
       {
         if(Particle::s_tag_format[colour].attrExists(m_symbolName))
-          throw gError("ValCalculatorArbitrary::setup", className() + ": Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(colour) + "'. Second definition is not allowed for overwrite = \"no\"");
+          throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(colour) + "'. Second definition is not allowed for overwrite = \"no\"");
       }
     }
     colour = 0;
@@ -147,7 +147,7 @@ void ValCalculatorArbitrary::setup()
       }
       catch(gError& err)
       {
-        throw gError("ValCalculatorArbitrary::setup", className() + ": search for symbol for species '" + M_MANAGER->species(colour) + " failed. The message was " + err.message()); 
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": search for symbol for species '" + M_MANAGER->species(colour) + " failed. The message was " + err.message()); 
       }
     }
     // see CONVENTION5 for rule about persistencies
@@ -180,7 +180,7 @@ void ValCalculatorArbitrary::setup()
           }
           catch(gError& err)
           {
-            throw gError("ValCalculatorArbitrary::setup", className() + ": search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + " failed. The message was " + err.message()); 
+            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + " failed. The message was " + err.message()); 
           }
         }
         else
@@ -198,7 +198,7 @@ void ValCalculatorArbitrary::setup()
           }
           catch(gError& err)
           {
-            throw gError("ValCalculatorArbitrary::setup", className() + ": search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + " failed. The message was " + err.message()); 
+            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + " failed. The message was " + err.message()); 
           }
 	}
         else
@@ -226,7 +226,7 @@ void ValCalculatorArbitrary::setup()
       m_2ndparticleFactor.setColourPair(cp);
 /*      m_1stparticleFactor.setReturnType(pFType);
       m_2ndparticleFactor.setReturnType(pFType);*/
-      MSG_DEBUG("ValCalculatorArbitrary::setup", className() + ": registering me, CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");
+      MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "registering me, CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");
       
       if(m_phaseUser == 0)    
         cp->registerCalc_0(this);
@@ -322,9 +322,9 @@ void ValCalculatorArbitrary::setup()
   else /*m_allPairs == false*/
   {
     if(m_species.first == "undefined")
-      throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
     if(m_species.second == "undefined")
-      throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled."); 
 
     ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
     
@@ -340,7 +340,7 @@ void ValCalculatorArbitrary::setup()
       }
       catch(gError& err)
       {
-        throw gError("ValCalculatorArbitrary::setup", className() + ": search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + " failed. The message was " + err.message()); 
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + " failed. The message was " + err.message()); 
       }
       try
       {
@@ -349,16 +349,16 @@ void ValCalculatorArbitrary::setup()
       }
       catch(gError& err)
       {
-        throw gError("ValCalculatorArbitrary::setup", className() + ": search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + " failed. The message was " + err.message()); 
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + " failed. The message was " + err.message()); 
       }      
     }
     else // m_overwrite = false
     {
       if(Particle::s_tag_format[cp->firstColour()].attrExists(m_symbolName)) 
-        throw gError("ValCalculatorArbitrary::setup", className() + ": Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(cp->firstColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(cp->firstColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
 
       if(Particle::s_tag_format[cp->secondColour()].attrExists(m_symbolName))
-        throw gError("ValCalculatorArbitrary::setup", className() + ": Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(cp->secondColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(cp->secondColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
 
         
       
@@ -373,7 +373,7 @@ void ValCalculatorArbitrary::setup()
       else m_slots.second = m_slots.first;
     }
     
-//     MSG_DEBUG("ValCalculatorArbitrary::setup", className() + " for " << m_symbolName << ": m_slots = (" << m_slots.first << ", " << m_slots.second << ")");
+//     MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + " for symbol " << m_symbolName << ": m_slots = (" << m_slots.first << ", " << m_slots.second << ")");
     
     
     m_function.setExpression(m_expression);
