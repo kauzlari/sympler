@@ -335,7 +335,7 @@ void Symbol::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
 		   int stage = (*vCIt)->stage();
 		   if(stage == -1) 
 		     {
-		       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+		       MSG_DEBUG("Symbol::findStageForSymbolName", "Class name: " + className() + ", name: " + this->name() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() << ", symbol: " << (*vCIt)->mySymbolName());
 		       tooEarly = true;
 		       m_stage = -1;
 		     }
@@ -369,7 +369,7 @@ void Symbol::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
 		 int stage = (*vCIt)->stage();
 		 if(stage == -1) 
 		   {
-		     MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+		     MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() << ", symbol: " << (*vCIt)->mySymbolName());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }
@@ -408,7 +408,7 @@ void Symbol::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) 
 		     {
-		       MSG_DEBUG("ParticleCacheArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		       MSG_DEBUG("ParticleCacheArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() << ", symbol: " << (*__iFE)->mySymbolName());
 		       tooEarly = true;
 		       m_stage = -1;
 		     }
@@ -446,7 +446,7 @@ void Symbol::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
 		     nothing = false;
 		     int stage = (*__iFE)->stage();
 		     if(stage == -1) {
-		       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() << ", symbol: " << (*__iFE)->mySymbolName());
 		       tooEarly = true;
 		       m_stage = -1;
 		     }
@@ -481,7 +481,7 @@ void Symbol::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
 		     nothing = false;
 		     int stage = (*__iFE)->stage();
 		     if(stage == -1) {
-		       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
 		       tooEarly = true;
 		       m_stage = -1;
 		     }
@@ -538,7 +538,7 @@ void Symbol::findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing
 		   int stage = (*vCIt)->stage();
 		   if(stage == -1) 
 		     {
-		       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+		       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() + ", symbol: " << (*vCIt)->mySymbolName());
 		       tooEarly = true;
 		       m_stage = -1;
 		     }
@@ -576,7 +576,7 @@ void Symbol::findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing
 			 int stage = (*vCIt)->stage();
 			 if(stage == -1) 
 			   {
-			     MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*vCIt)->className());
+			     MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() + ", symbol: " << (*vCIt)->mySymbolName());
 			     tooEarly = true;
 			     m_stage = -1;
 			   }
@@ -623,7 +623,7 @@ void Symbol::findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing
 		     int stage = (*__iFE)->stage();
 		     if(stage == -1) 
 		       {
-			 MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "For symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+			 MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "For symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
 			 tooEarly = true;
 			 m_stage = -1;
 		       }
@@ -661,7 +661,7 @@ void Symbol::findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing
 		     nothing = false;
 		     int stage = (*__iFE)->stage();
 		     if(stage == -1) {
-		       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of "<< "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
 		       tooEarly = true;
 		       m_stage = -1;
 		     }
@@ -696,7 +696,7 @@ void Symbol::findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing
 		   nothing = false;
 		   int stage = (*__iFE)->stage();
 		   if(stage == -1) {
-		     MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << (*__iFE)->className());
+		     MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of "<< "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
 		     tooEarly = true;
 		     m_stage = -1;
 		   }

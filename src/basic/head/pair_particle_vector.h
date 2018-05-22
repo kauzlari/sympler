@@ -137,6 +137,7 @@ class PairParticleVector : public ValCalculatorArbitrary
   
   /*!
    * Returns the symbol name as defined in the input file.
+   * FIXME: redundant with Symbol::mySymbolName()
    */
   virtual string myName() {
     return m_symbolName;

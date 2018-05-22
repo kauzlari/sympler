@@ -29,85 +29,101 @@
  */
 
 
-#include "particle_velsTest.h"
+#include "symbol_f_particle_velsTest.h"
 
 #include "fake_function_particle.h"
 
 #include <cmath>
 #include <limits>
 
-CPPUNIT_TEST_SUITE_REGISTRATION (ParticleVelsTest);
+CPPUNIT_TEST_SUITE_REGISTRATION (SymbolFParticleVelsTest);
 
-void ParticleVelsTest :: setUp (void)
+void SymbolFParticleVelsTest :: setUp (void)
 {
+
+  // This is required since SymbolFParticleVels::setup() calls the
+  // Controller of Simulation
+  // This starts getting bulky, but the pain is still below
+  // threshold...
+  Simulation* sim = new Simulation();
+  Controller* cont = new Controller(sim);
+  sim -> setController(cont);
+  
   // For the tests implemented so far (2018-04-20), NULL is fine
-  m_particleVels = new ParticleVels(/* Simulation* or Node* */ NULL);
-  m_particleVels -> setFunctionParticle(new FakeFunctionParticle());
+  m_symbolFParticleVels = new SymbolFParticleVels(/* Simulation* */ sim);
+  m_symbolFParticleVels -> setFunctionParticle(new FakeFunctionParticle());
 }
 
-void ParticleVelsTest :: tearDown (void) 
+void SymbolFParticleVelsTest :: tearDown (void) 
 {
-  delete m_particleVels;
+  delete m_symbolFParticleVels;
 }
 
-void ParticleVelsTest :: initTest (void)
+void SymbolFParticleVelsTest :: initTest (void)
 {
-  // NOTE: ParticleVels::init() is called by the constructor
-  CPPUNIT_ASSERT_EQUAL (m_particleVels -> overwriting(), true);
-  CPPUNIT_ASSERT_EQUAL (m_particleVels -> mySymbolName(), string("v"));
+  // NOTE: SymbolFParticleVels::init() is called by the constructor
+  CPPUNIT_ASSERT_EQUAL (true, m_symbolFParticleVels -> overwriting());
+  CPPUNIT_ASSERT_EQUAL (string("__force__"), m_symbolFParticleVels -> mySymbolName());
 }
 
-void ParticleVelsTest :: setupTest (void)
+void SymbolFParticleVelsTest :: setupTest (void)
 {
-  string exceptMsg = "ERROR: Unspecified exception in ParticleVelsTest :: setupTest for module " + m_particleVels->className() + ". Please check!";
+  string exceptMsg = "ERROR: Unspecified exception in SymbolFParticleVelsTest :: setupTest for module " + m_symbolFParticleVels->className() + ". Please check!";
 
   // We catch the first gError and do nothing, since we do not yet
   // (2018-04-23) test xml-input. FIXME: could we do that with some
   // FakeClass?
   try {
-    m_particleVels -> setup();
+    m_symbolFParticleVels -> setup();
   } catch(gError& err) {
     exceptMsg = err.message(); 
   }
 
   // Hence, currently (2018-04-23) we expect exceptions
-  CPPUNIT_ASSERT_THROW_MESSAGE(exceptMsg, m_particleVels -> setup(), gError);
+  CPPUNIT_ASSERT_THROW_MESSAGE(exceptMsg, m_symbolFParticleVels -> setup(), gError);
   
   // Yes we repeat it, because some setups might have messed things up.
-  // FIXME: Currently (2018-04-23) the called ParticleVels::setup()
+  // FIXME: Currently (2018-04-23) the called SymbolFParticleVels::setup()
   // does not do much, since it immediately stops after throwing an
   // exception. Probably this can only be fixed by adding tests for
   // the whole ParticleCache hierarchy
-  ParticleVelsTest :: initTest ();
+  SymbolFParticleVelsTest :: initTest ();
 }
 
-void ParticleVelsTest :: setupOffsetTest (void)
+void SymbolFParticleVelsTest :: setupOffsetTest (void)
 {
   try {
-    m_particleVels -> setup();
+    m_symbolFParticleVels -> setup();
   } catch(gError& err) {}
 
   // FIXME: This is currently (2018-04-23) not a true test since
-  // calling m_particleVels -> setupOffset() is protected and setup()
+  // calling m_symbolFParticleVels -> setupOffset() is protected and setup()
   // throws an exception before arriving at setupOffset(). the
   // assertion will pass since we do m_offset = 2nd argument  in the
-  // constructor of ParticleVels as well
-  CPPUNIT_ASSERT_EQUAL (m_particleVels -> offset(),
+  // constructor of SymbolFParticleVels as well
+  CPPUNIT_ASSERT_EQUAL (m_symbolFParticleVels -> offset(),
 			std::numeric_limits<std::size_t>::max());
 }
 
-void ParticleVelsTest :: computeCacheForTest (void)
+void SymbolFParticleVelsTest :: computeCacheForTest (void)
 {
   
   Particle* p = new Particle();
 
-  m_particleVels -> computeCacheFor(p);
+  // first force slot used
+  m_symbolFParticleVels -> setForceIndexTo(0);
+  m_symbolFParticleVels -> computeCacheFor(p);
+  // last force slot used
+  m_symbolFParticleVels -> setForceIndexTo(FORCE_HIST_SIZE-1);
+  m_symbolFParticleVels -> computeCacheFor(p);
 
   // looks a bit pointless to me that test...
-  for(size_t i = 0; i < SPACE_DIMS; ++i)
+  for(size_t i = 0; i < SPACE_DIMS; ++i) {
     // that's what FakeFunctionParticle::computeCacheFor(p) should have
     // done:
-    CPPUNIT_ASSERT_EQUAL ((double) i, p->v[i]);
+    CPPUNIT_ASSERT_EQUAL ((double) i, (p->force[0])[i]);
+    CPPUNIT_ASSERT_EQUAL ((double) i, (p->force[FORCE_HIST_SIZE-1])[i]);
 
+  }
 }
 
