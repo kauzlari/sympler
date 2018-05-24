@@ -67,9 +67,12 @@ void SymbolFParticleVels::init()
      "depends exclusively on other properties of the same particle. "
      "It may be defined by the attribute 'expression'. \nNote that, "
      "for this module, attributes 'overwrite' and 'symbol' must stay "
-     "at their default values (see below). \nYou can only set the "
+     "at their default values (see below). \nYou can only SET the "
      "force to a new value given by 'expression'. Incrementing the "
-     "previous value is currently (2018-05-17) NOT possible.");
+     "previous value is currently (2018-05-17) NOT possible. "
+     "Therefore, two SymbolFParticleVels will NOT obey the "
+     "superposition principle for forces. You simply have to include "
+     "everything in one module.");
 
   // It does not really matter, but since we have this option, and
   // since only 'true' makes sense when modifying the Particle

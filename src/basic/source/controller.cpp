@@ -829,19 +829,23 @@ void Controller::runSymbols() {
 // 	 clock_t tSpecial2; 
 // 	 tSpecial = clock();
 
+	 
 	 /* Run all calculators for non-bonded pairs in current stage. */
+
 	 if (cp->maxStage() >= stage) {
-	   FOR_EACH
-	     (vector<ValCalculator*>,
-	      cp->valCalculators(stage),
-	      FOR_EACH_PAIR__PARALLEL
-	      (Controller,
-	       cp,
+	 
+	   FOR_EACH_PAIR__PARALLEL
+	     (Controller,
+	      cp,
+	      // new version (2013-05-22)
+ 	      FOR_EACH
+ 	      (vector<ValCalculator*>,
+ 	       cp->valCalculators(stage),
  	       (*__iFE)->compute(pair);
  	       );
-	      // old version (2013-05-22); if new version works, check 
-	      // if you can remove this member function of Pairdist
-	      // 	      pair->runCalculatorsForStage(stage);
+	      // old version (2013-05-22); FIXME: if new version works,
+	      // check if you can remove this member function of Pairdist
+// 	      pair->runCalculatorsForStage(stage);
 	      );
 	   
 	   if (cp->maxStage() == stage) cpsFinished = cpsFinished && true; 
@@ -1108,6 +1112,26 @@ void Controller::runSymbols_0() {
 	 
 	 /* Run all calculators for non-bonded pairs in current stage. */
 	 if (cp->maxStage_0() >= stage) {
+
+	   ///// START: DEBUGGING VERSION - ORIGINAL BELOW /////////////
+	   
+	   // FOR_EACH
+	   //   (vector<ValCalculator*>,
+	   //    cp->valCalculators_0(stage),
+
+	      // MSG_DEBUG("Controller::runSymbols_0", "Now at ValCalculator: className = " << (*__iFE)->className() << ", name = " << (*__iFE)->name() << ", symbolName = " << (*__iFE)->mySymbolName());
+	      
+	      // FOR_EACH_PAIR__PARALLEL
+	      // (Controller,
+	      //  cp,
+	      //  // new version (2013-05-22)
+ 	      //  (*__iFE)->compute(pair);
+ 	      //  );
+	      // );
+
+	   ///// END: DEBUGGING VERSION - ORIGINL BELOW /////////////
+
+	   
 	   FOR_EACH_PAIR__PARALLEL
 	     (Controller,
 	      cp,
@@ -1117,10 +1141,11 @@ void Controller::runSymbols_0() {
  	       cp->valCalculators_0(stage),
  	       (*__iFE)->compute(pair);
  	       );
-	      // old version (2013-05-22); if new version works, check 
-	      // if you can remove this member function of Pairdist
-// 	      pair->runCalculatorsForStage_0(stage);
-	);
+	      // // old version (2013-05-22); FIXME: if new version works,
+	      // // check if you can remove this member function of
+	      // // Pairdist
+	      // // pair->runCalculatorsForStage_0(stage);
+	      );
 
       tInitEnd = clock();
 //       std::time(&tInitEnd);
@@ -1129,8 +1154,8 @@ void Controller::runSymbols_0() {
 
 	   if (cp->maxStage_0() == stage) cpsFinished = cpsFinished && true; 
 	   else cpsFinished = false;
-	 }
-	 );
+	 } // end of if (cp->maxStage_0() >= stage)
+	 ); // end of FOR_EACH_COLOUR_PAIR(M_MANAGER, ...
       ++stage;
 // time(&t1);
 // t1 = clock();
