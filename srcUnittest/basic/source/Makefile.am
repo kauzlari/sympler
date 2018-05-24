@@ -10,7 +10,8 @@ libbasicTest_la_SOURCES = \
 	pca_iapws-if97_rhoTest.cpp \
 	fake_function_particle.cpp \
 	particle_velsTest.cpp \
-	smart_enumTest.cpp
+	smart_enumTest.cpp \
+	symbol_f_particle_velsTest.cpp
 
 libbasicTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@
 

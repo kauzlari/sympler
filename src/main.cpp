@@ -293,6 +293,7 @@ void sayHello() {
 #include "particle_tensor.h"
 #include "particle_vector.h"
 #include "particle_vels.h"
+#include "symbol_f_particle_vels.h"
 // commented out because of complaint about redefinition
 // #include "pca_density_self_contribution.h"
 // #include "pca_energy_entropy.h"
@@ -526,6 +527,9 @@ void link_all_properly()
   new ParticleVels(NULL);
   new PCaEigensystem(NULL);
   new PCaMatrixInverse(NULL);
+  new SymbolFParticleVels(NULL);
+
+
   new PairRandScalar(NULL);
   new PairRandTensor(NULL);
   new PairRandVector(NULL);

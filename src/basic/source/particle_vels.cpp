@@ -31,6 +31,8 @@
 
 #include "particle_vels.h"
 
+#include <limits>
+
 const SymbolRegister<ParticleVels> particle_vels("ParticleVels");
 
 
@@ -47,7 +49,7 @@ ParticleVels::ParticleVels(Simulation* parent)
   // ParticleVels::setupOffset() pass. The only possible call via
   // ParticleVels::setup() dos not yet work in a unittest since it
   // throws and exception due to unset xml-input.
-  m_offset = HUGE_VAL;
+  m_offset = std::numeric_limits<std::size_t>::max();
 }
 
 ParticleVels::~ParticleVels()
@@ -100,6 +102,6 @@ void ParticleVels::setupOffset()
 {
   // Should not be used. If used, the huge value hopefully produces at
   // least a seg.-fault
-  m_offset = HUGE_VAL;
+  m_offset = std::numeric_limits<std::size_t>::max();
 
 }
