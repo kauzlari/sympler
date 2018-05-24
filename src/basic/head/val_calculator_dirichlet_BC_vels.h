@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -63,7 +63,19 @@ class ValCalculatorDirichletBCVels : public ValCalculatorBC
     {
       return new ValCalculatorDirichletBCVels(*this); 
     }
-  
+
+    /*!
+     * Returns the strings of those \a Symbols that the given class depends on
+     * due to hard-coded reasons (not due to runtime compiled expressions).
+     * Since there might be a \a Symbol subclass computing a new 
+     * \a Particle::v, we add it here for safety.
+     * @param[out] usedSymbols List to add the strings to.
+     */
+    virtual void addMyHardCodedDependenciesTo(list<string>& usedSymbols) const
+    {
+      usedSymbols.push_back("v");
+    }
+    
   public:
   /*!
    * Constructor
