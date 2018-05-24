@@ -92,6 +92,7 @@ include_HEADERS = \
 	smart_list.h \
 	smart_pointer.h \
 	symbol.h \
+	symbol_f_particle_vels.h \
 	threads.h \
 	transfer_particle_vector.h \
 	triangle_CGMD_interpolation.h \
