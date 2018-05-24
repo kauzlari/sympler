@@ -147,7 +147,7 @@ void ValCalculatorArbitrary::setup()
       }
       catch(gError& err)
       {
-        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": search for symbol for species '" + M_MANAGER->species(colour) + " failed. The message was " + err.message()); 
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(colour) + "' failed. The message was " + err.message()); 
       }
     }
     // see CONVENTION5 for rule about persistencies
@@ -180,7 +180,7 @@ void ValCalculatorArbitrary::setup()
           }
           catch(gError& err)
           {
-            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + " failed. The message was " + err.message()); 
+            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + "' failed. The message was " + err.message()); 
           }
         }
         else
@@ -198,7 +198,7 @@ void ValCalculatorArbitrary::setup()
           }
           catch(gError& err)
           {
-            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + " failed. The message was " + err.message()); 
+            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + "' failed. The message was " + err.message()); 
           }
 	}
         else
@@ -340,7 +340,7 @@ void ValCalculatorArbitrary::setup()
       }
       catch(gError& err)
       {
-        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + " failed. The message was " + err.message()); 
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + "' failed. The message was " + err.message()); 
       }
       try
       {
@@ -349,7 +349,7 @@ void ValCalculatorArbitrary::setup()
       }
       catch(gError& err)
       {
-        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + " failed. The message was " + err.message()); 
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + "' failed. The message was " + err.message()); 
       }      
     }
     else // m_overwrite = false

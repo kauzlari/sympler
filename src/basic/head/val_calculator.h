@@ -202,6 +202,16 @@ class ValCalculatorPair : public ValCalculator
    */
   virtual ValCalculatorPair* copyMySelf() = 0;
 
+  /*!
+   * Helper function for checking that a copy of \a this 
+   * \a ValCalculatorPair is a safe one. This check includes here by 
+   * default only assertions. But subclasses could do more, for example 
+   * also register the copy to some computations (precompute, 
+   * setupBeforeParticleCreation, or similar)
+   * @param[in] vc Copy of a \a ValCalculatorPair to check
+   */
+  virtual void makeCopySafe(ValCalculatorPair* vc) const;
+
   
  public:
 
