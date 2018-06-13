@@ -84,6 +84,8 @@ include_HEADERS = \
 	smart_list.h \
 	smart_pointer.h \
 	symbol.h \
+	symbol_f_particle_arbitrary.h \
+	symbol_f_particle_scalar.h \
 	symbol_f_particle_vels.h \
 	threads.h \
 	transfer_particle_vector.h \
