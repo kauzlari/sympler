@@ -49,6 +49,9 @@ void SymbolFParticleScalarTest :: setUp (void)
   // really use the FakeClass properties
   m_symbolFParticleArbitrary = new FakeSymbolFParticleScalar(m_simulation);
 
+  ((FakeSymbolFParticleScalar*) m_symbolFParticleArbitrary)
+    -> setColour(0);
+  
   setUpFunctionParticle();
 }
 
