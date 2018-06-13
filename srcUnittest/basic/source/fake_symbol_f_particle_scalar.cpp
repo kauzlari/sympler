@@ -49,3 +49,8 @@ void FakeSymbolFParticleScalar::setupForceOffsetForTestsOnly()
 			 + ObjToString(i))).offset;
   } 
 }
+
+void FakeSymbolFParticleScalar::setColour(size_t colour)
+{
+  m_colour = colour;
+}

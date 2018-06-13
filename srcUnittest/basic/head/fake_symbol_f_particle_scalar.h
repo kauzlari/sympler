@@ -67,6 +67,15 @@ class FakeSymbolFParticleScalar : public SymbolFParticleScalar
    */
   void setupForceOffsetForTestsOnly();
 
+  /*! 
+   * Set \a m_colour
+   * FIXME: extend test hierarchy such that there is, e.g., a 
+   * FakeParticleCache::setColour(), since \a m_colour is a member of 
+   * class \a ParticleCache
+   * @param[in] colour the colour to set \a m_colour to
+   */
+  void setColour(size_t colour);
+  
 };
 
 #endif
