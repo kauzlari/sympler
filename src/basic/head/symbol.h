@@ -40,7 +40,7 @@
 // class Node;
 
 /*!
- * Expression, computetd and saved in a symbol, to be used in expression 
+ * Expression, computed and saved in a symbol, to be used in expressions 
  * of other modules.
  * This class is mainly used as a common interface for the parsing hierarchy.
  * The computation of the symbols is rather based on the sudivision into 
@@ -176,7 +176,6 @@ class Symbol : public Node
    * An "empty" string must have the form "---".
    */
   virtual string usedSymbolsIgnoredForStaging() const {
-    /* return "---"; */
 
     if(m_oldSymbols == "---")
       return m_symbolName;
@@ -197,7 +196,7 @@ class Symbol : public Node
    * Constructor for \a Node hierarchy
    * @param parent The parent node
    */
-  Symbol(/*Node*/Simulation* parent);
+  Symbol(Simulation* parent);
   
   /*!
    * Constructor
@@ -218,7 +217,7 @@ class Symbol : public Node
   /*!
    * Return a string identifier for the calculator of this symbol
    */
-  virtual string myName()
+  virtual string myName() const
   {
     return m_properties.className(); 
   }
@@ -226,7 +225,7 @@ class Symbol : public Node
   /*!
    * Return the name of the computed symbol to be used in other expressions
    */
-  virtual string mySymbolName()
+  virtual string mySymbolName() const
   { 
     return m_symbolName;
   }
