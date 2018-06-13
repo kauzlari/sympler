@@ -88,11 +88,7 @@ void Symbol::init()
 void Symbol::setup()
 {
   Node::setup();
-}
-
-
-void Symbol::setup()
-{
+  
   if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
     throw gError("Symbol::setup for module " + className(), "Attribute 'stage' has none of the allowed values \"0\", \"1\", \"2\".");
 }
