@@ -29,27 +29,28 @@
  */
 
 
-#ifndef __SYMBOL_F_PARTICLE_VELS_TEST_H
-#define __SYMBOL_F_PARTICLE_VELS_TEST_H
+#ifndef __SYMBOL_F_PARTICLE_SCALAR_TEST_H
+#define __SYMBOL_F_PARTICLE_SCALAR_TEST_H
 
-#include "symbol_f_particle_vels.h"
+#include "symbol_f_particle_scalar.h"
 
 #include "symbol_f_particle_arbitraryTest.h"
 
 using namespace std;
 
-class SymbolFParticleVelsTest : public SymbolFParticleArbitraryTest
+
+class SymbolFParticleScalarTest : public SymbolFParticleArbitraryTest
 {
-  CPPUNIT_TEST_SUITE (SymbolFParticleVelsTest);
+  CPPUNIT_TEST_SUITE (SymbolFParticleScalarTest);
 
   CPPUNIT_TEST (computeCacheForTest);
   CPPUNIT_TEST (setupTest);
   // next 5 defined in parent class only
   // FIXME: Does CPPUNIT allow for a better solution? I don't like it
   // that we do not see the definition of the tested functions in the
-  // child class SymbolFParticleVels (which is in principle a good
+  // child class SymbolFParticleScalar (which is in principle a good
   // thing!), but we must(?) nonetheless
-  // activate the tests here in the child class SymbolFParticleVelsTest
+  // activate the tests here in the child class SymbolFParticleScalarTest
   // since the parent test class is an abstract class.
   CPPUNIT_TEST (initTest);
   CPPUNIT_TEST (setupOffsetTest);
@@ -70,14 +71,19 @@ class SymbolFParticleVelsTest : public SymbolFParticleArbitraryTest
  protected:
   
   /*!
-   * Test \a SymbolFParticleVels::computeCacheFor(Particle* p)
+   * Test \a SymbolFParticleScalar::computeCacheFor(Particle* p)
    */
   void computeCacheForTest (void);
-    
+
   /*!
-   * Test \a SymbolFParticleVels::setup()
+   * Test \a SymbolFParticleScalar::init(Particle* p)
+   */
+  virtual void initTest (void); 
+
+  /*!
+   * Test \a SymbolFParticleScalar::setup()
    * FIXME: This test only checks what can go wrong on the 
-   * \a SymbolFParticleVels level and not responsibilities of parent classes.
+   * \a SymbolFParticleScalar level and not responsibilities of parent classes.
    * This is a good thing! So fix this by extending the test-hierarchy 
    * to the parents and NOT by adding more test code here!
    */
