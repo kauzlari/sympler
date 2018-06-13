@@ -87,6 +87,8 @@ libbasic_la_SOURCES = \
 	reflector.cpp \
 	simulation.cpp \
 	symbol.cpp \
+	symbol_f_particle_arbitrary.cpp \
+	symbol_f_particle_scalar.cpp \
 	symbol_f_particle_vels.cpp \
 	transfer_particle_vector.cpp \
 	triangle_CGMD_interpolation.cpp \

@@ -32,19 +32,16 @@
 #ifndef __SYMBOL_F_PARTICLE_VELS_H
 #define __SYMBOL_F_PARTICLE_VELS_H
 
-#include "particle_cache_arbitrary.h"
-
-#include "function_particle.h"
-#include "simulation.h"
+#include "symbol_f_particle_arbitrary.h"
 
 using namespace std;
 
 class Simulation;
 
 /*!
- * Implementation of a per particle force
+ * Per particle translational force called as a \a Symbol
  */
-class SymbolFParticleVels : public ParticleCacheArbitrary
+class SymbolFParticleVels : public SymbolFParticleArbitrary
 {
 
  protected:  
@@ -55,7 +52,8 @@ class SymbolFParticleVels : public ParticleCacheArbitrary
   void init();
 
   /*!
-   * Helper for setting m_offset. This one overwrites 
+   * Helper for setting m_offset. This one uses 
+   * \a SymbolFParticleArbitrary::setupOffset, which in turn overrides 
    * \a ParticleCacheArbitrary::setupOffset, since 
    * \a SymbolFParticleVels modifies \a Particle::force and hence does 
    * not require any offset, hence no usage of 
@@ -78,6 +76,7 @@ class SymbolFParticleVels : public ParticleCacheArbitrary
   virtual void setFunctionReturnType(){
     m_function->setReturnType(Variant::VECTOR);
   }
+
   
  public:
   
@@ -96,73 +95,16 @@ class SymbolFParticleVels : public ParticleCacheArbitrary
    * Setup this \a Symbol
    */
   virtual void setup();
-
-  /*!
-   * Possibility for the Node to precompute stuff before \a Symbol s and \a Force s start computing
-   */
-  virtual void precompute()
-  {
-    m_offset = ((Simulation*) m_parent) -> controller() -> forceIndex(); 
-  }
   
   /*!
    * Compute the cache for particle \a p
-   * @param[out] p The particle to compute a new velocity for
+   * @param[out] p The particle to compute a new force for
    */
   virtual void computeCacheFor(Particle* p) {
     
     (*m_function)(&(p->force[m_offset]), p);            
   }
-      
-  /*!
-   * Register the additional degrees of freedom with the 
-   * \a Particle s \a DataFormat
-   * FIXME: Somehow, most of the classes do not use this function 
-   * anymore. So CHECK if it is:
-   * - A: Deprecated?
-   * - B: A useful refactoring that you forgot to use? (Note that 
-   * there is also the more recently created 
-   * ParticleCacheArbitrary::setupOffset()!)
-   */
-  virtual void registerWithParticle()
-  {
-  }
-
-  /*!
-   * Is this \a ParticleCache identical to the given one?
-   * @param c \a ParticleCache to compare to
-   * FIXME: Essentially copy&pasted from \a ParticleVector, so is
-   * there some refactoring possible? Why does the parent 
-   * \a ParticleCacheArbitrary not define anything? Because of some 
-   * nasty children?
-   */
-  virtual bool operator==(const ParticleCache &c) const
-  {
-    if (typeid(c) == typeid(*this)) 
-      {
-	SymbolFParticleVels *cc = (SymbolFParticleVels*) &c;
-	
-	return
-	(
-	 m_expression == cc->m_expression &&
-	 m_overwrite == cc->m_overwrite &&
-	 m_stage == cc->m_stage &&
-	 m_colour == cc->m_colour &&
-	 m_symbolName == cc->m_symbolName &&
-	 m_datatype == cc->m_datatype &&
-	 m_offset == cc->m_offset
-	 );
-      }
-    else return false;
-  }
-
-  /*!
-   * Currently (2018-05-17) this function is only used for unittesting
-   */
-  virtual void setForceIndexTo(size_t forceIndex) {
-    m_offset = forceIndex;
-  }
-  
+        
 };
 
 #endif
