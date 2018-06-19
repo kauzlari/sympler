@@ -41,6 +41,7 @@
 #include <string>
 #include"integrator_static_lse.h"
 
+#ifdef WITH_INTEGRATORSTATICLSE
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H
 #include "superlu/slu_ddefs.h"
@@ -460,4 +461,5 @@ if(mySlotToDof[pair->secondPart()->mySlot]<nofixedParticles-1 && mySlotToDof[pai
 
 #endif /*WITH_JAMA_JAMA_LU*/
 #endif /*HAVE_ARRAY_TYPES*/
+#endif /*IntegratorStaticLSE*/
 
