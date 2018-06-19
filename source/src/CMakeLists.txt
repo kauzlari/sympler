@@ -1,32 +1,3 @@
-# Include header files
-include_directories(${PROJECT_SOURCE_DIR}/source/include/basic)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/boundary)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/calculator)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/force)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/function_parser)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/geometry)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/geometry/stl)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/geometry/sat)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/integrator)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/meter)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/meter/grid_meter)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/particle_creator)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/postprocessor)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/reflector)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/callable)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/symbol)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/symbol/freesteam)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/symbol/particle_cache)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/symbol/val_calculator_pair)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/symbol/val_calculator_part)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/symbol/other)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/tools)
-include_directories(${PROJECT_SOURCE_DIR}/source/include/weighting_function)
-
-include_directories(${SDKROOT}/usr/include/libxml2)
-include_directories(${LIBXML2_INCLUDE_DIR})
-
-
 # Define source files to be compiled
 set(basic
 basic/cell.cpp

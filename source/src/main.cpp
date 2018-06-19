@@ -464,9 +464,11 @@ void link_all_properly()
   new IntegratorScalar(NULL);
   new IntegratorScalarLambda(NULL);
   new IntegratorStatic(NULL);
+#ifdef WITH_INTEGRATORSTATICLSE
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H
   new IntegratorStaticLSE(NULL);
+#endif
 #endif
 #endif
   new IntegratorVector(NULL);
