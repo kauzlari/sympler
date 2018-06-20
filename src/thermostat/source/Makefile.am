@@ -7,6 +7,7 @@ libthermostat_la_SOURCES = \
 	apply_vel_field.cpp \
 	cbl_pair_particle_arbitrary.cpp \
 	cbl_pair_particle_tensor.cpp \
+	cbl_pair_particle_vector.cpp \
 	shift_particle.cpp \
 	thermostat.cpp \
 	thermostat_energy_rescaling.cpp \

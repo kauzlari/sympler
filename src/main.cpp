@@ -313,6 +313,7 @@ void sayHello() {
 #include "apply_vector_field_file.h"
 #include "apply_vel_field.h"
 #include "cbl_pair_particle_tensor.h"
+#include "cbl_pair_particle_vector.h"
 #include "energy_pump.h"
 #include "shift_particle.h"
 #include "triangle_CGMD_interpolation.h"
@@ -566,6 +567,7 @@ void link_all_properly()
   new ApplyVectorFieldFile(NULL);
   new ApplyVelField(NULL);
   new CblPairParticleTensor(NULL);
+  new CblPairParticleVector(NULL);
   new EnergyPump(NULL);
   new ShiftParticle(NULL);
   new TriangleCGMDInterpolation(NULL);

@@ -135,7 +135,7 @@ bool Symbol::findStage()
       for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s) {
 	  
 	string name = (*s)->name();
-	MSG_DEBUG("Symbol::findStage", className() << ": now checking for used symbol with complete name " << name);
+	MSG_DEBUG("Symbol::findStage", "className: " << className() << "name: " << myName() << ": for symbol " << mySymbolName() << ": now checking for used symbol with complete name " << name);
 	
 	cleanSymbol(name);
 	  
@@ -277,18 +277,63 @@ bool Symbol::findStage_0()
 
 void Symbol::checkOverwriteForStageFinding(bool& tooEarly, bool& nothing)
 {
-    if(m_overwrite) {
-      // if we are overwriting we shouldn't be the first ones to write into this symbol,
-      // but should do so at a later stage. So we make an additional check for own symbol(s)
-      list<string> symbolNames = mySymbolNames();
+  
+  if(m_overwrite) {
+    // if we are overwriting we shouldn't be the first ones to write into this symbol,
+    // but should do so at a later stage. So we make an additional check for own symbol(s)
+    list<string> symbolNames = mySymbolNames();    
+    
+    Symbol::removeFromSymbolList(usedSymbolsIgnoredForStaging(), symbolNames);
+    
+    // MSG_DEBUG("Symbol::checkOverwriteForStageFinding", "own symbols to really stage after 'useOldFor' removal:");
+    
+    for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt) {
+      // cout << *myNamesIt << endl;
       
-      for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
-	
-      	findStageForSymbolName(*myNamesIt, tooEarly, nothing);
-      
-    }
+      findStageForSymbolName(*myNamesIt, tooEarly, nothing);
+    }    
+  }
 }
 
+
+/*static*/ void Symbol::removeFromSymbolList(string symbolChainToBeRemoved, list<string>& symbolsFromWhichToRemove) {
+
+  // go through the symbols in 'symbolChainToBeRemoved' and remove those from symbolsFromWhichToRemove 
+  if (symbolChainToBeRemoved != "---") {
+    bool run = true;
+    string working = symbolChainToBeRemoved;
+    while(run) {
+      string cur;
+      size_t pos = working.find('|');
+      
+      if (pos == string::npos) {
+	run = false;
+	cur = working;
+      }
+      else {
+	cur = string(working, 0, pos);
+	working = string(working, pos+1);
+      }
+      
+      list<string> symbolsToRemove;
+      // determine what to remove
+      for(list<string>::const_iterator s = symbolsFromWhichToRemove.begin(); s != symbolsFromWhichToRemove.end(); ++s) {
+	MSG_DEBUG("Symbol::removeFromSymbolList", "now comparing symbol '" << (*s) << "' with to be removed symbol '" << cur << "'");
+	if((*s) == cur) {
+	  symbolsToRemove.push_back(*s);
+	  MSG_DEBUG("Symbol::removeFromSymbolList", "will remove " << (*s));
+	}
+	else
+	  MSG_DEBUG("Symbol::removeFromSymbolList", "will NOT remove " << (*s));
+	  
+      }
+      // remove all (or none if(symbolsToRemove.empty()) )
+      for(list<string>::const_iterator s = symbolsToRemove.begin(); s != symbolsToRemove.end(); ++s)
+	symbolsFromWhichToRemove.remove(*s);
+    }
+  }
+  
+}
 
 void Symbol::checkOverwriteForStageFinding_0(bool& tooEarly, bool& nothing)
 {
@@ -296,6 +341,8 @@ void Symbol::checkOverwriteForStageFinding_0(bool& tooEarly, bool& nothing)
       // if we are overwriting we shouldn't be the first ones to write into this symbol,
       // but should do so at a later stage. So we make an additional check for own symbol(s)
       list<string> symbolNames = mySymbolNames();
+
+      Symbol::removeFromSymbolList(usedSymbolsIgnoredForStaging(), symbolNames);
       
       for(list<string>::iterator myNamesIt = symbolNames.begin(); myNamesIt != symbolNames.end(); ++myNamesIt)
 	
@@ -307,420 +354,361 @@ void Symbol::checkOverwriteForStageFinding_0(bool& tooEarly, bool& nothing)
 
 void Symbol::findStageForSymbolName(string name, bool& tooEarly, bool& nothing)
 {
-      // in the following loops we check, whether there exists a
-      // ValCalculator for the current symbol. If yes, we check the 
-      // stage of it and try to set the stage of this ValCalculator 
-      // consistently to it,
-
+  // in the following loops we check, whether there exists a
+  // ValCalculator for the current symbol. If yes, we check the 
+  // stage of it and try to set the stage of this ValCalculator 
+  // consistently to it
       
-      MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for " << mySymbolName() << ": m_phaseUser = " << m_phaseUser);
-      assert(m_phaseUser == 1 || m_phaseUser == 2);
-      // first, loop over ColourPairs
-      FOR_EACH_COLOUR_PAIR
-	(
-	 M_MANAGER,
-	 vector<ValCalculator*>* vCs;
-
-	 // loop over non-bonded ValCalculators
-	 vCs = &(cp->valCalculatorsFlat());
-	 // loop over ValCalculators
-	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
-	     (vCIt != vCs->end() && !tooEarly); ++vCIt) {
-	     // we have to exclude myself
-	     if((*vCIt) != this) {
-	       list<string> symbols = (*vCIt)->mySymbolNames();
+  MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for " << mySymbolName() << ": m_phaseUser = " << m_phaseUser << " called to check for name \"" << name << "\".");
+  
+  assert(m_phaseUser == 1 || m_phaseUser == 2);
+  // first, loop over ColourPairs
+  FOR_EACH_COLOUR_PAIR
+    (
+     M_MANAGER,
+     vector<ValCalculator*>* vCs;
+     
+     // loop over non-bonded ValCalculators
+     vCs = &(cp->valCalculatorsFlat());
+     // loop over ValCalculators
+     for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	 (vCIt != vCs->end() && !tooEarly); ++vCIt) {
+       // we have to exclude myself
+       if((*vCIt) != this) {
+	 list<string> symbols = (*vCIt)->mySymbolNames();
 	       
-	       //             MSG_DEBUG("Symbol::findStageForSymbolName", "symbols of VC: ");
-	       
-	       //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-	       //               cout << *symIt << endl;
-	       
-               
-	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-		 if(*symIt == name) {
-		   nothing = false;
-		   int stage = (*vCIt)->stage();
-		   if(stage == -1) 
-		     {
-		       MSG_DEBUG("Symbol::findStageForSymbolName", "Class name: " + className() + ", name: " + this->name() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() << ", symbol: " << (*vCIt)->mySymbolName());
-		       tooEarly = true;
-		       m_stage = -1;
-		     }
-		   else
-		     {
-		       if(stage >= m_stage) m_stage = stage+1;
-		     }
-		 }
-	       }
-	     }       
-	 } // end of loop over non-bonded vCs of current ColourPair
-	 
-	 // loop over bonded ValCalculators
-	 vCs = &(cp->bondedValCalculatorsFlat());
-	 // loop over ValCalculators
-	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
-	     (vCIt != vCs->end() && !tooEarly); ++vCIt) {
-	     // we have to exclude myself
-	   if((*vCIt) != this) {
-	     list<string> symbols = (*vCIt)->mySymbolNames();
-	     
-	     //             MSG_DEBUG("Symbol::findStageForSymbolName", "symbols of VC: ");
-	     
-	     //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-	     //               cout << *symIt << endl;
-	     
-	     
-	     for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-	       if(*symIt == name) {
-		 nothing = false;
-		 int stage = (*vCIt)->stage();
-		 if(stage == -1) 
-		   {
-		     MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() << ", symbol: " << (*vCIt)->mySymbolName());
-		     tooEarly = true;
-		     m_stage = -1;
-		   }
-		 else
-		   {
-		     if(stage >= m_stage) m_stage = stage+1;
-		   }
-	       }
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*vCIt)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("Symbol::findStageForSymbolName", "Class name: " + className() + ", name: " + this->name() << " for symbol '"  << m_symbolName << "': too early because of " <<  "non-bonded ValCalculator class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() << ", symbol: " << (*vCIt)->mySymbolName() << " which matches used symbol with name \"" << name << "\".");
+	       tooEarly = true;
+	       m_stage = -1;
 	     }
-	   }       
-	 } // end of loop over bonded vCs of current ColourPair
+	     else if(stage >= m_stage) m_stage = stage+1; 
+	   } // end of if(*symIt == name)
+	 } // end of for(list<string>::iterator
+       } // end of if((*vCIt) != this)
+     } // end of loop over non-bonded vCs of current ColourPair
 	 
-	 // can we stop FOR_EACH_COLOUR_PAIR now?
-	 if(tooEarly) {
-	   __cp = __end;
-	   // important because there still comes the ++__cp from the loop
-	   --__cp;
+     // loop over bonded ValCalculators
+     vCs = &(cp->bondedValCalculatorsFlat());
+     // loop over ValCalculators
+     for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	 (vCIt != vCs->end() && !tooEarly); ++vCIt) {
+       // we have to exclude myself
+       if((*vCIt) != this) {
+	 list<string> symbols = (*vCIt)->mySymbolNames();
+	     
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*vCIt)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "bonded ValCalculator class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() << ", symbol: " << (*vCIt)->mySymbolName());
+	       tooEarly = true;
+	       m_stage = -1;
+	     }
+	     else if(stage >= m_stage) m_stage = stage+1;
+	     
+	   }
 	 }
-	 );
-        
-      if(!tooEarly) {
-	// we have to search now in the ParticleCaches
-	vector<ParticleCache*>* pCs;
-	pCs = &(Particle::s_cached_flat_properties);
-	FOR_EACH
-	  (
-	   vector<ParticleCache*>,
-	   (*pCs),
-	   if(this != (*__iFE)) { // exclude myself
-	     
-	     list<string> symbols = (*__iFE)->mySymbolNames();
-	     for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-	       if(*symIt == name)
-		 {
-		   nothing = false;
-		   int stage = (*__iFE)->stage();
-		   if(stage == -1) 
-		     {
-		       MSG_DEBUG("ParticleCacheArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() << ", symbol: " << (*__iFE)->mySymbolName());
-		       tooEarly = true;
-		       m_stage = -1;
-		     }
-		   else
-		     {
-		       if(stage >= m_stage) m_stage = stage+1;
-		     }
-		 }
+       }       
+     } // end of loop over bonded vCs of current ColourPair
+     
+     // can we stop FOR_EACH_COLOUR_PAIR now?
+     if(tooEarly) {
+       __cp = __end;
+       // important because there still comes the ++__cp from the loop
+       --__cp;
+     }
+     ); // end of FOR_EACH_COLOUR_PAIR
+  
+  if(!tooEarly) {
+    // we have to search now in the ParticleCaches
+    vector<ParticleCache*>* pCs;
+    pCs = &(Particle::s_cached_flat_properties);
+    FOR_EACH
+      (
+       vector<ParticleCache*>,
+       (*pCs),
+       if(this != (*__iFE)) { // exclude myself
+	 
+	 list<string> symbols = (*__iFE)->mySymbolNames();
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*__iFE)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("ParticleCacheArbitrary::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "ParticleCache class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() << ", symbol: " << (*__iFE)->mySymbolName());
+	       tooEarly = true;
+	       m_stage = -1;
 	     }
-	   } // end of if(this != (*__iFE)) 
-	       // may we abort the loop over the ParticleCaches?
-	       if(tooEarly)
-		 {
-		   __iFE = __end;
-		   // important because there still comes the ++i from the loop
-		   --__iFE; 
-		 }
-	       );
-	    
-          } // end if(!tooEarly) (for search in ParticleCaches)
-        
-          if(!tooEarly) {
-	    // we have to search now in the TripletCalculators
-	    vector<TripletCalculator*>* tCs;
-	    tCs = M_PHASE->bondedTripletCalculatorsFlat();
-            FOR_EACH
-	      (
-	       vector<TripletCalculator*>, (*tCs),
-
-	       if(this != (*__iFE)) { // exclude myself
-		 
-		 list<string> symbols = (*__iFE)->mySymbolNames();
-		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-		   if(*symIt == name) {
-		     nothing = false;
-		     int stage = (*__iFE)->stage();
-		     if(stage == -1) {
-		       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() << ", symbol: " << (*__iFE)->mySymbolName());
-		       tooEarly = true;
-		       m_stage = -1;
-		     }
-		     else {
-		       if(stage >= m_stage) m_stage = stage+1;
-		     }
-		   }
-		 }
-	       } // end of if(this != (*__iFE))
-	       // may we abort the loop over the triplet Calculators?
-	       if(tooEarly) {
-		 __iFE = __end;
-		 // important because there still comes the ++i from the loop
-		 --__iFE; 
-	       }
-	       );	    
-          } // end if(!tooEarly) (for search in tripletCalculators)
-
-          if(!tooEarly) {
-	    // we have to search now in the QuintetCalculators
-	    vector<QuintetCalculator*>* tCs;
-	    tCs = M_PHASE->bondedQuintetCalculatorsFlat();
-            FOR_EACH
-	      (
-	       vector<QuintetCalculator*>, (*tCs),
-
-	       if(this != (*__iFE)) { // exclude myself
-	       
-		 list<string> symbols = (*__iFE)->mySymbolNames();
-		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-		   if(*symIt == name) {
-		     nothing = false;
-		     int stage = (*__iFE)->stage();
-		     if(stage == -1) {
-		       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
-		       tooEarly = true;
-		       m_stage = -1;
-		     }
-		     else {
-		       if(stage >= m_stage) m_stage = stage+1;
-		     }
-		   }
-		 }
-	       } // end of if(this != (*__iFE))
-	       // may we abort the loop over the QuintetCalculators?
-	       if(tooEarly) {
-		 __iFE = __end;
-		 // important because there still comes the ++i from the loop
-		 --__iFE; 
-	       }
-	       );	    
-          } // end if(!tooEarly) (for search in QuintetCalculators)
-	  
+	     else if(stage >= m_stage) m_stage = stage+1;
+	   }
+	 }
+       } // end of if(this != (*__iFE)) 
+       // may we abort the loop over the ParticleCaches?
+       if(tooEarly) {
+	 __iFE = __end;
+	 // important because there still comes the ++i from the loop
+	 --__iFE; 
+       }
+       );
+    
+  } // end if(!tooEarly) (for search in ParticleCaches)
+  
+  if(!tooEarly) {
+    // we have to search now in the TripletCalculators
+    vector<TripletCalculator*>* tCs;
+    tCs = M_PHASE->bondedTripletCalculatorsFlat();
+    FOR_EACH
+      (
+       vector<TripletCalculator*>, (*tCs),
+       
+       if(this != (*__iFE)) { // exclude myself
+	 
+	 list<string> symbols = (*__iFE)->mySymbolNames();
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*__iFE)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " <<  "TripletCalculator class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() << ", symbol: " << (*__iFE)->mySymbolName());
+	       tooEarly = true;
+	       m_stage = -1;
+	     }
+	     else if(stage >= m_stage) m_stage = stage+1;
+	     
+	   }
+	 }
+       } // end of if(this != (*__iFE))
+       // may we abort the loop over the triplet Calculators?
+       if(tooEarly) {
+	 __iFE = __end;
+	 // important because there still comes the ++i from the loop
+	 --__iFE; 
+       }
+       );	    
+  } // end if(!tooEarly) (for search in tripletCalculators)
+  
+  if(!tooEarly) {
+    // we have to search now in the QuintetCalculators
+    vector<QuintetCalculator*>* tCs;
+    tCs = M_PHASE->bondedQuintetCalculatorsFlat();
+    FOR_EACH
+      (
+       vector<QuintetCalculator*>, (*tCs),
+       
+       if(this != (*__iFE)) { // exclude myself
+	 
+	 list<string> symbols = (*__iFE)->mySymbolNames();
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*__iFE)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("Symbol::findStageForSymbolName", className() << " for symbol '"  << m_symbolName << "': too early because of " << "QuintetCalculator class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
+	       tooEarly = true;
+	       m_stage = -1;
+	     }
+	     else if(stage >= m_stage) m_stage = stage+1;
+	   }
+	 }
+       } // end of if(this != (*__iFE))
+       // may we abort the loop over the QuintetCalculators?
+       if(tooEarly) {
+	 __iFE = __end;
+	 // important because there still comes the ++i from the loop
+	 --__iFE; 
+       }
+       );	    
+  } // end if(!tooEarly) (for search in QuintetCalculators)
+  
 }
 
 
 void Symbol::findStageForSymbolName_0(string name, bool& tooEarly, bool& nothing)
 {
-      // in the following loops we check, whether there exists a
-      // ValCalculator for the current symbol. If yes, we check the 
-      // stage of it and try to set the stage of this ValCalculator 
-      // consistently to it,
-      
-      // first, loop over ColourPairs
-      FOR_EACH_COLOUR_PAIR
-	(
-	 M_MANAGER, 
-	 assert(m_phaseUser == 2 || m_phaseUser == 0);
-	 // loop over non-bonded ValCalculators
-	 vector<ValCalculator*>* vCs;
-	 vCs = &(cp->valCalculatorsFlat_0());
-	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
-	     (vCIt != vCs->end() && !tooEarly); ++vCIt)
-	   {
-	     // we have to exclude myself
-	     if((*vCIt) != this) {
-	       
-	       list<string> symbols = (*vCIt)->mySymbolNames();
-	       
-	       //             MSG_DEBUG("Symbol::findStageForSymbolName_0", "symbols of VC: ");
-	       
-	       //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-	       //               cout << *symIt << endl;
-	       
-               
-	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-		 if(*symIt == name) {
-		   nothing = false;
-		   int stage = (*vCIt)->stage();
-		   if(stage == -1) 
-		     {
-		       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() + ", symbol: " << (*vCIt)->mySymbolName());
-		       tooEarly = true;
-		       m_stage = -1;
-		     }
-		   else
-		     {
-		       if(stage >= m_stage) m_stage = stage+1;
-		     }
-		 }
+  // in the following loops we check, whether there exists a
+  // ValCalculator for the current symbol. If yes, we check the 
+  // stage of it and try to set the stage of this ValCalculator 
+  // consistently to it,
+  
+  // first, loop over ColourPairs
+  FOR_EACH_COLOUR_PAIR
+    (
+     M_MANAGER, 
+     assert(m_phaseUser == 2 || m_phaseUser == 0);
+     // loop over non-bonded ValCalculators
+     vector<ValCalculator*>* vCs;
+     vCs = &(cp->valCalculatorsFlat_0());
+     for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	 (vCIt != vCs->end() && !tooEarly); ++vCIt)
+       {
+	 // we have to exclude myself
+	 if((*vCIt) != this) {
+	   
+	   list<string> symbols = (*vCIt)->mySymbolNames();
+	   
+	   for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	     if(*symIt == name) {
+	       nothing = false;
+	       int stage = (*vCIt)->stage();
+	       if(stage == -1) {
+		 MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << "non-bonded ValCalculator class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() + ", symbol: " << (*vCIt)->mySymbolName());
+		 tooEarly = true;
+		 m_stage = -1;
 	       }
-	     }       
-	   } // end loop over non-bonded ValCalculators
-	 
-	 // loop over bonded ValCalculators
-	 vCs = &(cp->bondedValCalculatorsFlat_0());
-	 // loop over ValCalculators
-	 for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
-	     (vCIt != vCs->end() && !tooEarly); ++vCIt)
-	   {
-	     // we have to exclude myself
-	     if((*vCIt) != this)
-	       {
-		 list<string> symbols = (*vCIt)->mySymbolNames();
-		 
-		 //             MSG_DEBUG("Symbol::findStageForSymbolName_0", "symbols of VC: ");
-		 
-		 //             for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-		 //               cout << *symIt << endl;
-		 
-		 
-		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt)
-		   {
-		     if(*symIt == name)
-		       {
-			 nothing = false;
-			 int stage = (*vCIt)->stage();
-			 if(stage == -1) 
-			   {
-			     MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() + ", symbol: " << (*vCIt)->mySymbolName());
-			     tooEarly = true;
-			     m_stage = -1;
-			   }
-			 else
-			   {
-			     if(stage >= m_stage) m_stage = stage+1;
-			   }
-		       }
-		   }
-	       }       
-	   } // end of loop over bonded vCs of current ColourPair
-	 
-	 // can we stop FOR_EACH_COLOUR_PAIR now?
-	 if(tooEarly)
-	   {
-	     __cp = __end;
-	     // important because there still comes the ++__cp from the loop
-	     --__cp;
+	       else if(stage >= m_stage) m_stage = stage+1;
+	     }
 	   }
+	 }       
+       } // end loop over non-bonded ValCalculators
+     
+	 // loop over bonded ValCalculators
+     vCs = &(cp->bondedValCalculatorsFlat_0());
+     // loop over ValCalculators
+     for(vector<ValCalculator*>::iterator vCIt = vCs->begin(); 
+	 (vCIt != vCs->end() && !tooEarly); ++vCIt) {
+       // we have to exclude myself
+       if((*vCIt) != this) {
+	 list<string> symbols = (*vCIt)->mySymbolNames();
 	 
-	 ); // end loop over ColourPairs
-        
-          if(!tooEarly)
-          {
-          // we have to search now in the ParticleCaches
-            vector<ParticleCache*>* pCs;
-            pCs = &(Particle::s_cached_flat_properties_0);
-            FOR_EACH
-	      (
-	       vector<ParticleCache*>,
-	       (*pCs),
-	       if(this != (*__iFE)) { // exclude myself
-		 list<string> symbols = (*__iFE)->mySymbolNames();
-		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-		   
-		   MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "Now ParticleCache check for PC " << (*__iFE)->className() << " for its symbolName " << *symIt << " compared to used symbol " << name);
-		   
-		   if(*symIt == name) {
-		     
-		     MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "Found identity for *symIt '"  << *symIt << "' and name " << name << " for ParticleCache " << (*__iFE)->className());
-		     
-		     
-		     nothing = false;
-		     int stage = (*__iFE)->stage();
-		     if(stage == -1) 
-		       {
-			 MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "For symbol '"  << m_symbolName << "': too early because of " << "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
-			 tooEarly = true;
-			 m_stage = -1;
-		       }
-		     else
-		       {
-			 if(stage >= m_stage) m_stage = stage+1;
-		       }
-		   }
-	       } // end of for(list<string>::iterator symIt ...
-	       } // end of if(this != (*__iFE))
-	       // may we abort the loop over the ParticleCaches?
-	       if(tooEarly)
-		 {
-		   __iFE = __end;
-		   // important because there still comes the ++__iFE from the loop
-		   --__iFE; 
-		 }
-	       );
-	    
-          } // end if(!tooEarly) (for loop over ParticleCaches)
-
-          if(!tooEarly) {
-	    // we have to search now in the TripletCalculators
-	    vector<TripletCalculator*>* tCs;
-	    tCs = M_PHASE->bondedTripletCalculatorsFlat_0();
-	    // MSG_DEBUG("Symbol::findStageForSymbolName_0", "loop over triplet calculators START");
-            FOR_EACH
-	      (
-	       vector<TripletCalculator*>, (*tCs),
-	       if(this != (*__iFE)) { // exclude myself
-
-		 list<string> symbols = (*__iFE)->mySymbolNames();
-		 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-		   if(*symIt == name) {
-		     nothing = false;
-		     int stage = (*__iFE)->stage();
-		     if(stage == -1) {
-		       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of "<< "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
-		       tooEarly = true;
-		       m_stage = -1;
-		     }
-		     else {
-		       if(stage >= m_stage) m_stage = stage+1;
-		     }
-		   }
-		 }
-	       } // end of if(this != (*__iFE))
- 
-	       // may we abort the loop over the triplet Calculators?
-	       if(tooEarly) {
-		 __iFE = __end;
-		 // important because there still comes the ++__iFE from the loop
-		 --__iFE; 
+	 for(list<string>::iterator symIt = symbols.begin();
+	     symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*vCIt)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of " << "bonded ValCalculator class name: " + (*vCIt)->className() + ", name: " + (*vCIt)->name() + ", symbol: " << (*vCIt)->mySymbolName());
+	       tooEarly = true;
+	       m_stage = -1;
+	     }
+	     else if(stage >= m_stage) m_stage = stage+1;
+	   }
+	 }
+       }       
+     } // end of loop over bonded vCs of current ColourPair
+     
+     // can we stop FOR_EACH_COLOUR_PAIR now?
+     if(tooEarly) {
+       __cp = __end;
+       // important because there still comes the ++__cp from the loop
+       --__cp;
+     }
+     
+     ); // end loop over ColourPairs
+  
+  if(!tooEarly) {
+    // we have to search now in the ParticleCaches
+    vector<ParticleCache*>* pCs;
+    pCs = &(Particle::s_cached_flat_properties_0);
+    FOR_EACH
+      (
+       vector<ParticleCache*>,
+       (*pCs),
+       if(this != (*__iFE)) { // exclude myself
+	 list<string> symbols = (*__iFE)->mySymbolNames();
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   
+	   MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "Now ParticleCache check for PC " << (*__iFE)->className() << " for its symbolName " << *symIt << " compared to used symbol " << name);
+	   
+	   if(*symIt == name) {
+	     
+	     MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "Found identity for *symIt '"  << *symIt << "' and name " << name << " for ParticleCache " << (*__iFE)->className());	     
+	     
+	     nothing = false;
+	     int stage = (*__iFE)->stage();
+	     if(stage == -1) 
+	       {
+		 MSG_DEBUG("Symbol::findStageForSymbolName_0 for module " << className(), "For symbol '"  << m_symbolName << "': too early because of " << "ParticleCache class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
+		 tooEarly = true;
+		 m_stage = -1;
 	       }
-	       );	    
-          } // end if(!tooEarly) (for search in tripletCalculators)
+	     else if(stage >= m_stage) m_stage = stage+1;
+	     
+	   }
+	 } // end of for(list<string>::iterator symIt ...
+       } // end of if(this != (*__iFE))
+       // may we abort the loop over the ParticleCaches?
+       if(tooEarly) {
+	 __iFE = __end;
+	 // important because there still comes the ++__iFE from the loop
+	 --__iFE; 
+       }
+       ); // end of FOR_EACH(...
+    
+  } // end if(!tooEarly) (for loop over ParticleCaches)
 
-          if(!tooEarly) {
-	    // we have to search now in the QuintetCalculators
-	    vector<QuintetCalculator*>* tCs;
-	    tCs = M_PHASE->bondedQuintetCalculatorsFlat_0();
-	    // MSG_DEBUG("Symbol::findStageForSymbolName_0", "loop over triplet calculators START");
-            FOR_EACH
-	      (
-	       vector<QuintetCalculator*>, (*tCs),
-	       if(this != (*__iFE)) { // exclude myself
-	       list<string> symbols = (*__iFE)->mySymbolNames();
-	       for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
-		 if(*symIt == name) {
-		   nothing = false;
-		   int stage = (*__iFE)->stage();
-		   if(stage == -1) {
-		     MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of "<< "class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
-		     tooEarly = true;
-		     m_stage = -1;
-		   }
-		   else {
-		     if(stage >= m_stage) m_stage = stage+1;
-		   }
-		 }
-	       }
-	       } // end of if(this != (*__iFE))
-	       // may we abort the loop over the QuintetCalculators?
-	       if(tooEarly) {
-		 __iFE = __end;
-		 // important because there still comes the ++__iFE from the loop
-		 --__iFE; 
-	       }
-	       );	    
-          } // end if(!tooEarly) (for search in QuintetCalculators)
-
+  if(!tooEarly) {
+    // we have to search now in the TripletCalculators
+    vector<TripletCalculator*>* tCs;
+    tCs = M_PHASE->bondedTripletCalculatorsFlat_0();
+    // MSG_DEBUG("Symbol::findStageForSymbolName_0", "loop over triplet calculators START");
+    FOR_EACH
+      (
+       vector<TripletCalculator*>, (*tCs),
+       if(this != (*__iFE)) { // exclude myself
+	 
+	 list<string> symbols = (*__iFE)->mySymbolNames();
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*__iFE)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of "<< "TripletCalculator class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
+	       tooEarly = true;
+	       m_stage = -1;
+	     }
+	     else if(stage >= m_stage) m_stage = stage+1;
+	     
+	   }
+	 }
+       } // end of if(this != (*__iFE))
+       
+       // may we abort the loop over the triplet Calculators?
+       if(tooEarly) {
+	 __iFE = __end;
+	 // important because there still comes the ++__iFE from the loop
+	 --__iFE; 
+       }
+       ); // end of FOR_EACH(...	    
+  } // end if(!tooEarly) (for search in tripletCalculators)
+  
+  if(!tooEarly) {
+    // we have to search now in the QuintetCalculators
+    vector<QuintetCalculator*>* tCs;
+    tCs = M_PHASE->bondedQuintetCalculatorsFlat_0();
+    // MSG_DEBUG("Symbol::findStageForSymbolName_0", "loop over triplet calculators START");
+    FOR_EACH
+      (
+       vector<QuintetCalculator*>, (*tCs),
+       if(this != (*__iFE)) { // exclude myself
+	 list<string> symbols = (*__iFE)->mySymbolNames();
+	 for(list<string>::iterator symIt = symbols.begin(); symIt != symbols.end(); ++symIt) {
+	   if(*symIt == name) {
+	     nothing = false;
+	     int stage = (*__iFE)->stage();
+	     if(stage == -1) {
+	       MSG_DEBUG("Symbol::findStageForSymbolName_0", className() << " for symbol '"  << m_symbolName << "': too early because of "<< "QuintetCalculator class name: " + (*__iFE)->className() + ", name: " + (*__iFE)->name() + ", symbol: " << (*__iFE)->mySymbolName());
+	       tooEarly = true;
+	       m_stage = -1;
+	     }
+	     else if(stage >= m_stage) m_stage = stage+1;
+	     
+	   }
+	 }
+       } // end of if(this != (*__iFE))
+       // may we abort the loop over the QuintetCalculators?
+       if(tooEarly) {
+	 __iFE = __end;
+	 // important because there still comes the ++__iFE from the loop
+	 --__iFE; 
+       }
+       ); // end of FOR_EACH(...
+  } // end if(!tooEarly) (for search in QuintetCalculators)
+  
 }
 

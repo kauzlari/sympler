@@ -316,6 +316,17 @@ class Symbol : public Node
   virtual const bool doesOverwrite() const {
     return m_overwrite;
   }
+
+  /*!
+   * Helper to remove string names of symbols given by 
+   * \a symbolChainToBeRemoved  from a list of symbols 
+   * \a symbolsFromWhichToRemove.
+   * @param[in] symbolChainToBeRemoved The symbols to be removed, given 
+   * as a string with separator "|" between the names of the symbols
+   * @param[out] symbolsFromWhichToRemove Contains the list of symbols 
+   * from which some of them should be removed
+   */
+  static void removeFromSymbolList(string symbolChainToBeRemoved, list<string>& symbolsFromWhichToRemove);
   
 };
 

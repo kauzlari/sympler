@@ -91,13 +91,13 @@ void ParticleCacheArbitrary::setup()
   m_function.setColour(m_colour);*/
   
   if(m_expression == "undefined")
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'expression' has value \"undefined\""); 
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'expression' has value \"undefined\""); 
   if(m_species == "undefined")
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'species' has value \"undefined\""); 
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'species' has value \"undefined\""); 
   if(m_symbolName == "undefined")
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'symbol' has value \"undefined\"");
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'symbol' has value \"undefined\"");
   if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'stage' has none of the allowed values \"0\", \"1\", \"2\".");
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'stage' has none of the allowed values \"0\", \"1\", \"2\".");
 
   // should we create a Cache for the other colours too?
   if(m_species == "ALL")
@@ -195,7 +195,7 @@ void ParticleCacheArbitrary::setupOffset()
     }
     catch(gError& err)
     {
-      throw gError("ParticleCache::setup", "search for symbol failed. The message was " + err.message()); 
+      throw gError("ParticleCacheArbitrary::setupOffset: For module " + className(), "Search for symbol failed. The message was " + err.message()); 
     }
   }
   else
