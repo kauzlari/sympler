@@ -28,47 +28,50 @@
  * 
  */
 
+#include "cbl_pair_particle_vectorTest.h"
 
-#ifndef __CBL_PAIR_PARTICLE_TENSOR_TEST_H
-#define __CBL_PAIR_PARTICLE_TENSOR_TEST_H
+#include "simulation.h"
 
-#include "cbl_pair_particle_arbitraryTest.h"
+CPPUNIT_TEST_SUITE_REGISTRATION (CblPairParticleVectorTest);
 
-#include "cbl_pair_particle_tensor.h"
-
-using namespace std;
-
-/*!
- * Test class for class \a CblPairParticleTensor
- * FIXME: setup() and call() not tested yet!
- */
-class CblPairParticleTensorTest : public CblPairParticleArbitraryTest
+void CblPairParticleVectorTest :: setUp (void)
 {
-  CPPUNIT_TEST_SUITE (CblPairParticleTensorTest);
-  CPPUNIT_TEST (initTest);
-  CPPUNIT_TEST_SUITE_END ();
-  
- public:
-  
   /*!
-   * Initialise used objects
+   * Initialize objects
    */
-  virtual void setUp (void);
+  Simulation* sim = new Simulation();
   
-  /*!
-   * Delete used objects
-   */
-  virtual void tearDown (void);
-  
- protected:
-  
-  /*!
-   * Test init function
-   */
-  virtual void initTest (void);
-  
- private:
-  
-};
+  m_callable = new CblPairParticleVector(sim);
+}
 
-#endif
+void CblPairParticleVectorTest :: tearDown (void) 
+{
+  /*!
+   * Delete objects
+   */
+  delete m_callable;
+}
+
+void CblPairParticleVectorTest :: initTest (void)
+{
+  /*!
+   * Test init function. init() should have been called in constructor.
+   */
+
+  CblPairParticleArbitraryTest :: initTest();
+  
+  const PropertyList& properties = m_callable -> returnProperties();
+
+  CPPUNIT_ASSERT_EQUAL
+    (string("CblPairParticleVector"), m_callable -> name());
+  CPPUNIT_ASSERT_EQUAL
+    (string("CblPairParticleVector"), m_callable -> className());
+  CPPUNIT_ASSERT_EQUAL
+    (string("idVec(1)"), m_callable -> returnPairExpression());
+  CPPUNIT_ASSERT_EQUAL
+    (string("idVec(1)"), m_callable -> return1stParticleExpression());
+  CPPUNIT_ASSERT_EQUAL
+    (string("idVec(1)"), m_callable -> return2ndParticleExpression());
+  
+}
+
