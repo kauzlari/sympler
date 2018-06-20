@@ -3,7 +3,8 @@ noinst_LTLIBRARIES = libthermostatTest.la
 
 libthermostatTest_la_SOURCES = \
 	cbl_pair_particle_arbitraryTest.cpp \
-	cbl_pair_particle_tensorTest.cpp
+	cbl_pair_particle_tensorTest.cpp \
+	cbl_pair_particle_vectorTest.cpp
 
 
 libthermostatTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@

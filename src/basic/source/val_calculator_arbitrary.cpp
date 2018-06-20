@@ -133,7 +133,7 @@ void ValCalculatorArbitrary::setup()
       for (colour = 0; colour < M_MANAGER->nColours(); ++colour)
       {
         if(Particle::s_tag_format[colour].attrExists(m_symbolName))
-          throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(colour) + "'. Second definition is not allowed for overwrite = \"no\"");
+          throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol \"" + m_symbolName + "\" is already existing for species '" + M_MANAGER->species(colour) + "'. Second definition is not allowed for overwrite = \"no\"");
       }
     }
     colour = 0;
@@ -355,10 +355,10 @@ void ValCalculatorArbitrary::setup()
     else // m_overwrite = false
     {
       if(Particle::s_tag_format[cp->firstColour()].attrExists(m_symbolName)) 
-        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(cp->firstColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol \"" + m_symbolName + "\" is already existing for species '" + M_MANAGER->species(cp->firstColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
 
       if(Particle::s_tag_format[cp->secondColour()].attrExists(m_symbolName))
-        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Symbol " + m_symbolName + " is already existing for species '" + M_MANAGER->species(cp->secondColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
+        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol \"" + m_symbolName + "\" is already existing for species '" + M_MANAGER->species(cp->secondColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
 
         
       

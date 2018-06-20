@@ -5,6 +5,7 @@ include_HEADERS = \
 	apply_vel_field.h \
 	cbl_pair_particle_arbitrary.h \
 	cbl_pair_particle_tensor.h \
+	cbl_pair_particle_vector.h \
 	shift_particle.h \
 	thermostat.h \
 	thermostat_energy_rescaling.h \
