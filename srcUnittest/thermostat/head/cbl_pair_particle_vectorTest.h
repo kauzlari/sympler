@@ -29,22 +29,22 @@
  */
 
 
-#ifndef __CBL_PAIR_PARTICLE_TENSOR_TEST_H
-#define __CBL_PAIR_PARTICLE_TENSOR_TEST_H
+#ifndef __CBL_PAIR_PARTICLE_VECTOR_TEST_H
+#define __CBL_PAIR_PARTICLE_VECTOR_TEST_H
 
 #include "cbl_pair_particle_arbitraryTest.h"
 
-#include "cbl_pair_particle_tensor.h"
+#include "cbl_pair_particle_vector.h"
 
 using namespace std;
 
 /*!
- * Test class for class \a CblPairParticleTensor
+ * Test class for class \a CblPairParticleVector
  * FIXME: setup() and call() not tested yet!
  */
-class CblPairParticleTensorTest : public CblPairParticleArbitraryTest
+class CblPairParticleVectorTest : public CblPairParticleArbitraryTest
 {
-  CPPUNIT_TEST_SUITE (CblPairParticleTensorTest);
+  CPPUNIT_TEST_SUITE (CblPairParticleVectorTest);
   CPPUNIT_TEST (initTest);
   CPPUNIT_TEST_SUITE_END ();
   
