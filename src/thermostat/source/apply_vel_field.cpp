@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -62,17 +62,17 @@ void ApplyVelField::init()
   m_properties.setClassName("ApplyVelField");
 
   m_properties.setDescription(
-    "When called, this callable modifies the velocity-field of each particle according to user-defined expressions for the attributes 'u', 'v', 'w' described below.  In the expressions you may use constants, functions (listed under sympler --help expressions) and the known variables 'x', 'y', 'z', 'u', 'v', 'w' (NOT those listed under sympler --help expressions!). \nNOTE: The velocity is SET and not incremented. If you want to increment, use the known variables 'u', 'v', 'w' containing the respective old values of the velocity components, e.g., by typing 'u = \"u + exp(x)\"', where the second part is your increment." 
+    "When called, this callable modifies the velocity-field of each particle according to user-defined expressions for the attributes 'u', 'v', 'w' described below. In the expressions you may use constants, functions (listed under sympler --help expressions) and the known variables 'x', 'y', 'z', 'u', 'v', 'w' (NOT those listed under sympler --help expressions!). \nNOTE: The velocity is SET and not incremented. If you want to increment, use the known variables 'u', 'v', 'w' containing the respective old values of the velocity components, e.g., by typing 'u = \"u + exp(x)\"', where the second part is your increment." 
   );
 
   FUNCTIONFIXEDPC(u, m_velX, 
-                  "This sets the x-component of the additional velocity to the specified algebraic expression. See above for allowed expressions.");
+                  "This sets the x-component of the velocity to the specified algebraic expression. See above for allowed expressions.");
   
   FUNCTIONFIXEDPC(v, m_velY, 
-                  "This sets the y-component of the additional velocity to the specified algebraic expression. See above for allowed expressions.");
+                  "This sets the y-component of the velocity to the specified algebraic expression. See above for allowed expressions.");
   
   FUNCTIONFIXEDPC(w, m_velZ, 
-                  "This sets the z-component of the additional velocity to the specified algebraic expression. See above for allowed expressions.");
+                  "This sets the z-component of the velocity to the specified algebraic expression. See above for allowed expressions.");
   
   m_velX.addVariable("x");
   m_velX.addVariable("y");

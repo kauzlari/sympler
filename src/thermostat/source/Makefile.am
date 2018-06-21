@@ -2,6 +2,7 @@
 noinst_LTLIBRARIES = libthermostat.la
 
 libthermostat_la_SOURCES = \
+	apply_scalar_field.cpp \
 	apply_vector_field.cpp \
 	apply_vector_field_file.cpp \
 	apply_vel_field.cpp \
