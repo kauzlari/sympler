@@ -1,5 +1,6 @@
 
 include_HEADERS = \
+	apply_scalar_field.h \
 	apply_vector_field.h \
 	apply_vector_field_file.h \
 	apply_vel_field.h \

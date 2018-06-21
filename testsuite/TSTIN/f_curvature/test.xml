@@ -3,7 +3,7 @@
 	inputFromResults="no"
 >
  <Controller
-	timesteps="1000"
+	timesteps="10"
 	statusEvery="10"
 	dt="0.01">
 
