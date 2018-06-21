@@ -62,17 +62,17 @@ void ApplyVelField::init()
   m_properties.setClassName("ApplyVelField");
 
   m_properties.setDescription(
-    "When called, this callable adds a user-specified velocity-field to each particle."
+    "When called, this callable modifies the velocity-field of each particle according to user-defined expressions for the attributes 'u', 'v', 'w' described below.  In the expressions you may use constants, functions (listed under sympler --help expressions) and the known variables 'x', 'y', 'z', 'u', 'v', 'w' (NOT those listed under sympler --help expressions!). \nNOTE: The velocity is SET and not incremented. If you want to increment, use the known variables 'u', 'v', 'w' containing the respective old values of the velocity components, e.g., by typing 'u = \"u + exp(x)\"', where the second part is your increment." 
   );
 
   FUNCTIONFIXEDPC(u, m_velX, 
-                  "This sets the x-component of the additional velocity to the specified algebraic expression. You may use constants or the known variables 'x', 'y', 'z'.");
+                  "This sets the x-component of the additional velocity to the specified algebraic expression. See above for allowed expressions.");
   
   FUNCTIONFIXEDPC(v, m_velY, 
-                  "This sets the y-component of the additional velocity to the specified algebraic expression. You may use constants or the known variables 'x', 'y', 'z'.");
+                  "This sets the y-component of the additional velocity to the specified algebraic expression. See above for allowed expressions.");
   
   FUNCTIONFIXEDPC(w, m_velZ, 
-                  "This sets the z-component of the additional velocity to the specified algebraic expression. You may use constants or the known variables 'x', 'y', 'z'.");
+                  "This sets the z-component of the additional velocity to the specified algebraic expression. See above for allowed expressions.");
   
   m_velX.addVariable("x");
   m_velX.addVariable("y");
@@ -85,10 +85,22 @@ void ApplyVelField::init()
   m_velZ.addVariable("x");
   m_velZ.addVariable("y");
   m_velZ.addVariable("z");
+
+  m_velX.addVariable("u");
+  m_velX.addVariable("v");
+  m_velX.addVariable("w");
   
-  m_velX.setExpression("0");
-  m_velY.setExpression("0");
-  m_velZ.setExpression("0");
+  m_velY.addVariable("u");
+  m_velY.addVariable("v");
+  m_velY.addVariable("w");
+  
+  m_velZ.addVariable("u");
+  m_velZ.addVariable("v");
+  m_velZ.addVariable("w");
+  
+  m_velX.setExpression("u");
+  m_velY.setExpression("v");
+  m_velZ.setExpression("w");
 
 
   STRINGPC
@@ -116,9 +128,9 @@ void ApplyVelField::thermalize(Phase* phase)
     FOR_EACH_FREE_PARTICLE_C
       (phase,
        m_colour,
-       __iSLFE->v.x += m_velX(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z);
-       __iSLFE->v.y += m_velY(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z);
-       __iSLFE->v.z += m_velZ(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z);
+       __iSLFE->v.x = m_velX(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z);
+       __iSLFE->v.y = m_velY(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z);
+       __iSLFE->v.z = m_velZ(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z);
     );
 
 }
