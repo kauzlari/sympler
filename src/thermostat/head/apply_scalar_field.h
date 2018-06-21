@@ -29,8 +29,8 @@
  */
 
 
-#ifndef __APPLY_VECTOR_FIELD_H
-#define __APPLY_VECTOR_FIELD_H
+#ifndef __APPLY_SCALAR_FIELD_H
+#define __APPLY_SCALAR_FIELD_H
 
 #include "thermostat.h"
 #include "function_fixed.h"
@@ -41,29 +41,23 @@ class Phase;
 class Simulation;
 
 /*!
- * \a Callable setting a user-defined vector field to a user-defined vector expression
+ * \a Callable setting a user-defined scalar field to a user-defined 
+ * scalar expression
+ * FIXME: Put this class and \a ApplyVectorField (and \a ApplyVelField ? and 
+ * others?) into a hierarchy with parent CblParticleArbitrary (DO NOT 
+ * inherit from Thermostat anymore! Check \a CblPairParticleArbitrary .) and 
+ * switch the \a FunctionFixed to the more flexible \a FunctionParticle. 
  */
-class ApplyVectorField : public Thermostat
+class ApplyScalarField : public Thermostat
 {
+
  protected:
 
-
   /*!
-   * Sets the x-component of the user-defined vector specified by \a m_symbolName to the specified algebraic scalar expression. See \a init() for the known symbols.
+   * Sets the user-defined scalar specified by \a m_symbolName to the specified algebraic scalar expression. See \a init() for the known symbols.
    */
-  FunctionFixed m_vecX;
+  FunctionFixed m_expr;
   
-  /*!
-   * Sets the y-component of the user-defined vector specified by \a m_symbolName to the specified algebraic scalar expression. See \a init() for the known symbols.
-   */
-  FunctionFixed m_vecY;
-  
-  /*!
-   * Sets the z-component of the user-defined vector specified by \a m_symbolName to the specified algebraic scalar expression. See \a init() for the known symbols.
-   */
-  FunctionFixed m_vecZ;
-
-
   /*!
    * The colour, this \a Callable should act on
    */
@@ -94,12 +88,12 @@ class ApplyVectorField : public Thermostat
    * Constructor
    * @param sim Pointer to the main simulation object
    */
-  ApplyVectorField(Simulation* sim);
+  ApplyScalarField(Simulation* sim);
 
   /*!
    * Destructor
    */
-  virtual ~ApplyVectorField() {}
+  virtual ~ApplyScalarField() {}
 
   /*!
    * Thermalize the system
