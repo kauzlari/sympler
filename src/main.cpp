@@ -309,6 +309,7 @@ void sayHello() {
 
 
 // Callables
+#include "apply_scalar_field.h"
 #include "apply_vector_field.h"
 #include "apply_vector_field_file.h"
 #include "apply_vel_field.h"
@@ -563,6 +564,7 @@ void link_all_properly()
   new ReflectorThermalizeInternalEnergy(NULL);
 
   // Callables
+  new ApplyScalarField(NULL);
   new ApplyVectorField(NULL);
   new ApplyVectorFieldFile(NULL);
   new ApplyVelField(NULL);
