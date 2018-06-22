@@ -29,15 +29,12 @@
  */
 
 
-
 #include "val_calculator_arbitrary.h"
 #include "colour_pair.h"
 #include "particle_cache.h"
 #include "triplet_calculator.h"
 #include "quintet_calculator.h"
 
-
-// const SymbolRegister<ValCalculatorRho> val_calc_rho("ValCalculatorRho");
 
 #define M_SIMULATION  ((Simulation*) m_parent)
 #define M_PHASE  M_SIMULATION->phase()
@@ -48,8 +45,7 @@ ValCalculatorArbitrary::ValCalculatorArbitrary(/*Node*/Simulation* parent)
   : NonBondedPairParticleCalculator(parent)
 {
   m_datatype = DataFormat::DOUBLE;
-/*  m_1stparticleFactor.setReturnType(Variant::SCALAR);
-  m_2ndparticleFactor.setReturnType(Variant::SCALAR);*/
+
   init();
 }    
 
@@ -108,7 +104,7 @@ void ValCalculatorArbitrary::init()
 
 void ValCalculatorArbitrary::setup()
 {
-  MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": START, cutoff = " << m_cutoff);    
+  MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol \"" + m_symbolName + ": START, cutoff = " << m_cutoff);    
     
   if(m_cutoff <= 0)
     throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Attribute 'cutoff' has no value > 0!");
@@ -122,238 +118,242 @@ void ValCalculatorArbitrary::setup()
   if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
     throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Attribute 'stage' is " + ObjToString(m_phaseUser) + ", which is none of the allowed values \"0\", \"1\", \"2\".");
    
-  if(m_allPairs)
-  {
+  if(m_allPairs) {
     
     size_t colour;
     
-    if(!m_overwrite)
-    {
+    if(!m_overwrite) {
       // is the symbol already existing somewhere?
-      for (colour = 0; colour < M_MANAGER->nColours(); ++colour)
-      {
+      for (colour = 0; colour < M_MANAGER->nColours(); ++colour) {
         if(Particle::s_tag_format[colour].attrExists(m_symbolName))
           throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol \"" + m_symbolName + "\" is already existing for species '" + M_MANAGER->species(colour) + "'. Second definition is not allowed for overwrite = \"no\"");
       }
     }
     colour = 0;
 
-    if(m_overwrite)
-    {
-      try
-      {
+    if(m_overwrite) {
+      try {
         m_slots.first = Particle::s_tag_format[colour].indexOf(m_symbolName, m_datatype);
         m_slots.first = Particle::s_tag_format[colour].offsetByIndex(m_slots.first);
       }
-      catch(gError& err)
-      {
-        throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(colour) + "' failed. The message was " + err.message()); 
+      catch(gError& err) {
+        throw
+	  gError("ValCalculatorArbitrary::setup", "Class name: "
+		 + className() + ", name: " + name() +
+		 ": Search for symbol for species '" +
+		 M_MANAGER->species(colour) + "' failed. The message was "
+		 + err.message()); 
       }
     }
     // see CONVENTION5 for rule about persistencies
-    else // m_overwrite = false
-    {
-      m_slots.first = Particle::s_tag_format[colour].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
+    else { // m_overwrite = false 
+      m_slots.first = Particle::s_tag_format[colour].addAttribute
+	(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName)
+	.offset;
     }
     m_slots.second = m_slots.first;
-    
+
+    // NOTE: the order for more than 2 colours, e.g. for 3,  will be:
+    // 00, 01, 11, 02, 12, 22
     FOR_EACH_COLOUR_PAIR
-        (
-        M_MANAGER,
+      (M_MANAGER,
+       
+       cp->setCutoff(m_cutoff);
+       cp->setNeedPairs(true);
+       
+       if(colour < cp->firstColour() || colour < cp->secondColour()) {
+	 ++colour;
+	       
+	 if(cp->firstColour() == colour) {
+	   if(m_overwrite) {
+	     try {
+	       m_slots.first = Particle::s_tag_format[cp->firstColour()]
+		 .indexOf(m_symbolName, m_datatype);
+	       m_slots.first = Particle::s_tag_format[cp->firstColour()]
+		 .offsetByIndex(m_slots.first); 
+	     }
+	     catch(gError& err) {
+	       throw
+		 gError("ValCalculatorArbitrary::setup", "Class name: "
+			+ className() + ", name: " + name() +
+			": Search for symbol for species '" +
+			M_MANAGER->species(cp->firstColour()) +
+			"' failed. The message was " + err.message()); 
+	     }
+	   }
+	   else {
+	     // see CONVENTION5 for rule about persistencies
+	     m_slots.first =
+	       Particle::s_tag_format[colour].addAttribute
+	       (m_symbolName, m_datatype, /*persistency*/false, m_symbolName)
+	       .offset;
+	   }
+	 } // end of if(cp->firstColour() == colour)
+	 else {
+	   // here we have to make sure at least that the offsets are correct
+	   m_slots.first = Particle::s_tag_format[cp->firstColour()]
+	     .offsetByName(m_symbolName);
+	 }
+	 
+	 if(cp->secondColour() == colour) {
+	   if(m_overwrite) {
+	     try {
+	       m_slots.second = Particle::s_tag_format[cp->secondColour()].indexOf(m_symbolName, m_datatype);
+	       m_slots.second = Particle::s_tag_format[cp->secondColour()].offsetByIndex(m_slots.second);
+	     }
+	     catch(gError& err) {
+	       throw
+		 gError
+		 ("ValCalculatorArbitrary::setup", "Class name: "
+		  + className() + ", name: " + name() +
+		  ": Search for symbol for species '" +
+		  M_MANAGER->species(cp->secondColour()) +
+		  "' failed. The message was " + err.message()); 
+	     }
+	   }
+	   else {
+	     // see CONVENTION5 for rule about persistencies
+	     m_slots.second = Particle::s_tag_format[colour]
+	       .addAttribute(m_symbolName, m_datatype, /*persistency*/false
+			     , m_symbolName).offset;
+	   }
+	 } // end of if(cp->secondColour() == colour)
+	 else {
+	   // here we have to make sure at least that the offsets are correct
+	   m_slots.second = Particle::s_tag_format[cp->secondColour()].offsetByName(m_symbolName);
+	 }
+	 
+       } // end of if(colour < cp->firstColour() || colour < cp->secondColour())
+       else {
+	 // here we have to make sure at least that the offsets are correct
+	 m_slots.first = Particle::s_tag_format[cp->firstColour()]
+	   .offsetByName(m_symbolName);
+	 m_slots.second = Particle::s_tag_format[cp->secondColour()]
+	   .offsetByName(m_symbolName);
+       }
+       
+       // is it the last calculator to be created?
+       vector<ColourPair*>::iterator cpTester = __cp;
+       if(++cpTester == __end) {
+	 m_function.setExpression(m_expression);
+	 m_function.setColourPair(cp);
+	 m_1stparticleFactor.setExpression(m_1stPExpression);
+	 m_1stparticleFactor.setColourPair(cp);
+	 m_2ndparticleFactor.setExpression(m_2ndPExpression);
+	 m_2ndparticleFactor.setColourPair(cp);
+	 
+	 if(m_phaseUser == 0)    
+	   cp->registerCalc_0(this);
+	 else if(m_phaseUser == 1) {   
+	   cp->registerCalc(this);
+	 }
+	 else { // so it is 2 
+	   ValCalculator* vc = copyMySelf() /*new ValCalculatorArbitrary(*this)*/;
+	   assert(((ValCalculatorArbitrary*) vc)->m_symbolName == m_symbolName);
+	   assert(vc->stage() == m_stage);
+	   assert(((ValCalculatorArbitrary*) vc)->m_slots.first == m_slots.first);
+	   assert(((ValCalculatorArbitrary*) vc)->m_slots.second == m_slots.second);
+	   assert(((ValCalculatorArbitrary*) vc)->m_parent == m_parent);
+	   assert(((ValCalculatorArbitrary*) vc)->m_overwrite == m_overwrite);
+	   assert(((ValCalculatorArbitrary*) vc)->m_species.first == m_species.first);
+	   assert(((ValCalculatorArbitrary*) vc)->m_species.second == m_species.second);
+	   
+	   ((ValCalculatorArbitrary*) vc)->m_function.setExpression(m_expression);
+	   ((ValCalculatorArbitrary*) vc)->m_function.setColourPair(cp);
+	   ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
+	   ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
+	   ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
+	   ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
+	   assert(((ValCalculatorArbitrary*) vc)->m_function.returnType() == m_function.returnType()); 
       
-    // see CONVENTION5 for rule about persistencies
-    
-    cp->setCutoff(m_cutoff);
-    cp->setNeedPairs(true);
-    
-    if(colour < cp->firstColour() || colour < cp->secondColour())
-    {
-      ++colour;
-      if(cp->firstColour() == colour)
-      {
-        if(m_overwrite)
-        {
-          try
-          {
-            m_slots.first = Particle::s_tag_format[cp->firstColour()].indexOf(m_symbolName, m_datatype);
-            m_slots.first = Particle::s_tag_format[cp->firstColour()].offsetByIndex(m_slots.first);
-          }
-          catch(gError& err)
-          {
-            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + "' failed. The message was " + err.message()); 
-          }
-        }
-        else
-          // see CONVENTION5 for rule about persistencies
-          m_slots.first = Particle::s_tag_format[colour].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
-      }
-      if(cp->secondColour() == colour)
-      {
-        if(m_overwrite)
-        {
-          try
-          {
-            m_slots.second = Particle::s_tag_format[cp->secondColour()].indexOf(m_symbolName, m_datatype);
-            m_slots.second = Particle::s_tag_format[cp->secondColour()].offsetByIndex(m_slots.second);
-          }
-          catch(gError& err)
-          {
-            throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + "' failed. The message was " + err.message()); 
-          }
-	}
-        else
-          // see CONVENTION5 for rule about persistencies
-          m_slots.second = Particle::s_tag_format[colour].addAttribute(m_symbolName, m_datatype, /*persist.second*/false, m_symbolName).offset;
-      }
-    }
-    else
-    {
-    // here we have to make sure at least that the offsets are correct
-      m_slots.first = Particle::s_tag_format[cp->firstColour()].offsetByName(m_symbolName);
-      m_slots.second = Particle::s_tag_format[cp->secondColour()].offsetByName(m_symbolName);
-    }
-    
-    vector<ColourPair*>::iterator cpTester = __cp;
-    // is it the last calculator to be created?
-    if(++cpTester == __end)
-    {
-      m_function.setExpression(m_expression);
-      m_function.setColourPair(cp);
-//       m_function.setReturnType(funcType);
-      m_1stparticleFactor.setExpression(m_1stPExpression);
-      m_1stparticleFactor.setColourPair(cp);
-      m_2ndparticleFactor.setExpression(m_2ndPExpression);
-      m_2ndparticleFactor.setColourPair(cp);
-/*      m_1stparticleFactor.setReturnType(pFType);
-      m_2ndparticleFactor.setReturnType(pFType);*/
-      MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "registering me, CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");
+	   cp->registerCalc(vc);
+	   
+	   cp->registerCalc_0(this);
+	 }
+       } // end of if(++cpTester == __end)       
+       // No? Then make a copy
+       else { // else of if(++cpTester == __end)
+
+	 ValCalculator* vc = copyMySelf() /*new ValCalculatorArbitrary(*this)*/;
+	 assert(((ValCalculatorArbitrary*) vc)->m_symbolName == m_symbolName);
+	 assert(vc->stage() == m_stage);
+	 assert(((ValCalculatorArbitrary*) vc)->m_slots.first == m_slots.first);
+	 assert(((ValCalculatorArbitrary*) vc)->m_slots.second == m_slots.second);
+	 assert(((ValCalculatorArbitrary*) vc)->m_parent == m_parent);
+	 assert(((ValCalculatorArbitrary*) vc)->m_overwrite == m_overwrite);
+	 assert(((ValCalculatorArbitrary*) vc)->m_species.first == m_species.first);
+	 assert(((ValCalculatorArbitrary*) vc)->m_species.second == m_species.second);
+	 
+	 ((ValCalculatorArbitrary*) vc)->m_function.setExpression(m_expression);
+	 ((ValCalculatorArbitrary*) vc)->m_function.setColourPair(cp);
+	 ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
+	 ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
+	 ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
+	 ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
+	 assert(((ValCalculatorArbitrary*) vc)->m_function.returnType() == m_function.returnType()); 
       
-      if(m_phaseUser == 0)    
-        cp->registerCalc_0(this);
-      else if(m_phaseUser == 1)    
-        cp->registerCalc(this);
-      else // so it is 2
-      {
-        ValCalculator* vc = copyMySelf() /*new ValCalculatorArbitrary(*this)*/;
-        assert(((ValCalculatorArbitrary*) vc)->m_symbolName == m_symbolName);
-        assert(vc->stage() == m_stage);
-        assert(((ValCalculatorArbitrary*) vc)->m_slots.first == m_slots.first);
-        assert(((ValCalculatorArbitrary*) vc)->m_slots.second == m_slots.second);
-        assert(((ValCalculatorArbitrary*) vc)->m_parent == m_parent);
-        assert(((ValCalculatorArbitrary*) vc)->m_overwrite == m_overwrite);
-        assert(((ValCalculatorArbitrary*) vc)->m_species.first == m_species.first);
-        assert(((ValCalculatorArbitrary*) vc)->m_species.second == m_species.second);
-  
-        ((ValCalculatorArbitrary*) vc)->m_function.setExpression(m_expression);
-        ((ValCalculatorArbitrary*) vc)->m_function.setColourPair(cp);
-        ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
-        ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
-        ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
-        ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
-        assert(((ValCalculatorArbitrary*) vc)->m_function.returnType() == m_function.returnType()); 
-      
-        MSG_DEBUG("ValCalculatorArbitrary::setup", className() + ": registering copy, CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");    
-      
-        cp->registerCalc(vc);
-         
-        cp->registerCalc_0(this);
-      }
-    }
-    
-    // No? Then make a copy
-    else 
-    {
-      ValCalculator* vc = copyMySelf() /*new ValCalculatorArbitrary(*this)*/;
-      assert(((ValCalculatorArbitrary*) vc)->m_symbolName == m_symbolName);
-      assert(vc->stage() == m_stage);
-      assert(((ValCalculatorArbitrary*) vc)->m_slots.first == m_slots.first);
-      assert(((ValCalculatorArbitrary*) vc)->m_slots.second == m_slots.second);
-      assert(((ValCalculatorArbitrary*) vc)->m_parent == m_parent);
-      assert(((ValCalculatorArbitrary*) vc)->m_overwrite == m_overwrite);
-      assert(((ValCalculatorArbitrary*) vc)->m_species.first == m_species.first);
-      assert(((ValCalculatorArbitrary*) vc)->m_species.second == m_species.second);
-  
-      ((ValCalculatorArbitrary*) vc)->m_function.setExpression(m_expression);
-      ((ValCalculatorArbitrary*) vc)->m_function.setColourPair(cp);
-//       ((ValCalculatorArbitrary*) vc)->m_function.setReturnType(funcType);
-      ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
-      ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
-      ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
-      ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
-      assert(((ValCalculatorArbitrary*) vc)->m_function.returnType() == m_function.returnType()); 
-      
-      MSG_DEBUG("ValCalculatorArbitrary::setup", className() + ": registering copy, CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");    
-      
-      if(m_phaseUser == 0)
-        cp->registerCalc_0(vc);
-      else if(m_phaseUser == 1)
-        cp->registerCalc(vc);
-      else // so it is 2
-      {
-        cp->registerCalc(vc);
-         
-        vc = copyMySelf() /*new ValCalculatorArbitrary(*this)*/;
-        assert(((ValCalculatorArbitrary*) vc)->m_symbolName == m_symbolName);
-        assert(vc->stage() == m_stage);
-        assert(((ValCalculatorArbitrary*) vc)->m_slots.first == m_slots.first);
-        assert(((ValCalculatorArbitrary*) vc)->m_slots.second == m_slots.second);
-        assert(((ValCalculatorArbitrary*) vc)->m_parent == m_parent);
-        assert(((ValCalculatorArbitrary*) vc)->m_overwrite == m_overwrite);
-        assert(((ValCalculatorArbitrary*) vc)->m_species.first == m_species.first);
-        assert(((ValCalculatorArbitrary*) vc)->m_species.second == m_species.second);
-  
-        ((ValCalculatorArbitrary*) vc)->m_function.setExpression(m_expression);
-        ((ValCalculatorArbitrary*) vc)->m_function.setColourPair(cp);
-//       ((ValCalculatorArbitrary*) vc)->m_function.setReturnType(funcType);
-        ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
-        ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
-        ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
-        ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
-        assert(((ValCalculatorArbitrary*) vc)->m_function.returnType() == m_function.returnType()); 
-      
-        MSG_DEBUG("ValCalculatorArbitrary::setup", className() + ": registering copy, CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");    
-        
-        cp->registerCalc_0(vc);
-      }
-      
-    }
-        );
-  }
-  else /*m_allPairs == false*/
-  {
+	 if(m_phaseUser == 0)
+	   cp->registerCalc_0(vc);
+	 else if(m_phaseUser == 1) {
+	   cp->registerCalc(vc);
+	 }
+	 else { // so it is 2 
+	   cp->registerCalc(vc);
+	   
+	   vc = copyMySelf() /*new ValCalculatorArbitrary(*this)*/;
+	   assert(((ValCalculatorArbitrary*) vc)->m_symbolName == m_symbolName);
+	   assert(vc->stage() == m_stage);
+	   assert(((ValCalculatorArbitrary*) vc)->m_slots.first == m_slots.first);
+	   assert(((ValCalculatorArbitrary*) vc)->m_slots.second == m_slots.second);
+	   assert(((ValCalculatorArbitrary*) vc)->m_parent == m_parent);
+	   assert(((ValCalculatorArbitrary*) vc)->m_overwrite == m_overwrite);
+	   assert(((ValCalculatorArbitrary*) vc)->m_species.first == m_species.first);
+	   assert(((ValCalculatorArbitrary*) vc)->m_species.second == m_species.second);
+	   
+	   ((ValCalculatorArbitrary*) vc)->m_function.setExpression(m_expression);
+	   ((ValCalculatorArbitrary*) vc)->m_function.setColourPair(cp);
+	   //       ((ValCalculatorArbitrary*) vc)->m_function.setReturnType(funcType);
+	   ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
+	   ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
+	   ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
+	   ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
+	   assert(((ValCalculatorArbitrary*) vc)->m_function.returnType() == m_function.returnType()); 
+	   
+	   cp->registerCalc_0(vc);
+	 } // end of else for m_phaseUser == 2
+       
+       } // end of else of if(++cpTester == __end)
+       ); // end of loop over ColourPairs
+  } // end of if(all_Pairs)
+ else /*m_allPairs == false*/ {
+
     if(m_species.first == "undefined")
-      throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + " for symbol " + m_symbolName + ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
     if(m_species.second == "undefined")
-      throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + "Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + " for symbol " + m_symbolName + ": Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled."); 
 
-    ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
+    ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second));
     
     cp->setCutoff(m_cutoff);
     cp->setNeedPairs(true);
 
-    if(m_overwrite)
-    {
-      try
-      {
+    if(m_overwrite) {
+      try {
         m_slots.first = Particle::s_tag_format[cp->firstColour()].indexOf(m_symbolName, m_datatype);
         m_slots.first = Particle::s_tag_format[cp->firstColour()].offsetByIndex(m_slots.first);
       }
-      catch(gError& err)
-      {
+      catch(gError& err) {
         throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->firstColour()) + "' failed. The message was " + err.message()); 
       }
-      try
-      {
+      try {
         m_slots.second = Particle::s_tag_format[cp->secondColour()].indexOf(m_symbolName, m_datatype);
         m_slots.second = Particle::s_tag_format[cp->secondColour()].offsetByIndex(m_slots.second);
       }
-      catch(gError& err)
-      {
+      catch(gError& err) {
         throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Search for symbol for species '" + M_MANAGER->species(cp->secondColour()) + "' failed. The message was " + err.message()); 
       }      
     }
-    else // m_overwrite = false
-    {
+    else {// m_overwrite = false
       if(Particle::s_tag_format[cp->firstColour()].attrExists(m_symbolName)) 
         throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol \"" + m_symbolName + "\" is already existing for species '" + M_MANAGER->species(cp->firstColour()) + "'. Second definition is not allowed for overwrite = \"no\"");
 
@@ -365,16 +365,12 @@ void ValCalculatorArbitrary::setup()
       // see CONVENTION5 for rule about persistencies
       m_slots.first = Particle::s_tag_format[cp->firstColour()].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
   
-      if(cp->firstColour() != cp->secondColour())
-      {
+      if(cp->firstColour() != cp->secondColour()) {
         // see CONVENTION5 for rule about persistencies
         m_slots.second = Particle::s_tag_format[cp->secondColour()].addAttribute(m_symbolName, m_datatype, /*persist.second*/false, m_symbolName).offset;
       }
       else m_slots.second = m_slots.first;
-    }
-    
-//     MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + " for symbol " << m_symbolName << ": m_slots = (" << m_slots.first << ", " << m_slots.second << ")");
-    
+    }    
     
     m_function.setExpression(m_expression);
     m_function.setColourPair(cp);
@@ -388,8 +384,7 @@ void ValCalculatorArbitrary::setup()
       cp->registerCalc_0(this);
     else if(m_phaseUser == 1)    
       cp->registerCalc(this);
-    else // so it is 2
-    {
+    else { // so it is 2
       ValCalculator* vc = copyMySelf() /*new ValCalculatorArbitrary(*this)*/;
       assert(((ValCalculatorArbitrary*) vc)->m_symbolName == m_symbolName);
       assert(vc->stage() == m_stage);
@@ -402,15 +397,12 @@ void ValCalculatorArbitrary::setup()
   
       ((ValCalculatorArbitrary*) vc)->m_function.setExpression(m_expression);
       ((ValCalculatorArbitrary*) vc)->m_function.setColourPair(cp);
-//       ((ValCalculatorArbitrary*) vc)->m_function.setReturnType(funcType);
       ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setExpression(m_1stPExpression);
       ((ValCalculatorArbitrary*) vc)->m_1stparticleFactor.setColourPair(cp);
       ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setExpression(m_2ndPExpression);
       ((ValCalculatorArbitrary*) vc)->m_2ndparticleFactor.setColourPair(cp);
       assert(((ValCalculatorArbitrary*) vc)->m_function.returnType() == m_function.returnType()); 
       
-      MSG_DEBUG("ValCalculatorArbitrary::setup", className() + ": registering copy, CP = (" << cp->firstColour() << ", " << cp->secondColour() << ")");    
-       
       cp->registerCalc(vc);
       cp->registerCalc_0(this);
     }
