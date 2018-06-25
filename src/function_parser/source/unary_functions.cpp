@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -124,6 +124,9 @@ MAKE_UNARY_FUNCTION(sqrt, sqrt, 6);
 MAKE_UNARY_FUNCTION(sin, sin, 6);
 MAKE_UNARY_FUNCTION(cos, cos, 6);
 MAKE_UNARY_FUNCTION(tan, tan, 6);
+
+MAKE_UNARY_FUNCTION(asin, asin, 6);
+MAKE_UNARY_FUNCTION(acos, acos, 6);
 MAKE_UNARY_FUNCTION(atan, atan, 6);
 
 MAKE_UNARY_FUNCTION(hsin, sinh, 6);
