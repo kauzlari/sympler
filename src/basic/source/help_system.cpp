@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -223,7 +223,8 @@ string expr_help_str
      "   * \"@\"\n"
      "        * Vector@Vector = Tensor (outer product), e.g. \"[ai]@[bj]\"\n"
      "   * \"^\" = exponentiation, e.g., \"a^b\"\n"
-     "   * \"*\" = multiplication, component wise on Matrix and Vector, e.g., \"a*b\" or also \"{ai}*{bj}\"\n"
+     "   * \"*\" = multiplication, component wise on Matrix and Vector,\n"
+     "     e.g., \"a*b\" or also \"{ai}*{bj}\"\n"
      "   * \"�\"\n"
      "       * Matrix�Matrix = Matrix (standard matrix product), e.g. \"{a}�{b}\"\n"
      "         Clarification in case the operator does not display correctly\n"
@@ -232,26 +233,37 @@ string expr_help_str
      "\n"
      " * Functions of a scalar (or scalar-components):\n"
      "   * abs(Scalar): self-explanatory, component-wise for non-scalars\n"
+     "   * acos(Scalar): self-explanatory, component-wise for non-scalars\n"
+     "   * asin(Scalar): self-explanatory, component-wise for non-scalars\n"
      "   * atan(Scalar): self-explanatory, component-wise for non-scalars\n"
-     "   * cos(Scalar): self-explanatory, component-wise for non-scalars, e.g., \"cos({aj})\"\n"
-     "   * hcos(Scalar): (cosh) self-explanatory, component-wise for non-scalars\n"
+     "   * cos(Scalar): self-explanatory, component-wise for non-scalars,\n"
+     "     e.g., \"cos({aj})\"\n"
      "   * exp(Scalar): self-explanatory, component-wise for non-scalars\n"
+     "   * hcos(Scalar): (cosh) self-explanatory, component-wise for non-scalars\n"
+     "   * hsin(Scalar): (sinh) self-explanatory, component-wise for non-scalars\n"
+     "   * htan(Scalar): (tanh) self-explanatory, component-wise for non-scalars\n"   
      "   * idMat(Scalar) = Scalar times identity-matrix, e.g., \"idMat(ai)\"\n"
      "   * idVec(Scalar) = Vector: [Scalar, Scalar, Scalar], e.g., \"idVec(a)\"\n"
      "   * round(Scalar): rounds to nearest integer, component-wise for non-scalars\n"
-     "   * sin(Scalar): self-explanatory, component-wise for non-scalars, e.g., \"sin(a)\"\n"
-     "   * hsin(Scalar): (sinh) self-explanatory, component-wise for non-scalars\n"
-     "   * step(Scalar): unit step function with the following definition: 1 for x>0 and 0 otherwise, component-wise for non-scalars\n"
-     "   * stpVal(Scalar): step function with the following definition: x for x>0 and 0 otherwise, component-wise for non-scalars\n"
-     "   * sqrt(Scalar): square root of a positive real number, component-wise for non-scalars\n"
+     "   * sin(Scalar): self-explanatory, component-wise for non-scalars,\n"
+     "     e.g., \"sin(a)\"\n"
+     "   * round(Scalar): round to integer, component-wise for non-scalars\n"
+     "   * step(Scalar): unit step function with the following definition:\n"
+     "     1 for x>0 and 0 otherwise, component-wise for non-scalars\n"
+     "   * stpVal(Scalar): step function with the following definition:\n"
+     "     x for x>0 and 0 otherwise, component-wise for non-scalars\n"
+     "   * sqrt(Scalar): square root of a positive real number, component-wise\n"
+     "     for non-scalars\n"
      "   * tan(Scalar): self-explanatory, component-wise for non-scalars\n"
-     "   * htan(Scalar): (tanh) self-explanatory, component-wise for non-scalars\n"   
      "   * unitMat(Scalar) = Matrix: Scalar*([1,1,1]@[1,1,1]), e.g., \"unitMat(a)\"\n"
-     "   * uran(Scalar) = Uniform random number in the interval [0,1]; the argument is not used at the moment, e.g., \"uran(1)\"\n"
-     "   * uVecX|Y|Z(Scalar) = [Scalar, 0, 0]|[0,Scalar,0]|[0,0,Scalar], e.g., \"uVecY(a)\"\n"
+     "   * uran(Scalar) = Uniform random number in the interval [0,1]; the\n"
+     "     argument is not used at the moment, e.g., \"uran(1)\"\n"
+     "   * uVecX|Y|Z(Scalar) = [Scalar, 0, 0]|[0,Scalar,0]|[0,0,Scalar],\n"
+     "     e.g., \"uVecY(a)\"\n"
      "\n"
      " * Functions of a vector:\n"
-     "   * diagMat(Vector) = Matrix: Matrix with vector components in diagonal, e.g., \"diagMat([a])\"\n"
+     "   * diagMat(Vector) = Matrix: Matrix with vector components in diagonal,\n"
+     "     e.g., \"diagMat([a])\"\n"
      "   * x|y|zCoord(Vector) = Scalar: self-explanatory, e.g., \"zCoord([a])\"\n"
      "\n"
      " * Functions of a matrix:\n"
@@ -259,7 +271,8 @@ string expr_help_str
      "   * Q(Matrix) = Scalar: Matrix:Matrix, e.g., \"Q({ai})\"\n"
      "   * T(Matrix) = Matrix: transpose of Matrix, e.g., \"T({ai})\"\n"
      "   * trace(Matrix) = Scalar: self-explanatory, e.g., \"trace({ai})\"\n"
-     "   * xyMat(Matrix) = Matrix: zeroes the third row and column, e.g. \"xyMat({ai})\"\n" 
+     "   * xyMat(Matrix) = Matrix: zeroes the third row and column,\n"
+     "     e.g. \"xyMat({ai})\"\n" 
      "\n\n");
 
 
