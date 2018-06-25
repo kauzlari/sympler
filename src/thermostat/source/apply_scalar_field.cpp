@@ -65,7 +65,7 @@ void ApplyScalarField::init()
   );
 
   FUNCTIONFIXEDPC(scalar, m_expr, 
-                  "This sets the scalar field to the specified algebraic expression. See above for allowed expressions.");
+                  "This sets the scalar field to the algebraic expression specified here. See above for allowed expressions. Note that the affected scalar-field itself is accessed by the variable-name 'scalar' and NOT by its original name given in attribute 'symbol'.");
   
   m_expr.addVariable("x");
   m_expr.addVariable("y");
