@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -54,6 +54,11 @@ class IntegratorTensorLambda: public IntegratorTensor
    * Factor for choice of predictor-corrector scheme. 
    */
   double m_lambda;
+
+  /*!
+   * Helper being set to 0.5 - \a m_lambda in \a setup()
+   */
+  double m_lambda_diff;
 
   /*!
    * Initialize the property list
