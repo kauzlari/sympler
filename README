@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -73,7 +73,7 @@ Compiling SYMPLER:
 
 + Required tools for configuration and compilation: 
 
-++ the GNU autotools (aclocal, libtool, autoconf, automake, etc.)
+++ CMake (minimal version required: 2.8)
 ++ a C++ compiler such as GNU g++
 ++ a C compiler such as GNU gcc
 
@@ -82,7 +82,6 @@ Compiling SYMPLER:
 
 ++ GNU scientific library (GSL)
 ++ libxml2
-++ CppUnit (provides unit tests; on Ubuntu: sudo apt install libcppunit-dev)
 
 NOTE: You usually also have to install the libraries for development. They have names such as libgsl*-dev,
 libsdl*-dev, and so on.
@@ -90,11 +89,13 @@ libsdl*-dev, and so on.
 
 + Optional libraries: 
 
-++ liblzma-dev: For the configure-option --enable-all-static (see below)
-++ libsdl (1.2.0 or newer but not 2.0 or newer): If you use configure option --enable-meter-lives (see below). Gives simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found and the modules will be compiled. If not, you will have to modify some include and/or library paths by hand.
+++ libcppunit: Provides unit tests (on Ubuntu: sudo apt install libcppunit-dev)
+++ liblzma-dev & libz-dev: For the configure-option -Dstatic=1 (see below)
+++ libsdl (1.2.0 or newer but not 2.0 or newer): Gives simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found and the modules will be compiled. If libsdl is not found, you will have to modify some include and/or library paths by hand. Can not be used with the -Dstatic=1 option.
+++ libfreesteam: If found, provides modules, in which the freesteam library is used to compute thermodynamic variables based on the IAPWS-IF97 formulation. Consult http://freesteam.sourceforge.net/ for more information. Can not be used with the -Dstatic=1 option.
 ++ OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during
 configuration (CXXFLAGS="... -fopenmp").
-++ libtnt, libjama, libsuperlu: Use the options --with-tnt --with-superlu during configuration. This allows for: 
+++ libtnt, libjama, libsuperlu: Use the options -Dtnt=1 -DIntegratorStaticLSE=1 during configuration. This provides: 
 +++ coupling of particles to a linear system of equations solver with module IntegratorLSE
 +++ the module for velocity constraints VelConstraints
 +++ the integrator IntegratorVelocityVerletPressure
@@ -109,42 +110,40 @@ find special instructions for MacOS and Intel compilers.
 
 ++ Configuration and Compilation for standard Linux-systems:
 
-Assuming the complete path to the directory where you downloaded the SYMPLER source-code is given by $SOURCE-DIR, then the series of commands that
-usually works is:
-
-$ cd $SOURCE-DIR
-$ autoreconf --install --force
+Assuming the complete path to the directory where you downloaded the SYMPLER source-code is given by $SOURCE-DIR.
 
 Then, assuming the complete path to the directory where you want to compile SYMPLER is given by $BUILD-DIR (it might be the same as or different
 from $SOURCE-DIR):
 
 $ cd $BUILD-DIR
-$ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
-$ make -j[1 to roughly the number of available cores]
+$ CXXFLAGS="[cxxflags]" cmake [options] $SOURCE-DIR
+$ make -jNUM
+
+where NUM can be 1 to roughly 1.5 times your available CPU-cores for faster parallel compilation. (NOT execution of sympler! See option -fopenmp below.) 
 
 Useful [cxxflags] are (for more see the g++ documentation):
 
 -O3: for optimised compilation with g++
--fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)
+-fopenmp: for compilation with OpenMP parallelisation (currently still inefficient)
+-O0 -g -Wall: for debugging.
 
 and useful [options] are:
 
---with-tnt: use tnt library and jama libraries
---with-superlu: use superlu
---enable-meter-lives: Compile additional MeterLive modules for runtime visualisation. If you enable this option and get an error message such as "...SDL/SDL.h: No such file or directory", then you have not installed libsdl at all (see optional requirements above) or you must give the correct include and library paths in the CXXFLAGS or elsewhere. Note: It is NOT recommended to use this option on HPC machines. Anyway, most HPC admins will refrain from installing the required SDL-library in an HPC environment.
---enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries
+-Dtnt=1: use tnt library and jama libraries
+-DIntegratorStaticLSE=1: use superlu library to compile IntegratorStaticLSE module
+-Dstatic=1: for a statically linked stand alone executable not requiring any dynamical linking of libraries
 (except for the glibc used during linking after compilation of SYMPLER; and the runtime compiled expressions of
-course). NOTE the required library liblzma-dev (listed under optional libraries above). Also libicu should be
-installed, but this is usually the case by default (for example libicu-dev and libicu55 on Ubuntu 16.04). Further
-note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash
-very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome.
+course). NOTE: the freesteam modules (using libfreesteam) and the MeterLive and MeterLiveColoured modules (using libsdl) can not be compiled statically and will hence be missing. NOTE: the libraries liblzma-dev and libz-dev (listed under optional libraries above) are required. Also libicu should be installed, but this is usually the case by default (for example libicu-dev and libicu55 on Ubuntu 16.04). Further note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome.
 
-After successful compilation the executable "sympler" will be created in the directory src/. 
+After successful compilation the executable "sympler" will be created in the directory $BUILD-DIR. 
 
 
 ++ Configuration and Compilation on MacOS
 
-The following instructions were last successfully tested with Mac OS X 10.11.6 (based on older instructions by Andreas Greiner, Tobias Wondratsch, Oliver Grünert).
+!!!NOTE!!!
+These instructions are currently outdated and will NOT work with the current distribution requiring CMAKE instead of the autotools. They should still work with older distributions which use the autotools. An update of the MacOS documentation is under construction.
+
+The following instructions were last successfully tested on Mac OS X 10.11.6 (based on older instructions by Andreas Greiner, Tobias Wondratsch, Oliver Grünert).
 
 The libxml2 library comes already preinstalled by Apple but caused trouble during the SYMPLER installation. You may give the preinstalled libxml2 a try or immediately go and get an alternative version and the two remaining libraries by using one of the packaging-systems for Mac OS.
 
@@ -206,6 +205,9 @@ mentioned above.
 
 ++ SYMPLER and Intel compilers:
 
+!!!NOTE!!!
+These instructions are currently outdated and will NOT work literally with the current distribution requiring CMAKE instead of the autotools. They should still work with older distributions which use the autotools, and the flags and variables can still beset similarly. An update of the documentation for compiling with the Intel compile is under construction.
+
 A few hints when using icc (the Intel C++ compiler) for SYMPLER:
 
 ++ Set the environment variable LANG=C
@@ -228,7 +230,7 @@ Running SYMPLER
 
 A static executable will work, if your glibc is roughly the same as the one, which was used for compilation.
 Additionally executables are specific to 32 and 64 bit platforms, respectively. The modules MeterLive and
-MeterLiveColoured are not activated in a static version. Alternatively you can use a dynamically linked version.
+MeterLiveColoured are not activated in a static version just like the Freesteam modules. Alternatively you can use a dynamically linked version.
 
 A dynamic executable needs at least the following libraries installed:
 
