@@ -41,6 +41,7 @@
 #include "threads.h"
 #include "triplet.h"
 #include "quintet.h"
+#include "val_calculator_part.h"
 
 #ifdef _OPENMP
   #include "omp.h"

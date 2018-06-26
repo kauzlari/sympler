@@ -40,6 +40,7 @@
 #include "colour_pair.h"
 #include "particle_cache.h"
 #include "pair_creator.h"
+#include "val_calculator_part.h"
 
 #ifdef _OPENMP
   #include "omp.h"
