@@ -1,5 +1,5 @@
 # Specify cmake version
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 2.8)
 project(sympler)
 
 
@@ -77,22 +77,33 @@ set(link_lib
 find_package(LibXml2 REQUIRED)
 
 # GSL is required
-find_package(GSL REQUIRED)		 				
+if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+  find_package(GSL REQUIRED)
+else(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
+  execute_process(COMMAND gsl-config --version OUTPUT_VARIABLE gsl_version OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(${gsl_version})
+    message(STATUS "Found GSL (found version ${gsl_version})")
+  else(${gsl_version})
+    message(FATAL_ERROR "Could NOT find GSL")
+  endif(${gsl_version})
+endif(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} GREATER 3.1)
 
-# CPPUNIT is required
+# CPPUNIT is optional, Unittest compiling only if CPPUNIT Library existing
 find_path(CPPUNIT_INCLUDE_DIR cppunit/Test.h)
 find_library(CPPUNIT_LIBRARY NAMES cppunit)
 if(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
   message(STATUS "Found CppUnit: ${CPPUNIT_LIBRARY}")
+  set(CPPUNIT_FOUND TRUE)
 else(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
-  message(FATAL_ERROR "Could not find CppUnit")
+  message(STATUS "Could NOT find CPPUNIT: No Unittest compiling")
+  set(CPPUNIT_FOUND FALSE)
 endif(CPPUNIT_INCLUDE_DIR AND CPPUNIT_LIBRARY)
 
 # SDL is linked, if installed
 find_package(SDL)
 if(SDL_FOUND)
   if(${static})
-    message("-- Dont build SDL, because of statically linking")
+    message(STATUS "Dont build SDL, because of statically linking")
   else(${static})
     add_definitions(-DHAVE_SDL)
     set(link_lib ${link_lib} -lSDL)
@@ -102,27 +113,27 @@ endif(SDL_FOUND)
 # FREESTEAM is linked, if installed
 execute_process(COMMAND freesteam-config --version OUTPUT_VARIABLE freesteam_version OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(${freesteam_version})
-  message("-- Found Freesteam (found version ${freesteam_version})")
+  message(STATUS "Found Freesteam (found version ${freesteam_version})")
   if(${static})
-    message("-- Dont build Freesteam, because of statically linking")
+    message(STATUS "Dont build Freesteam, because of statically linking")
   else(${static})
     add_definitions(-DHAVE_FREESTEAM)
     set(link_lib ${link_lib} -lfreesteam)
   endif(${static})
 else(${freesteam_version})
-  message("-- Could NOT find FREESTEAM")
+  message(STATUS "Could NOT find FREESTEAM")
 endif(${freesteam_version})
 
 # TNT & JAMA are optional, if -Dtnt=1 is set
 if(${tnt})
-  message("-- Use TNT & JAMA Libraries")
+  message(STATUS "Use TNT & JAMA Libraries")
   add_definitions(-DHAVE_TNT_TNT_H)
   add_definitions(-DHAVE_JAMA_JAMA_LU_H)
 endif(${tnt})
 
 # Compile IntegratorStaticLSE using SuperLU (+ TNT & JAMA) Library, if -DIntegratorStaticLSE=1 is set
 if(${IntegratorStaticLSE})
-  message("-- Use SuperLU Libraries to compile IntegratorStaticLSE")
+  message(STATUS "Use SuperLU Libraries to compile IntegratorStaticLSE")
   add_definitions(-DHAVE_TNT_TNT_H)
   add_definitions(-DHAVE_JAMA_JAMA_LU_H)
   add_definitions(-DWITH_INTEGRATORSTATICLSE)
@@ -144,11 +155,13 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 if(IS_BIG_ENDIAN)
   add_definitions(-DIS_BIG_ENDIAN)
-endif()
+endif(IS_BIG_ENDIAN)
 
 
 # Add subdirectories to the build
 add_subdirectory(source/src)
-add_subdirectory(source/src_test)
+if(${CPPUNIT_FOUND})
+  add_subdirectory(source/src_test)
+endif(${CPPUNIT_FOUND})
 
 
