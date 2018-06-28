@@ -82,7 +82,7 @@ class PairParticleTensor : public ValCalculatorArbitrary
     virtual void compute(Pairdist* pD, int thread_no)
 #endif
     {
-//           MSG_DEBUG("PairParticleVector::compute", "START, m_cutoff = " << m_cutoff << ", slots = (" << m_slots.first << ", " << m_slots.second << ")");
+      /* MSG_DEBUG("PairParticleTensor::compute", "START, m_cutoff = " << m_cutoff << ", slots = (" << m_slots.first << ", " << m_slots.second << ")"); */
       if(pD->abs() < m_cutoff)
       {
         tensor_t temp;
@@ -90,12 +90,17 @@ class PairParticleTensor : public ValCalculatorArbitrary
             // compute the pair-expression
         m_function(&temp, pD);
 
+	/* MSG_DEBUG("PairParticleTensor::compute", "m_function gave " << temp); */
+
         tensor_t tempFirst;
         tensor_t tempSecond;
             // compute the particle-expressions
         m_1stparticleFactor(&tempFirst, pD);
         m_2ndparticleFactor(&tempSecond, pD);
 
+	/* MSG_DEBUG("PairParticleTensor::compute", "particleFac1 = " << tempFirst); */
+	/* MSG_DEBUG("PairParticleTensor::compute", "particleFac2 = " << tempSecond); */
+	
         Particle* first = pD->firstPart();
         Particle* second = pD->secondPart();
 
@@ -116,7 +121,7 @@ class PairParticleTensor : public ValCalculatorArbitrary
                 }
               }
 #endif
-
+	      /* MSG_DEBUG("PairParticleTensor::compute", "p1tot = " << first->tag.tensorByOffset(m_slots.first)); */
         }
 
         if(pD->actsOnSecond())
@@ -136,6 +141,7 @@ class PairParticleTensor : public ValCalculatorArbitrary
                 }
               }
 #endif
+	      /* MSG_DEBUG("PairParticleTensor::compute", "p2tot = " << second->tag.tensorByOffset(m_slots.second)); */
 
         }
       }

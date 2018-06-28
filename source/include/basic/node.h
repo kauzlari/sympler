@@ -110,6 +110,13 @@ public:
   }
 
   /*!
+   * Returns the \a PropertyList of this \a Node
+   */
+  const PropertyList& returnProperties() const {
+    return m_properties;
+  }
+  
+  /*!
    * String identifier for this object
    */
   const string &name() const {

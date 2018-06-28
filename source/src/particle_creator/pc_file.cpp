@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -32,6 +32,8 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <limits>
+
 #include "cell.h"
 #include "phase.h"
 #include "simulation.h"
@@ -605,11 +607,12 @@ void ParticleCreatorFile::readParticle(Particle &p, ifstream &pos, string &freeO
  }
 
 void ParticleCreatorFile::setup() {
-  //	ParticleCreatorFree::setup();
+
   // this PC uses m_species as filter for the given input file
- 
-    myCutoff = M_PHASE->pairCreator()->interactionCutoff(); //as in pc_wall for adjustBoxSize()
-      if (m_species != "UNDEF") {
+  
+  myCutoff = M_PHASE->pairCreator()->interactionCutoff(); //as in pc_wall for adjustBoxSize()
+  if (m_species != "UNDEF") {
+    // throws exception if species not found
     m_colour = M_MANAGER->getColour/*AndAdd*/(m_species);
   } else {
     //   m_colour = ALL_COLOURS;
@@ -622,8 +625,12 @@ void ParticleCreatorFile::setup() {
     
     pos >> skipws >> s;
     while (s != "!!!" && !pos.eof()) {
-      
-      c = M_MANAGER->getColour/*AndAdd*/(s);
+
+      // tiny test: throws exception if species not found
+      c = M_MANAGER->getColour(s);
+      // meaningful value?
+      assert(c < 0.01*std::numeric_limits<size_t>::max());
+
       pos >> skipws >> s;
       
       while (s != "!!!" && !pos.eof())
@@ -633,7 +640,7 @@ void ParticleCreatorFile::setup() {
     }
     pos.close();
     
-}
+  }
 }
 
 
@@ -735,9 +742,9 @@ void ParticleCreatorFile::adjustBoxSize(point_t &size, bool_point_t& frameRCfron
      Particle p;
    
 	bool_point_t periodicityFront = ((Boundary*) m_parent)->periodicityFront();
-	MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "periodicityFront = " << periodicityFront);
+	MSG_DEBUG("ParticleCreatorFile::adjustBoxSize", "periodicityFront = " << periodicityFront);
 	bool_point_t periodicityBack = ((Boundary*) m_parent)->periodicityBack();
-	MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "periodicityBack = " 
+	MSG_DEBUG("ParticleCreatorFile::adjustBoxSize", "periodicityBack = " 
 	<< periodicityBack);
 	
         string freeOrFrozen = "free";
@@ -747,10 +754,10 @@ void ParticleCreatorFile::adjustBoxSize(point_t &size, bool_point_t& frameRCfron
         
         while(!pos.eof() && pos.peek() != '!' ){ 
            pos >> skipws >> freeOrFrozen ;  //first species, dismissed.
-	   MSG_DEBUG("ParticleCreatorWall::adjustBoxSize", "second call of readParticle");
+
            readParticle(p,pos,freeOrFrozen);
 	   // ignore the remaining attributes if there are any
-	   pos.ignore(HUGE_VAL,'\n');
+	   pos.ignore(std::numeric_limits<int>::max(),'\n');
            if(!m_particlesInside){        
                 if (!(M_BOUNDARY->isInside(p.r))) {
                  

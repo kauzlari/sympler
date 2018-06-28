@@ -56,7 +56,14 @@ class ParticleRandNormVector : public ParticleCacheArbRNG
     {
       return new ParticleRandNormVector(*this);
     }
-    
+
+    /*!
+     * Helper function for setting the return type of \a m_function
+     */
+    virtual void setFunctionReturnType(){
+      m_function->setReturnType(Variant::VECTOR);
+    }
+
   public:
   /*!
    * Constructor
@@ -135,14 +142,13 @@ class ParticleRandNormVector : public ParticleCacheArbRNG
     virtual void computeCacheFor(Particle* p)
     {
       
-      // new style: random number (zero mean, unit variance) was already precomputed in the corresponding tag-slot
+      // random number (zero mean, unit variance) was already
+      // precomputed in the corresponding tag-slot
       point_t* vec = &(p->tag.pointByOffset(m_offset));
-/*       m_function(vec, p); */
       point_t temp;
-      m_function(&temp, p);
+      (*m_function)(&temp, p);
       for(size_t i = 0; i < SPACE_DIMS; ++i)
 	(*vec)[i] *= temp[i];
-/* 	(*vec)[i] *= m_rng.normal(1); */
 
     }
 

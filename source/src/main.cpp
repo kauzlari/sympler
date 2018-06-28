@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -292,7 +292,9 @@ void sayHello() {
 #include "particle_scalar.h"
 #include "particle_tensor.h"
 #include "particle_vector.h"
-#include "pca_random.h"
+#include "particle_vels.h"
+#include "symbol_f_particle_scalar.h"
+#include "symbol_f_particle_vels.h"
 // commented out because of complaint about redefinition
 // #include "pca_density_self_contribution.h"
 // #include "pca_energy_entropy.h"
@@ -307,9 +309,12 @@ void sayHello() {
 
 
 // Callables
+#include "apply_scalar_field.h"
 #include "apply_vector_field.h"
 #include "apply_vector_field_file.h"
 #include "apply_vel_field.h"
+#include "cbl_pair_particle_tensor.h"
+#include "cbl_pair_particle_vector.h"
 #include "energy_pump.h"
 #include "shift_particle.h"
 #include "triangle_CGMD_interpolation.h"
@@ -526,9 +531,13 @@ void link_all_properly()
   new PCacheIAPWSIF97p(NULL);
   new PCacheIAPWSIF97rho(NULL);
 #endif
+  new ParticleVels(NULL);
   new PCaEigensystem(NULL);
   new PCaMatrixInverse(NULL);
-  new PCaRandom(NULL);
+  new SymbolFParticleScalar(NULL);
+  new SymbolFParticleVels(NULL);
+
+
   new PairRandScalar(NULL);
   new PairRandTensor(NULL);
   new PairRandVector(NULL);
@@ -559,9 +568,12 @@ void link_all_properly()
   new ReflectorThermalizeInternalEnergy(NULL);
 
   // Callables
+  new ApplyScalarField(NULL);
   new ApplyVectorField(NULL);
   new ApplyVectorFieldFile(NULL);
   new ApplyVelField(NULL);
+  new CblPairParticleTensor(NULL);
+  new CblPairParticleVector(NULL);
   new EnergyPump(NULL);
   new ShiftParticle(NULL);
   new TriangleCGMDInterpolation(NULL);

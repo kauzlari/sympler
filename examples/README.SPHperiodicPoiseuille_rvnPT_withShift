@@ -1,0 +1,3 @@
+Minimal weakly compressible SPH-simulation of Poiseuille flow with additional heat flow and particle shift correction.
+
+The input file is heavily commented. Please continue reading there for further documentation.

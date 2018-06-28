@@ -278,7 +278,7 @@ species = "BAR"
 >
 
  <OutputFile
-       nameOutputFile="fparticletensor.dat"
+       nameOutputFile="tensor.dat"
        columns = "force1|position|velocity"
        multipleFiles="yes"/>
   

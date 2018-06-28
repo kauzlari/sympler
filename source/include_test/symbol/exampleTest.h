@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -30,8 +30,8 @@
 
 
 
-#ifndef EXAMPLETEST_H
-#define EXAMPLETEST_H
+#ifndef __EXAMPLETEST_H
+#define __EXAMPLETEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>

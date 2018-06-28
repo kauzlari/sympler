@@ -37,7 +37,7 @@ const SymbolRegister<ParticleTensor> particle_tensor("ParticleTensor");
 ParticleTensor::ParticleTensor(Simulation* parent)
   : ParticleCacheArbitrary(parent)
 {
-  m_function.setReturnType(Variant::TENSOR);
+  setFunctionReturnType();
   m_datatype = DataFormat::TENSOR;
   init();
 }

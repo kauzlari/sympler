@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -40,7 +40,7 @@
 // class Node;
 
 /*!
- * Expression, computetd and saved in a symbol, to be used in expression 
+ * Expression, computed and saved in a symbol, to be used in expressions 
  * of other modules.
  * This class is mainly used as a common interface for the parsing hierarchy.
  * The computation of the symbols is rather based on the sudivision into 
@@ -86,6 +86,24 @@ class Symbol : public Node
    * an XML-attribute but only in selected sub-classes
    */
   bool m_overwrite;
+
+  /*!
+   * Will the symbol introduced by this \a Symbol be protected from 
+   * automatic reset (=0)? The default value in the constructor is 
+   * 'false' for class \a Symbol.
+   * FIXME: currently (2018-05-09) not used, but could be useful, 
+   * especially if we add the feature, that the \a Symbol takes itself 
+   * control over the resetting while \a m_persistency = true to 
+   * protect from automatic reset. First incomplete code related to 
+   * this feature exists in some \a Symbol s, but is commented out due 
+   * to a vanished need for it. 
+   */
+  bool m_persistency;
+  
+  /*!
+   * This string holds the symbols, which are not waited for to be computed beforehand
+   */
+  string m_oldSymbols;
   
   /*!
    * Initialise the PropertyList.
@@ -158,7 +176,10 @@ class Symbol : public Node
    * An "empty" string must have the form "---".
    */
   virtual string usedSymbolsIgnoredForStaging() const {
-    return "---";
+
+    if(m_oldSymbols == "---")
+      return m_symbolName;
+    else return string(m_oldSymbols + "|" + m_symbolName);
   }
   
   /*!
@@ -184,7 +205,7 @@ class Symbol : public Node
    * Constructor for \a Node hierarchy
    * @param parent The parent node
    */
-  Symbol(/*Node*/Simulation* parent);
+  Symbol(Simulation* parent);
   
   /*!
    * Constructor
@@ -198,7 +219,7 @@ class Symbol : public Node
   }
   
   /*!
-   * Setup this Symbol
+   * Initialise all variables of this \a Symbol
    * FIXME: This function was added pretty recently (2018-02-19), and 
    * some of the children do not call it in their own setup(). It also
    * does not yet setup all members it declares.
@@ -208,7 +229,7 @@ class Symbol : public Node
   /*!
    * Return a string identifier for the calculator of this symbol
    */
-  virtual string myName()
+  virtual string myName() const
   {
     return m_properties.className(); 
   }
@@ -216,7 +237,7 @@ class Symbol : public Node
   /*!
    * Return the name of the computed symbol to be used in other expressions
    */
-  virtual string mySymbolName()
+  virtual string mySymbolName() const
   { 
     return m_symbolName;
   }
@@ -295,6 +316,17 @@ class Symbol : public Node
   virtual const bool doesOverwrite() const {
     return m_overwrite;
   }
+
+  /*!
+   * Helper to remove string names of symbols given by 
+   * \a symbolChainToBeRemoved  from a list of symbols 
+   * \a symbolsFromWhichToRemove.
+   * @param[in] symbolChainToBeRemoved The symbols to be removed, given 
+   * as a string with separator "|" between the names of the symbols
+   * @param[out] symbolsFromWhichToRemove Contains the list of symbols 
+   * from which some of them should be removed
+   */
+  static void removeFromSymbolList(string symbolChainToBeRemoved, list<string>& symbolsFromWhichToRemove);
   
 };
 

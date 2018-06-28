@@ -37,7 +37,7 @@ const SymbolRegister<ParticleVector> particle_vector("ParticleVector");
 ParticleVector::ParticleVector(Simulation* parent)
   : ParticleCacheArbitrary(parent)
 {
-  m_function.setReturnType(Variant::VECTOR);
+  setFunctionReturnType();
   m_datatype = DataFormat::POINT;
   init();
 }

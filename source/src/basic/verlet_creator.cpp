@@ -80,20 +80,47 @@ VerletCreator::~VerletCreator()
 void VerletCreator::init()
 {
   m_properties.setClassName("VerletCreator");
-  m_properties.setDescription("Implementation of a PairCreator creating a neighbour list by applying first a cell subdivision and then the standard Verlet-list method");
+  m_properties.setDescription
+    ("Implementation of a PairCreator creating a neighbour list by "
+     "applying first a cell subdivision and then the standard Verlet "
+     "neighbour list method.\n"
+     "Please NOTE: This PairCreator does not reset (to zero) symbols "
+     "stored in "
+     "pairs unless the whole neighbour list needs to be rebuilt. "
+     "Therefore, while the distance vector [rij] of the pairs may "
+     "already have been updated, the pairs may still hold data for a "
+     "while (until the next call of Symbols responsible for the "
+     "data), which was computed at an older pair state corresponding "
+     "to an older [rij]. If the data depends on [rij] this may be "
+     "undesirable, otherwise probably not. In any case, the user "
+     "should consult the output of 'sympler --help workflow' to "
+     "figure out, which symbols should ideally be computed at which "
+     "stage. Note that data stored in the pairs may therefore NOT be "
+     "identical at all instances during a time step to those from a "
+     "simulation using a "
+     "different PairCreator. Unthoughtful usage of the Symbol stages "
+     "may therefore lead to PairCreator-dependent (and usually wrong) "
+     "simulation results."
+);
 
   DOUBLEPC
     (skinSize,
      m_skin_size,
      -HUGE_VAL,
-     "The size of the additional skin to the cut-off to get the verlet-list cut-off.");
+     "The size of the additional skin added to the cutoff.");
 
   INTPC
-    (every, m_every, -1, "If this value is larger than zero, the neighbour list is updated strictly every 'every' time steps. This update strategy requires some previous knowledge, otherwise you risk to miss neighbours if m_every is too large.");
+    (every, m_every, -1, "If this value is larger than zero, the "
+     "neighbour list is updated strictly every 'every' time steps. "
+     "This update strategy requires some previous knowledge, "
+     "otherwise you risk to miss neighbours if 'every' is too large.");
 
   STRINGPC
     (displacement, m_displacement_name,
-     "Name of the displacement.");
+     "Name of the particle displacement required to determine when "
+     "the neighbour list must be updated. This quantity must be "
+     "computed externally for each particle, for example by a "
+     "suitable Integrator such as IntegratorVelocityVerletDisp.");
 
   m_displacement_name = "undefined";
   m_skin_size = -1;
