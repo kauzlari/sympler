@@ -41,7 +41,7 @@ const SymbolRegister<ParticleRandNormVector> particle_rand_norm_vector("Particle
 ParticleRandNormVector::ParticleRandNormVector(Simulation* parent)
   : ParticleCacheArbRNG(parent)
 {
-  m_function.setReturnType(Variant::VECTOR);
+  setFunctionReturnType();
   m_datatype = DataFormat::POINT;
   init();
 }

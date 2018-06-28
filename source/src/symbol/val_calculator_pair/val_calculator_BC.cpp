@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -103,6 +103,19 @@ void ValCalculatorBC::setup()
   
   ValCalculatorPair::setup();
   
+}
+
+void ValCalculatorBC::makeCopySafe(ValCalculatorPair* vc) const {
+
+  ValCalculatorPair::makeCopySafe(vc);
+
+  assert(((ValCalculatorBC*) vc) -> m_frozen == m_frozen);
+  assert(((ValCalculatorBC*) vc) -> m_wallSpecies == m_wallSpecies);
+  assert(((ValCalculatorBC*) vc) -> m_wallColour == m_wallColour);
+  assert(((ValCalculatorBC*) vc) -> m_wallIsSecond == m_wallIsSecond);
+  
+  // important!
+  M_CONTROLLER->registerForSetupAfterParticleCreation(vc);
 }
 
 void /*pair<size_t, size_t>*/ ValCalculatorBC::setSlot(ColourPair* cp, size_t& slot, bool oneProp)

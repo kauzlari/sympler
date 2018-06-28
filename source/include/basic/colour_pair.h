@@ -56,7 +56,7 @@
 
 #define FOR_EACH_PAIR(cp, code)                                         \
 {                                                                       \
-  for (int t = 0; t < global::n_threads; ++t) {                  \
+  for (size_t t = 0; t < global::n_threads; ++t) {                  \
 if(cp->freePairsRandom(t).size())\
 {\
   SL_FOR_EACH(PrimitiveSLEntry<size_t>, cp->freePairsRandom(t),\
@@ -96,9 +96,9 @@ else \
 }		while(0)
 
 
-#define FOR_EACH_PAIR_HALF_IN_GROUP(/*phase*/cp, groups, code)  \
+#define FOR_EACH_PAIR_HALF_IN_GROUP(cp, groups, code)  \
 {                                                               \
-  for (int t = 0; t < global::n_threads; ++t) {              \
+  for (size_t t = 0; t < global::n_threads; ++t) {              \
     if (groups.empty()) {                                       \
       SL_FOR_EACH(Pairdist, cp->freePairs()[t],			\
 		  Pairdist* pair = __iSLFE;				\

@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -77,13 +77,13 @@ class ValCalculatorBC : public ValCalculatorPair
      * Internal helper storing the \a Wall s in the non-periodic neighbouhood of each 
      * \a Boundary \a Particle and the distance to it
      */
-    vector<vector<pair<Wall*, double> >* >m_wallTable;
+    vector<vector<pair<Wall*, double> >* > m_wallTable;
 
     /*!
      * Internal helper storing the \a Wall s in the periodic neighbouhood of each 
      * \a Boundary \a Particle and the distance to it
      */
-    vector<vector<pair<Wall*, double> >* >m_periodicWallTable;
+    vector<vector<pair<Wall*, double> >* > m_periodicWallTable;
     
     /*!
      * Initialise the property list
@@ -113,6 +113,13 @@ class ValCalculatorBC : public ValCalculatorPair
       
     }
 
+    /*!
+     * In addition to calling the same method of its parant class (see 
+     * documentatio there), this method registers the copy \a vc. And 
+     * runs assertion for its own members variables.
+     * @param[in] vc Copy of this \a ValCalculatorBC to be checked
+     */
+    virtual void makeCopySafe(ValCalculatorPair* vc) const;
     
   public:
   /*!

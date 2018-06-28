@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -194,7 +194,7 @@ Particle *Phase::addFrozenParticle(const point_t &pos, const point_t &vel, size_
     return &p;
 }
 
-void Phase::setForNewIntegration()
+void Phase::clearParticleData()
 {
   m_manager->clearTags();
 }
