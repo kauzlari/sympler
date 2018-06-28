@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -41,7 +41,21 @@ using namespace std;
 
 REGISTER_SMART_ENUM
 (Callable_Factory,
- "Callables are generic objects that are called in every simulation step.");
+ "Callables are generic objects that are called in every simulation "
+ "step. Currently (2018-05-04), a Callable is called after the final "
+ "integration step within each time step. Refer to the output of "
+ "'sympler --help workflow' for more details.\n"
+ "The two major differences to Symbols are:\n"
+ "  - The computational routine of each Callable handles loops over\n"
+ "    particles or pairs of particles by itself, while Symbols are\n"
+ "    called *within* a loop.\n"
+ "  - Callables do not check for dependencies of their input\n"
+ "    variables on output of other Callables. Hence Callables also do\n"
+ "    not arrange themselves in corresponding stages to determine\n"
+ "    the order in which they will be called. Instead, the order of\n"
+ "    execution is strictly the order given as user input. The user\n"
+ "    must make sure that the resulting dependencies make sense."
+ );
 
 
 Callable::Callable(Simulation* sim)

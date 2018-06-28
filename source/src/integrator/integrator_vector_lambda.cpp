@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -86,6 +86,8 @@ void IntegratorVectorLambda::init()
 void IntegratorVectorLambda::setup()
 {
   IntegratorVector::setup();
+
+  m_lambda_diff = 0.5 - m_lambda;
 }
 
 
@@ -127,17 +129,17 @@ void IntegratorVectorLambda::integrateStep2()
      i->tag.pointByOffset(((IntegratorVectorLambda*) data)
 			  ->m_vector_offset) +=
      ((IntegratorVectorLambda*) data)->m_dt *
-     0.5*(
-	  // new flux
-	  i->tag.pointByOffset(((IntegratorVectorLambda*) data)
-				 -> m_force_offset[force_index]
-				 )
-	  -
-	  // old flux
-	  i->tag.pointByOffset(((IntegratorVectorLambda*) data)
-				 -> m_force_offset[other_force_index]
-				 )    
-	  );
+     (
+      // new flux
+      0.5*i->tag.pointByOffset(((IntegratorVectorLambda*) data)
+			   -> m_force_offset[force_index]
+			   )
+      + m_lambda_diff*
+      // old flux
+      i->tag.pointByOffset(((IntegratorVectorLambda*) data)
+			   -> m_force_offset[other_force_index]
+			   )    
+      );
      );  
   
 }

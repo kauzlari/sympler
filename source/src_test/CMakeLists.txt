@@ -10,6 +10,9 @@ set(calculator_test
 )
 
 set(callable_test
+callable/cbl_pair_particle_arbitraryTest.cpp
+callable/cbl_pair_particle_tensorTest.cpp
+callable/cbl_pair_particle_vectorTest.cpp
 )
 
 set(force_test
@@ -47,6 +50,12 @@ symbol/freesteam/pca_iapws-if97_kappaTest.cpp
 symbol/freesteam/pca_iapws-if97_pTest.cpp
 symbol/freesteam/pca_iapws-if97_rhoTest.cpp
 symbol/freesteam/pca_iapws-if97Test.cpp
+symbol/particle_cache/fake_function_particle.cpp
+symbol/particle_cache/fake_symbol_f_particle_scalar.cpp
+symbol/particle_cache/particle_velsTest.cpp
+symbol/particle_cache/symbol_f_particle_arbitraryTest.cpp
+symbol/particle_cache/symbol_f_particle_scalarTest.cpp
+symbol/particle_cache/symbol_f_particle_velsTest.cpp
 )
 
 set(tools_test
@@ -60,6 +69,7 @@ set(weighting_function_test
 add_executable(symplerTest 
 mainTest.cpp
 ${basic_test}
+${callable_test}
 ${geometry_test}
 ${integrator_test}
 ${symbol_test}

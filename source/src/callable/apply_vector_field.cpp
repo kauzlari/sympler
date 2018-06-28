@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -61,17 +61,18 @@ void ApplyVectorField::init()
   m_properties.setClassName("ApplyVectorField");
 
   m_properties.setDescription(
-    "When called, this callable adds a user-specified vector-field to each particle."
+
+    "When called, this callable modifies the user-specified vector-field of each particle according to user-defined expressions for the attributes 'vc', 'vy', 'vz' described below. In the expressions you may use constants, functions (listed under sympler --help expressions) and the known variables 'x', 'y', 'z', 'vx', 'vy', 'vz' (NOT those listed under sympler --help expressions!). \nNOTE: The vector-field is SET and not incremented. If you want to increment, use the known variables 'vx', 'vy', 'vz' containing the respective old values of the vector field components, e.g., by typing 'vx = \"vx + exp(x)\"', where the second part is your increment." 
   );
 
   FUNCTIONFIXEDPC(vx, m_vecX, 
-                  "This sets the x-component of the additional vector to the specified algebraic expression. You may use constants or the known variables 'x', 'y', 'z'.");
+                  "This sets the x-component of the vector field to the specified algebraic expression. See above for allowed expressions.");
   
   FUNCTIONFIXEDPC(vy, m_vecY, 
-                  "This sets the y-component of the additional vector to the specified algebraic expression. You may use constants or the known variables 'x', 'y', 'z'.");
+                  "This sets the y-component of the vector field to the specified algebraic expression. See above for allowed expressions.");
   
   FUNCTIONFIXEDPC(vz, m_vecZ, 
-                  "This sets the z-component of the additional vector to the specified algebraic expression. You may use constants or the known variables 'x', 'y', 'z'.");
+                  "This sets the z-component of the vector field to the specified algebraic expression. See above for allowed expressions.");
   
   m_vecX.addVariable("x");
   m_vecX.addVariable("y");
@@ -85,10 +86,21 @@ void ApplyVectorField::init()
   m_vecZ.addVariable("y");
   m_vecZ.addVariable("z");
   
-  m_vecX.setExpression("0");
-  m_vecY.setExpression("0");
-  m_vecZ.setExpression("0");
-
+  m_vecX.addVariable("vx");
+  m_vecX.addVariable("vy");
+  m_vecX.addVariable("vz");
+  
+  m_vecY.addVariable("vx");
+  m_vecY.addVariable("vy");
+  m_vecY.addVariable("vz");
+  
+  m_vecZ.addVariable("vx");
+  m_vecZ.addVariable("vy");
+  m_vecZ.addVariable("vz");
+  
+  m_vecX.setExpression("vx");
+  m_vecY.setExpression("vy");
+  m_vecZ.setExpression("vz");
 
   STRINGPC
     (species, m_species,
@@ -132,17 +144,15 @@ void ApplyVectorField::setup()
 
 void ApplyVectorField::thermalize(Phase* phase)
 {
-
-    FOR_EACH_FREE_PARTICLE_C
-      (phase,
-       m_colour,
-       point_t& vec = __iSLFE->tag.pointByOffset(m_offset);
-       point_t& r = __iSLFE->r;
-       vec.x += m_vecX(r.x, r.y, r.z);
-       vec.y += m_vecY(r.x, r.y, r.z);
-       vec.z += m_vecZ(r.x, r.y, r.z);
-    );
-
+  FOR_EACH_FREE_PARTICLE_C
+    (phase,
+     m_colour,
+     point_t& vec = __iSLFE->tag.pointByOffset(m_offset);
+     point_t& r = __iSLFE->r;
+     vec.x = m_vecX(r.x, r.y, r.z, vec.x, vec.y, vec.z);
+     vec.y = m_vecY(r.x, r.y, r.z, vec.x, vec.y, vec.z);
+     vec.z = m_vecZ(r.x, r.y, r.z, vec.x, vec.y, vec.z);
+     );
 }
 
 

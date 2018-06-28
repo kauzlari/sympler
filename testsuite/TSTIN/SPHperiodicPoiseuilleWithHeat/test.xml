@@ -1,12 +1,14 @@
-<!-- Minimal weakly compressible SPH-simulation of Poiseuille flow and heat conduction.
+<!-- Minimal weakly compressible SPH-simulation of Poiseuille flow with additional heat conduction. The boundary conditions for the temperature at the two walls "left" and "right" are T_left = 350 K and T_right = 298K. The initial temperature in the fluid is t_0 = 298K everywhere.
+
+This file additionally implements a stabilisation mechanism consisting of a particle shift as described in [3].
 
 Note that further documentation can be found above many of the modules used below. For References such as [1] see the end of this file.
     
-    Note that the setup below is "minimal" in the following sense: Minimal particle resolution, minimal effort for implementing boundary conditions, no stabilisation mechanisms such as artificial viscosity or other. Any improvement of the above or other aspects will lead to improved accuracy and prolonged stablity.
+    Note that the setup below is "minimal" in the following sense: Minimal particle resolution, minimal effort for implementing boundary conditions, no further stabilisation mechanisms besides particle shifting [3]. Any improvement of the above or other aspects will lead to improved accuracy and prolonged stablity, but for this simple setup it turns out to be unnecessary.
     
     Further note that you should create the subdirectories grid, pos and posFrozen before running the simulation. The directories must be created in the directory where you issue the command to run the simulation.
     
-    The simulation-box has cuboid shape (for sizes see module BoundaryCuboid) with periodic boundary conditions in y-direction and in z-direction. In x-direction, at x=0 and at x=boxX (for value of boxX seemodule BoundaryCuboid), there is a wall with assumed no-slip boundary condition for the velocity (vx=vy=vz=0), which is implemented by the module DirichletBCVels and one of the modules FPairVelsWF (see below). 
+    The simulation-box has cuboid shape (for sizes see module BoundaryCuboid) with periodic boundary conditions in y-direction and in z-direction. In x-direction, at x=0 and at x=boxX (for value of boxX see module BoundaryCuboid), there is a wall with assumed no-slip boundary condition for the velocity (vx=vy=vz=0), which is implemented by the module DirichletBCVels computing a symbol "velBC" used by one of the modules FPairVelsWF (or PairParticleVector, see below). The temperature-boundary conditions mentioned above require a module DirichletBCScalar computing a symbol "tempBC" used in a module FPairScalar (or PairParticleScalar, see below).
 
 For the fluid, approximate properties of water are taken. The units used in the simulation are:
 
@@ -30,7 +32,7 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
     wtDistEps = "-1e-10"
     >
   
-  <!--M5-Spline implemented "by hand". "Lucy" (also 4th order) is currently (2016-12-11) the only hard-coded interpolation function which is useful for SPH, but it is usually inferior to M5. As you can see, the strategy in this input file is to set the cutoff to 1. An alternative strategy is to set it to 2, 2.5, 3 for the M4, M5, M6 (3rd, 4th, 5th order), respectively. Reasonable particle distances/densities or the normalisation of the interpolants will for example depend on this choice. The attribute 'selfContribution' and the prefactor in 'weight' contain the normalisation.-->
+  <!--M5-Spline implemented "by hand". "Lucy" (also 4th order) is currently (2018-06-20) the only hard-coded interpolation function which is useful for SPH, but it is usually inferior to M5. As you can see, the strategy in this input file is to set the cutoff to 1. An alternative strategy is to set it to 2, 2.5, 3 for the M4, M5, M6 (3rd, 4th, 5th order), respectively. Reasonable particle distances/densities or the normalisation of the interpolants will for example depend on this choice. The attribute 'selfContribution' and the prefactor in 'weight' contain the normalisation.-->
   <InputWF
       cutoff = "1"
       interpolation = "(step(r)-step(r-0.2))*(1-(150/23)*r^2+(375/23)*r^4)+(step(r-0.2)-step(r-0.6))*(2/23)*(11-5*r*(-2+5*r*(6+5*r*(r-2))))+step(r-0.6)*(125/46)*(r-1)^4"
@@ -39,16 +41,16 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
       name = "M5"
       />
 
-  <!--
-      The number of timesteps ("100000") is currently chosen such that one can see the onset of instabilities (starting roughly at timestep 66000 ~ 1.6 s). Even at timestep 300000 (~ 7.5 s), the simulation is still running and the velocities are still in the right order of magnitude, but one observes significant oscillating deviations from the expected parabolic velocity profile. 
+  <!--      
       The size of the timestep dt = "0.005" is limited in this simulation (Reynolds-number ~ 7) by the CFL-condition dt <~ 0.25*d/c ~ 0.0081*[t] [1]. For further limitations (not dominating here), see [1,2]. The factor 0.25 is approximate and empirical. It varies slightly depending on the specific SPH-setup (e.g. kernel, cutoff). d=(rho/m)^(-1/3), i.e., the distance of nearest neighbours in a cubic lattice, is here chosen as the characteristic disretisation length. Other groups do that differently, but the order of magnitude is the same. c is the chosen artificial speed of sound. See the pressure gradient term below for more details about c.
   -->
   <Controller
       timesteps = "20"
       dt = "0.005"
-      >
+      statusEvery = "100"
+>
 
-    <!-- Besides time-integration, Integrators also introduce a species. lambda="1" gives a predictor-corrctor integration suitable for SPH with integrated density "n".-->
+    <!-- Besides perorming time-integration, Integrators also introduce a species. lambda="1" gives a predictor-corrctor integration suitable for SPH with integrated density "n" and temperature "temp".-->
     <IntegratorVelocityVerlet
         species="fluid"
         lambda = "1"
@@ -61,8 +63,9 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
         scalar = "n"
         symbol = "n"
         />
-    <IntegratorScalar
+    <IntegratorScalarLambda
         species = "wall"
+        lambda = "1"
         scalar = "n"
         symbol = "n"
         />
@@ -71,70 +74,386 @@ where [eta] is the unit of shear viscosity, eta = 1e-3 Pa s is the real shear vi
     <IntegratorScalarLambda
         species = "fluid"
         lambda = "1"
-        scalar = "temperature"
+        scalar = "temp"
         symbol = "temp"
         />
 
-    <!-- Again just the introduction of the symbol. This enables us to set initial (and forever constant) conditions-->
+    <!-- Again just the introduction of the symbol. This enables us to set initial (and forever constant) boundary conditions in ParticleCreatorWall below -->
     <IntegratorScalar
         species = "wall"
-        scalar = "temperature"
+        scalar = "temp"
         symbol = "temp"
         />
-
+    
   </Controller>
 
-  <!-- This commented out module would perform the alternative summation approach for the density [1] -->
   <!--
-      <ValCalculatorRho
-      species1="fluid"
-      species2="fluid"
-      symbol="n"
-      weightingFunction="M5"
-      allPairs="yes"
-      />
+      
+      ////////////// START: Symbols with stage = "2" ///////////////////////
+
   -->
 
-  <!-- Computes the symbol 'F' which is usually used as 'Fij' below. As the name indicates, Fij = -(dW(rij)/drij)/rij -->
-  <ValCalculatorNegDKernelDivr
-      allPairs = "yes"
-      symbol = "F"
-      weightingFunction="M5"
-      />
-
-  <!-- Next one is only for test purposes in the testsuite -->
-  <PairScalar
-      cutoff = "1"
-      species1 = "fluid"
-      species2 = "wall"
-      symbol = "scndF"
-      expression = "Fij"
-      />
-
   
-  <!-- This provides the symbol with default name 'vBC' (usable as 'vBCij' in pair expressions), which allows to enforce no-slip boundary conditions by replacing the velocity of the wall-particle with this one. The word 'Dirichlet' is a bit misleading and too general. For each pair of fluid and wall particles, 'vBC' is an extrapolation of the fluid-particle velocity onto the wall particle, such that the velocity at the intersection-point of the line connecting the two particles with the wall is zero. -->
+  <!--
+      w = -W'(r)/r which gives us nablaW(r) = -w*[r]      
+  -->
+  <ValCalculatorNegDKernelDivr
+      species1="fluid"
+      species2="wall"
+      symbol = "w"
+      weightingFunction="M5"
+      stage = "2"
+      />
+  <ValCalculatorNegDKernelDivr
+      species1="fluid"
+      species2="fluid"
+      symbol = "w"
+      weightingFunction="M5"
+      stage = "2"
+      />
+
+  <!-- This provides the symbol with default name 'vBC' (usable as 'vBCij' in pair expressions), which allows to enforce no-slip boundary conditions by replacing the velocity of the wall-particle with this one. For each pair of fluid and wall particles, 'vBC' is an extrapolation of the fluid-particle velocity onto the wall particle, such that the velocity at the intersection-point of the line connecting the two particles with the wall is equal to the velocity that we have set for the wall particles in ParticleCreatorWall (here: zero = no-slip).
+NOTE: stage = "2" since we recompute forces in stage 0 based on shifted particle properties
+  -->
   <DirichletBCVels
       wallSpecies = "wall"
       species1 = "fluid"
       species2 = "wall"
+      stage = "2"
       />
 
-  <!--
-Next is just for testing purposes to test the stage-finding
-  -->
-  <ParticleScalar species = "fluid" symbol = "secondtemp" expression = "temp"/>
-  <!-- Unfortunately, the next line only creates the Symbol, but it does not assign the values for the frozen wall particles
-       The solution for this can be found below at ParticleCreatorWall. NOTE: "2ndtemp" would produce an xml-parse error there.
-  -->
-  <ParticleScalar species = "wall" symbol = "secondtemp" expression = "temp"/>
-  
-  <!-- Same technique as for no-slip, but now, the boundary condition is non-zero, and it is in fact stored in the Symbol temp of the wall particles. Therefore, scalar = "temperature" -->
+  <!-- Dirichlet boundary condition for temperature: Same technique as for no-slip, but now, the boundary condition is non-zero, and it is in fact stored in the Symbol temp of the wall particles. Therefore, scalar = "temp" -->
   <DirichletBCScalar
       wallSpecies = "wall"
       species1 = "fluid"
       species2 = "wall"
-      scalar = "secondtemp"
-      symbol = "tempD"
+      scalar = "temp"
+      symbol = "tempBC"
+      stage = "2"
+      />
+
+  <!--
+
+////////////// END: Symbols with stage = "2" ///////////////////////
+
+  -->
+  
+  
+  <!--
+
+////////////// START: Symbols with stage = "0" ///////////////////////
+
+  -->
+  
+<!-- shift of the velocity-->
+<!-- computation of {TnablaVelForShift} can be found more down in the Callables section -->
+  <ParticleVels
+      species = "fluid"
+      expression = "[v]+{TnablaVelForShift}:[shift]"
+      stage = "0"
+      useOldFor = "v"
+      />
+
+  <!-- This should avoid dependency+staging-trouble since overwriting "n" soon
+  -->
+  <ParticleScalar
+      species = "fluid"
+      expression = "n"
+      stage = "0"
+      useOldFor = "n"
+      symbol = "nOld"
+      />
+
+  <!-- Pressure change due to shift. -->
+  <!-- computation of {nablaPDivn} can be found more down in the Callables section -->
+  <ParticleScalar
+      species = "fluid"
+      expression = "nOld*[nablaPDivnForShift]:[shift]"
+      stage = "0"
+      symbol = "deltaPShift"
+      />
+  
+  <!-- Density change due to shift computed from EOS with c^2 = 141.29. For details on EOS see pressure forces -->
+  <ParticleScalar
+      species = "fluid"
+      expression = "nOld+deltaPShift/141.29"
+      stage = "0"
+      symbol = "n"
+      overwrite = "yes"
+      />
+
+  <!-- Temperature shift -->
+  <!-- computation of {nablaTForShift} can be found more down in the Callables section -->
+  <ParticleScalar
+      species = "fluid"
+      expression = "temp+[nablaTForShift]:[shift]"
+      stage = "0"
+      symbol = "temp"
+      overwrite = "yes"
+      useOldFor = "temp"
+      />
+  
+  <!--
+      /////// START: recomputation of forces/fluxes based on shifted particle data ////
+  -->
+
+  <!--
+      NOTE: detailed documentation of "contEq(0)", "heatEq(0)", "nablaPDivn(0)", "Feta" terms can be found below for stage = "1" 
+  -->
+  
+  <PairParticleScalar
+      species1 = "fluid"
+      species2 = "wall"
+      particleFactor_i = "-([vi]-[vBCij]):[rij]*wij"
+      particleFactor_j = "0"
+      symmetry = "1"
+      stage = "0"
+      cutoff = "1"
+      symbol = "contEq0"
+      />
+  <PairParticleScalar
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "-([vi]-[vj]):[rij]*wij"
+      symmetry = "1"
+      stage = "0"
+      overwrite = "yes"
+      symbol = "contEq0"
+      cutoff = "1"
+      />
+
+  <!-- Write into the force/flux of variable(symbol) "n" -->
+  <SymbolFParticleScalar
+      species = "fluid"
+      expression = "contEq0"
+      variable = "n"
+      stage = "0"
+      />
+
+  <!-- heat -->
+  <PairParticleScalar
+      species1 = "fluid"
+      species2 = "wall"
+      particleFactor_i = "(1/(ni*nj))*2*0.1452*(tempBCij-tempi)*wij"
+      particleFactor_j = "0"
+      symmetry = "-1"
+      stage = "0"
+      cutoff = "1"
+      symbol = "heatEq0"
+      />
+  <PairParticleScalar
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "(1/(ni*nj))*2*0.1452*(tempj-tempi)*wij"
+      symmetry = "-1"
+      stage = "0"
+      overwrite = "yes"
+      symbol = "heatEq0"
+      cutoff = "1"
+      />
+
+  <!-- Write into the force/flux of variable(symbol) "temp" -->
+  <SymbolFParticleScalar
+      species = "fluid"
+      expression = "heatEq0"
+      variable = "temp"
+      stage = "0"
+      />
+
+  <!--
+    Pressure gradient force (acceleration in fact, but since m=1 ...)
+  -->
+
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "wall"
+      expression = "(141.29)*((ni-17.576)/(ni*ni)+(nj-17.576)/(nj*nj))*[rij]*wij"
+      symmetry = "-1"
+      symbol = "nablaPDivn0"
+      stage = "0"
+      cutoff = "1"
+      />
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "(141.29)*((ni-17.576)/(ni*ni)+(nj-17.576)/(nj*nj))*[rij]*wij"
+      symmetry = "-1"
+      symbol = "nablaPDivn0"
+      stage = "0"
+      cutoff = "1"
+      overwrite = "yes"
+      />
+
+  
+  <!-- Viscous forces with viscosity eta=1-->
+  <!-- Viscous forces with viscosity eta=1 for fluid-wall interactions, imposing no-slip boundary conditions. -->
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "wall"
+      particleFactor_i = "-2*1*([vi]-[vBCij])*wij/(nj*nj)"
+      particleFactor_j = "idVec(0)"
+      symmetry = "-1"
+      symbol = "Feta0"
+      stage = "0"
+      cutoff = "1"
+      />
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "-2*1*([vi]-[vj])*wij/(ni*nj)"
+      symmetry = "-1"
+      symbol = "Feta0"
+      stage = "0"
+      overwrite = "yes"
+      cutoff = "1"
+      />
+
+  
+  <!-- Pressure force + body-force on each particle, which is equivalent to an externally applied constant pressure gradient
+NOTE: SymbolFParticleVels SETS the force. It does NOT increment. Hence two SymbolFParticleVels will NOT obey the superposition principle for forces
+  -->
+  <!-- Write into the force corresponding to the particle velocity -->
+  <SymbolFParticleVels
+      species = "fluid"
+      expression = "[nablaPDivn0]+[Feta0]+uVecY(0.05)"
+      stage = "0"
+      />
+
+  <!--
+      /////// END: recomputation of forces/fluxes based on shifted particle data ////
+  -->
+  
+
+  <!-- //////// START: Some helpers for debugging-measurements //////// -->
+
+  <!-- The pick matrices allow to create a matrix with zero entries except for the picked entry -->
+
+  <!--
+
+  <ParticleTensor
+      species = "fluid"
+      symbol = "pickMatX"
+      expression = "uVecX(1)@uVecX(1)"
+      stage = "0"
+      />
+  <ParticleTensor
+      species = "fluid"
+      symbol = "pickMatY"
+      expression = "uVecY(1)@uVecY(1)"
+      stage = "0"
+      />
+  <ParticleTensor
+      species = "fluid"
+      symbol = "pickMatZ"
+      expression = "uVecZ(1)@uVecZ(1)"
+      stage = "0"
+      />
+
+-->
+
+  <!-- Now extract a vector containing only the diagonal of {TnablaVelForShift} -->
+
+  <!--
+
+  <ParticleVector
+      species = "fluid"
+      symbol = "diagsTNablaVel"
+      expression = "({pickMatX}°{TnablaVelForShift}°{pickMatX}+{pickMatY}°{TnablaVelForShift}°{pickMatY}+{pickMatZ}°{TnablaVelForShift}°{pickMatZ}):idVec(1)"
+      stage = "0"
+      />
+
+-->
+
+  <!-- Now extract a vector with the off-diagonals as (xz, yx, zy)
+
+  Here, the relevant (way largest!) component should be yx, i.e. dv_y/dx. Hence the three we put into the vector are yx and its "anti"-cyclic partners. NOTE: The yx-component of the transpose velocity gradient is indeed dv_y/dx and NOT (d/dy)(v_x) !
+  -->
+
+<!--
+  
+  <ParticleVector
+      species = "fluid"
+      symbol = "offsTNablaVel"
+      expression = "({pickMatY}°{TnablaVelForShift}°{pickMatX}+{pickMatZ}°{TnablaVelForShift}°{pickMatY}+{pickMatX}°{TnablaVelForShift}°{pickMatZ}):idVec(1)"
+      stage = "0"
+      />
+
+-->
+
+  <!-- //////// END: Some helpers for debugging-measurements //////// -->
+
+  
+  <!--
+      
+      ////////////// END: Symbols with stage = "0" ///////////////////////
+
+  -->
+  
+  
+  <!--
+      
+      ////////////// START: Symbols with stage = "1" ///////////////////////
+      ////////////// (and the resulting Forces)      ///////////////////////
+
+  -->
+  
+<!-- As long as all masses = 1, this effectively computes the number density around a particle and the inverse would give a volume
+Currently only used for the ParticleShift, hence stage = "1" enough so far
+-->
+  <ValCalculatorRho
+      symbol="numDens"
+      weightingFunction="M5"
+      allPairs="yes"
+      stage = "1"
+      />
+
+  <!-- For access to the kernel values in a symbol for each pair -->
+  <ValCalculatorKernel
+      symbol = "W"
+      weightingFunction="M5"
+      allPairs="yes"
+      stage = "1"
+      />
+  <!-- Computation of a particle shift compensating for inhomogeneities (holes in the worst case) -->
+  <PairParticleVector
+      expression = "0.1*[rij]*Wij"
+      particleFactor_i = "idVec(1/numDensj)"
+      particleFactor_j = "idVec(1/numDensi)"
+      cutoff = "1"
+      symbol = "shift"
+      allPairs="yes"
+      symmetry = "-1"
+      stage = "1"
+      />
+
+  
+  <!-- Right hand side (RHS) of discretised continuity equation [1]. -->
+  <!-- Continuity equation for fluid-wall interactions. No clean boundary condition is implemented here besides the same no-slip model as for the viscous forces below. Whether the no-slip condition should be applied here is debatable, since the wall particles actually do not move and hence do not produce a true density change.-->
+  <PairParticleScalar
+      species1 = "fluid"
+      species2 = "wall"
+      particleFactor_i = "-([vi]-[vBCij]):[rij]*wij"
+      particleFactor_j = "0"
+      symmetry = "1"
+      stage = "1"
+      symbol = "contEq1"
+      cutoff = "1"
+      />
+  <PairParticleScalar
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "-([vi]-[vj]):[rij]*wij"
+      symmetry = "1"
+      stage = "1"
+      overwrite = "yes"
+      symbol = "contEq1"
+      cutoff = "1"
+/>
+  <!-- Make a force/flux on "n" out of it -->
+  <FParticleScalar
+      species = "fluid"
+      expression = "contEq1"
+      scalar = "n"
       />
 
   <!-- RHS of heat equation :
@@ -142,105 +461,229 @@ Next is just for testing purposes to test the stage-finding
        thermal conductivity: k ~ 0.60694 W/(m K) ~ 1.7151e5 [m]*[l]/([t]^3*[T])
        then, k/Cp ~ 0.1452 [m]/([l]*[t])
   -->
-  <FPairScalar
-      forceName="dT_dt"
-      species1="fluid"
-      species2="fluid"
-      pairFactor="(1/(ni*nj))*2*0.1452*(tempj-tempi)"
-      symmetry="-1"
-      weightingFunction="M5"
-      scalar="temperature"
-      />
-<!-- If, one day, we should have local heat capacities and conductivities
-      particleFactor_i="1/cpi"
-      particleFactor_j="1/cpj"
-      pairFactor="(1/(ni*nj))*(4*ki*kj/(ki+kj))*(tempj-tempi)"
--->
-
-  <FPairScalar
-      forceName="dT_dt"
-      species1="fluid"
-      species2="wall"
-      particleFactor_j="0"
-      pairFactor="(1/(ni*nj))*2*0.1452*(tempDij-tempi)"
-      symmetry="-1"
-      weightingFunction="M5"
-      scalar="temperature"
-      />
-
-  <!-- Right hand side (RHS) of discretised continuity equation [1]. This module multiplies the pairFactor internally with Fij. -->
-  <FPairScalar
-      species1 = "fluid"
-      species2 = "fluid"
-      pairFactor = "-([vi]-[vj]):[rij]"
-      weightingFunction = "M5"
-      symmetry = "1"
-      scalar = "n"
-      />
-  
-  <!-- Continuity equation for fluid-wall interactions. No clean boundary condition is implemented here besides the same no-slip model as for the viscous forces below. -->
-  <FPairScalar
+  <PairParticleScalar
       species1 = "fluid"
       species2 = "wall"
-      particleFactor_i = "-([vi]-[vBCij]):[rij]"
+      particleFactor_i = "(1/(ni*nj))*2*0.1452*(tempBCij-tempi)*wij"
       particleFactor_j = "0"
-      weightingFunction = "M5"
-      symmetry = "1"
-      scalar = "n"
+      symmetry = "-1"
+      stage = "1"
+      symbol = "heatEq1"
+      cutoff = "1"
       />
-  
-  <!-- Viscous forces with viscosity eta=1-->
-  <FPairVelsWF
+  <PairParticleScalar
       species1 = "fluid"
       species2 = "fluid"
-      pairFactor = "-2*1*([vi]-[vj])/(ni*nj)"
-      weightingFunction = "M5"
+      expression = "(1/(ni*nj))*2*0.1452*(tempj-tempi)*wij"
       symmetry = "-1"
+      stage = "1"
+      overwrite = "yes"
+      symbol = "heatEq1"
+      cutoff = "1"
+/>
+  <!-- Make a force/flux on "temp" out of it -->
+  <FParticleScalar
+      species = "fluid"
+      expression = "heatEq1"
+      scalar = "temp"
       />
   
-  <!-- Viscous forces with viscosity eta=1 for fluid-wall interactions, imposing no-slip boundary conditions. -->
-  <FPairVelsWF
+  <!-- Viscous forces with viscosity eta = 1 [eta]-->
+  <!-- Viscous forces with viscosity eta=1 [eta] for fluid-wall interactions, imposing no-slip boundary conditions. -->
+  <PairParticleVector
       species1 = "fluid"
       species2 = "wall"
-      particleFactor_i = "-2*1*([vi]-[vBCij])/(nj*nj)"
+      particleFactor_i = "-2*1*([vi]-[vBCij])*wij/(nj*nj)"
       particleFactor_j = "idVec(0)"
-      weightingFunction = "M5"
-      symmetry = "1"
+      symmetry = "-1"
+      symbol = "Feta1"
+      stage = "1"
+      cutoff = "1"
       />
-  
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "-2*1*([vi]-[vj])*wij/(ni*nj)"
+      symmetry = "-1"
+      symbol = "Feta1"
+      stage = "1"
+      overwrite = "yes"
+      cutoff = "1"
+      />
+    
   <!-- Pressure gradient forces for weakly compressible SPH. We use here for the pressure the linear artificial equation of state P = c^2*(rho-rho0), where c is the artificial speed of sound and rho_0 = 17.576 is the equilibrium density. This choice is not typical but possible and does not make a huge difference to the usual (also artificial) choice P = P0*((rho/rho0)^7-1) with P0 = c^2*rho0/7. In both cases, c^2 must be chosen as
 
 c^2 = max[v0^2, eta*v0/(boxX*rho0), a*boxX]/deltaRho ~ 141.29*[l]^2/[t]^2,
 
 where we choose for the maximum allowed flow velocity v0 = 0.1 m/s ~ 1.68*[l]/[t], the used acceleration in the external pressure gradient term below is a = 0.05*[l]/[t]^2, and we choose deltaRho = 0.02 as the maximum allowed density fluctuation in the weakly compressible SPH approach [1]. -->
-  <FPairVelsWF
-      species1 = "fluid"
-      species2 = "fluid"
-      pairFactor = "(141.29)*((ni-17.576)/(ni*ni)+(nj-17.576)/(nj*nj))*[rij]"
-      weightingFunction = "M5"
-      />
-  
-  <!-- Pressure gradient forces for fluid-wall interactions. No clean boundary condition is implemented here. the wall particle acts here always as a fluid particle with equilibrium density. Hence the second term should in fact vanish. An alternative would be to assign the properties of the fluid particle to the wall particle. This would be an approximate but not exact mirror boundary condition (MBC). Exact MBCs are not yet implemented but shouldn't be very difficult. -->
-  <FPairVelsWF
+  <!-- Pressure gradient forces for fluid-wall interactions: No clean boundary condition is implemented here. The wall particle acts here always as a fluid particle with equilibrium density. Hence the second term should in fact vanish. An alternative would be to assign the properties of the fluid particle to the wall particle. This would be an approximate but not exact mirror boundary condition (MBC). Better (linearly consistent) MBCs are not yet implemented but shouldn't be very difficult.
+NOTE: The second term (nj-17.576)/(nj*nj) is = 0 since nj=17.576 ALWAYS. Hence it is not written!
+  -->
+  <!-- GENERAL REMARK about the usage of different symbols for stages 0 and 1:
+       This is necessary because there is no resetting to zero for symbols computed by summation (from 0 to 1 there is)
+  -->
+  <PairParticleVector
       species1 = "fluid"
       species2 = "wall"
-      pairFactor = "(141.29)*((ni-17.576)/(ni*ni)+(nj-17.576)/(nj*nj))*[rij]"
-      weightingFunction = "M5"
+      expression = "(141.29)*((ni-17.576)/(ni*ni))*[rij]*wij"
+      symmetry = "-1"
+      symbol = "nablaPDivn1"
+      stage = "1"
+      cutoff = "1"
       />
-
-  <!-- Body-force on each particle, which is equivalent to an externally applied constant pressure gradient -->
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "(141.29)*((ni-17.576)/(ni*ni)+(nj-17.576)/(nj*nj))*[rij]*wij"
+      symmetry = "-1"
+      symbol = "nablaPDivn1"
+      stage = "1"
+      cutoff = "1"
+      overwrite = "yes"
+      />
+  
+  <!-- All previously computed forces + body-force on each particle, which is equivalent to an externally applied constant pressure gradient -->
   <FParticleVels
       species = "fluid"
-      expression = "uVecY(0.005)"
+      expression = "[Feta1]+[nablaPDivn1]+uVecY(0.05)"
       />
+
+  <!--
+      
+      ////////////// END: Symbols with stage = "1" ///////////////////////
+      ////////////// (and the resulting Forces)    ///////////////////////
+      
+  -->
+
+
+  <!--
+      
+      ////////////// START: Callables //////////////////////////////////////
+      
+  -->
+
+  <!--
+      
+      ////////////// START: Gradients for shifting corrections /////////////
+      (Computed here BEFORE the actual shift (last Callable below) and used
+      in stage 0 AFTER the shift)
+      
+  -->
+
+  <!-- Transpose Velocity gradient tensor based on corrected velocities. 
+       
+       TnablaVelForShift = sum_j ( -([vi]-[vj])@nablaWij /numDens_j ) 
+       = sum_j ( ([vi]-[vj])@[rij]*wij /numDens_j )
+       with wij = -W'(rij)*/rij and since nablaWij = W'(rij)*[rij]/rij
+       
+       NOTE: [vBCij] is based on predicted velocities only!
+       If we switch to an integration scheme where the velocities are entirely done in integration step 1, then this would be solved. Also wall particles exactly and exclusively placed on the wall-boundary would be a solution (v_wall = v_BC always).
+       
+  -->
+  <CblPairParticleTensor
+      species1="fluid"
+      species2="wall"
+      symbol = "TnablaVelForShift"
+      expression = "([vi]-[vBCij])@[rij]*wij"
+      particleFactor_i = "unitMat(1/numDensj)"
+      particleFactor_j = "unitMat(0)"
+      cutoff = "1"
+      />  
+
+  <CblPairParticleTensor
+      species1="fluid"
+      species2="fluid"
+      symbol = "TnablaVelForShift"
+      expression = "([vi]-[vj])@[rij]*wij"
+      particleFactor_i = "unitMat(1/numDensj)"
+      particleFactor_j = "unitMat(1/numDensi)"
+      cutoff = "1"
+      overwrite = "yes"
+      />
+
+
+<!-- Temperature gradient based on corrected temperatures.
+
+NOTE: [tempBCij] is based on predicted temperatures only!
+If we switch to an integration scheme where the temperatures are entirely done in integration step 1, then this would be solved. Also wall particles exactly and exclusively placed on the wall-boundary would be a solution (temp_wall = temp_BC always).
+
+-->
+  <CblPairParticleVector
+      species1="fluid"
+      species2="wall"
+      symbol = "nablaTForShift"
+      expression = "(tempi-tempBCij)*[rij]*wij"
+      particleFactor_i = "idVec(1/numDensj)"
+      particleFactor_j = "idVec(0)"
+      cutoff = "1"
+      />  
+
+  <CblPairParticleVector
+      species1="fluid"
+      species2="fluid"
+      symbol = "nablaTForShift"
+      expression = "(tempi-tempj)*[rij]*wij"
+      particleFactor_i = "idVec(1/numDensj)"
+      particleFactor_j = "idVec(1/numDensi)"
+      cutoff = "1"
+      overwrite = "yes"
+      />
+
+
+  <!-- Pressure gradient based on corrected pressures, i.e. corrected densities (WCSPH only!). 
+       NOTE: here we still use the physical anti-symmetric style as for the forces. For numerical consistency it might be worth to switch to a symmetric form (which may also be made linearly consistent with the B-matrix), at least for the shifting, maybe for all.
+       NOTE: Also here we use a separate symbol "nablaPDivnForShift", different from "nablaPDivn0/1" since symbols are currently (2018-06-20) only reset once between stage 0 and 1, and NOT before every computation of a symbol. Using the same symbol would hence lead to double summation into the same symbol (for PairParticle-like modules).
+  -->
+  <CblPairParticleVector
+      species1="fluid"
+      species2="wall"
+      symbol = "nablaPDivnForShift"
+      expression = "(141.29)*((ni-17.576)/(ni*ni))*[rij]*wij"
+      cutoff = "1"
+      symmetry = "-1"
+      overwrite = "no"
+      />  
+
+  <CblPairParticleVector
+      species1="fluid"
+      species2="fluid"
+      symbol = "nablaPDivnForShift"
+      expression = "(141.29)*((ni-17.576)/(ni*ni)+(nj-17.576)/(nj*nj))*[rij]*wij"
+      cutoff = "1"
+      overwrite = "yes"
+      symmetry = "-1"
+      />
+
+  <!--
+      
+      ////////////// END: Gradients for shifting corrections /////////////
+      
+  -->
+
+  
+  <!--
+      Performs the actual shift of the particles based on the previously
+      computed symbol "shift" (in stage "1")
+  --> 
+  <ShiftParticle
+      species = "fluid"
+      shiftSymbol = "shift"
+      />
+
+
+  <!--
+      
+      ////////////// END: Callables //////////////////////////////////////
+
+  -->
+
   
   <Phase
       smartCells = "0"
       >
     <LinkedListCreator/>
-
     
-    <!-- We try 8 particles in the cross-section: It has been tested, e.g., in Phys. Rev. E 67 (2003) 026705, that >=6 cutoffs are required to resolve a given wavelength properly. If we approximate the expected parabolic velocity profile of Poiseuille flow by a half-wave, then we need >=3cutoffs = 3. For our choice of 2.6 particles per cutoff (in a simple cubic lattice), this means that we need 3x2.6=7.8, i.e. a minimum of 8 particles. The box-sizes result from that. In y-direction and in z-direction, they just result from the periodicity. In z-direction, we take the absolute minimum of >= 2 cutoffs such that the particles don't see their periodic image. In the laminar regime, all particles in z-direction should behave the same (periodic) way. In the simulation this is true as long as no instabilities occur.
+    <!-- We try 8 particles in the cross-section: It has been tested, e.g., in Phys. Rev. E 67 (2003) 026705, that >=6 cutoffs are required to resolve a given wavelength properly. If we approximate the expected parabolic velocity profile of Poiseuille flow by a half-wave, then we need >=3cutoffs. For our choice of 2.6 particles per cutoff (in a simple cubic lattice), this means that we need >=3x2.6=7.8, i.e. a minimum of 8 particles. The box-sizes result from that. In y-direction and in z-direction, they just result from the periodicity. In z-direction, we take the absolute minimum of >= 2 cutoffs such that the particles don't see their periodic image. In the laminar regime, all particles in z-direction should behave the same (periodic) way. In the simulation this is true as long as no instabilities occur.
 	 In x-direction, we additionally enforce, that the wall particles on the "left" and on the "right" have equal distance to the wall-boundary. This is currently a bit cumbersome since the wall particles are created (in a cubic lattice), by extending the bounding box by 1 cutoff beyond each wall and then starting with the first wall particle at 0.5*d from the "lower end" of the bounding box. Only for cutoffs which are multiples of 0.5*d, this does not require any manual adjustment. But here we have a nearest particle-distance in a cubic lattice of d = 1/2.6. In fact, this even complicates the adjustment of the channel width in real units (see above for units). Therefore, the TODO-list for the SYMPLER-code already contains a simplification of this issue.-->
     <BoundaryCuboid
         boxX = "3.3846153846153837"
@@ -251,10 +694,12 @@ where we choose for the maximum allowed flow velocity v0 = 0.1 m/s ~ 1.68*[l]/[t
         periodicZ = "yes"
         >
 
-      <!-- This is a hard reflection of the particles from the walls, which is always defined, but should (hopefully) not play a major role in our simulation. Here, the outgoing angle of the reflected particle is simply equal to the incoming one.-->
+      <!-- This is a hard reflection of the particles from the walls, must always be defined for safety. Here, the outgoing angle of the reflected particle is simply equal to the incoming one. The reflector should (hopefully) never come to action due to the particle shift and the first row of wall particles being very close to the wall.
+	   NOTE: The following discussion is most relevant for curved and cornered geometries:
+	   Experience shows that wall particles very close to the mathematical boundary line in combination with the particle shift seems to be a good setup. Ideally we should follow Ref. [3] strictly and place one single row of wall particles EXACTLY on the boundary line. NOTE that bigger gaps between the first row of wall particles and the boundary line may lead to Reflector-events AND MORE IMPORTANTLY to particle shifts out of the boundary (fatal!), since collision detection for the particle shift is not yet (2018-06-20) implemented. And maybe it shouldn't be implemented due to efficiency reasons.-->
       <ReflectorMirror/>
 
-      <!-- This creates the fluid particles on a simple-cubic lattice. The 'density' is 2.6^3=17.576 and is used for placing the particles with a lattice constant of d=1/2.6. Masses of the particles are m=1 in the used units. u, v, w are the initial velocities of all particles. They should be explicitly set to 0 here, because the default is velocities drawn from Maxwell-Boltzmann at temperature=1; not useful in a SPH-discretisation of non-fluctuating Navier-Stokes. Initial values (here for n, consistent with 'density') are set here.-->
+      <!-- This creates the fluid particles on a simple-cubic lattice. The 'density' is 2.6^3=17.576 and is used for placing the particles with a lattice constant of d=1/2.6. Masses of the particles are m=1 in the used units. u, v, w are the initial velocities of all particles. They should be explicitly set to 0 here, because the default is velocities drawn from Maxwell-Boltzmann at temperature=1; not useful in a SPH-discretisation of non-fluctuating Navier-Stokes. Initial values (here for density "n" (consistent with 'density'), and temperature "temp") are set here.-->
       <ParticleCreatorLattice
           species = "fluid"
           density = "17.576"
@@ -262,25 +707,23 @@ where we choose for the maximum allowed flow velocity v0 = 0.1 m/s ~ 1.68*[l]/[t
           u = "0"
           v = "0"
           w = "0"
-	  temperature = "298"
-          />
+	  temp = "298"
+	  />
 
-      <!-- Wall particles on a simple-cubic lattice outside the walls and within a range of 1cutoff to at least one wall segment.
-	   left wall is at T=298K, right wall is at T=350K. Due to the testing with the extra Symbol "secondtemp", we also have to set this one for the frozen wall particles, since the above ParticleScalar does not do that. NOTE that a name "2ndtemp" would produce an xml-parse error here
-      -->
+      <!-- Wall particles on a simple-cubic lattice outside the walls and within a range of 1cutoff to at least one wall segment. Since the created particles are frozen, all their 'variables' are constants. Hence we must set the values here. E.g., forgetting to set numDens will lead to default values of 0 and division by zero. The slightly different value for 'numDens' is the optimal value for a simple-cubic lattice. But the difference to 17.576 is probably insignificantly small. -->
       <ParticleCreatorWall
           density = "17.576"
           species = "wall"
           n = "17.576"
-	  temperature = "350*step(x-3.3846153846153837)+298*step(-x)"
-	  secondtemp = "350*step(x-3.3846153846153837)+298*step(-x)"
+	  numDens = "17.5663"
+	  temp = "350*step(-x)+298*step(x-3.3846)"
           />
       
     </BoundaryCuboid>
     
   </Phase>
 
-  <!-- This Meter measures quantities (defined by its sub-modules) averaged over the whole domain. This is especially useful for debugging, stability and convergence checks. -->
+    <!-- This Meter measures quantities (defined by its sub-modules) averaged over the whole domain. This is especially useful for debugging, stability and convergence checks. -->
   <MeterAverage
      measureEvery = "10"
      >
@@ -289,11 +732,12 @@ where we choose for the maximum allowed flow velocity v0 = 0.1 m/s ~ 1.68*[l]/[t
     <Temperature species = "fluid"/>
     <Scalar symbol = "n" species = "fluid"/>
     <!-- The macroscopic temperature-DOF -->
-    <Scalar symbol = "temperature" species = "fluid"/>
+    <Scalar symbol = "temp" species = "fluid"/>
     <!-- This sub-module is for writing out what was measured by the previous sub-modules. Sub-directories must already exist! Already existing files will be over-written!-->
-    <OutputFile nameOutputFile = "SPHperiodicPoiseuilleWithHeat.dat" multipleFiles = "no"/>
+    <OutputFile nameOutputFile = "SPHperiodicPoiseuilleWithHeatAndShift.dat" multipleFiles = "no"/>
     
   </MeterAverage>
+
    
  </Simulation>
 
@@ -301,5 +745,6 @@ where we choose for the maximum allowed flow velocity v0 = 0.1 m/s ~ 1.68*[l]/[t
 
 [1]: J. J. Monaghan, Annu. Rev. Astron. Astrophys. 30, 543 (1992).
 [2]: P. W. Cleary, Applied Mathematical Modelling 22, 981 (1998).
+[3]: R. Fatehi, M. T. Manzari, Int. J. Numer. Meth. Fluids 68, 905 (2012).
 
  -->

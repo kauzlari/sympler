@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -61,7 +61,7 @@ void PairParticleTensor::init()
   m_properties.setClassName("ValCalculatorPart");
   m_properties.setName("PairParticleTensor");
 
-  m_properties.setDescription("User defined tensor property for particles, which has to be computed by pair summation. It may be defined by the attribute 'expression'. You should take care to define the attribute 'symmetry' properly. Additionally, notice that the particle expressions must be vectors. If you only need scalars, use \"unitMat(scalar)\", where \"scalar\" is your scalar. The particle expressions are multiplied with the pair expression element by element.");
+  m_properties.setDescription("User defined tensor property for particles, which has to be computed by pair summation. It may be defined by the attribute 'expression'. You should take care to define the attribute 'symmetry' properly. Additionally, notice that the particle expressions must be 3x3 matrices. If you only need scalars, use \"unitMat(scalar)\", where \"scalar\" is your scalar. The particle expressions are multiplied with the pair expression element by element.");
 
   m_1stPExpression = "unitMat(1)";
   m_2ndPExpression = "unitMat(1)";

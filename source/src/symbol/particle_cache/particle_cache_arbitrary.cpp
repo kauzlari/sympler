@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -46,6 +46,7 @@ ParticleCacheArbitrary::ParticleCacheArbitrary(/*Node*/Simulation* parent/*size_
 /*: m_colour(colour), m_stage(0)*/
   : ParticleCache(parent)
 {
+  m_function = new FunctionParticle();
   init();
 }
 
@@ -71,6 +72,12 @@ void ParticleCacheArbitrary::init()
        "Is this calculator allowed to overwrite already existing symbols " 
            "with name 'symbol' ?");
 
+  STRINGPC
+      (useOldFor, m_oldSymbols,
+       "Here, you can list the used symbols, which should be treated as \"old\", i.e., this calculator will not wait for those symbols to be computed beforehand, but it will take what it finds. Separate the symbols by the \"|\"- (\"pipe\"-) symbol."
+      );
+
+  m_oldSymbols = "---";
   m_overwrite = false;
   m_expression = "undefined";
   m_symbolName = "undefined";
@@ -84,13 +91,13 @@ void ParticleCacheArbitrary::setup()
   m_function.setColour(m_colour);*/
   
   if(m_expression == "undefined")
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'expression' has value \"undefined\""); 
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'expression' has value \"undefined\""); 
   if(m_species == "undefined")
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'species' has value \"undefined\""); 
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'species' has value \"undefined\""); 
   if(m_symbolName == "undefined")
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'symbol' has value \"undefined\"");
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'symbol' has value \"undefined\"");
   if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
-    throw gError("ParticleCache::setup", className() + " reports: Attribute 'stage' has none of the allowed values \"0\", \"1\", \"2\".");
+    throw gError("ParticleCacheArbitrary::setup", className() + " reports: Attribute 'stage' has none of the allowed values \"0\", \"1\", \"2\".");
 
   // should we create a Cache for the other colours too?
   if(m_species == "ALL")
@@ -109,10 +116,10 @@ void ParticleCacheArbitrary::setup()
           ParticleCache* pc = copyMySelf()/*new ParticleCacheArbitrary(*this)*/;
           // Absolutely important because setExpression adds the function 
           // to the "toBeCompiled"-list
-          ((ParticleCacheArbitrary*) pc)->m_function.setExpression(m_expression);
-          ((ParticleCacheArbitrary*) pc)->m_function.setColour(m_colour);
+          ((ParticleCacheArbitrary*) pc)->m_function->setExpression(m_expression);
+          ((ParticleCacheArbitrary*) pc)->m_function->setColour(m_colour);
           
-          assert(((ParticleCacheArbitrary*) pc)->m_function.returnType() == m_function.returnType()); 
+          assert(((ParticleCacheArbitrary*) pc)->m_function->returnType() == m_function->returnType()); 
           assert(((ParticleCacheArbitrary*) pc)->mySymbolName() == m_symbolName);
           assert(((ParticleCacheArbitrary*) pc)->stage() == m_stage);
           assert(((ParticleCacheArbitrary*) pc)->m_colour == m_colour);
@@ -128,10 +135,10 @@ void ParticleCacheArbitrary::setup()
             ParticleCache* pc = copyMySelf()/*new ParticleCacheArbitrary(*this)*/;
           // Absolutely important because setExpression adds the function 
           // to the "toBeCompiled"-list
-            ((ParticleCacheArbitrary*) pc)->m_function.setExpression(m_expression);
-            ((ParticleCacheArbitrary*) pc)->m_function.setColour(m_colour);
+            ((ParticleCacheArbitrary*) pc)->m_function->setExpression(m_expression);
+            ((ParticleCacheArbitrary*) pc)->m_function->setColour(m_colour);
           
-            assert(((ParticleCacheArbitrary*) pc)->m_function.returnType() == m_function.returnType()); 
+            assert(((ParticleCacheArbitrary*) pc)->m_function->returnType() == m_function->returnType()); 
             assert(((ParticleCacheArbitrary*) pc)->mySymbolName() == m_symbolName);
             assert(((ParticleCacheArbitrary*) pc)->stage() == m_stage);
             assert(((ParticleCacheArbitrary*) pc)->m_colour == m_colour);
@@ -147,9 +154,9 @@ void ParticleCacheArbitrary::setup()
 
   // next lines are done in any case 
   setupOffset();
-
-  m_function.setExpression(m_expression);
-  m_function.setColour(m_colour);
+  
+  m_function->setExpression(m_expression);
+  m_function->setColour(m_colour);
   
   if(m_phaseUser == 0)
     Particle::registerCache_0(this);
@@ -162,10 +169,10 @@ void ParticleCacheArbitrary::setup()
     ParticleCache* pc = copyMySelf()/*new ParticleCacheArbitrary(*this)*/;
           // Absolutely important because setExpression adds the function 
           // to the "toBeCompiled"-list
-    ((ParticleCacheArbitrary*) pc)->m_function.setExpression(m_expression);
-    ((ParticleCacheArbitrary*) pc)->m_function.setColour(m_colour);
+    ((ParticleCacheArbitrary*) pc)->m_function->setExpression(m_expression);
+    ((ParticleCacheArbitrary*) pc)->m_function->setColour(m_colour);
           
-    assert(((ParticleCacheArbitrary*) pc)->m_function.returnType() == m_function.returnType()); 
+    assert(((ParticleCacheArbitrary*) pc)->m_function->returnType() == m_function->returnType()); 
     assert(((ParticleCacheArbitrary*) pc)->mySymbolName() == m_symbolName);
     assert(((ParticleCacheArbitrary*) pc)->stage() == m_stage);
     assert(((ParticleCacheArbitrary*) pc)->m_colour == m_colour);
@@ -177,6 +184,7 @@ void ParticleCacheArbitrary::setup()
 
 void ParticleCacheArbitrary::setupOffset()
 {
+
   if(m_overwrite)
   { 
     // so the attribute should already exist
@@ -187,7 +195,7 @@ void ParticleCacheArbitrary::setupOffset()
     }
     catch(gError& err)
     {
-      throw gError("ParticleCache::setup", "search for symbol failed. The message was " + err.message()); 
+      throw gError("ParticleCacheArbitrary::setupOffset: For module " + className(), "Search for symbol failed. The message was " + err.message()); 
     }
   }
   else
@@ -207,7 +215,7 @@ void ParticleCacheArbitrary::setupOffset()
 
 void ParticleCacheArbitrary::addMyUsedSymbolsTo(typed_value_list_t& usedSymbols) {
 
-  FunctionParser::addToTypedValueList(m_function.usedSymbols(), usedSymbols);      
+  FunctionParser::addToTypedValueList(m_function->usedSymbols(), usedSymbols);      
 }
 
 

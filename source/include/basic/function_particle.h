@@ -84,7 +84,7 @@ public:
    * @param val Return value
    * @param p Particle the function takes as the argument
    */
-  void operator()(void* val, Particle* p) const {
+  virtual void operator()(void* val, Particle* p) const {
     m_compiler.fn()(val, p, p->tag.data());
   }
 };

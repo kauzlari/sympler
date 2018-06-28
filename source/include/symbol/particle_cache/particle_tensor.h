@@ -46,12 +46,7 @@ class ParticleTensor : public ParticleCacheArbitrary
    * Initialise the PropertyList.
      */
     void init();
-  
-//    /*!
-//     * Helper for setting m_offset
-    //     */
-//    void setupOffset();
-    
+      
     /*!
     * Helper function for polymorphic copying
     */
@@ -59,6 +54,14 @@ class ParticleTensor : public ParticleCacheArbitrary
     {
       return new ParticleTensor(*this);
     }
+
+    /*!
+     * Helper function for setting the return type of \a m_function
+     */
+    virtual void setFunctionReturnType(){
+      m_function->setReturnType(Variant::TENSOR);
+    }
+
     
   public:
   /*!
@@ -77,12 +80,8 @@ class ParticleTensor : public ParticleCacheArbitrary
        */
     virtual void computeCacheFor(Particle* p)
     {
-//       MSG_DEBUG("ParticleScalar::computeCacheFor", "BEFORE " + m_symbolName + " = " << p->tag.doubleByOffset(m_offset));
       
-      // FIXME: the first argument is already a reference, so it should be OK ?!?
-      m_function(&(p->tag.tensorByOffset(m_offset)), p);
-      
-//       MSG_DEBUG("ParticleScalar::computeCacheFor", "AFTER " + m_symbolName + " = " << p->tag.doubleByOffset(m_offset));
+      (*m_function)(&(p->tag.tensorByOffset(m_offset)), p);
       
     }
 

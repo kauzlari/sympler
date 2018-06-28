@@ -81,7 +81,7 @@ class BondedPairParticleArbitrary : public BondedPairParticleCalc
   /*!
    * This string holds the symbols, which are not waited for to be computed beforehand
    */
-  string m_oldSymbols;
+  /* string m_oldSymbols; */
   
   /*!
    * Initialise the property list
@@ -93,9 +93,9 @@ class BondedPairParticleArbitrary : public BondedPairParticleCalc
    * which should be ignored when determining the stage. The expressions are separated by " | ".
    * An "empty" string must have the form "---".
    */
-  virtual string usedSymbolsIgnoredForStaging() const {
-    return m_oldSymbols;
-  }
+  /* virtual string usedSymbolsIgnoredForStaging() const { */
+  /*   return m_oldSymbols; */
+  /* } */
 
   /*!
    * Adds the expressions used by this \a Symbol to the given list. 

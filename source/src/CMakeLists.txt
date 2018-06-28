@@ -237,10 +237,14 @@ reflector/reflector_with_rng.cpp
 )
 
 set(callable
+callable/apply_scalar_field.cpp
 callable/apply_vector_field.cpp
 callable/apply_vector_field_file.cpp
 callable/apply_vel_field.cpp
 callable/callable.cpp
+callable/cbl_pair_particle_arbitrary.cpp
+callable/cbl_pair_particle_tensor.cpp
+callable/cbl_pair_particle_vector.cpp
 callable/shift_particle.cpp
 callable/triangle_CGMD_interpolation2points.cpp
 callable/triangle_CGMD_interpolation.cpp
@@ -278,14 +282,17 @@ symbol/particle_cache/particle_rand_norm_vector.cpp
 symbol/particle_cache/particle_scalar.cpp
 symbol/particle_cache/particle_tensor.cpp
 symbol/particle_cache/particle_vector.cpp
+symbol/particle_cache/particle_vels.cpp
 symbol/particle_cache/particle_cache_arb_rng.cpp
 symbol/particle_cache/pca_density_0oc.cpp
 symbol/particle_cache/pca_density_self_contribution.cpp
 symbol/particle_cache/pca_eigensystem.cpp
 symbol/particle_cache/pca_energy_entropy.cpp
 symbol/particle_cache/pca_matrix_inverse.cpp
-symbol/particle_cache/pca_random.cpp
 symbol/particle_cache/pca_volume_self_contribution.cpp
+symbol/particle_cache/symbol_f_particle_arbitrary.cpp
+symbol/particle_cache/symbol_f_particle_scalar.cpp
+symbol/particle_cache/symbol_f_particle_vels.cpp
 symbol/particle_cache/transfer_particle_vector.cpp
 symbol/val_calculator_pair/bonded_pair_scalar.cpp
 symbol/val_calculator_pair/bonded_pair_vector.cpp
@@ -298,12 +305,12 @@ symbol/val_calculator_pair/pair_rand_arbitrary.cpp
 symbol/val_calculator_pair/pair_rand_scalar.cpp
 symbol/val_calculator_pair/pair_rand_tensor.cpp
 symbol/val_calculator_pair/pair_rand_vector.cpp
+symbol/val_calculator_pair/val_calculator_pair.cpp
 symbol/val_calculator_pair/val_calculator_BC.cpp
 symbol/val_calculator_pair/val_calculator_dirichlet_BC_scalar.cpp
 symbol/val_calculator_pair/val_calculator_dirichlet_BC_vels.cpp
 symbol/val_calculator_pair/val_calculator_kernel.cpp
 symbol/val_calculator_pair/val_calculator_neg_dkernel_divr.cpp
-symbol/val_calculator_pair/val_calculator_pair.cpp
 symbol/val_calculator_part/bonded_pair_particle_arbitrary.cpp
 symbol/val_calculator_part/bonded_pair_particle_calc.cpp
 symbol/val_calculator_part/bonded_pair_particle_one_noise_vector.cpp

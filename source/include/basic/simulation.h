@@ -166,6 +166,15 @@ public:
     return m_controller;
   }
 
+  /*!
+   * Sets \a Simulation::m_controller
+   * @param[in] controller Pointer to the externally created 
+   * \a Controller instance
+   */
+  void setController(Controller* controller) {
+    m_controller = controller;
+  }
+
 
   /*!
    * Returns a pointer to the \a Phase object
