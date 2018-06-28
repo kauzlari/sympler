@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -151,6 +151,8 @@ void IntegratorVelocityVerlet::integratePosition(Particle* p, Cell* cell)
 void IntegratorVelocityVerlet::integrateVelocity(Particle* p)
 {
   size_t force_index;
+  // FIXME: inefficient to set the force_index again and again for each
+  // particle. Can we use Node::precompute() or s.th. similar?
   force_index = ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
 //   MSG_DEBUG("IntegratorVelocityVerlet::integrateVelocity", name() << "v BEFORE = " << p->v);
   p->v += m_lambda * (p->dt * p->force[force_index]/m_mass);

@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -43,7 +43,7 @@ const SymbolRegister<TransferParticleVector> transfer_particle_vector("TransferP
 TransferParticleVector::TransferParticleVector(Simulation* parent)
   : ParticleCacheArbitrary(parent), m_pointerToParticleList(NULL), m_targetColour(100000)
 {
-  m_function.setReturnType(Variant::VECTOR);
+  setFunctionReturnType();
   m_datatype = DataFormat::POINT;
   init();
 }
@@ -103,14 +103,14 @@ void TransferParticleVector::setupOffset()
     }
     catch(gError& err)
     {
-      throw gError("ParticleCache::setup", "search for symbol failed. The message was " + err.message()); 
+      throw gError("TransferParticleVector::setup", "search for symbol failed. The message was " + err.message()); 
     }
   }
   else
   {
     // so the attribute shouldn't yet exist
     if(Particle::s_tag_format[m_targetColour].attrExists(m_symbolName))
-      throw gError("ParticleCache::setup", "Symbol " + m_symbolName + " already existing. Second definition is not allowed for 'overwrite = \"no\"'.");
+      throw gError("TransferParticleVector::setup", "Symbol " + m_symbolName + " already existing. Second definition is not allowed for 'overwrite = \"no\"'.");
     else 
       // FIXME: let's try if it works for all cases that persistency = false
       m_offset = Particle::s_tag_format[m_targetColour].addAttribute(m_symbolName, m_datatype, false, m_symbolName).offset;

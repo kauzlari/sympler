@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -90,6 +90,8 @@ void IntegratorTensorLambda::init()
 void IntegratorTensorLambda::setup()
 {
   IntegratorTensor::setup();  
+
+  m_lambda_diff = 0.5 - m_lambda;
 }
 
 
@@ -130,17 +132,17 @@ void IntegratorTensorLambda::integrateStep2()
      i->tag.tensorByOffset(((IntegratorTensorLambda*) data)
 			  ->m_tensor_offset) +=
      ((IntegratorTensorLambda*) data)->m_dt *
-     0.5*(
-	  // new flux
-	  i->tag.tensorByOffset(((IntegratorTensorLambda*) data)
-				 -> m_force_offset[force_index]
-				 )
-	  -
-	  // old flux
-	  i->tag.tensorByOffset(((IntegratorTensorLambda*) data)
-				 -> m_force_offset[other_force_index]
-				 )    
-	  );
+     (
+      // new flux
+      0.5*i->tag.tensorByOffset(((IntegratorTensorLambda*) data)
+			    -> m_force_offset[force_index]
+			    )
+      + m_lambda_diff*
+      // old flux
+      i->tag.tensorByOffset(((IntegratorTensorLambda*) data)
+			    -> m_force_offset[other_force_index]
+			    )    
+      );
      );  
   
 }

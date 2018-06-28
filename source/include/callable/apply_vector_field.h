@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -41,7 +41,7 @@ class Phase;
 class Simulation;
 
 /*!
- * \a Callable adding a user-defined field to a user-defined vector
+ * \a Callable setting a user-defined vector field to a user-defined vector expression
  */
 class ApplyVectorField : public Thermostat
 {
@@ -49,17 +49,17 @@ class ApplyVectorField : public Thermostat
 
 
   /*!
-   * Adds the specified algebraic expression to the x-component of the vector. See \a init() for the known symbols.
+   * Sets the x-component of the user-defined vector specified by \a m_symbolName to the specified algebraic scalar expression. See \a init() for the known symbols.
    */
   FunctionFixed m_vecX;
   
   /*!
-   * Adds the specified algebraic expression to the y-component of the vector. See \a init() for the known symbols.
+   * Sets the y-component of the user-defined vector specified by \a m_symbolName to the specified algebraic scalar expression. See \a init() for the known symbols.
    */
   FunctionFixed m_vecY;
   
   /*!
-   * Adds the specified algebraic expression to the z-component of the vector. See \a init() for the known symbols.
+   * Sets the z-component of the user-defined vector specified by \a m_symbolName to the specified algebraic scalar expression. See \a init() for the known symbols.
    */
   FunctionFixed m_vecZ;
 

@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -428,9 +428,9 @@ public:
   /*!
    * Clear the tags for new calculation of cached quantities
    * currently, only additional doubles of particles are reset to zero
-   * Fixme!!! what else could be done here?
+   * FIXME: what else could be done here?
    */
-  void setForNewIntegration();
+  void clearParticleData();
 
   /*!
    * Compute the center of mass velocity

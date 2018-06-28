@@ -46,13 +46,29 @@ using namespace std;
 ValCalculatorPart::ValCalculatorPart(/*Node*/Simulation* parent): ValCalculator(parent)
 {
   init();
-//   MSG_DEBUG("ValCalculator::ValCalculator", "CONSTRUCTOR");
 }
 
 void ValCalculatorPart::init()
 {
   m_properties.setClassName("ValCalculatorPart");
  
+  // START: unfinished stuff from 2018-05-08 ////////////////////
+  
+  // BOOLPC
+  //   (selfReset, m_selfReset, "Should this module protect its computed "
+  //    "symbol from automatic resetting (to zero) and reset it by "
+  //    "itself? The self-reset will be done"
+  //    "immediately before the start of computations by any Symbols, "
+  //    "including this one in stage 0 and/or 1 as selected. This may be "
+  //    "useful to prevent a too early reset, for example by a triggered "
+  //    "position update or neighbour list rebuild. In selfReset "
+  //    "mode, overwriting existing symbols "
+  //    "('overrite = \"yes\"') by this module is forbidden.");
+
+  // m_selfReset = false;
+
+  // END: unfinished stuff from 2018-05-08 ////////////////////
+
 #ifdef _OPENMP
   m_copy_slots.resize(global::n_threads);
 #endif
@@ -61,9 +77,37 @@ void ValCalculatorPart::init()
 
 void ValCalculatorPart::setup()
 {
-
-  throw gError("ValCalculatorPart::setup", "Shouldn't currently be called. Contact the programmer.");
+  ValCalculator::setup();
   
+  // START: unfinished stuff from 2018-05-08 ////////////////////
+  
+  // if(m_selfReset) {
+  //   if(m_overwrite)
+  //     // Not all children allow to control m_overwrite via XML-input. 
+  //     // But since the default in class Symbol is m_overwrite = false,
+  //     // this exception and its message should always make sense when
+  //     // thrown, since m_overwrite = true is either set via XML or via
+  //     // an error in the implementation of a child class. The latter
+  //     // should only be metioned in this comment and *not* in the
+  //     // exception message, such that we don't confuse users.
+  //     throw gError("ValCalculatorPart::setup for module " + className(),
+  // 		   "'overwrite = \"yes\"' is not allowed together with "
+  // 		   "'selfReset = \"yes\"'.");
+  //   m_persistency = true;
+
+  //   // The resetting will be done by an overriden Node::precompute()
+  //   if(m_phase == 0) M_CONTROLLER->registerForPrecomputation_0(this);
+  //   if(m_phase == 1) M_CONTROLLER->registerForPrecomputation(this);
+  //   if(m_phase == 2) {
+  //     M_CONTROLLER->registerForPrecomputation(this);
+  //     M_CONTROLLER->registerForPrecomputation_0(this);
+  //   }
+  // } // end of if if(m_selfReset)
+  // else
+  //   m_persistency = false;
+
+  // END: unfinished stuff from 2018-05-08 ////////////////////
+
 }
 
 

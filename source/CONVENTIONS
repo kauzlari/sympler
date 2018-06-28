@@ -22,8 +22,12 @@ returnVVsum(*) functions only needed for free particles:
 
 5. persistency:
 
-Symbols created by ValCalculators or ParticleCaches have always persistency = false
+Symbols created by ValCalculators or ParticleCaches have always persistency = false.
+
 EXCEPTION: A Calculator introducing a CONSTANT !!!
+(on 2018-04-25 not sure anymore if this is used/relevant anywhere.)
+
+Rationale for ValCalculatorPair children: As long as (was true on 2018-04-25) we do not detect whether a pair symbol depends on particle positions an distances, we must assume that they *all* become invalid when particles are moved and the neighbour list is reconstructed. The following is true for LinkedListCreator: Latest the neighbour list reconstruction is the place where the symbols will be reset (correctly!) to zero. VerletCreator is more lazy. If only new distances are computed for the existing pairs, then the symbols may become invalid in the time between the distance computation and the recomputation of the symbols themselves, but the symbols are *not* reset and keep their old value until recomputation.
 
 -----------------------------------------------------------------------------------------------
 
