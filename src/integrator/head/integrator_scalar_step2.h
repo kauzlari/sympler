@@ -29,8 +29,8 @@
  */
 
 
-#ifndef __INTEGRATOR_SCALAR_LAMBDA_H
-#define __INTEGRATOR_SCALAR_LAMBDA_H
+#ifndef __INTEGRATOR_SCALAR_STEP2_H
+#define __INTEGRATOR_SCALAR_STEP2_H
 
 
 #include <math.h>
@@ -41,14 +41,19 @@ using namespace std;
 
 
 /*!
- * Adds an additional scalar degree of freedom,
- * to the particles specified and integrates it with a second
- * order accurate predictor-corrector scheme.
- * Predictor step: predicted = old + lambda*dt*f_new
- * Corrector step: new = predicted + 0.5*dt*(f_new - f_old)
- * Usually, the forces are updated between the two steps.
+ * Adds an additional scalar degree of freedom, to the particles of 
+ * the specified colour and integrates it according to the following 
+ * scheme:
+ * integration-step1: no activity 
+ * integration-step2: s(t + dt) = s(t) + dt * F(t)
+ * Here, s is the scalar, F is its flux (usually computed with Force 
+ * modules such as FPairScalar or FParticleScalar), t is time and dt is 
+ * the size of the integration time step (defined in the Controller). 
+ * Further information on the integration-steps, including their place 
+ * in the total SYMPLER workflow, can be found with the help option 
+ * "--help workflow".
  */
-class IntegratorScalarLambda: public IntegratorScalar
+class IntegratorScalarStep2: public IntegratorScalar
 {
   protected:
   
@@ -76,12 +81,12 @@ class IntegratorScalarLambda: public IntegratorScalar
    * Constructor
    * @param controller Pointer to the \a Controller object this \a Integrator belongs to
    */  
-  IntegratorScalarLambda(Controller *controller);
+  IntegratorScalarStep2(Controller *controller);
   
   /*!
    * Destructor
    */
-  virtual ~IntegratorScalarLambda();
+  virtual ~IntegratorScalarStep2();
   
   /*!
    * Register the field and the force of the field with the \a Particle
@@ -89,12 +94,12 @@ class IntegratorScalarLambda: public IntegratorScalar
   virtual void setup();
   
   /*!
-   * Predictor step
+   * Does nothing in the scheme implemented here
    */
   virtual void integrateStep1();
   
   /*!
-   * Corrector step
+   * Integration s(t + dt) = s(t) + dt * F(t)
    */
   virtual void integrateStep2();
 

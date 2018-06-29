@@ -8,6 +8,7 @@ include_HEADERS = \
 	integrator_pos_vel_step2.h \
 	integrator_scalar.h \
 	integrator_scalar_lambda.h \
+	integrator_scalar_step2.h \
 	integrator_static.h \
 	integrator_static_lse.h \
 	integrator_tensor.h \

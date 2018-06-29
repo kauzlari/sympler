@@ -12,6 +12,7 @@ libintegrator_la_SOURCES = \
 	integrator_pos_vel_step2.cpp \
 	integrator_scalar.cpp \
 	integrator_scalar_lambda.cpp \
+	integrator_scalar_step2.cpp \
 	integrator_static.cpp \
 	integrator_static_lse.cpp \
 	integrator_tensor.cpp \
