@@ -202,15 +202,18 @@ void IntegratorVelocityVerlet::solveHitTimeEquation(WallTriangle* wallTriangle, 
     if (t0 < c_wt_time_eps)
     {
       n = 0;
+      // an empty results vector is a valid result
     }
-
-    n = 1;
-    results->push_back(t0);
+    else {
+      n = 1;
+      results->push_back(t0);
+    }
   }
 }
 
 
-void IntegratorVelocityVerlet::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, const point_t &force)
+void IntegratorVelocityVerlet::hitPos
+(const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
   hit_pos = p->r + dt*p->v + dt*dt/2*force/m_mass;
 }

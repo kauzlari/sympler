@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -509,39 +509,40 @@ void IntegratorVelocityVerletPressure::solveHitTimeEquation(
 	c = surface_normal * p->r - wallTriangle->nDotR();
 
 	if (a != 0) {
-		n = gsl_poly_solve_quadratic(a, b, c, &t0, &t1);
-
-		//     MSG_DEBUG("IntegratorVelocityVerlet::solveHitTimeEquation", "n = " << n << ", t0 = " << t0 << ", t1 = " << t1 << " for a = " << a << ", b = " << b << ", c = " << c << ", force = " << force << ", v = " << p->v << ", r = " << p->r << ", ndotr = " << wallTriangle->nDotR() << ", surfnormal = " << surface_normal);
-
-		if (n == 0 || (t0 < c_wt_time_eps && t1 < c_wt_time_eps)) {
-		}
-
-		else {
-			if (t0 < c_wt_time_eps) {
-				t0 = t1;
-				results->push_back(t0);
-			}
-
-			results->push_back(t0);
-			results->push_back(t1);
-			sort(results->begin(), results->end());
-		}
+	  n = gsl_poly_solve_quadratic(a, b, c, &t0, &t1);
+	  
+	  //     MSG_DEBUG("IntegratorVelocityVerlet::solveHitTimeEquation", "n = " << n << ", t0 = " << t0 << ", t1 = " << t1 << " for a = " << a << ", b = " << b << ", c = " << c << ", force = " << force << ", v = " << p->v << ", r = " << p->r << ", ndotr = " << wallTriangle->nDotR() << ", surfnormal = " << surface_normal);
+	  
+	  if (n == 0 || (t0 < c_wt_time_eps && t1 < c_wt_time_eps)) {
+	  }
+	  
+	  else {
+	    if (t0 < c_wt_time_eps) {
+	      t0 = t1;
+	      results->push_back(t0);
+	    }
+	    
+	    results->push_back(t0);
+	    results->push_back(t1);
+	    sort(results->begin(), results->end());
+	  }
 	} else {
-		t0 = -c / b;
-
-		if (t0 < c_wt_time_eps) {
-			n = 0;
-		}
-
-		n = 1;
-		results->push_back(t0);
+	  t0 = -c / b;
+	  
+	  if (t0 < c_wt_time_eps) {
+	    n = 0;
+	    // nothing to add to results vector
+	  }
+	  else {
+	  n = 1;
+	  results->push_back(t0);
+	  }
 	}
 }
 
-void IntegratorVelocityVerletPressure::hitPos(
-/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos,
-		const point_t &force) {
-	hit_pos = p->r + dt * p->v + dt * dt / 2 * force / m_mass;
+void IntegratorVelocityVerletPressure::hitPos
+(const double& dt, const Particle* p, point_t &hit_pos, const point_t &force) {
+  hit_pos = p->r + dt * (p->v + (dt / 2.) * force / m_mass);
 }
 
 #endif

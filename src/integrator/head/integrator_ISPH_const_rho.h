@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -708,7 +708,7 @@ public:
    * NOTE: For the same reasons as in \a solveHitTimeEquation, currently (2017-01-05), this 
    * function should never be called and hence throws an exception
    */
-  virtual void hitPos(double dt, const Particle* p, point_t &hit_pos,
+  virtual void hitPos(const double& dt, const Particle* p, point_t &hit_pos,
 		      const point_t &force);
 
 #ifdef _OPENMP

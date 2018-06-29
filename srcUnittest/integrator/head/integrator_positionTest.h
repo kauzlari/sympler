@@ -29,41 +29,38 @@
  */
 
 
-#ifndef INTEGRATOR_VELOCITY_VERLET_TEST_H
-#define INTEGRATOR_VELOCITY_VERLET_TEST_H
 
-#include "integrator_positionTest.h"
+#ifndef INTEGRATOR_POSITION_TEST_H
+#define INTEGRATOR_POSITION_TEST_H
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "integrator_velocity_verlet.h"
+#include "integrator_position.h"
+#include "particle.h"
+#include "simulation.h"
+#include "controller.h"
 
 
 using namespace std;
 
-class IntegratorVelocityVerletTest : public IntegratorPositionTest
+class IntegratorPositionTest : public CPPUNIT_NS :: TestFixture
 {
-  CPPUNIT_TEST_SUITE (IntegratorVelocityVerletTest);
-  CPPUNIT_TEST (integrateVelocityTest);
-  CPPUNIT_TEST (hitPosTest);
-  CPPUNIT_TEST_SUITE_END ();
 
-  
  public:
-
+  
   /*!
    * Initialize objects
    */
   void setUp (void);
 
   /*!
-   * Initialize objects
+   * Delete objects
    */
   void tearDown (void);
 
   
  protected:
-  
+
   /*!
    * Test integrating velocity of a particle
    */
@@ -74,8 +71,24 @@ class IntegratorVelocityVerletTest : public IntegratorPositionTest
    */
   void hitPosTest (void);
 
+  /*!
+   * Dummy particle for testing
+   */
+  Particle *m_particleTest;
+
+  /*!
+   * Instance of child of \a IntegratorPosition to be tested
+   */
+  IntegratorPosition *m_integratorPositionTest;
+
+  /*!
+   * Required to instantiate an \a IntegratorPosition
+   */
+  Controller *m_controllerTest;
   
  private:
+  
+  Simulation *m_simulationTest;
   
 };
 

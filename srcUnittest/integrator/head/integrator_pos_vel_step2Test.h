@@ -29,26 +29,26 @@
  */
 
 
-#ifndef INTEGRATOR_VELOCITY_VERLET_TEST_H
-#define INTEGRATOR_VELOCITY_VERLET_TEST_H
+#ifndef INTEGRATOR_POS_VEL_STEP2_TEST_H
+#define INTEGRATOR_POS_VEL_STEP2_TEST_H
 
 #include "integrator_positionTest.h"
 
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "integrator_velocity_verlet.h"
+#include "integrator_pos_vel_step2.h"
 
 
 using namespace std;
 
-class IntegratorVelocityVerletTest : public IntegratorPositionTest
+class IntegratorPosVelStep2Test : public IntegratorPositionTest
 {
-  CPPUNIT_TEST_SUITE (IntegratorVelocityVerletTest);
+  CPPUNIT_TEST_SUITE (IntegratorPosVelStep2Test);
   CPPUNIT_TEST (integrateVelocityTest);
   CPPUNIT_TEST (hitPosTest);
   CPPUNIT_TEST_SUITE_END ();
 
-  
+ 
  public:
 
   /*!

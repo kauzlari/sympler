@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -76,7 +76,7 @@ void IntegratorVelocityVerletDisp::init()
   m_properties.setClassName("IntegratorPosition");
   m_properties.setName("IntegratorVelocityVerletDisp");
 
-  m_properties.setDescription("Integrates the position and momentum coordinates of each particle according to the Velocity-Verlet Algorithm and calculates the displacement for each particle");
+  m_properties.setDescription("Integrates the position and momentum coordinates of each particle according to the Velocity-Verlet Algorithm and calculates the displacement for each particle.");
 
 
   STRINGPC
@@ -95,7 +95,7 @@ void IntegratorVelocityVerletDisp::init()
 
 void IntegratorVelocityVerletDisp::setup()
 {
-  Integrator::setup();
+  IntegratorVelocityVerlet::setup();
 
   m_displacement_offset = 
     Particle::s_tag_format[m_colour].addAttribute
@@ -112,7 +112,8 @@ void IntegratorVelocityVerletDisp::integratePosition(Particle* p, Cell* cell)
   force_index = ((Controller*) m_parent/*integrator->parent()*/)->forceIndex();
 
   point_t accel = p->force[force_index]/m_mass;
-  
+
+  // will also compute m_disp in IntegratorVelocityVerletDisp::hitPos
   cell->doCollision(p, p->r, p->v, accel, (IntegratorPosition*) this); 
 
   p->tag.pointByOffset(this->m_displacement_offset) += m_disp - p->r;
@@ -129,11 +130,12 @@ void IntegratorVelocityVerletDisp::integratePosition(Particle* p, Cell* cell)
 }
 
 
-void IntegratorVelocityVerletDisp::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, const point_t &force)
+void IntegratorVelocityVerletDisp::hitPos
+(const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
-  hit_pos = p->r + dt*(p->v + dt/2*force/m_mass);
+  m_disp = dt*(p->v + dt/2*force/m_mass);
 
-  m_disp = hit_pos - p->r;
+  hit_pos = p->r + m_disp;
 }
 
 

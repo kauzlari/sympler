@@ -29,54 +29,46 @@
  */
 
 
-#ifndef INTEGRATOR_VELOCITY_VERLET_TEST_H
-#define INTEGRATOR_VELOCITY_VERLET_TEST_H
-
 #include "integrator_positionTest.h"
-
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
-#include "integrator_velocity_verlet.h"
+#include <vector>
 
 
-using namespace std;
-
-class IntegratorVelocityVerletTest : public IntegratorPositionTest
+void IntegratorPositionTest :: setUp (void)
 {
-  CPPUNIT_TEST_SUITE (IntegratorVelocityVerletTest);
-  CPPUNIT_TEST (integrateVelocityTest);
-  CPPUNIT_TEST (hitPosTest);
-  CPPUNIT_TEST_SUITE_END ();
 
-  
- public:
+  // Initialize objects
+  m_particleTest = new Particle();
+  m_simulationTest = new Simulation();
+  m_controllerTest = new Controller(m_simulationTest);
+}
 
-  /*!
-   * Initialize objects
-   */
-  void setUp (void);
+void IntegratorPositionTest :: tearDown (void) 
+{
+  // Delete objects
+  delete m_controllerTest;
+  delete m_simulationTest;
+  delete m_particleTest;
+}
 
-  /*!
-   * Initialize objects
-   */
-  void tearDown (void);
+void IntegratorPositionTest :: integrateVelocityTest (void)
+{
+  // Here we test a function that should do nothing
+  point_t reference = m_particleTest->v = { { {3.5, -0.1, 0.0} } };
+  m_integratorPositionTest->integrateVelocity(m_particleTest);
+  CPPUNIT_ASSERT_EQUAL (reference, m_particleTest->v);
 
-  
- protected:
-  
-  /*!
-   * Test integrating velocity of a particle
-   */
-  void integrateVelocityTest (void);
+}
 
-  /*!
-   * Test computation of hit position
-   */
-  void hitPosTest (void);
+void IntegratorPositionTest :: hitPosTest (void)
+{
+  // Here we test a function that should do nothing
+  point_t reference = { { {-0.79, 1.81, 4.45} } };
+  point_t hit_posTest = reference;
+  m_particleTest->r = { { {-1.0, 2.0, 4.0} } };
+  m_particleTest->v = { { {2.0, -2.0, 3.0} } };
+  const point_t forceTest1 = { { {2.0, 2.0, 30.0} } };
+  m_integratorPositionTest->hitPos(0.1, m_particleTest, hit_posTest, forceTest1);
+  CPPUNIT_ASSERT_EQUAL (reference, hit_posTest);
+}
 
-  
- private:
-  
-};
 
-#endif

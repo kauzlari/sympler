@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -136,14 +136,17 @@ void IntegratorVelocityVerletX::solveHitTimeEquation(WallTriangle* wallTriangle,
     if (t0 < c_wt_time_eps)
     {
       n = 0;
+      // nothing to add to results vector
     } 
-    
+    else {
     n = 1;
     results->push_back(t0);
+    }
   }
 }
 
-void IntegratorVelocityVerletX::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, const point_t &force)
+void IntegratorVelocityVerletX::hitPos
+(const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
   hit_pos = p->r + dt*p->tag.pointByOffset(m_v_offset) + dt*dt/2*force;
 }

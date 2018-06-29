@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -948,7 +948,8 @@ void IntegratorISPHconstRho::solveHitTimeEquation(WallTriangle* wallTriangle, co
 }
 
 
-void IntegratorISPHconstRho::hitPos(double dt, const Particle* p, point_t &hit_pos, const point_t &force)
+void IntegratorISPHconstRho::hitPos
+(const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
   throw gError("IntegratorISPHconstRho::hitPos", "Fatal ERROR: Shouldn't have been called! Contact programmer!");
 }

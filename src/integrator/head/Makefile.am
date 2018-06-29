@@ -5,6 +5,7 @@ include_HEADERS = \
 	integrator_ISPH_const_rho_FDRHS.h \
 	integrator_lse.h \
 	integrator_position.h \
+	integrator_pos_vel_step2.h \
 	integrator_scalar.h \
 	integrator_scalar_lambda.h \
 	integrator_static.h \

@@ -29,12 +29,10 @@
  */
 
 
+#ifndef __INTEGRATOR_POS_VEL_STEP2_H
+#define __INTEGRATOR_POS_VEL_STEP2_H
 
-
-#ifndef __INTEGRATOR_VELOCITY_VERLET_DISP_H
-#define __INTEGRATOR_VELOCITY_VERLET_DISP_H
-
-#include "integrator_velocity_verlet.h"
+#include "integrator_position.h"
 
 using namespace std;
 
@@ -44,19 +42,15 @@ class Controller;
 class WallTriangle;
 class Cell;
 
-//----IntegratorVelocityVerletDisp ----
 
-/*!
- * Modified Velocity-Verlet integrator for the positions velocities and particle displacement
- * See: R. D. Groot and P. B. Warren, J. Chem. Phys. 107, 4423-4435 (1997)
- */
-
-class IntegratorVelocityVerletDisp: public IntegratorVelocityVerlet
+class IntegratorPosVelStep2: public IntegratorPosition
 {
-protected:
-
+  
+ protected:
+  
   /*!
    * The name of the integrator displacement
+   * FIXME: parent class for \a IntegratorPosition s with displacement?
    */
   string m_displacement_name;
 
@@ -80,17 +74,18 @@ protected:
    */
   void init();
 
-public:
+  
+ public:
   /*!
    * Constructor
    * @param controller Pointer to the \a Controller object this \a Integrator belongs to
    */
-  IntegratorVelocityVerletDisp(Controller *controller);
+  IntegratorPosVelStep2(Controller *controller);
 
   /*!
    * Destructor
    */
-  virtual ~IntegratorVelocityVerletDisp();
+  virtual ~IntegratorPosVelStep2();
 
   /*!
    * Setup for this \a Integrator
@@ -98,18 +93,47 @@ public:
   virtual void setup();
 
   /*!
-   * Integration of the position and calculating the displacement
+   * Initialize temporary fields and clear all forces
+   */
+  virtual void isAboutToStart();
+
+  /*!
+   * Estimation of the velocity
+   */
+  virtual void integrateStep1();
+
+  /*!
+   * Correction of the velocity
+   */
+  virtual void integrateStep2();
+  
+  /*!
+   * Integration of the position and calculation of the displacement
    */
   virtual void integratePosition(Particle* p, Cell* cell);
 
   /*!
-   * Checks which of the times (in the time vector) is the actual hit position. The function will 
-be used in WallTriangle
+   * Prediction of the velocity
    */
-  virtual void hitPos(const double& dt, const Particle* p, point_t &hit_pos, 
-const point_t &force);
+  virtual void integrateVelocity(Particle* p);
+
+  /*!
+   * Solves the equation for times of hit-events of a  \a Particle with 
+   * a \a WallTriangle
+   */
+  virtual void solveHitTimeEquation
+    (WallTriangle* wallTriangle, const Particle* p,
+     const point_t& force, vector<double>* results);
+  
+  /*!
+   * Checks which of the times (in the time vector) is the actual hit 
+   * position. The function will be called by \a WallTriangle
+   */
+  virtual void hitPos(const double& dt, const Particle* p, point_t &hit_pos,
+		      const point_t &force);
 
 #ifdef _OPENMP
+  
   /*!
    * Returns the degrees of freedom string for this \a Integrator
    */
@@ -118,6 +142,7 @@ const point_t &force);
   /*!
    * Merge the copies at the end of every timestep
    */
+  virtual void mergeCopies(Particle* p, int thread_no, int force_index);
 
 #endif
 

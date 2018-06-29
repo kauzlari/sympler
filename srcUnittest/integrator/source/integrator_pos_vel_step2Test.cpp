@@ -29,64 +29,39 @@
  */
 
 
-#include "integrator_velocity_verletTest.h"
+#include "integrator_pos_vel_step2Test.h"
 #include <vector>
 
 
-CPPUNIT_TEST_SUITE_REGISTRATION (IntegratorVelocityVerletTest);
+CPPUNIT_TEST_SUITE_REGISTRATION (IntegratorPosVelStep2Test);
 
-void IntegratorVelocityVerletTest :: setUp (void)
+void IntegratorPosVelStep2Test :: setUp (void)
 {
   IntegratorPositionTest :: setUp();
   
-  m_integratorPositionTest = new IntegratorVelocityVerlet(m_controllerTest);
+  m_integratorPositionTest = new IntegratorPosVelStep2(m_controllerTest);
 }
 
-void IntegratorVelocityVerletTest :: tearDown (void) 
+void IntegratorPosVelStep2Test :: tearDown (void) 
 {
   IntegratorPositionTest :: tearDown();
   
   delete m_integratorPositionTest;
 }
 
-void IntegratorVelocityVerletTest :: integrateVelocityTest (void)
+void IntegratorPosVelStep2Test :: integrateVelocityTest (void)
 {
-  /*!
-   * Test integrating velocity of a particle
-   */
-  m_particleTest->v = { { {0.0, 0.0, 0.0} } };
-  m_particleTest->dt = 0.1;
-  m_particleTest->force[0] = { {70.0, -2.0, 0.0} };
-  m_integratorPositionTest -> integrateVelocity(m_particleTest);
-  point_t reference = { { {3.5, -0.1, 0.0} } };
-  CPPUNIT_ASSERT_EQUAL (reference, m_particleTest->v);
-
-  m_particleTest->v = { { {0.0, 0.0, 0.0} } };
-  m_particleTest->dt = 0.01;
-  m_particleTest->force[0] = { {-0.2, 2443, 90.0} };
-  m_integratorPositionTest -> integrateVelocity(m_particleTest);
-  reference = { { {-0.001, 12.215, 0.45} } };
-  CPPUNIT_ASSERT_EQUAL (reference, m_particleTest->v);
-
-  m_particleTest->v = { { {0.0, 0.0, 0.0} } };
-  m_particleTest->dt = 0.001;
-  m_particleTest->force[0] = { {0.0, -87.34, 1.0} };
-  m_integratorPositionTest -> integrateVelocity(m_particleTest);
-  reference = { { {0.0, -0.04367, 0.0005} } };
-  CPPUNIT_ASSERT_EQUAL (reference, m_particleTest->v);
+  IntegratorPositionTest :: integrateVelocityTest();
 }
 
-void IntegratorVelocityVerletTest :: hitPosTest (void)
+void IntegratorPosVelStep2Test :: hitPosTest (void)
 {
-  /*!
-   * Test computation of hit position
-   */
   point_t hit_posTest = { { {0.0, 0.0, 0.0} } };
   m_particleTest->r = { { {-1.0, 2.0, 4.0} } };
   m_particleTest->v = { { {2.0, -2.0, 3.0} } };
   point_t forceTest = { { {2.0, 2.0, 30.0} } };
   m_integratorPositionTest->hitPos(0.1, m_particleTest, hit_posTest, forceTest);
-  point_t reference = { { {-0.79, 1.81, 4.45} } };
+  point_t reference = { { {-0.8, 1.8, 4.3} } };
   CPPUNIT_ASSERT_EQUAL (reference, hit_posTest);
 
   hit_posTest = { { {0.0, 0.0, 0.0} } };
@@ -94,7 +69,8 @@ void IntegratorVelocityVerletTest :: hitPosTest (void)
   m_particleTest->v = { { {-22.2, 5.1, 0.0} } };
   forceTest = { { {1.0, 0.0, 130.0} } };
   m_integratorPositionTest->hitPos(0.01, m_particleTest, hit_posTest, forceTest);
-  reference = { { {-0.22195, 320.051, -1.3935} } };
+  // yes, same z-value because force does not have an effect and vz = 0!
+  reference = { { {-0.222, 320.051, -1.4} } };
   CPPUNIT_ASSERT_EQUAL (reference, hit_posTest);
 
   hit_posTest = { { {0.0, 0.0, 0.0} } };
@@ -102,7 +78,7 @@ void IntegratorVelocityVerletTest :: hitPosTest (void)
   m_particleTest->v = { { {-1.2, 11.0, 0.0} } };
   forceTest = { { {0.0, 0.1, 0.55} } };
   m_integratorPositionTest->hitPos(0.001, m_particleTest, hit_posTest, forceTest);
-  reference = { { {33.8988, 20.01100005, -3.999999725} } };
+  reference = { { {33.8988, 20.011, -4.0} } };
   CPPUNIT_ASSERT_EQUAL (reference, hit_posTest);
 }
 

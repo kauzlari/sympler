@@ -1,7 +1,11 @@
 
 noinst_LTLIBRARIES = libintegratorTest.la
 
-libintegratorTest_la_SOURCES = integrator_velocity_verletTest.cpp
+libintegratorTest_la_SOURCES = 	\
+	integrator_positionTest.cpp \
+	integrator_pos_vel_step2Test.cpp \
+	integrator_velocity_verletTest.cpp
+
 
 libintegratorTest_la_CXXFLAGS = @GSL_CFLAGS@ @SDL_CFLAGS@ @XML_CFLAGS@
 

@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -61,7 +61,6 @@ IntegratorPosition::~IntegratorPosition()
 }
 
 
-
 //---- Methods ----
 
 void IntegratorPosition::init()
@@ -100,33 +99,17 @@ void IntegratorPosition::isAboutToStart()
      ++counter;
     );
   if(counter == 0)
-    throw gError("IntegratorVelocityVerlet::isAboutToStart", "no free particles found for species " + m_species + "! Don't instantiate an Integrator for positions and velocities in that case. Use another module to create the species.");
+    throw gError("IntegratorPosition::isAboutToStart for module " + name(), "no free particles found for species " + m_species + "! Don't instantiate an Integrator for positions and velocities in that case. Use another module to create the species.");
   // FIXME: so we need some SpeciesCreator to make it more transparent
-  // FIXME: put all in this function into the general setup for Nodes after the particle creation or into s.th. even more general
+
 }
 
 
 void IntegratorPosition::integrateStep1()
 {
-//   FOR_EACH_FREE_PARTICLE_C
-//       (M_SIMULATION->phase(), 0,
-//        if(i->mySlot == 183)
-//        {
-//          MSG_DEBUG("IntegratorPosition::integrateStep1", i->mySlot << "BEFORE (N=" << M_SIMULATION->phase()->returnNofPart() << "):"
-//              << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1]);
-//        }
-//       );
 
  M_PHASE->invalidatePositions(this);
 
-//   FOR_EACH_FREE_PARTICLE_C
-//       (M_SIMULATION->phase(), 0,
-//        if(i->mySlot == 183)
-//        {
-//          MSG_DEBUG("IntegratorPosition::integrateStep1", i->mySlot << "AFTER (N=" << M_SIMULATION->phase()->returnNofPart() << "):"
-//              << endl << "r=" << i->r << endl << "v=" << i->v << endl << "dt="  << i->dt << endl << "f0="  << i->force[0] << endl << "f1="  << i->force[1]);
-//        }
-//       );
 }
 
 
@@ -153,7 +136,8 @@ void IntegratorPosition::solveHitTimeEquation(WallTriangle* wallTriangle, const 
 }
 
 
-void IntegratorPosition::hitPos(/*WallTriangle* wallTriangle, */double dt, const Particle* p, point_t &hit_pos, const point_t &force)
+void IntegratorPosition::hitPos
+(const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
 }
 

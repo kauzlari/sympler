@@ -220,6 +220,7 @@ void sayHello() {
 #include "integrator_omelyan.h"
 #include "integrator_omelyan_NR.h"
 #include "integrator_position.h"
+#include "integrator_pos_vel_step2.h"
 #include "integrator_scalar.h"
 #include "integrator_scalar_lambda.h"
 #include "integrator_static.h"
@@ -460,6 +461,7 @@ void link_all_properly()
 #endif
 #endif
   new IntegratorPosition(NULL);
+  new IntegratorPosVelStep2(NULL);
   new IntegratorScalar(NULL);
   new IntegratorScalarLambda(NULL);
   new IntegratorStatic(NULL);
