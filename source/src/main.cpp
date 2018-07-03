@@ -56,7 +56,7 @@
 using namespace std;
 
 // Don't change following line; pre-commit hook uses it to set version number (date of commit)
-const char* version = "defaultVersion";
+const char* version = "v2018.07.03";
 
 void link_all_properly();
 
