@@ -55,6 +55,9 @@
 
 using namespace std;
 
+// Don't change following line; pre-commit hook uses it to set version number (date of commit)
+const char* version = "v2018.07.03";
+
 void link_all_properly();
 
 void sayHello();
@@ -126,7 +129,8 @@ int main(int argc, char *argv[])
 }
 
 void sayHello() {
-  cout << endl << "SYMPLER: SYMbolic ParticLE simulatoR" << endl
+  cout << endl << "SYMPLER: SYMbolic ParticLE simulatoR "
+       << "(" << version << ")" << endl
        << "Copyright 2002-2018, David Kauzlaric and " << endl
        << "other authors listed in the AUTHORS file." << endl
        << "This program comes with ABSOLUTELY NO WARRANTY;" << endl
