@@ -133,6 +133,7 @@ void IntegratorVelocityVerletDisp::integratePosition(Particle* p, Cell* cell)
 void IntegratorVelocityVerletDisp::hitPos
 (const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
+  // FIXME: is "=" correct? Shouldn't it be "+=" ?
   m_disp = dt*(p->v + dt/2*force/m_mass);
 
   hit_pos = p->r + m_disp;

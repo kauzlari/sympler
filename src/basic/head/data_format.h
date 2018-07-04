@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -287,7 +287,7 @@ public:
     if (!attrExists(name))
       throw gError
         ("DataFormat::attrByName",
-         string("Attribute '") + name + "' does not exists. Possibilities: " + toString());
+         string("Attribute '") + name + "' does not exist. Possibilities: " + toString());
 
     return m_attr_by_name[name];
   }

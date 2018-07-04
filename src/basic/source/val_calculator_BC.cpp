@@ -66,13 +66,22 @@ void ValCalculatorBC::init()
   STRINGPC
       (symbol, m_symbolName,
        "Name of the symbol for the boundary value.");
+
+  m_symbolName = "BC";
   
   STRINGPC(wallSpecies, m_wallSpecies, 
            "Species of the wall particles."
           );
 
-  m_symbolName = "BC";
   m_wallSpecies = "undefined";
+
+  STRINGPC
+    (useOldFor, m_oldSymbols,
+     "Here, you can list the used symbols, which should be treated as \"old\", i.e., this calculator will not wait for those symbols to be computed beforehand, but it will take what it finds. Separate the symbols by the \"|\"- (\"pipe\"-) symbol."
+     );
+
+  m_oldSymbols = "---";
+
   m_frozen = true;
   
 #ifdef _OPENMP

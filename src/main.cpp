@@ -224,6 +224,7 @@ void sayHello() {
 #include "integrator_scalar.h"
 #include "integrator_scalar_lambda.h"
 #include "integrator_scalar_step2.h"
+#include "integrator_shift.h"
 #include "integrator_static.h"
 #include "integrator_tensor.h"
 #include "integrator_velocity_verlet_disp.h"
@@ -466,6 +467,7 @@ void link_all_properly()
   new IntegratorScalar(NULL);
   new IntegratorScalarLambda(NULL);
   new IntegratorScalarStep2(NULL);
+  new IntegratorShift(NULL);
   new IntegratorStatic(NULL);
 #ifdef WITH_ARRAY_TYPES
 #ifdef HAVE_JAMA_JAMA_LU_H

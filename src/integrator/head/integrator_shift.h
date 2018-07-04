@@ -29,8 +29,8 @@
  */
 
 
-#ifndef __INTEGRATOR_POS_VEL_STEP2_H
-#define __INTEGRATOR_POS_VEL_STEP2_H
+#ifndef __INTEGRATOR_SHIFT_H
+#define __INTEGRATOR_SHIFT_H
 
 #include "integrator_position.h"
 
@@ -43,13 +43,23 @@ class WallTriangle;
 class Cell;
 
 
-class IntegratorPosVelStep2: public IntegratorPosition
+class IntegratorShift: public IntegratorPosition
 {
   
  protected:
   
   /*!
-   * The name of the \a Particle displacement
+   * The symbol name of the externally computed shift used as input
+   */
+  string m_shift_symbol;
+
+  /*!
+   * The tag offset of the \a Particle shift
+   */
+  size_t m_shift_offset;
+
+  /*!
+   * The name of the integrator displacement
    * FIXME: parent class for \a IntegratorPosition s with displacement?
    */
   string m_displacement_name;
@@ -66,7 +76,7 @@ class IntegratorPosVelStep2: public IntegratorPosition
 
   /*! 
    * The current displacement for a \a Particle. Used to calculate the 
-   * absolute displacement of \a Particle in a timestep 
+   * absolute displacement of the current \a Particle in a timestep 
    */
   point_t m_disp;
 
@@ -81,12 +91,12 @@ class IntegratorPosVelStep2: public IntegratorPosition
    * Constructor
    * @param controller Pointer to the \a Controller object this \a Integrator belongs to
    */
-  IntegratorPosVelStep2(Controller *controller);
+  IntegratorShift(Controller *controller);
 
   /*!
    * Destructor
    */
-  virtual ~IntegratorPosVelStep2();
+  virtual ~IntegratorShift();
 
   /*!
    * Setup for this \a Integrator
