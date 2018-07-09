@@ -68,14 +68,14 @@ in Symbols such as 'Dwall' or 'g' compensate for the missing '-1'.
 
   <ValCalculatorNegDKernelDivr
      symbol="F2" 
-     species1="H"
-     species2="wall"
+     species2="H"
+     species1="wall"
      weightingFunction="Lucy1"     
   />
 
   <ValCalculatorKernel
-    species1 = "H"
-    species2 = "wall"
+    species2 = "H"
+    species1 = "wall"
     symbol = "W"
     weightingFunction="Lucy1"
   />
@@ -96,8 +96,8 @@ in Symbols such as 'Dwall' or 'g' compensate for the missing '-1'.
   />
 
   <PairParticleTensor
-    species1="H"
-    species2="wall"
+    species1="wall"
+    species2="H"
     symbol = "D"
     particleFactor_j = "Fij*(([vBCij]-[vj])@[rij]+[rij]@([vBCij]-[vj]))/ni"
     particleFactor_i = "unitMat(0)"
@@ -132,8 +132,8 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
     particleFactor_i = "unitMat(1/nj)"
     particleFactor_j = "unitMat(1/ni)"
     cutoff = "1"
-    species1 = "H"
-    species2 = "wall"
+    species2 = "H"
+    species1 = "wall"
   />
 
   <!-- detect the singular zero matrices in the interior and replace them by unit-matrix-->
@@ -152,8 +152,8 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
 
 
   <PairParticleScalar
-    species1 = "H"
-    species2 = "wall"
+    species2 = "H"
+    species1 = "wall"
     symbol = "norm"
     expression = "Wij"
     particleFactor_i = "1/nj"
@@ -165,8 +165,8 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
 
   <!-- the corrected "left" part of the shear tensor-->
   <PairParticleTensor
-    species1="H"
-    species2="wall"
+    species2="H"
+    species1="wall"
     symbol = "Dwall"
     particleFactor_j = "Fij*(([vBCij]-[vj])@[rij])°{Bj}/(ni)"
     particleFactor_i = "unitMat(0)"
@@ -189,8 +189,8 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
 />
 
   <PairParticleTensor
-     species1="H"
-     species2="wall"
+     species2="H"
+     species1="wall"
      expression="[rij]@((-(9.042556731554133*17.576/7)*(((nj/17.576)^7-1)/(nj*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij])+(-2*etawallj*([vj]-[vBCij])/(nj*nj)))*F2ij"
      symbol = "stress"
      cutoff="1"
@@ -219,8 +219,8 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
 
   <DirichletBCVels
     wallSpecies = "wall"
-    species1 = "H"
-    species2 = "wall"
+    species2 = "H"
+    species1 = "wall"
   />
 
   <ParticleScalar
@@ -259,15 +259,15 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
   />
 
   <FPairVelsWF
-    species1 = "H"
-    species2 = "wall"
+    species2 = "H"
+    species1 = "wall"
     pairFactor = "(9.042556731554133*17.576/7)*(((nj/17.576)^7-1)/(nj*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
     weightingFunction = "Lucy1"
   />
 
   <FPairVelsWF
-    species1 = "H"
-    species2 = "wall"
+    species2 = "H"
+    species1 = "wall"
     particleFactor_j = "-2*etawallj*([vj]-[vBCij])/(nj*nj)"
     particleFactor_i = "idVec(0)"
     weightingFunction = "Lucy1"
@@ -275,8 +275,8 @@ tau_y_real=436507.49999999977=437 kPa (measured at 50.5% was 1.8 kPa)
    />
 
   <FPairScalar
-    species1 = "H"
-    species2 = "wall"
+    species2 = "H"
+    species1 = "wall"
     particleFactor_j = "-([vj]-[vBCij]):[rij]"
     particleFactor_i = "0"
     weightingFunction = "Lucy1"

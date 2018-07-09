@@ -46,8 +46,8 @@
   />
 
   <PairParticleVector
-     species1="fluid"
-     species2="memba"
+     species2="fluid"
+     species1="memba"
      expression = "4.5*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
      symmetry = "-1"
      symbol = "FDfma"
@@ -55,8 +55,8 @@
   />
 
   <PairParticleVector
-     species1="fluid"
-     species2="membb"
+     species2="fluid"
+     species1="membb"
      expression = "4.5*((1-rij)^2)*(([vj]-[vi]):[rij])*[rij]/(rij*rij)"
      symmetry = "-1"
      symbol = "FDfmb"
@@ -89,16 +89,16 @@
  />
 
  <PairParticleVector
-	species1 = "fluid"
-	species2 = "memba"
+	species2 = "fluid"
+	species1 = "memba"
 	expression = "25*(1-rij)*[rij]/rij"
 	symmetry = "-1"
 	symbol = "FCfma"
 	cutoff ="1"
  />
  <PairParticleVector
-	species1 = "fluid"
-	species2 = "membb"
+	species2 = "fluid"
+	species1 = "membb"
 	expression = "25*(1-rij)*[rij]/rij"
 	symmetry = "-1"
 	symbol = "FCfmb"
