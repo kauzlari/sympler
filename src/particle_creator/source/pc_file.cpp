@@ -91,7 +91,7 @@ string ParticleCreatorFile::readNext(ifstream &pos) {
 void ParticleCreatorFile::createParticles() {
 
   MSG_DEBUG("ParticleCreatorFile::createParticles","start");
-    
+  
   Phase *phase = M_PHASE;
   ManagerCell *manager = M_MANAGER;
   ifstream pos(m_filename.c_str());
@@ -99,38 +99,40 @@ void ParticleCreatorFile::createParticles() {
   vector<list<pair<string, int> > > tags;
   vector<list<bool> > writeTags;
   string species;
-
+  
   initTransform();
-
+  
   if (!pos)
     throw gError("ParticleCreatorFile::createParticles", "Error opening file '" + m_filename + "'.");
-
+  
   tags.resize(manager->nColours());
   writeTags.resize(manager->nColours());
-
+  
   pos >> skipws >> s;
   // 1st while
   while (s != "!!!" && !pos.eof()) {
     
     size_t c;
-
+    
     species = s;
-    if (m_species == "UNDEF" || m_species == species){ 
+    if (m_species == "UNDEF" || m_species == species) { 
       c = manager->getColour(s);
     }
 
     pos >> skipws >> s;
-
+    
     // 2nd while: this loop is just entered if there are declared tag-fields
     while (s != "!!!" && !pos.eof()) {
       if (m_species == "UNDEF" || m_species == species) { 
 	
 	size_t slot, offset;
         bool tempBool = true;
-
+	
 	if(Particle::s_tag_format[c].attrExists(s)) {
+
 	  slot = Particle::s_tag_format[c].attrByName(s).index;
 	  offset = Particle::s_tag_format[c].attrByName(s).offset;
+
 	}
 	// don't write because not used in this simulation
 	else {
@@ -143,372 +145,365 @@ void ParticleCreatorFile::createParticles() {
         tags[c].push_back(pair<string, int>(s, slot));
         
 	if(tempBool) {
-
+	  
 	  // FIXME: from here, the next ~300 lines are a huge mess! Clean up and refactor! Compare how Symbol::findStage() was refactored. Can you use some of that? Do you have to loop over the sorted stages or can you take the unsorted ones as in Symbol::findStage()? Why this special loop over vCPs in case of OpenMP? 
 	  
 	  pair<size_t, size_t> theSlots;
-
+	  
 	  // in the following loops we check, whether there exists a
 	  // ValCalculator for the found tag. If yes, this ParticleCreator 
 	  // WILL NOT write the values from the file into the particles, since 
 	  // the ValCalculator will compute them during update of the PairList
-
+	  
 	  // first, loop over ColourPairs
 	  FOR_EACH_COLOUR_PAIR
 	    (
 	     manager,
-
-		 // loop over stages: should be OK, because Symbols are already sorted
-		 // see in Controller::run()
-		 
-		 for(size_t stage = 0; (stage <= cp->maxStage()/*ColourPair::s_maxStage*/ /*VC_MAX_STAGE*/ && tempBool); ++stage)
-		   {
-		     // MSG_DEBUG("ParticleCreatorFile::createParticles", "stage = " << stage);
-		     
-		     vector<ValCalculator*>& vCs = cp->valCalculators(stage);
-#ifdef _OPENMP
-		     vector<ValCalculator*> vCPs = cp->valCalculatorParts(stage);
-#endif
-		     // loop over ValCalculators
-		     for(vector<ValCalculator*>::iterator vCIt = vCs.begin(); 
-			 (vCIt != vCs.end() && tempBool); ++vCIt)
-		       {
-			 // MSG_DEBUG("ParticleCreatorFile::createParticles", "now VC = " << (*vCIt)->myName());
-			 // the FOR_EACH_COLOUR_PAIR does not seem to like the comma 
-			 // in pair<...
-			 //               pair<size_t, size_t> theSlots;
-			 try
-			   {
-			     (*vCIt)->mySlots(theSlots);
-			     // MSG_DEBUG("ParticleCreatorFile::createParticles", "theSlots = (" << theSlots.first << ", " << theSlots.second << "), offset = " << offset );
-
-
-			     // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
-// 			     if(cp->firstColour() == c)
-			     if(manager->getColour((*vCIt)->firstWriteSpecies()) == c)
-			       {
-				 if(theSlots.first == offset) 
-				   {
-				     if((*vCIt)->mySymbolName() != s) {
-				       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
-				       abort();
-				     }
-				     if(!(*vCIt)->doesOverwrite()) {
-				       tempBool = false;
-				       MSG_INFO("ParticleCreatorFile::createParticles", 
-						 "found " << (*vCIt)->myName() 
-						 << " for symbol " << (*vCIt)->mySymbolName() 
-						 << ". Skipping the corresponding column-values in" 
-						 " the particle file.");
-				     }
-				   }
-			       }
-			     else
-			       {
-			     // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
-				 if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
-
-				   if(theSlots.second == offset) {
-				     if((*vCIt)->mySymbolName() != s) {
-				       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
-				       abort();
-				     }
-				     if(!(*vCIt)->doesOverwrite()) {
-				       tempBool = false;
-				       MSG_INFO("ParticleCreatorFile::createParticles", 
-						 "found " << (*vCIt)->myName() 
-						 << " for symbol " << (*vCIt)->mySymbolName() 
-						 << ". Skipping the corresponding column-values in" 
-						 " the particle file.");               
-				     }
-				   }
-				 } // end of if (manager->getColour((*vCIt)->secondWriteSpecies()) == c)
-			       } // end of else of if ((*vCIt)->manager->getColour(firstWriteSpecies()) == c)
-			   } // end of try
-			 // that's if (*vCIt)->mySlots(theSlots) throws an exception
-			 catch(gError& err)
-			   {
-// 			     MSG_DEBUG("ParticleCreatorFile::createParticles", 
-// 				       "Ignoring ValCalculatorPair: " 
-// 				       << (*vCIt)->mySymbolName());
-			   }                
-		       } // end of for(vector<ValCalculator*>::iterator vCIt...
-#ifdef _OPENMP
-		     for(vector<ValCalculator*>::iterator vCIt = vCPs.begin(); 
-			 (vCIt != vCPs.end() && tempBool); ++vCIt) {
-		       // MSG_DEBUG("ParticleCreatorFile::createParticles", "now VC = " << (*vCIt)->myName());
-		       // the FOR_EACH_COLOUR_PAIR does not seem to like the comma 
-		       // in pair<...
-		       //               pair<size_t, size_t> theSlots;
-		       try {
-			 (*vCIt)->mySlots(theSlots);
-			 // MSG_DEBUG("ParticleCreatorFile::createParticles", "theSlots = (" << theSlots.first << ", " << theSlots.second << "), offset = " << offset );
-
-
-			 // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
-			 // if(cp->firstColour() == c) {
-			 if(manager->getColour((*vCIt)->firstWriteSpecies()) == c) {
-
-			   if(theSlots.first == offset) {
-			     if((*vCIt)->mySymbolName() != s) {
-			       MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
-			       abort();
-			     }
-			     if(!(*vCIt)->doesOverwrite()) {
-			       tempBool = false;
-			       MSG_INFO("ParticleCreatorFile::createParticles", 
-					 "found " << (*vCIt)->myName() 
-					 << " for symbol " << (*vCIt)->mySymbolName() 
-					 << ". Skipping the corresponding column-values in" 
-					 " the particle file.");
-			     }
-			     
-			   } // end of if(theSlots.first == offset)
-			 } // end of if(manager->getColour((*vCIt)->firstWriteSpecies()) == c)
-			 else {
-
-			   // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
-			   if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
-
-			     if(theSlots.second == offset) {
-			       if((*vCIt)->mySymbolName() != s) {
-				 MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
-				 abort();
-			       }
-			       if(!(*vCIt)->doesOverwrite()) {
-				 tempBool = false;
-				 MSG_INFO("ParticleCreatorFile::createParticles", 
-					   "found " << (*vCIt)->myName() 
-					   << " for symbol " << (*vCIt)->mySymbolName() 
-					   << ". Skipping the corresponding column-values in" 
-					   " the particle file.");               
-			       }
-			     }
-			   }
-			 } // end of else of if (manager->getColour((*vCIt)->firstWriteSpecies()) == c)
-			 
-		       } // end of try ...
-		       catch(gError& err) {
-// 			 MSG_DEBUG("ParticleCreatorFile::createParticles", 
-// 				   "Ignoring ValCalculatorPair: " 
-// 				   << (*vCIt)->mySymbolName());
-		       }
-		     } // end of for(vector<ValCalculator*>::iterator vCIt ...) ...
-#endif
-			 
-		   } // end of for(size_t stage = 0 ...)... 
-		 for(size_t stage = 0; (stage <= cp->maxStage_0()/*ColourPair::s_maxStage*/ /*VC_MAX_STAGE*/ && tempBool); ++stage) {
-		   
-		   vector<ValCalculator*>& vCs = cp->valCalculators_0(stage);
-#ifdef _OPENMP
-		   vector<ValCalculator*>& vCPs = cp->valCalculatorParts_0(stage);
-#endif
-		   // loop over ValCalculators
-		   for(vector<ValCalculator*>::iterator vCIt = vCs.begin(); 
-		       (vCIt != vCs.end() && tempBool); ++vCIt) {
-		     try {
-		       (*vCIt)->mySlots(theSlots);
-
-		       // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
-		       // if(cp->firstColour() == c) {
-		       if(manager->getColour((*vCIt)->firstWriteSpecies()) == c) {
-
-			 if(theSlots.first == offset) {
-			   if((*vCIt)->mySymbolName() != s) {
-			     MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
-			     abort();
-			   }
-			   if(!(*vCIt)->doesOverwrite()) {
-			     tempBool = false;
-			     MSG_INFO("ParticleCreatorFile::createParticles", 
-				       "found " << (*vCIt)->myName() 
-				       << " for symbol " << (*vCIt)->mySymbolName() 
-				       << ". Skipping the corresponding column-values in" 
-				       " the particle file.");
-			   }
-			 }
-		       }
-		       else {
-
-			 // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
-			 if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
-
-			   if(theSlots.second == offset) {
-			     if((*vCIt)->mySymbolName() != s) {
-			       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
-			       abort();
-			     }
-			     if(!(*vCIt)->doesOverwrite()) {
-			       tempBool = false;
-			       MSG_INFO("ParticleCreatorFile::createParticles", 
-					 "found " << (*vCIt)->myName() 
-					 << " for symbol " << (*vCIt)->mySymbolName() 
-					 << ". Skipping the corresponding column-values in" 
-					 " the particle file.");               
-			     }
-			   }
-			 }
-		       }
-		     }
-		     catch(gError& err) {
-// 		       MSG_DEBUG("ParticleCreatorFile::createParticles", 
-// 				 "Ignoring ValCalculatorPair: " 
-// 				 << (*vCIt)->mySymbolName());
-		     }
-		   }
-#ifdef _OPENMP
-		   for(vector<ValCalculator*>::iterator vCIt = vCPs.begin(); 
-		       (vCIt != vCPs.end() && tempBool); ++vCIt) {
-		     try {
-		       (*vCIt)->mySlots(theSlots);
-
-		       // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
-		       // if(cp->firstColour() == c) {
-		       if(manager->getColour((*vCIt)->firstWriteSpecies()) == c) {
-
-			 if(theSlots.first == offset) {
-			   if((*vCIt)->mySymbolName() != s) {
-			     MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
-			     abort();
-			   }
-			   if(!(*vCIt)->doesOverwrite()) {
-			     tempBool = false;
-			     MSG_INFO("ParticleCreatorFile::createParticles", 
-				       "found " << (*vCIt)->myName() 
-				       << " for symbol " << (*vCIt)->mySymbolName() 
-				       << ". Skipping the corresponding column-values in" 
-				       " the particle file.");
-			   }
-			 }
-		       }
-		       else {
-
-			 // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
-			 if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
-
-			   if(theSlots.second == offset) {
-			     if((*vCIt)->mySymbolName() != s) {
-			       MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
-			       abort();
-			     }
-			     if(!(*vCIt)->doesOverwrite()) {
-			       tempBool = false;
-			       MSG_INFO("ParticleCreatorFile::createParticles", 
-					 "found " << (*vCIt)->myName() 
-					 << " for symbol " << (*vCIt)->mySymbolName() 
-					 << ". Skipping the corresponding column-values in" 
-					 " the particle file.");               
-			     }
-			   }
-			 }
-		       }
-		     }
-		     catch(gError& err) {
-// 		       MSG_DEBUG("ParticleCreatorFile::createParticles", 
-// 				 "Ignoring ValCalculatorPair: " 
-// 				 << (*vCIt)->mySymbolName());
-		     }
-		   }
-#endif
-		 }
-		     
-		 // can we stop FOR_EACH_COLOUR_PAIR now?
-		 if(!tempBool)
-		   {
-		     __cp = __end;
-		     // important because there still comes the ++__cp from the loop
-		     --__cp;
-		   }
-
-	     );
 	     
-	     // do we also have to search in the ParticleCaches? ...
-	     if(tempBool)
-	       {// ... yes we have to search in the ParticleCaches
-
-		 // also loop over colours because a ParticleCache my generally write in any colour;
-		 for(size_t col = 0; col < phase->nColours(); ++col) {
+	     // loop over stages: should be OK, because Symbols are already sorted
+	     // see in Controller::run()
+	     
+	     for(size_t stage = 0; (stage <= cp->maxStage() && tempBool); ++stage) {
+	       // MSG_DEBUG("ParticleCreatorFile::createParticles", "stage = " << stage);
+	       
+	       vector<ValCalculator*>& vCs = cp->valCalculators(stage);
+#ifdef _OPENMP
+	       vector<ValCalculator*> vCPs = cp->valCalculatorParts(stage);
+#endif
+	       // loop over ValCalculators
+	       for(vector<ValCalculator*>::iterator vCIt = vCs.begin(); 
+		   (vCIt != vCs.end() && tempBool); ++vCIt) {
+		 MSG_DEBUG("ParticleCreatorFile::createParticles", "now VC = " << (*vCIt)->myName() << " with symbolName = " << (*vCIt)->mySymbolName());
+		 // the FOR_EACH_COLOUR_PAIR does not seem to like the comma 
+		 // in pair<...
+		 //               pair<size_t, size_t> theSlots;
+		 try {
+		   (*vCIt)->mySlots(theSlots);
+		   MSG_DEBUG("ParticleCreatorFile::createParticles", "For this VC, theSlots = (" << theSlots.first << ", " << theSlots.second << "), offset = " << offset );
 		   
-		   // loop over stages
-		   for(size_t stage = 0; stage <= Particle::s_maxStage && tempBool; ++stage)
-		     {
-		       if (Particle::s_cached_properties[col].size() > stage) {
-			 FOR_EACH
-			   (vector<ParticleCache*>,
-			    Particle::s_cached_properties[col][stage],
+		   
+		   // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
+		   // 			     if(cp->firstColour() == c)
+		   if(manager->getColour((*vCIt)->firstWriteSpecies()) == c) {
 
-			    // also check colours because a ParticleCache my generally write in any colour;
-			    if ((*(*__iFE)).writeColour() == c && (*(*__iFE)).offset() == offset) {
-				if((*(*__iFE)).mySymbolName() != s)
-				  throw gError("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ParticleCache (stage 1) calculating symbol " + (*(*__iFE)).mySymbolName() + " at same memory position. Contact the programmers. Read-species of this ParticleCache: " + manager->species(col) + ". Write-species of this ParticleCache: " + manager->species(c));
-				else {
-				  if(!(*(*__iFE)).doesOverwrite()) {
-				    MSG_INFO("ParticleCreatorFile::createParticles", 
-					      "found " << (*(*__iFE)).myName() 
-					      << " for symbol " << (*(*__iFE)).mySymbolName() 
-					      << ". Skipping the corresponding column-values in" 
-					      " the particle file.");
-				    tempBool = false;
-				  }
-				}
-			    }
-			    // may we abort the loop over the ParticleCaches?
-			    if(!tempBool)
-			      {
-				__iFE = __end;
-				// important because there still comes the ++__iFE from the loop
-				--__iFE; 
-			      }
-			    );
+		     MSG_DEBUG("ParticleCreatorFile::createParticles", "first species \"" << (*vCIt)->firstWriteSpecies() << "\" of VC matches and has colour " << c);
+		     
+		     if(theSlots.first == offset) {
+		       if((*vCIt)->mySymbolName() != s) {
+			 MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
+			 abort();
 		       }
-		     if (Particle::s_cached_properties_0[col].size() > stage) 
-		       {
-			 FOR_EACH
-			   (
-			    
-			    vector<ParticleCache*>,
-			    Particle::s_cached_properties_0[col][stage],
+		       if(!(*vCIt)->doesOverwrite()) {
+			 tempBool = false;
+			 MSG_INFO("ParticleCreatorFile::createParticles", 
+				  "found " << (*vCIt)->myName() 
+				  << " for symbol " << (*vCIt)->mySymbolName() 
+				  << ". Skipping the corresponding column-values in" 
+				  " the particle file.");
+		       }
+		     }
+		   } // end of if(manager->getColour((*vCIt)->firstWriteSpecies()) == c)
+		   else {
+		     // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
+		     if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
 
-			    // also check colours now (2011-05-18) because a ParticleCache my generally write in any colour;
-			    if ((*(*__iFE)).writeColour() == c && (*(*__iFE)).offset() == offset) {
-			      if((*(*__iFE)).mySymbolName() != s)
-				throw gError("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ParticleCache (stage 0) calculating symbol \"" + (*(*__iFE)).mySymbolName() + "\" at same memory position. Contact the programmers. Read-species of this ParticleCache: " + manager->species(col) + ". Write-species of this ParticleCache: " + manager->species(c));
-			      else {
-				  if(!(*(*__iFE)).doesOverwrite()) {
-				    MSG_INFO("ParticleCreatorFile::createParticles", 
-					      "found " << (*(*__iFE)).myName() 
-					      << " for symbol " << (*(*__iFE)).mySymbolName() 
-					      << ". Skipping the corresponding column-values in" 
-					      " the particle file.");
-				    tempBool = false;
-				  }
-			      }
-			      
-			    }
-			    // may we abort the loop over the ParticleCaches?
-			    if(!tempBool)
-			      {
-				__iFE = __end;
-				// important because there still comes the ++__iFE from the loop
-				--__iFE; 
-			      }
-			    );
+		     MSG_DEBUG("ParticleCreatorFile::createParticles", "second species \"" << (*vCIt)->secondWriteSpecies() << "\" of VC matches and has colour " << c);
+		       
+		       if(theSlots.second == offset) {
+			 if((*vCIt)->mySymbolName() != s) {
+			   MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ValCalculator calculating symbol \"" + (*vCIt)->mySymbolName() + "\" at same memory position. Contact the programmers. Aborting.");
+			   abort();
+			 }
+			 if(!(*vCIt)->doesOverwrite()) {
+			   tempBool = false;
+			   MSG_INFO("ParticleCreatorFile::createParticles", 
+				    "found " << (*vCIt)->myName() 
+				    << " for symbol " << (*vCIt)->mySymbolName() 
+				    << ". Skipping the corresponding column-values in" 
+				    " the particle file.");               
+			 }
 		       }
-		     } // end of for(size_t stage = 0...)
-		 } // end of for(size_t col = 0; col < phase->nColours(); ++col)
-		 
+		     } // end of if (manager->getColour((*vCIt)->secondWriteSpecies()) == c)
+		   } // end of else of if ((*vCIt)->manager->getColour(firstWriteSpecies()) == c)
+		 } // end of try
+		 // that's if (*vCIt)->mySlots(theSlots) throws an exception
+		 catch(gError& err) {
+		   // MSG_DEBUG("ParticleCreatorFile::createParticles", 
+		   //	       "Ignoring ValCalculatorPair: " 
+		   //	       << (*vCIt)->mySymbolName());
+		 }                
+	       } // end of for(vector<ValCalculator*>::iterator vCIt...
+#ifdef _OPENMP
+	       for(vector<ValCalculator*>::iterator vCIt = vCPs.begin(); 
+		   (vCIt != vCPs.end() && tempBool); ++vCIt) {
+		 // MSG_DEBUG("ParticleCreatorFile::createParticles", "now VC = " << (*vCIt)->myName());
+		 // the FOR_EACH_COLOUR_PAIR does not seem to like the comma 
+		 // in pair<...
+		 //               pair<size_t, size_t> theSlots;
+		 try {
+		   (*vCIt)->mySlots(theSlots);
+		   // MSG_DEBUG("ParticleCreatorFile::createParticles", "theSlots = (" << theSlots.first << ", " << theSlots.second << "), offset = " << offset );
+		   
+		   
+		   // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
+		   // if(cp->firstColour() == c) {
+		   if(manager->getColour((*vCIt)->firstWriteSpecies()) == c) {
+		     
+		     if(theSlots.first == offset) {
+		       if((*vCIt)->mySymbolName() != s) {
+			 MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			 abort();
+		       }
+		       if(!(*vCIt)->doesOverwrite()) {
+			 tempBool = false;
+			 MSG_INFO("ParticleCreatorFile::createParticles", 
+				  "found " << (*vCIt)->myName() 
+				  << " for symbol " << (*vCIt)->mySymbolName() 
+				  << ". Skipping the corresponding column-values in" 
+				  " the particle file.");
+		       }		       
+		     } // end of if(theSlots.first == offset)
+		   } // end of if(manager->getColour((*vCIt)->firstWriteSpecies()) == c)
+		   else {
+		     
+		     // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
+		     if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
+		       
+		       if(theSlots.second == offset) {
+			 if((*vCIt)->mySymbolName() != s) {
+			   MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			   abort();
+			 }
+			 if(!(*vCIt)->doesOverwrite()) {
+			   tempBool = false;
+			   MSG_INFO("ParticleCreatorFile::createParticles", 
+				    "found " << (*vCIt)->myName() 
+				    << " for symbol " << (*vCIt)->mySymbolName() 
+				    << ". Skipping the corresponding column-values in" 
+				    " the particle file.");               
+			 }
+		       }
+		     }
+		   } // end of else of if (manager->getColour((*vCIt)->firstWriteSpecies()) == c)  
+		 } // end of try ...
+		 catch(gError& err) {
+		   // 			 MSG_DEBUG("ParticleCreatorFile::createParticles", 
+		   // 				   "Ignoring ValCalculatorPair: " 
+		   // 				   << (*vCIt)->mySymbolName());
+		 }
+	       } // end of for(vector<ValCalculator*>::iterator vCIt ...) ...
+#endif
+	       
+	     } // end of for(size_t stage = 0 ...)... 
+	     for(size_t stage = 0; (stage <= cp->maxStage_0()/*ColourPair::s_maxStage*/ /*VC_MAX_STAGE*/ && tempBool); ++stage) {
+	       
+	       vector<ValCalculator*>& vCs = cp->valCalculators_0(stage);
+#ifdef _OPENMP
+	       vector<ValCalculator*>& vCPs = cp->valCalculatorParts_0(stage);
+#endif
+	       // loop over ValCalculators
+	       for(vector<ValCalculator*>::iterator vCIt = vCs.begin(); 
+		   (vCIt != vCs.end() && tempBool); ++vCIt) {
+		 try {
+		   (*vCIt)->mySlots(theSlots);
+		   
+		   // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
+		   // if(cp->firstColour() == c) {
+		   if(manager->getColour((*vCIt)->firstWriteSpecies()) == c) {
+		     
+		     if(theSlots.first == offset) {
+		       if((*vCIt)->mySymbolName() != s) {
+			 MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			 abort();
+		       }
+		       if(!(*vCIt)->doesOverwrite()) {
+			 tempBool = false;
+			 MSG_INFO("ParticleCreatorFile::createParticles", 
+				  "found " << (*vCIt)->myName() 
+				  << " for symbol " << (*vCIt)->mySymbolName() 
+				  << ". Skipping the corresponding column-values in" 
+				  " the particle file.");
+		       }
+		     }
+		   }
+		   else {
+		     
+		     // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
+		     if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
+		       
+		       if(theSlots.second == offset) {
+			 if((*vCIt)->mySymbolName() != s) {
+			   MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			   abort();
+			 }
+			 if(!(*vCIt)->doesOverwrite()) {
+			   tempBool = false;
+			   MSG_INFO("ParticleCreatorFile::createParticles", 
+				    "found " << (*vCIt)->myName() 
+				    << " for symbol " << (*vCIt)->mySymbolName() 
+				    << ". Skipping the corresponding column-values in" 
+				    " the particle file.");               
+			 }
+		       }
+		     }
+		   }
+		 }
+		 catch(gError& err) {
+		   // MSG_DEBUG("ParticleCreatorFile::createParticles", 
+		   //	 "Ignoring ValCalculatorPair: " 
+		   //	 << (*vCIt)->mySymbolName());
+		 }
 	       }
+#ifdef _OPENMP
+	       for(vector<ValCalculator*>::iterator vCIt = vCPs.begin(); 
+		   (vCIt != vCPs.end() && tempBool); ++vCIt) {
+		 try {
+		   (*vCIt)->mySlots(theSlots);
+		   
+		   // next "if" not needed anymore (2011-05-18) because Calcs from any cp may generally write in any c 
+		   // if(cp->firstColour() == c) {
+		   if(manager->getColour((*vCIt)->firstWriteSpecies()) == c) {
+		     
+		     if(theSlots.first == offset) {
+		       if((*vCIt)->mySymbolName() != s) {
+			 MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			 abort();
+		       }
+		       if(!(*vCIt)->doesOverwrite()) {
+			 tempBool = false;
+			 MSG_INFO("ParticleCreatorFile::createParticles", 
+				  "found " << (*vCIt)->myName() 
+				  << " for symbol " << (*vCIt)->mySymbolName() 
+				  << ". Skipping the corresponding column-values in" 
+				  " the particle file.");
+		       }
+		     }
+		   }
+		   else {
+		     
+		     // next "if" now needed (2011-05-18) because Calcs from any cp may generally write in any c 
+		     if (manager->getColour((*vCIt)->secondWriteSpecies()) == c) {
+		       
+		       if(theSlots.second == offset) {
+			 if((*vCIt)->mySymbolName() != s) {
+			   MSG_INFO("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ValCalculator calculating symbol " + (*vCIt)->mySymbolName() + " at same memory position. Contact the programmers.");
+			   abort();
+			 }
+			 if(!(*vCIt)->doesOverwrite()) {
+			   tempBool = false;
+			   MSG_INFO("ParticleCreatorFile::createParticles", 
+				    "found " << (*vCIt)->myName() 
+				    << " for symbol " << (*vCIt)->mySymbolName() 
+				    << ". Skipping the corresponding column-values in" 
+				    " the particle file.");               
+			 }
+		       }
+		     }
+		   }
+		 }
+		 catch(gError& err) {
+		   // MSG_DEBUG("ParticleCreatorFile::createParticles", 
+		   //		 "Ignoring ValCalculatorPair: " 
+		   //		 << (*vCIt)->mySymbolName());
+		 }
+	       }
+#endif
+	     }
+	     
+	     // can we stop FOR_EACH_COLOUR_PAIR now?
+	     if(!tempBool) {
+	       __cp = __end;
+	       // important because there still comes the ++__cp from the loop
+	       --__cp;
+	     }
+	     
+	     );
+	  
+	  // do we also have to search in the ParticleCaches? ...
+	  if(tempBool) {// ... yes we have to search in the ParticleCaches
+	    
+	    // also loop over colours because a ParticleCache my generally write in any colour;
+	    for(size_t col = 0; col < phase->nColours(); ++col) {
+	      
+	      // loop over stages
+	      for(size_t stage = 0; stage <= Particle::s_maxStage && tempBool; ++stage) {
+		if (Particle::s_cached_properties[col].size() > stage) {
+		  FOR_EACH
+		    (vector<ParticleCache*>,
+		     Particle::s_cached_properties[col][stage],
+		     
+		     // also check colours because a ParticleCache my generally write in any colour;
+		     if ((*(*__iFE)).writeColour() == c && (*(*__iFE)).offset() == offset) {
+		       if((*(*__iFE)).mySymbolName() != s) {
+			 MSG_DEBUG("ParticleCreatorFile::createParticles", "Fatal error for symbol " + s + "from particle-file! Found ParticleCache (stage 1) calculating symbol " + (*(*__iFE)).mySymbolName() + " at same memory position. Contact the programmers. Read-species of this ParticleCache: " + manager->species(col) + ". Write-species of this ParticleCache: " + manager->species(c));
+		       abort();
+		       }
+		       else {
+			 if(!(*(*__iFE)).doesOverwrite()) {
+			   MSG_INFO("ParticleCreatorFile::createParticles", 
+				    "found " << (*(*__iFE)).myName() 
+				    << " for symbol " << (*(*__iFE)).mySymbolName() 
+				    << ". Skipping the corresponding column-values in" 
+				    " the particle file.");
+			   tempBool = false;
+			 }
+		       }
+		     }
+		     // may we abort the loop over the ParticleCaches?
+		     if(!tempBool) {
+		       __iFE = __end;
+		       // important because there still comes the ++__iFE from the loop
+		       --__iFE; 
+		     }
+		     );
+		}
+		if (Particle::s_cached_properties_0[col].size() > stage) {
+		  FOR_EACH
+		    (
+		     
+		     vector<ParticleCache*>,
+		     Particle::s_cached_properties_0[col][stage],
+		     
+		     // also check colours now (2011-05-18) because a ParticleCache my generally write in any colour;
+		     if ((*(*__iFE)).writeColour() == c && (*(*__iFE)).offset() == offset) {
+		       if((*(*__iFE)).mySymbolName() != s)
+			 throw gError("ParticleCreatorFile::createParticles", "Fatal error for symbol \"" + s + "\" from particle-file! Found ParticleCache (stage 0) calculating symbol \"" + (*(*__iFE)).mySymbolName() + "\" at same memory position. Contact the programmers. Read-species of this ParticleCache: " + manager->species(col) + ". Write-species of this ParticleCache: " + manager->species(c));
+		       else {
+			 if(!(*(*__iFE)).doesOverwrite()) {
+			   MSG_INFO("ParticleCreatorFile::createParticles", 
+				    "found " << (*(*__iFE)).myName() 
+				    << " for symbol " << (*(*__iFE)).mySymbolName() 
+				    << ". Skipping the corresponding column-values in" 
+				    " the particle file.");
+			   tempBool = false;
+			 }
+		       }
+		       
+		     }
+		     // may we abort the loop over the ParticleCaches?
+		     if(!tempBool)
+		       {
+			 __iFE = __end;
+			 // important because there still comes the ++__iFE from the loop
+			 --__iFE; 
+		       }
+		     );
+		}
+	      } // end of for(size_t stage = 0...)
+	    } // end of for(size_t col = 0; col < phase->nColours(); ++col)
+	    
+	  }
 	} // end of if(tempBool) for search in Calculators and Caches if true
 	if(tempBool) 
 	  MSG_INFO("ParticleCreatorFile::createParticles", "I will write the tag " << s);
-
+	
 	// c always meaningful because of if (m_species == "UNDEF" || m_species == species)
 	writeTags[c].push_back(tempBool);
 	
       } // end of if (m_species == "UNDEF" || m_species == species)
       
       pos >> skipws >> s;
-
+      
     } // end of 2nd while (s != "!!!" && !pos.eof()) (just entered if tag-fields have been declared in the file)
     
     if (pos.eof())
@@ -520,10 +515,10 @@ void ParticleCreatorFile::createParticles() {
   
   // initial read for species of real particle data starting now   
   pos >> skipws >> species;
-
+  
   // 3rd while (for the real particle data)
   while (species != "!!!" && !pos.eof()) {
-
+    
     Particle p;
     Cell *c;
     size_t colour;
@@ -535,12 +530,12 @@ void ParticleCreatorFile::createParticles() {
       
       readParticle(p,pos,freeOrFrozen);
       p.setColour(colour);
-
+      
       list<bool>::iterator boolIt = writeTags[colour].begin();
       for (list<pair<string, int> >::iterator j = tags[colour].begin(); j != tags[colour].end(); j++) {
-
+	
 	s = readNext(pos);
-
+	
 	if(*boolIt) {
 	  p.tag.fromStringByIndex(j->second, s);
 	}
@@ -551,25 +546,25 @@ void ParticleCreatorFile::createParticles() {
       
       c = manager->findCell(p.r);
       if (c) {
-    
+	
         if(m_particlesInside){
-         if (M_BOUNDARY->isInside(p.r)) {
-           p.g = c->group();
-	  
-           if (freeOrFrozen == "frozen")
-	    m_particles_frozen[p.g].newEntry() = p;
-	  else
-	    m_particles[p.g].newEntry() = p;
+	  if (M_BOUNDARY->isInside(p.r)) {
+	    p.g = c->group();
+	    
+	    if (freeOrFrozen == "frozen")
+	      m_particles_frozen[p.g].newEntry() = p;
+	    else
+	      m_particles[p.g].newEntry() = p;
           }
 	}
         if(!m_particlesInside){        
-         if (!(M_BOUNDARY->isInside(p.r))) {
-           p.g = c->group();
-	  
-           if (freeOrFrozen == "frozen")
-	    m_particles_frozen[p.g].newEntry() = p;
-	  else
-	    m_particles[p.g].newEntry() = p;
+	  if (!(M_BOUNDARY->isInside(p.r))) {
+	    p.g = c->group();
+	    
+	    if (freeOrFrozen == "frozen")
+	      m_particles_frozen[p.g].newEntry() = p;
+	    else
+	      m_particles[p.g].newEntry() = p;
           }
 	}
       }
@@ -579,10 +574,10 @@ void ParticleCreatorFile::createParticles() {
       // ignore this line since species not used in this simulation
       getline(pos, species);
     }
-
+    
     // read species at beginning of next line for next round of loop
     pos >> skipws >> species;
-
+    
   } // end of 3rd while(species != "!!!" ...) (for the real particle data)
   pos.close();
   /* next will call the one in ParticleCreatorFree */

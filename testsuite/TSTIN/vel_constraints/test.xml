@@ -109,8 +109,8 @@
 			  weightingFunction = "Lucy1"
 			  />
 		  <PairParticleVector
-		    species1 = "H"
-		    species2 = "wall"
+		    species2 = "H"
+		    species1 = "wall"
 		    expression = "(0.000002843771238760281*17.576/7)*(((nj/17.576)^7-1)/(nj*ni)+((nj/17.576)^7-1)/(nj*nj))*[rij]"
 		    symbol = "FPWall"
 		    cutoff = "1"
@@ -119,16 +119,16 @@
 		<!--Boundary conditions viscous forces-->
  
 		<FPairVelsWF
-			  species1 = "H"
-			  species2 = "wall"
+			  species2 = "H"
+			  species1 = "wall"
 			  particleFactor_j = "-2*1*([vj]-[vBCij])/(nj*nj)"
 			  particleFactor_i = "idVec(0)"
 			  weightingFunction = "Lucy1"
 			  symmetry = "1"
 			  />
 		<PairParticleVector
-		  species1 = "H"
-		  species2 = "wall"
+		  species2 = "H"
+		  species1 = "wall"
 		  particleFactor_j = "-2*1*([vj]-[vBCij])/(nj*nj)"
 		  particleFactor_i = "idVec(0)"
 		  symbol = "FEtaWall"
@@ -137,8 +137,8 @@
 		/>
 		<!--Boundary conditions computation of density-->
 		<FPairScalar
-			    species1 = "H"
-			    species2 = "wall"
+			    species2 = "H"
+			    species1 = "wall"
 			    particleFactor_j = "-(-[vj]):[rij]"
 			    particleFactor_i = "0"
 			    weightingFunction = "Lucy1"
