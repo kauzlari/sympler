@@ -324,7 +324,7 @@ void ValCalculatorArbitrary::setup()
        
        } // end of else of if(++cpTester == __end)
        ); // end of loop over ColourPairs
-  } // end of if(all_Pairs)
+  } // end of if(m_all_Pairs)
  else /*m_allPairs == false*/ {
 
     if(m_species.first == "undefined")
@@ -332,6 +332,13 @@ void ValCalculatorArbitrary::setup()
     if(m_species.second == "undefined")
       throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + " for symbol " + m_symbolName + ": Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled."); 
 
+    size_t firstColour = M_MANAGER->getColour(m_species.first);
+    size_t secondColour = M_MANAGER->getColour(m_species.second);
+
+    if(secondColour < firstColour)
+      throw gError
+	("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + " for symbol \"" + m_symbolName +  "\": Forbidden order of species, since colourRank(species1) = " + ObjToString(firstColour) + " > " + "colourRank(species2) = " + ObjToString(secondColour) + ". Please swap the arguments of attributes 'species1' and 'species2'. The colourRank of species is determined by the order of their definition by the Integrators. The first Integrator for a species counts.");
+    
     ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second));
     
     cp->setCutoff(m_cutoff);
@@ -364,7 +371,7 @@ void ValCalculatorArbitrary::setup()
       
       // see CONVENTION5 for rule about persistencies
       m_slots.first = Particle::s_tag_format[cp->firstColour()].addAttribute(m_symbolName, m_datatype, /*persist.first*/false, m_symbolName).offset;
-  
+
       if(cp->firstColour() != cp->secondColour()) {
         // see CONVENTION5 for rule about persistencies
         m_slots.second = Particle::s_tag_format[cp->secondColour()].addAttribute(m_symbolName, m_datatype, /*persist.second*/false, m_symbolName).offset;
