@@ -79,7 +79,7 @@ else
 }
 #Compile the code
 print"CONFIGURATION PROGRESSING...\n";
-$com= `$Bin/../configure --with-tnt --with-superlu CXXFLAGS="-O3 -g" > configout.txt 2>&1`; 
+$com= `CXXFLAGS="-O3 -g" cmake -Dtnt=1 -DIntegratorStaticLSE=1 $Bin/.. > configout.txt 2>&1`; 
 if($com == 0)
 {
 	print"CONFIGURATION DONE\n";
@@ -132,7 +132,7 @@ foreach $dir (@dirs)
  	  $SIG{ALRM}=
  	  sub{ die "Timeout, test input '$dir.xml' took more than 2 minutes to run!\n"; };
 	  alarm 120;
-  	  $test=system("$builddir/src/sympler $Bin/TSTIN/$dir/test.xml > /tmp/test_$dir.txt 2>&1");
+  	  $test=system("$builddir/sympler $Bin/TSTIN/$dir/test.xml > /tmp/test_$dir.txt 2>&1");
 	  alarm 0;
        	 };
 
