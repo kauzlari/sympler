@@ -1,4 +1,0 @@
-SUBDIRS = \
-	head \
-	source \
-	stl
