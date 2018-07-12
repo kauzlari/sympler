@@ -116,6 +116,7 @@ void IntegratorVelocityVerletDisp::integratePosition(Particle* p, Cell* cell)
   // will also compute m_disp in IntegratorVelocityVerletDisp::hitPos
   cell->doCollision(p, p->r, p->v, accel, (IntegratorPosition*) this); 
 
+  // m_disp = 0.0 if no hit
   p->tag.pointByOffset(this->m_displacement_offset) += m_disp - p->r;
 
   p->r += p->dt * (p->v + 0.5 * p->dt * accel);  
@@ -133,7 +134,7 @@ void IntegratorVelocityVerletDisp::integratePosition(Particle* p, Cell* cell)
 void IntegratorVelocityVerletDisp::hitPos
 (const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
-  // FIXME: is "=" correct? Shouldn't it be "+=" ?
+  // stores disp up to the hit. So should be "="
   m_disp = dt*(p->v + dt/2*force/m_mass);
 
   hit_pos = p->r + m_disp;

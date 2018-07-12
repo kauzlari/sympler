@@ -159,6 +159,7 @@ void IntegratorShift::integrateStep2()
 void IntegratorShift::integratePosition(Particle* p, Cell* cell)
 {
   point_t& pDisp = p->tag.pointByOffset(m_displacement_offset);
+  const point_t& pShift = p->tag.pointByOffset(m_shift_offset);
 
   // is not 0. but should be irrelevant for the collision algorithm
   // since the new shift is the only input for the new position
@@ -168,14 +169,16 @@ void IntegratorShift::integratePosition(Particle* p, Cell* cell)
   // will also compute m_disp and set a new (inverted and decreased)
   // shift in IntegratorShift::hitPos
   cell->doCollision(p, p->r, p->v, accel, (IntegratorPosition*) this);
-
-  pDisp += m_disp - p->r;
   
-  // the remaining shift (if there was a hit, then in the opposite
-  // direction of the original one)  
-  p->r += p->tag.pointByOffset(m_shift_offset);
+  // the total shift or the remaining one (if there was a hit, then in
+  // the opposite direction of the original one)  
+  p->r += pShift;
 
-  pDisp += p->r;
+  // m_disp = 0.0 if there was no hit
+  pDisp += m_disp;
+
+  // the net shift if there was a hit (and also if not)
+  pDisp += pShift;
   
   // for next usage
   m_disp.assign(0);
@@ -198,33 +201,63 @@ void IntegratorShift::solveHitTimeEquation(WallTriangle* wallTriangle, const Par
   const point_t& shiftVec = p->tag.pointByOffset(m_shift_offset);
   const point_t& surface_normal = wallTriangle->normal();
 
-  // Here, the "*" are scalar products!
-  double ratio =
-    // shift component normal to plane of WallTriangle
-    (surface_normal * p->r - wallTriangle->nDotR())
-    // normal distance of p->r to plane of WallTriangle
-    / (surface_normal * shiftVec);
+  // The "*" between two point_t are scalar products!
   
-  // "time" of the hit tHit = dt - remainingDtAfterHit = dt - dt * (normalShift + normalDistToWall) / normalShift = -dt * normalDistToWall / normalShift = -m_dt * ratio
-  if (ratio < 0.) {// hence, tHit >= 0
-    results->push_back(-m_dt * ratio);
-    // let us already compute point_t m_disp here
-    m_disp += shiftVec * ratio;
+  // shift component normal to plane of WallTriangle
+  double normShift = surface_normal * shiftVec;
+
+  // is there any shift-component normal to the wall?
+  if(fabs(normShift) > 0.) {
+    double ratio =
+      // nominator = normal distance of p->r to plane of WallTriangle
+      (surface_normal * p->r - wallTriangle->nDotR())
+      / normShift;
+
+    // add (subtract) a safety epsilon for following if-check
+    ratio -= g_geom_eps;
+    
+    // "time" of the hit tHit = m_dt - remainingDtAfterHit
+    // = m_dt - m_dt * (normalShift + normalDistToWall) / normalShift
+    // = -m_dt * normalDistToWall / normalShift = -m_dt * ratio
+    if (ratio < 0.) { // hence, tHit >= 0
+      results->push_back(-m_dt * ratio);
+      
+      // NOTE: do NOT do the following line of code here, since the found
+      // time might be too large such that the hit does not take place.
+      // This is checked by the WallTriangle. Do this line in hitPos(..)
+      // m_disp += shiftVec * ratio;
+    } // else: see next else    
   }
-  // else = no shift: the algorithm is fine with an empty list of times,
-  // and we use the original shift
-  else 
-    m_disp += shiftVec;
+  // else = no hit: the algorithm is fine with an empty list of hit
+  // times, and we use the original shift
+  // m_disp should still be 0 (meant to store the displacment up to the
+  // hit)
+
 }
 
 
 void IntegratorShift::hitPos
 (const double& dt, const Particle* p, point_t &hit_pos, const point_t &force)
 {
-  // m_disp should already have a meaningful value corresponding to the
-  // artificially computed dt
+
+  const point_t& shiftVec = p->tag.pointByOffset(m_shift_offset);
+  // m_dt -- and also p->dt -- should hold the full time_step, since
+  // the current collision algorithm implemented here does not permit
+  // multiple collision events (not even near corners!). Hence we could
+  // use p->dt but we do not have to.
+  double timeToHitFrac = dt / m_dt;
+
+  // m_disp must now have the value directly AT the hit position. The
+  // remaining shift is taken care of later in integratePosition(..),
+  // by first computing the remaining shift at the end of this function.
+  // "+=" should be OK, since either m_disp was reset to 0.0 for this
+  // particle, or we have to take multiple hits into account (which
+  // should in fact not happen, since we just revert the shift direction.
+  m_disp += timeToHitFrac * shiftVec;
+  
   hit_pos = p->r + m_disp;
 
+  // Remaining shift:
   // (Most) Reflectors do not touch the shift vector, so we decide to
   // revert it here, but at most such that the net shift of the
   // particle is zero.
@@ -232,7 +265,9 @@ void IntegratorShift::hitPos
   // Then we scale to at most the length that the particle was already
   // shifted by using the remaining dt. If the fist argument wins, then
   // the particle is just placed back to where it was.
-  p->tag.pointByOffset(m_shift_offset) *= -min(dt / m_dt, (m_dt - dt) / m_dt);  
+  // The safety g_geom_eps was previously added to a dimensionless
+  // ratio, hence we use it here in the same way
+  p->tag.pointByOffset(m_shift_offset) *= -(min(dt, m_dt - dt) / m_dt + g_geom_eps);  
 }
 
 
