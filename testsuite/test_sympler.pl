@@ -79,7 +79,7 @@ else
 }
 #Compile the code
 print"CONFIGURATION PROGRESSING...\n";
-$com= `$Bin/../configure --with-tnt --with-superlu CXXFLAGS="-O3 -g" > configout.txt 2>&1`; 
+$com= `CXXFLAGS="-O3 -g" cmake -Dtnt=1 -DIntegratorStaticLSE=1 $Bin/.. > configout.txt 2>&1`; 
 if($com == 0)
 {
 	print"CONFIGURATION DONE\n";
@@ -132,7 +132,7 @@ foreach $dir (@dirs)
  	  $SIG{ALRM}=
  	  sub{ die "Timeout, test input '$dir.xml' took more than 2 minutes to run!\n"; };
 	  alarm 120;
-  	  $test=system("$builddir/src/sympler $Bin/TSTIN/$dir/test.xml > /tmp/test_$dir.txt 2>&1");
+  	  $test=system("$builddir/sympler $Bin/TSTIN/$dir/test.xml > /tmp/test_$dir.txt 2>&1");
 	  alarm 0;
        	 };
 
@@ -160,11 +160,14 @@ foreach $dir (@dirs)
 		foreach my $sim(@sim)
 		{
 			system("perl -pi -e 's/-0.000000/0.000000/g' $sim");
+			#print "At res $res and at sim $sim\n";
 			if($res eq $sim)
 			{	
+				#print "Before diff\n";
 				$ret=system("diff -E -b -t $Bin/RESULTS/$res /tmp/SIMULATION/$sim >/tmp/diff_$sim");
 				if ($ret){print "RESULT CHANGED FOR $res and $sim AND CHANGED RESULTS ARE STORED IN '/tmp/diff_$sim \n";}
 				else {print "RESULT IS SAME FOR $res and $sim\n";} 
+				#print "After diff\n";
 			}
 			
 		}

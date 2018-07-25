@@ -1,1 +1,0 @@
-CXX="xlC_r" CXXFLAGS='-O3 -qsmp -qrtti=all -blibpath:"/usr/vacpp/lib:/usr/lib:/lib"' ./configure $@

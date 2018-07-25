@@ -1,0 +1,30 @@
+1. Definition of frozen particles:
+
+Everything concerning these particles is frozen, not only the positions. This means also all properties saved in tags. What we assign initially to them is NEVER changed. The consequence is, if we need particles with frozen positions but VARIABLE OTHER PROPERTIES, we have to create a species, which does not posses an IntegratorPosition.
+
+-----------------------------------------------------------------------------------------------
+
+2. pairdist.h: actsOn* functions
+
+they will ALWAYS return "false" for a frozen particle
+
+-----------------------------------------------------------------------------------------------
+
+3. The number of frozen particles is CONSTANT during a simulation
+
+-----------------------------------------------------------------------------------------------
+
+4. phase.h: 
+
+returnVVsum(*) functions only needed for free particles:
+
+-----------------------------------------------------------------------------------------------
+
+5. persistency:
+
+Symbols created by ValCalculators or ParticleCaches have always persistency = false
+EXCEPTION: A Calculator introducing a CONSTANT !!!
+
+-----------------------------------------------------------------------------------------------
+
+6. bonded pair and triplet calculators rely on the order of the particle definition in bonded pairs and triplets in accordance with the definition of the attributes 'species1' .. 'species2/3' of the calculators. This implies that all particle species in the pairs/triplets belonging to one connected list are defined in the same order.
