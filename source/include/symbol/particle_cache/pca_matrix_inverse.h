@@ -32,9 +32,14 @@
 #ifndef __PCA_MATRIX_INVERSE_H
 #define __PCA_MATRIX_INVERSE_H 
 
+#include <gsl/gsl_math.h>
+
+#include "gsl_helper.h"
+
 #include "particle_cache.h"
 
-#include <gsl/gsl_math.h>
+
+/*
 #include <gsl/gsl_linalg.h>
 
 // the following definitions are done because I do not know how to turn range-checking 
@@ -51,6 +56,7 @@
 #ifndef GSL_MATRIX_GET
 #define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
 #endif
+*/
 
 
 /*!
