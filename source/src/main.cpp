@@ -53,6 +53,10 @@
   #include <mpi.h>
 #endif
 
+#ifdef _VERSIONNUMBER
+const char* versionNumber = _VERSIONNUMBER;
+#endif
+
 using namespace std;
 
 void link_all_properly();
@@ -126,7 +130,11 @@ int main(int argc, char *argv[])
 }
 
 void sayHello() {
-  cout << endl << "SYMPLER: SYMbolic ParticLE simulatoR" << endl
+  cout << endl << "SYMPLER: SYMbolic ParticLE simulatoR"
+#ifdef _VERSIONNUMBER
+       << " (" << versionNumber << ")"
+#endif
+       << endl
        << "Copyright 2002-2018, David Kauzlaric and " << endl
        << "other authors listed in the AUTHORS file." << endl
        << "This program comes with ABSOLUTELY NO WARRANTY;" << endl

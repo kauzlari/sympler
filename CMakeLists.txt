@@ -162,6 +162,24 @@ if(IS_BIG_ENDIAN)
 endif(IS_BIG_ENDIAN)
 
 
+# Version control tracking
+message(STATUS "Execute version control tracking")
+# Check if git repository
+execute_process(COMMAND git rev-parse --is-inside-work-tree WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} ERROR_QUIET OUTPUT_VARIABLE git_repository OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(${git_repository})
+# Get version number from last commit date by using git log history
+  execute_process(COMMAND git log -1 --format=%ci WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
+# Get version number from last changed date of file
+else(${git_repository})
+  execute_process(COMMAND stat -c %y CMakeLists.txt WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif(${git_repository})
+# Create appropriate string
+string(SUBSTRING ${last_commit_date} 0 10 version_date)
+string(CONCAT version_number v${version_date})
+# Set macro with version number
+add_definitions(-D_VERSIONNUMBER="${version_number}")
+
+
 # Add subdirectories to the build
 add_subdirectory(source/src)
 if(${CPPUNIT_FOUND})
