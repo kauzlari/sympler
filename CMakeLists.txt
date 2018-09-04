@@ -171,7 +171,12 @@ if(${git_repository})
   execute_process(COMMAND git log -1 --format=%ci WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
 # Get version number from last changed date of file
 else(${git_repository})
-  execute_process(COMMAND stat -c %y CMakeLists.txt WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(APPLE)
+    set(get_date_info_command stat -f %Sm -t %Y-%m-%d CMakeLists.txt)
+  else(APPLE)
+    set(get_date_info_command stat -c %y CMakeLists.txt)
+  endif(APPLE)
+  execute_process(COMMAND ${get_date_info_command} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif(${git_repository})
 # Create appropriate string
 string(SUBSTRING ${last_commit_date} 0 10 version_date)
