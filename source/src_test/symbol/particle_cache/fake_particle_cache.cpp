@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2018,
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,25 +29,20 @@
  */
 
 
-#ifndef __GSL_HELPER_H
-#define __GSL_HELPER_H
+#include "fake_particle_cache.h"
 
-#include <gsl/gsl_linalg.h>
+FakeParticleCache::FakeParticleCache(Simulation* parent)
+  : ParticleCache(parent)
+{
+}
 
-// the following definitions are done because I do not know how to turn range-checking 
-// off for the GSL
-#ifndef GSL_VECTOR_SET
-#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
-#endif
-#ifndef GSL_VECTOR_GET
-#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
-#endif
-#ifndef GSL_MATRIX_SET
-#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
-#endif
-#ifndef GSL_MATRIX_GET
-#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
-#endif
+FakeParticleCache::FakeParticleCache
+	(size_t colour, size_t offset, string symbolName)
+	: ParticleCache(colour, offset, symbolName)
+{
+}
 
+FakeParticleCache::~FakeParticleCache()
+{
+}
 
-#endif

@@ -29,25 +29,67 @@
  */
 
 
-#ifndef __GSL_HELPER_H
-#define __GSL_HELPER_H
+#ifndef __FAKE_PCA_2ND_DERIV_CORR_H
+#define __FAKE_PCA_2ND_DERIV_CORR_H
 
-#include <gsl/gsl_linalg.h>
+#include "pca_2nd_sph_deriv_corr.h"
+#include "fake_particle_cache.h"
 
-// the following definitions are done because I do not know how to turn range-checking 
-// off for the GSL
-#ifndef GSL_VECTOR_SET
-#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
-#endif
-#ifndef GSL_VECTOR_GET
-#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
-#endif
-#ifndef GSL_MATRIX_SET
-#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
-#endif
-#ifndef GSL_MATRIX_GET
-#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
-#endif
+/*!
+ * Fake class for testing class \a PCa2ndSPHDerivCorr
+ */
+class FakePCa2ndSPHDerivCorr: public PCa2ndSPHDerivCorr
+{
+
+  protected:
 
 
+  public:
+
+    /*!
+     * Constructor for node hierarchy
+     */
+    FakePCa2ndSPHDerivCorr(/*Node*/Simulation* parent);
+
+    /*!
+     * Destructor
+     */
+    virtual ~FakePCa2ndSPHDerivCorr();
+
+    /*!
+     * Set protected member \a PCa2ndSPHDerivCorr::m_systemMatOffset
+     */
+    virtual void setSystemMatOffset(size_t offset) {
+
+    	m_systemMatOffset = offset;
+    }
+
+    /*!
+     * Set protected member \a PCa2ndSPHDerivCorr::m_offset
+     */
+    virtual void setOutputOffset(size_t offset) {
+
+    	m_offset = offset;
+    }
+
+    /*!
+     * Set protected member \a PCa2ndSPHDerivCorr::m_pairLoopToDo
+     */
+    virtual void setPairLoopToDo(bool pairLoopToDo) {
+
+    	m_pairLoopToDo = pairLoopToDo;
+    }
+
+    /*!
+     * Set protected member \a PCa2ndSPHDerivCorr::m_colour
+     */
+    virtual void setColour(size_t colour) {
+
+    	m_colour = colour;
+    }
+
+};
+
 #endif
+
+

@@ -282,6 +282,7 @@ void sayHello() {
 #include "pc_wall_textured.h"
 
 // ParticleCaches
+#include "pca_2nd_sph_deriv_corr.h"
 #include "pca_eigensystem.h"
 #include "pca_density_0oc.h"
 #include "pca_iapws-if97_cp.h"
@@ -530,6 +531,8 @@ void link_all_properly()
   new ParticleScalar(NULL);
   new ParticleTensor(NULL);
   new ParticleVector(NULL);
+  new ParticleVels(NULL);
+  new PCa2ndSPHDerivCorr(NULL);
 #ifdef HAVE_FREESTEAM
   new PCacheIAPWSIF97Cp(NULL);
   new PCacheIAPWSIF97eta(NULL);
@@ -537,7 +540,6 @@ void link_all_properly()
   new PCacheIAPWSIF97p(NULL);
   new PCacheIAPWSIF97rho(NULL);
 #endif
-  new ParticleVels(NULL);
   new PCaEigensystem(NULL);
   new PCaMatrixInverse(NULL);
   new SymbolFParticleScalar(NULL);

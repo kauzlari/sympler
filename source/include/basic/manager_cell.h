@@ -237,13 +237,6 @@ protected:
   vector<ColourPair*> m_colourPairs;
   
   /*!
-   * (SameColourPair) 
-   * Check if the colour pairs in the manager are in the same order as in Pairdist
-   * Needed for "Forces"->computeForces()
-   */
-  bool m_scp; 
-
-  /*!
    * Activate cell \a c, this means that the first particle entered this cell
    * @param c Cell to activate
    */
@@ -416,10 +409,6 @@ public:
     return m_links;
   }
   
-  virtual bool& sameCP() {
-    return m_scp;
-  }
-
   /*!
    * Return the number of all active links
    */

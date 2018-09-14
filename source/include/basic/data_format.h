@@ -83,23 +83,23 @@ typedef SmartPointer< MArray2D > array2d_double_sp;
 #define NOOP while(0)
 #ifdef WITH_ARRAY_TYPES
 
-#define	DATAFORMAT_ARRAY_SWITCH(attr,m_data,oper) \
+#define	DATAFORMAT_ARRAY_SWITCH(attr,data,oper) \
 	case DataFormat::MArray2D:\
-		oper(attr,m_data,array2d_double_sp); break
+		oper(attr,data,array2d_double_sp); break
 #else
-#define	DATAFORMAT_ARRAY_SWITCH(attr,m_data,oper) NOOP
+#define	DATAFORMAT_ARRAY_SWITCH(attr,data,oper) NOOP
 #endif
 
-#define DATAFORMAT_CONTAINER_SWITCH(attr,m_data,oper) switch((attr)->datatype) { \
-  case DataFormat::VECTOR_DOUBLE:				       \
-    oper((attr),(m_data),vector_double_sp); break;		       \
+#define DATAFORMAT_CONTAINER_SWITCH(attr,data,oper) switch((attr)->datatype) { \
+  case DataFormat::VECTOR_DOUBLE:	\
+	oper((attr),(data),vector_double_sp); break;		       \
   case DataFormat::VECTOR_INT:					       \
-    oper((attr),(m_data),vector_int_sp); break;			       \
+    oper((attr),(data),vector_int_sp); break;			       \
   case DataFormat::VECTOR_POINT:				       \
-    oper((attr),(m_data),vector_point_sp); break;		       \
+    oper((attr),(data),vector_point_sp); break;		       \
   case DataFormat::VECTOR_TENSOR:				       \
-    oper((attr),(m_data),vector_tensor_sp); break;		       \
-    DATAFORMAT_ARRAY_SWITCH((attr),(m_data),oper);			\
+    oper((attr),(data),vector_tensor_sp); break;		       \
+    DATAFORMAT_ARRAY_SWITCH((attr),(data),oper);			\
   default: /*Yes, it will be called for other formats and should then do NOTHING!*/ break; \
 }
 

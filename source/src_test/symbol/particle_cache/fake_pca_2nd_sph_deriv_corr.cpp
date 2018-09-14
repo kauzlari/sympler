@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2018,
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,25 +29,20 @@
  */
 
 
-#ifndef __GSL_HELPER_H
-#define __GSL_HELPER_H
+#include "fake_pca_2nd_sph_deriv_corr.h"
 
-#include <gsl/gsl_linalg.h>
+FakePCa2ndSPHDerivCorr::FakePCa2ndSPHDerivCorr(Simulation* parent)
+  : PCa2ndSPHDerivCorr(parent)
+{
+}
 
-// the following definitions are done because I do not know how to turn range-checking 
-// off for the GSL
-#ifndef GSL_VECTOR_SET
-#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
-#endif
-#ifndef GSL_VECTOR_GET
-#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
-#endif
-#ifndef GSL_MATRIX_SET
-#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
-#endif
-#ifndef GSL_MATRIX_GET
-#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
-#endif
+//FakePCa2ndSPHDerivCorr::FakePCa2ndSPHDerivCorr
+//	(size_t colour, size_t offset, string symbolName)
+//	: PCa2ndSPHDerivCorr(colour, offset, symbolName)
+//{
+//}
 
+FakePCa2ndSPHDerivCorr::~FakePCa2ndSPHDerivCorr()
+{
+}
 
-#endif

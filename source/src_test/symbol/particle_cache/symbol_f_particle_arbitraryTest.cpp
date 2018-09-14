@@ -59,7 +59,9 @@ void SymbolFParticleArbitraryTest :: setUpFunctionParticle() {
 
 void SymbolFParticleArbitraryTest :: tearDown (void) 
 {
-  delete m_symbolFParticleArbitrary;
+	delete m_simulation -> controller();
+  delete m_simulation;
+	delete m_symbolFParticleArbitrary;
 }
 
 void SymbolFParticleArbitraryTest :: initTest (void)

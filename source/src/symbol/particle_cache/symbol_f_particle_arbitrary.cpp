@@ -71,7 +71,7 @@ void SymbolFParticleArbitrary::init()
   
   // It does not really matter, but since we have this option, and
   // since only 'true' makes sense when modifying the Particle
-  // force, we overwrite the undefined setting from the parent
+  // force, we overwrite the default false setting from the parent
   // class by true
   m_overwrite = true;
 

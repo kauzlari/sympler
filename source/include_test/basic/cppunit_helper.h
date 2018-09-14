@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2018,
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -29,25 +29,34 @@
  */
 
 
-#ifndef __GSL_HELPER_H
-#define __GSL_HELPER_H
 
-#include <gsl/gsl_linalg.h>
+#ifndef __CPPUNIT_HELPER_H
+#define __CPPUNIT_HELPER_H
 
-// the following definitions are done because I do not know how to turn range-checking 
-// off for the GSL
-#ifndef GSL_VECTOR_SET
-#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
-#endif
-#ifndef GSL_VECTOR_GET
-#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
-#endif
-#ifndef GSL_MATRIX_SET
-#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
-#endif
-#ifndef GSL_MATRIX_GET
-#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
-#endif
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
+
+using namespace std;
+
+
+class CppunitHelper {
+
+	public:
+
+		static void testPropAttr
+			(string name, string description, const Node* propHolder) {
+
+			const PropertyList& propList = propHolder -> returnProperties();
+
+			CPPUNIT_ASSERT_EQUAL
+				(true, propList.exists(name));
+
+			CPPUNIT_ASSERT_EQUAL
+				(description, propList.propByName(name).description);
+
+		}
+
+};
 
 
 #endif

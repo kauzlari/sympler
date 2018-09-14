@@ -144,13 +144,6 @@ class SymbolFParticleArbitrary : public ParticleCacheArbitrary
   }
 
   /*!
-   * Public helper function for polymorphic copying
-   */
-  virtual ParticleCache* returnCopy() {
-    return this -> copyMySelf();
-  }
-  
-  /*!
    * Currently (2018-05-25) this function is only used for unittesting
    */
   virtual void setForceIndexTo(size_t forceIndex) {

@@ -85,7 +85,7 @@ void PCaMatrixInverse::init()
 
 void PCaMatrixInverse::setup()
 {
-  // turns of the default gsl_error handling so that we can handle ourselves
+  // turns off the default gsl_error handling so that we can handle ourselves
   gsl_set_error_handler_off ();
 
   if(m_species == "undefined")

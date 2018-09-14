@@ -53,8 +53,12 @@ symbol/freesteam/pca_iapws-if97_pTest.cpp
 symbol/freesteam/pca_iapws-if97_rhoTest.cpp
 symbol/freesteam/pca_iapws-if97Test.cpp
 symbol/particle_cache/fake_function_particle.cpp
+symbol/particle_cache/fake_particle_cache.cpp
+symbol/particle_cache/fake_pca_2nd_sph_deriv_corr.cpp
 symbol/particle_cache/fake_symbol_f_particle_scalar.cpp
 symbol/particle_cache/particle_velsTest.cpp
+symbol/particle_cache/particle_cacheTest.cpp
+symbol/particle_cache/pca_2nd_sph_deriv_corrTest.cpp
 symbol/particle_cache/symbol_f_particle_arbitraryTest.cpp
 symbol/particle_cache/symbol_f_particle_scalarTest.cpp
 symbol/particle_cache/symbol_f_particle_velsTest.cpp
@@ -121,6 +125,13 @@ ${link_lib}
 
 # Execute tests after build
 enable_testing()
-ADD_CUSTOM_COMMAND(TARGET symplerTest POST_BUILD COMMAND ${CMAKE_BINARY_DIR}/symplerTest)
+#ADD_CUSTOM_COMMAND(TARGET symplerTest POST_BUILD COMMAND ${CMAKE_BINARY_DIR}/symplerTest)
+ADD_CUSTOM_COMMAND(
+	TARGET symplerTest 
+	POST_BUILD 
+		COMMAND 
+			cp ${CMAKE_BINARY_DIR}/symplerTest 
+					${CMAKE_BINARY_DIR}/symplerTestBackup 
+		COMMAND ${CMAKE_BINARY_DIR}/symplerTest)
 
 

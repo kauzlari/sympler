@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -37,12 +37,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_eigen.h>
 
-// the following definitions are done because I do not know how to turn range-checking 
-// off for the GSL
-#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
-#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
-#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
-#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
+#include "gsl_helper.h"
 
 /*!
  * Computes the eigensystem, i.e., the eigenvalues and corresponding 

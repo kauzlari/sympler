@@ -248,10 +248,7 @@ class Symbol : public Node
   virtual const bool& overwriting() const {
     return m_overwrite;
   }
-  
-  
-#ifdef _OPENMP
-  
+
   /*!
    * Returns the datatype of this symbol.
    */
@@ -259,6 +256,8 @@ class Symbol : public Node
     return m_datatype;
   }
   
+#ifdef _OPENMP
+
   /*!
    * Gets the number of doubles for a datatype, set by the \a DataFormat
    */

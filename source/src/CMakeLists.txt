@@ -287,6 +287,7 @@ symbol/particle_cache/particle_tensor.cpp
 symbol/particle_cache/particle_vector.cpp
 symbol/particle_cache/particle_vels.cpp
 symbol/particle_cache/particle_cache_arb_rng.cpp
+symbol/particle_cache/pca_2nd_sph_deriv_corr.cpp
 symbol/particle_cache/pca_density_0oc.cpp
 symbol/particle_cache/pca_density_self_contribution.cpp
 symbol/particle_cache/pca_eigensystem.cpp
