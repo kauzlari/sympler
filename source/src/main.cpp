@@ -362,8 +362,8 @@ void sayHello() {
 #include "triplet_calc_central_part_scalar.h"
 #include "quintet_calc_curvature.h"
 #include "quintet_calc_curvature_f.h"
-// #include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_scalar.h"
+#include "val_calculator_dirichlet_BC_vector.h"
 #include "val_calculator_dirichlet_BC_vels.h"
 #include "val_calculator_kernel.h"
 #include "val_calculator_neg_dkernel_divr.h"
@@ -618,17 +618,14 @@ void link_all_properly()
   new TripletCalcCentralPartScalar(NULL);
   new QuintetCalcCurvatureF(NULL);
   new QuintetCalcCurvature(NULL);
-//   new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCScalar(NULL);
+  new ValCalculatorDirichletBCVector(NULL);
   new ValCalculatorDirichletBCVels(NULL);
   new ValCalculatorKernel(NULL);
   new ValCalculatorNegDKernelDivr(NULL);
   new ValCalculatorRi(NULL);
   new ValCalculatorRi6(NULL);
   new ValCalculatorRho(NULL);
-  // commented out because trying to get rid of it
-//   new ValCalculatorShear(NULL);
-//   new ValCalculatorShearX(NULL);
 // commented out because buggy
 //   new ValCalculatorSymmetryBCScalar(NULL);
   new ValCalculatorVolume(NULL);

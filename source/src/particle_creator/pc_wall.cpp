@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -267,7 +267,12 @@ void ParticleCreatorWall::createParticles()
 			value = &(p->tag.doubleByOffset(offset));
 		      }
 		    else 
-		      throw gError("ParticleCreatorWall::createParticles", "For species '" + m_species + "': Scalar-type definition used for non-scalar property '" + name + "'. For vectors, you must add \"__x\", \"__y\" or \"__z\" and for tensors you must add \"__xx\", \"__xy\", \"__xz\", \"__yx\", \"__yy\", \"__yz\", \"__zx\", \"__zy\" or \"__zz\" to the property name.");
+		      throw gError("ParticleCreatorWall::createParticles", "For species '"
+		      		+ m_species + "': Scalar-type definition used for non-scalar "
+							"property '" + name + "'. For vectors, you must add \"__x\", "
+							"\"__y\" or \"__z\" and for tensors you must add \"__xx\", "
+							"\"__xy\", \"__xz\", \"__yx\", \"__yy\", \"__yz\", \"__zx\", "
+							"\"__zy\" or \"__zz\" to the property name.");
 		  }
 		else
 		  { 
@@ -396,9 +401,14 @@ void ParticleCreatorWall::init()
   m_properties.setDescription(
   "Generates particles behind walls, i.e., outside the domain,"
       " a freely moving particle can reach.\n"
-      "The initial conditions of user-defined symbols can be set by taking the symbol as an attribute and defining a mathematical expression for it. For the expression, the same variables are allowed as, e.g., for the attribute 'u'. For non-scalars you have to add the following to the attribute name:\n"
-      "\"_x\", \"_y\" or \"_z\" for the respective components of a vector\n"
-      "\"_xx\", \"_xy\", \"_xz\", \"_yx\", \"_yy\", \"_yz\", \"_zx\", \"_zy\" and \"_zz\" for the respective components of a tensor."
+      "The initial conditions of user-defined symbols can be set by taking the "
+  		"symbol as an attribute and defining a mathematical expression for it. "
+  		"For the expression, the same variables are allowed as, e.g., for the "
+  		"attribute 'u'. For non-scalars you have to add the following to the "
+  		"attribute name:\n"
+      "\"__x\", \"__y\" or \"__z\" for the respective components of a vector\n"
+      "\"__xx\", \"__xy\", \"__xz\", \"__yx\", \"__yy\", \"__yz\", \"__zx\", "
+  		"\"__zy\" and \"__zz\" for the respective components of a tensor."
   );
   /* Allow unknown properties. Those ones have to be identified later.
   They are used to set the particles degrees of freedom initially. */

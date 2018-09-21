@@ -28,22 +28,22 @@
  * 
  */
 
-
-#ifndef __VAL_CALCULATOR_DIRICHLET_BC_SCALAR_H
-#define __VAL_CALCULATOR_DIRICHLET_BC_SCALAR_H
+#ifndef __VAL_CALCULATOR_DIRICHLET_BC_VECTOR_H
+#define __VAL_CALCULATOR_DIRICHLET_BC_VECTOR_H
 
 #include "val_calculator_dirichlet_BC_arbitrary.h"
 
-
 /*!
- * Saves the pair-specific value of an arbitrary scalar of the boundary particle used
- * for applying a Dirichlet boundary condition (BC) in each pair of particles.
+ * Saves the pair-specific value of an arbitrary vector of the boundary
+ * particle used for applying a Dirichlet boundary condition (BC) in each pair
+ * of particles.
  */
-class ValCalculatorDirichletBCScalar : public ValCalculatorDirichletBCArbitrary
+class ValCalculatorDirichletBCVector : public ValCalculatorDirichletBCArbitrary
 {
-  protected:
-    
-    /*!
+
+	protected:
+
+		/*!
      * Initialise the property list
      */
     virtual void init();
@@ -53,25 +53,26 @@ class ValCalculatorDirichletBCScalar : public ValCalculatorDirichletBCArbitrary
      */
     virtual ValCalculatorPair* copyMySelf()
     {
-      return new ValCalculatorDirichletBCScalar(*this); 
+      return new ValCalculatorDirichletBCVector(*this);
     }
-  
+
   public:
-  /*!
-   * Constructor
-   * @param symbol The symbol name
-   */
-    ValCalculatorDirichletBCScalar(string symbol);
 
-  /*!
+    /*!
+     * Constructor
+     * @param symbol The symbol name
+     */
+    ValCalculatorDirichletBCVector(string symbol);
+
+    /*!
      * Constructor for Node hierarchy
-   */
-    ValCalculatorDirichletBCScalar(/*Node*/Simulation* parent);
+     */
+    ValCalculatorDirichletBCVector(/*Node*/Simulation* parent);
 
-  /*!
+    /*!
      * Destructor
-   */
-    virtual ~ValCalculatorDirichletBCScalar() {
+     */
+    virtual ~ValCalculatorDirichletBCVector() {
     }
 
     /*!
@@ -96,46 +97,44 @@ class ValCalculatorDirichletBCScalar : public ValCalculatorDirichletBCArbitrary
 	  
       	// if all worked fine, we may now compute the value of the outer particle
       	// the check for innerDist != HUGE_VAL is done below
-      	pD->tag.doubleByOffset(m_slot) =
+      	pD->tag.pointByOffset(m_slot) =
       			(outerDist+innerDist)
-						* (p2nd->tag.doubleByOffset(m_varOffset.second)) / innerDist
+						* (p2nd->tag.pointByOffset(m_varOffset.second)) / innerDist
 						- (outerDist / innerDist)
-							* p1st->tag.doubleByOffset(m_varOffset.first);
+							* p1st->tag.pointByOffset(m_varOffset.first);
 	  
       }
       else { // so !m_wallIsSecond
 	  
-        // if all worked fine, we may now compute the value of the outer particle
-        // the check for innerDist != HUGE_VAL is done below
-        // the first term is for Dirichlet != 0. We assume the value was assigned
-        // to the wall particles.
-      	pD->tag.doubleByOffset(m_slot) =
+      	// if all worked fine, we may now compute the value of the outer particle
+      	// the check for innerDist != HUGE_VAL is done below
+      	// the first term is for Dirichlet != 0. We assume the value was assigned
+      	// to the wall particles.
+      	pD->tag.pointByOffset(m_slot) =
       			(outerDist+innerDist)
-						* (p1st->tag.doubleByOffset(m_varOffset.first)) / innerDist
+						* (p1st->tag.pointByOffset(m_varOffset.first)) / innerDist
 						- (outerDist / innerDist)
-							* p2nd->tag.doubleByOffset(m_varOffset.second);
+							* p2nd->tag.pointByOffset(m_varOffset.second);
 	  
       } // of else of if(m_wallIsSecond)
       
       if(innerDist == HUGE_VAL)
-      	throw
-					gError("ValCalculatorDirichletBCScalar::compute", "No wall found for "
-							"pair. Check your geometry and other settings. If this doesn't "
-							"help, contact the programmers. \nDetails: slot1="
-							+ ObjToString(pD->firstPart()->mySlot) + ", slot2="
-							+ ObjToString(pD->secondPart()->mySlot) + "c1="
-							+ ObjToString(pD->firstPart()->c) + ", c2="
-							+ ObjToString(pD->secondPart()->c) + ", r1="
-							+ ObjToString(pD->firstPart()->r) + ", r2="
-							+ ObjToString(pD->secondPart()->r));
-      
+      	throw gError("ValCalculatorDirichletBCVector::compute", "No wall found "
+      			"for pair. Check your geometry and other settings. If this doesn't "
+      			"help, contact the programmers. \nDetails: slot1="
+      			+ ObjToString(pD->firstPart()->mySlot) + ", slot2="
+						+ ObjToString(pD->secondPart()->mySlot) + "c1="
+						+ ObjToString(pD->firstPart()->c) + ", c2="
+						+ ObjToString(pD->secondPart()->c) + ", r1="
+						+ ObjToString(pD->firstPart()->r) + ", r2="
+						+ ObjToString(pD->secondPart()->r));
     }
 
     /*!
-     * Returns "dirichletBCScalar"
+     * Returns "dirichletBCVector"
      */
     virtual string myName() {
-      return "dirichletBCScalar";
+      return "dirichletBCVector";
     }
 
     /*!

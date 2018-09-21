@@ -29,28 +29,28 @@
  */
 
 
-#include "val_calculator_dirichlet_BC_scalar.h"
+#include "val_calculator_dirichlet_BC_vector.h"
 
-const SymbolRegister<ValCalculatorDirichletBCScalar> val_calc_dirichlet_BC_scalar("DirichletBCScalar");
+const SymbolRegister<ValCalculatorDirichletBCVector> val_calc_dirichlet_BC_vector("DirichletBCVector");
 
 using namespace std;
 
-ValCalculatorDirichletBCScalar::ValCalculatorDirichletBCScalar(string symbol)
+ValCalculatorDirichletBCVector::ValCalculatorDirichletBCVector(string symbol)
   : ValCalculatorDirichletBCArbitrary(symbol)
 {}
 
-ValCalculatorDirichletBCScalar::ValCalculatorDirichletBCScalar(/*Node*/Simulation* parent)
+ValCalculatorDirichletBCVector::ValCalculatorDirichletBCVector(/*Node*/Simulation* parent)
   : ValCalculatorDirichletBCArbitrary(parent)
 {
   init();
 }
 
-void ValCalculatorDirichletBCScalar::init()
+void ValCalculatorDirichletBCVector::init()
 {
-  m_properties.setClassName("DirichletBCScalar");
+  m_properties.setClassName("DirichletBCVector");
 
   m_properties.setDescription(
-  		"Saves the pair-specific value of an arbitrary scalar of the boundary "
+  		"Saves the pair-specific value of an arbitrary vector of the boundary "
   		"particle used for applying a Dirichlet boundary condition (BC) in each "
   		"pair of particles. This calculator uses a linear approximation as "
   		"described in [70]. The actual value of the Dirichlet boundary "
@@ -64,9 +64,9 @@ void ValCalculatorDirichletBCScalar::init()
 #endif
 }
 
-void ValCalculatorDirichletBCScalar::setup()
+void ValCalculatorDirichletBCVector::setup()
 {
-  m_datatype = DataFormat::DOUBLE;
+  m_datatype = DataFormat::POINT;
   
   ValCalculatorDirichletBCArbitrary::setup();
 }

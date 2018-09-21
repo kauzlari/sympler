@@ -250,7 +250,7 @@ void PCa2ndSPHDerivCorr::setup()
     		m_datatype, false, m_symbolName).offset;
 
     // system matrix
-    if(Particle::s_tag_format[m_colour].attrExists("__sysMat"))
+    if(Particle::s_tag_format[m_colour].attrExists("__sysMatFor" + m_symbolName))
       throw gError("PCa2ndSPHDerivCorr::setup", "Symbol \"__sysMat\" is "
       	"already existing for species '" + M_MANAGER->species(m_colour) +
 				"'. But this name is reserved for module SPH2ndDerivCorr and can only "
@@ -265,7 +265,7 @@ void PCa2ndSPHDerivCorr::setup()
     // behaviour or if we should weaken the clear() procedure for SmartPointers
 
   	m_systemMatOffset
-			= Particle::s_tag_format[m_colour].addAttribute("__sysMat",
+			= Particle::s_tag_format[m_colour].addAttribute("__sysMatFor" + m_symbolName,
 					DataFormat::VECTOR_DOUBLE, true, "__sysMat").offset;
 
 
@@ -292,47 +292,47 @@ void PCa2ndSPHDerivCorr::setup()
 
   	// START: creating the helper matrices
 
-    if(Particle::s_tag_format[m_colour].attrExists("__Cabcd"))
+    if(Particle::s_tag_format[m_colour].attrExists("__CabcdFor" + m_symbolName))
       throw gError("PCa2ndSPHDerivCorr::setup", "Symbol \"__Cabcd\" is "
       	"already existing for species '" + M_MANAGER->species(m_colour) +
 				"'. But this name is reserved for module SPH2ndDerivCorr and can only "
 				"be used once. Aborting.");
 
     m_CabcdHelperOffset
-			= Particle::s_tag_format[m_colour].addAttribute("__Cabcd",
+			= Particle::s_tag_format[m_colour].addAttribute("__CabcdFor" + m_symbolName,
 					DataFormat::VECTOR_DOUBLE, true, "__Cabcd").offset;
 
 
-    if(Particle::s_tag_format[m_colour].attrExists("__Habc"))
+    if(Particle::s_tag_format[m_colour].attrExists("__HabcFor" + m_symbolName))
       throw gError("PCa2ndSPHDerivCorr::setup", "Symbol \"__Habc\" is "
       	"already existing for species '" + M_MANAGER->species(m_colour) +
 				"'. But this name is reserved for module SPH2ndDerivCorr and can only "
 				"be used once. Aborting.");
 
     m_HabfHelperOffset
-			= Particle::s_tag_format[m_colour].addAttribute("__Habc",
+			= Particle::s_tag_format[m_colour].addAttribute("__HabcFor" + m_symbolName,
 					DataFormat::VECTOR_DOUBLE, true, "__Habc").offset;
 
 
-    if(Particle::s_tag_format[m_colour].attrExists("__Eabc"))
+    if(Particle::s_tag_format[m_colour].attrExists("__EabcFor" + m_symbolName))
       throw gError("PCa2ndSPHDerivCorr::setup", "Symbol \"__Eabc\" is "
       	"already existing for species '" + M_MANAGER->species(m_colour) +
 				"'. But this name is reserved for module SPH2ndDerivCorr and can only "
 				"be used once. Aborting.");
 
     m_EabeHelperOffset
-			= Particle::s_tag_format[m_colour].addAttribute("__Eabc",
+			= Particle::s_tag_format[m_colour].addAttribute("__EabcFor" + m_symbolName,
 					DataFormat::VECTOR_DOUBLE, true, "__Eabc").offset;
 
 
-    if(Particle::s_tag_format[m_colour].attrExists("__TGabc"))
+    if(Particle::s_tag_format[m_colour].attrExists("__TGabcFor" + m_symbolName))
       throw gError("PCa2ndSPHDerivCorr::setup", "Symbol \"__TGabc\" is "
       	"already existing for species '" + M_MANAGER->species(m_colour) +
 				"'. But this name is reserved for module SPH2ndDerivCorr and can only "
 				"be used once. Aborting.");
 
     m_T_Gcab_abcHelperOffset
-			= Particle::s_tag_format[m_colour].addAttribute("__TGabc",
+			= Particle::s_tag_format[m_colour].addAttribute("__TGabcFor" + m_symbolName,
 					DataFormat::VECTOR_DOUBLE, true, "__TGabc").offset;
 
   	// END: creating the helper matrices

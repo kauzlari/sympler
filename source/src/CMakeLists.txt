@@ -311,7 +311,9 @@ symbol/val_calculator_pair/pair_rand_tensor.cpp
 symbol/val_calculator_pair/pair_rand_vector.cpp
 symbol/val_calculator_pair/val_calculator_pair.cpp
 symbol/val_calculator_pair/val_calculator_BC.cpp
+symbol/val_calculator_pair/val_calculator_dirichlet_BC_arbitrary.cpp
 symbol/val_calculator_pair/val_calculator_dirichlet_BC_scalar.cpp
+symbol/val_calculator_pair/val_calculator_dirichlet_BC_vector.cpp
 symbol/val_calculator_pair/val_calculator_dirichlet_BC_vels.cpp
 symbol/val_calculator_pair/val_calculator_kernel.cpp
 symbol/val_calculator_pair/val_calculator_neg_dkernel_divr.cpp

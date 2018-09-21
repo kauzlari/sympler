@@ -287,19 +287,15 @@ class Symbol : public Node
   
   /*!
    * Determines \a m_stage of the current \a Symbol.
-   * By default, we assume that the stage is fixed and known during compile-time, 
-   * so this function does nothing except returning the message (true) that the 
-   * stage was already found. Symbols, which determine the stage during run-time 
-   * have to redefine this function.
+   * Implements the main stage finding logic for user-stage 1. Calls methods
+   * that may be overridden by child classes.
    */
   virtual bool findStage();
   
   /*!
    * Determines \a m_stage of the current \a Symbol.
-   * By default, we assume that the stage is fixed and known during compile-time, 
-   * so this function does nothing except returning the message (true) that the 
-   * stage was already found. Symbols, which determine the stage during run-time 
-   * have to redefine this function.
+   * Implements the main stage finding logic for user-stage 0. Calls methods
+   * that may be overridden by child classes.
    * FIXME: Try to avoid code duplication for _0 versions
    */
   virtual bool findStage_0();

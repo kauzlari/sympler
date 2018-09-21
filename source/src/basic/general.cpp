@@ -61,3 +61,33 @@ string make_filename(string s, int n)
   return s;
 }
 
+
+bool g_stringIsInPipeList(string s, string pipeStringList)
+{
+
+  if (pipeStringList != "---") {
+    bool run = true;
+    string working = pipeStringList;
+    while(run) {
+      string cur;
+      size_t pos = working.find('|');
+
+      if (pos == string::npos) {
+      	run = false;
+      	cur = working;
+      }
+      else {
+      	cur = string(working, 0, pos);
+      	working = string(working, pos+1);
+      }
+
+      if(s == cur)
+      	return true; // should quit the while loop
+    }
+
+  }
+
+  return false;
+}
+
+
