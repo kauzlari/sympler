@@ -88,6 +88,10 @@ int main(int argc, char *argv[])
   if (argc >= 2) {
     if (argc == 2 && !strcmp(argv[1], "--help"))
       main_help();
+#ifdef _VERSIONNUMBER
+    else if (argc == 2 && !strcmp(argv[1], "--version"))
+      cout << "Version: " << versionNumber << endl << endl;
+#endif
     else if (argc == 3)
       help(argv[2]);
     else if (argc == 2) {
