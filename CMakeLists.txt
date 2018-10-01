@@ -169,17 +169,26 @@ execute_process(COMMAND git rev-parse --is-inside-work-tree WORKING_DIRECTORY ${
 if(${git_repository})
 # Get version number from last commit date by using git log history
   execute_process(COMMAND git log -1 --format=%ci WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
+  # Create appropriate string
+  string(SUBSTRING ${last_commit_date} 0 16 version_date)
+  string(REPLACE ":" "-" version_date ${version_date})
+  string(REPLACE " " "." version_date ${version_date})
 # Get version number from last changed date of file
 else(${git_repository})
   if(APPLE)
     set(get_date_info_command stat -f %Sm -t %Y-%m-%d CMakeLists.txt)
+    execute_process(COMMAND ${get_date_info_command} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # Create appropriate string
+    string(SUBSTRING ${last_commit_date} 0 10 version_date)
   else(APPLE)
     set(get_date_info_command stat -c %y CMakeLists.txt)
+    execute_process(COMMAND ${get_date_info_command} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # Create appropriate string
+    string(SUBSTRING ${last_commit_date} 0 16 version_date)
+    string(REPLACE ":" "-" version_date ${version_date})
+    string(REPLACE " " "." version_date ${version_date})
   endif(APPLE)
-  execute_process(COMMAND ${get_date_info_command} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif(${git_repository})
-# Create appropriate string
-string(SUBSTRING ${last_commit_date} 0 10 version_date)
 string(CONCAT version_number v${version_date})
 # Set macro with version number
 add_definitions(-D_VERSIONNUMBER="${version_number}")
