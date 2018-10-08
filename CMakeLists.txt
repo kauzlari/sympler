@@ -167,31 +167,44 @@ message(STATUS "Execute version control tracking")
 # Check if git repository
 execute_process(COMMAND git rev-parse --is-inside-work-tree WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} ERROR_QUIET OUTPUT_VARIABLE git_repository OUTPUT_STRIP_TRAILING_WHITESPACE)
 if(${git_repository})
-# Get version number from last commit date by using git log history
+  # Get version number from last commit date by using git log history
   execute_process(COMMAND git log -1 --format=%ci WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
-  # Create appropriate string
+  # Create version number string
   string(SUBSTRING ${last_commit_date} 0 16 version_date)
   string(REPLACE ":" "-" version_date ${version_date})
-  string(REPLACE " " "." version_date ${version_date})
-# Get version number from last changed date of file
+  string(REPLACE " " "_" version_date ${version_date})
+  # Get branch name using git branch
+  execute_process(COMMAND git rev-parse --abbrev-ref HEAD WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE branch_name OUTPUT_STRIP_TRAILING_WHITESPACE)
 else(${git_repository})
   if(APPLE)
+    # Get version number from last changed date of file for macOS systems
     set(get_date_info_command stat -f %Sm -t %Y-%m-%d CMakeLists.txt)
     execute_process(COMMAND ${get_date_info_command} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
-    # Create appropriate string
+    # Create version number string
     string(SUBSTRING ${last_commit_date} 0 10 version_date)
   else(APPLE)
+    # Get version number from last changed date of file in Linux systems
     set(get_date_info_command stat -c %y CMakeLists.txt)
     execute_process(COMMAND ${get_date_info_command} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE last_commit_date OUTPUT_STRIP_TRAILING_WHITESPACE)
-    # Create appropriate string
+    # Create version number string
     string(SUBSTRING ${last_commit_date} 0 16 version_date)
     string(REPLACE ":" "-" version_date ${version_date})
-    string(REPLACE " " "." version_date ${version_date})
+    string(REPLACE " " "_" version_date ${version_date})
+    # Get branch name using source directory name
+    get_filename_component(directory_name ${CMAKE_CURRENT_LIST_DIR} NAME)
+    string(FIND ${directory_name} "-" pos REVERSE)
+    MATH(EXPR pos "${pos}+1")
+    if(pos)
+      string(SUBSTRING ${directory_name} ${pos} -1 branch_name)
+    endif(pos)
   endif(APPLE)
 endif(${git_repository})
-string(CONCAT version_number v${version_date})
+# Concatenate branch name if it is not master
+if(branch_name AND NOT(${branch_name} MATCHES "master"))
+  string(CONCAT version_date ${version_date}_${branch_name})
+endif(branch_name AND NOT(${branch_name} MATCHES "master"))
 # Set macro with version number
-add_definitions(-D_VERSIONNUMBER="${version_number}")
+add_definitions(-D_VERSIONNUMBER="v${version_date}")
 
 
 # Add subdirectories to the build
