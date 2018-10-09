@@ -35,7 +35,7 @@
 #include "particle_cache.h"
 #include "triplet_calculator.h"
 #include "quintet_calculator.h"
-
+#include "general.h"
 
 
 #define M_SIMULATION  ((Simulation*) m_parent)
@@ -103,7 +103,9 @@ int Symbol::setNumOfDoubles() {
 
 bool Symbol::findStage()
 {
-  MSG_DEBUG("Symbol::findStage for module " << className(), "START: stage = " << m_stage);
+  MSG_DEBUG("Symbol::findStage for module " << className(), "START: stage = "
+  		<< m_stage);
+
   if(m_stage == -1) {
 
     // check for symbols in runtime compiled expressions
@@ -118,7 +120,8 @@ bool Symbol::findStage()
     
     if(!hardCodedDependencies && !usingSymbols && !m_overwrite) {
       m_stage = 0;
-      MSG_DEBUG("Symbol::findStage", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
+      MSG_DEBUG("Symbol::findStage", className() << " for symbol '"
+      		<< m_symbolName << "': no symbols used: stage is now " << m_stage);
       return true;
     }
     
@@ -130,25 +133,42 @@ bool Symbol::findStage()
 
     if(usingSymbols) {
 
-      FunctionParser::removeFromTypedValues(usedSymbolsIgnoredForStaging(), /*typed_value_list_t&*/ usedSymbols);
+      FunctionParser::removeFromTypedValues(usedSymbolsIgnoredForStaging(),
+      		/*typed_value_list_t&*/ usedSymbols);
       
-      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s) {
+      for(typed_value_list_t::const_iterator s = usedSymbols.begin();
+      		s != usedSymbols.end() && !tooEarly; ++s) {
 	  
-	string name = (*s)->name();
-	MSG_DEBUG("Symbol::findStage", "className: " << className() << "name: " << myName() << ": for symbol " << mySymbolName() << ": now checking for used symbol with complete name " << name);
+      	string name = (*s)->name();
+      	MSG_DEBUG("Symbol::findStage", "className: " << className() << "name: "
+      			<< myName() << ": for symbol " << mySymbolName()
+						<< ": now checking for used symbol with complete name " << name);
 	
-	cleanSymbol(name);
+      	cleanSymbol(name);
 	  
-	findStageForSymbolName(name, tooEarly, nothing);
+      	findStageForSymbolName(name, tooEarly, nothing);
 	  
       } // end loop over used symbols
       
     } // end of if(usingSymbols) 
 
     if(hardCodedDependencies) {
-      for(list<string>::const_iterator s = hardCodedSymbols.begin(); s != hardCodedSymbols.end() && !tooEarly; ++s) {
-	MSG_DEBUG("Symbol::findStage", className() << ": now checking for hard-coded used symbol with name " << *s);
-	findStageForSymbolName(*s, tooEarly, nothing);
+      for(list<string>::const_iterator s = hardCodedSymbols.begin();
+      		s != hardCodedSymbols.end() && !tooEarly; ++s) {
+
+      	if(g_stringIsInPipeList(*s, usedSymbolsIgnoredForStaging())) {
+
+      		MSG_DEBUG("Symbol::findStage", className() << ": not checking for "
+      				"hard-coded used symbol with name '" << *s
+							<< "' because listed in attribute 'useOldFor'.");
+
+      	}
+      	else {
+
+      		MSG_DEBUG("Symbol::findStage", className() << ": now checking for "
+      				"hard-coded used symbol with name " << *s);
+      		findStageForSymbolName(*s, tooEarly, nothing);
+      	}
       }
     }
     
@@ -162,28 +182,34 @@ bool Symbol::findStage()
       if(nothing)
       {
         m_stage = 0;
-        MSG_DEBUG("Symbol::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        MSG_DEBUG("Symbol::findStage", className() << " for symbol '"
+        		<< m_symbolName << "': stage is now " << m_stage);
         return true;
       } 
       else return false;
     }
     else 
     {
-      MSG_DEBUG("Symbol::findStage", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      MSG_DEBUG("Symbol::findStage", className() << " for symbol '"
+      		<< m_symbolName << "': stage is now " << m_stage);
       return true;
     }
   } // end if(m_stage == -1)
   else 
   {
-    MSG_DEBUG("Symbol::findStage", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    MSG_DEBUG("Symbol::findStage", className() << " for symbol '"
+    		<< m_symbolName << "': stage was already " << m_stage);
     return true;
   }
 }
 
-
+// FIXME: identical to findStage() (except for ..._0 method calls)
+// REFACTOR!!!
 bool Symbol::findStage_0()
 {
-  MSG_DEBUG("Symbol::findStage_0", className() << " START: stage = " << m_stage);
+  MSG_DEBUG("Symbol::findStage_0", className() << " START: stage = "
+  		<< m_stage);
+
   if(m_stage == -1) {
     typed_value_list_t usedSymbols;
     
@@ -191,13 +217,21 @@ bool Symbol::findStage_0()
 
     // no symbols used? not overwriting?
     bool usingSymbols = !(usedSymbols.empty());
-    if(!usingSymbols && !m_overwrite) {
+
+    // some modules depend on other symbols in a hard-coded way
+    list<string> hardCodedSymbols;
+    addMyHardCodedDependenciesTo(hardCodedSymbols);
+    bool hardCodedDependencies = !(hardCodedSymbols.empty());
+
+    if(!hardCodedDependencies && !usingSymbols && !m_overwrite) {
       m_stage = 0;
-      MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': no symbols used: stage is now " << m_stage);
+      MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"
+      		<< m_symbolName << "': no symbols used: stage is now " << m_stage);
       return true;
     }
     
-    // this is for aborting, when there is a Calculator, which has stage = -1 itself
+    // this is for aborting, when there is a Calculator, which has stage = -1
+    // itself
     bool tooEarly = false;
     // this is for setting the stage to '0' when there is no Calculator at all 
     // (but probably Integrators or s.th. like that)
@@ -205,20 +239,47 @@ bool Symbol::findStage_0()
 
     if(usingSymbols) {
 
-      FunctionParser::removeFromTypedValues(/*string*/ /*m_oldSymbols*/usedSymbolsIgnoredForStaging(), /*typed_value_list_t&*/ usedSymbols);
+      FunctionParser::removeFromTypedValues
+				(/*string*/ /*m_oldSymbols*/usedSymbolsIgnoredForStaging(),
+						/*typed_value_list_t&*/ usedSymbols);
       
-      for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end() && !tooEarly; ++s) {
+      for(typed_value_list_t::const_iterator s = usedSymbols.begin();
+      		s != usedSymbols.end() && !tooEarly; ++s) {
 	  
-	string name = (*s)->name();
-	MSG_DEBUG("Symbol::findStage_0", className() << ": now checking for used symbol with complete name " << name);
+      	string name = (*s)->name();
+      	MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"
+        		<< m_symbolName << "': now checking for "
+      			"used symbol with complete name " << name);
 	
-	cleanSymbol(name);
+      	cleanSymbol(name);
 	  
-	findStageForSymbolName_0(name, tooEarly, nothing);
+      	findStageForSymbolName_0(name, tooEarly, nothing);
 	  
       } // end loop over used symbols
       
     } // end of if(usingSymbols) 
+
+
+    if(hardCodedDependencies) {
+      for(list<string>::const_iterator s = hardCodedSymbols.begin();
+      		s != hardCodedSymbols.end() && !tooEarly; ++s) {
+
+      	if(g_stringIsInPipeList(*s, usedSymbolsIgnoredForStaging())) {
+
+      		MSG_DEBUG("Symbol::findStage_0", className() << ": not checking for "
+      				"hard-coded used symbol with name '" << *s
+							<< "' because listed in attribute 'useOldFor'.");
+
+      	}
+      	else {
+
+      		MSG_DEBUG("Symbol::findStage_0", className() << ": now checking for "
+      				"hard-coded used symbol with name " << *s);
+      		findStageForSymbolName_0(*s, tooEarly, nothing);
+
+      	}
+      }
+    }
 
     // Possibly additional check for own symbol(s)
     checkOverwriteForStageFinding_0(tooEarly, nothing);
@@ -230,20 +291,23 @@ bool Symbol::findStage_0()
       if(nothing)
       {
         m_stage = 0;
-        MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+        MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"
+        		<< m_symbolName << "': stage is now " << m_stage);
         return true;
       } 
       else return false;
     }
     else 
     {
-      MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage is now " << m_stage);
+      MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"
+      		<< m_symbolName << "': stage is now " << m_stage);
       return true;
     }
   } // end if(m_stage == -1)
   else 
   {
-    MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"  << m_symbolName << "': stage was already " << m_stage);
+    MSG_DEBUG("Symbol::findStage_0", className() << " for symbol '"
+    		<< m_symbolName << "': stage was already " << m_stage);
     return true;
   }
 }

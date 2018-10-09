@@ -104,8 +104,6 @@ void ValCalculatorArbitrary::init()
 
 void ValCalculatorArbitrary::setup()
 {
-  MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Symbol \"" + m_symbolName + ": START, cutoff = " << m_cutoff);    
-    
   if(m_cutoff <= 0)
     throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Attribute 'cutoff' has no value > 0!");
      

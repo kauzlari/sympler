@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -437,7 +437,8 @@ void ParticleCreatorWallTextured::createParticles() {
 void ParticleCreatorWallTextured::init() {
 	// ParticleCreatorWall::init() is called before automatically by the constructor 
 	m_properties.setClassName("ParticleCreatorWallTextured");
-	m_properties.setDescription("Generates particles behind boundary walls, i.e., outside the domain "
+	m_properties.setDescription
+		("Generates particles behind boundary walls, i.e., outside the domain "
 		"that a freely moving particle can reach.\n"
 		"The user can give a texture to the walls. The textures are "
 		"defined in PGM files (see http://netpbm.sourceforge.net/doc/pgm.html)"
@@ -450,9 +451,9 @@ void ParticleCreatorWallTextured::init() {
 		"expression for it. For the expression, the same variables are "
 		"allowed as, e.g., for the attribute 'u'. For non-scalars you "
 		"have to add the following to the attribute name:\n"
-		"\"_x\", \"_y\" or \"_z\" for the respective components of a vector\n"
-		"\"_xx\", \"_xy\", \"_xz\", \"_yx\", \"_yy\", \"_yz\", \"_zx\", \"_zy\" "
-			"and \"_zz\" for the respective components of a tensor.");
+		"\"__x\", \"__y\" or \"__z\" for the respective components of a vector\n"
+		"\"__xx\", \"__xy\", \"__xz\", \"__yx\", \"__yy\", \"__yz\", \"__zx\", "
+		"\"__zy\" and \"__zz\" for the respective components of a tensor.");
 
 	FUNCTIONFIXEDPC(mapPixel, m_mappixel,
 			"This expression maps the pixel values 'v' (0..255) to a double which than can be used in expressions. Default for v is 0.")

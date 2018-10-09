@@ -445,7 +445,7 @@ FUNCTION_PARSER_LOG("FunctionParser::parseThis", "start-expression = " << expres
 
 /*static*/ void FunctionParser::removeFromTypedValues(string toRemove, typed_value_list_t& usedSymbols) {
 
-  MSG_DEBUG("FunctionParser::removeFromTypedValues", "START: toRemove = '" << toRemove << "'");
+  FUNCTION_PARSER_LOG("FunctionParser::removeFromTypedValues", "START: toRemove = '" << toRemove << "'");
       
   // go through the symbols in 'toRemove' and remove those from usedSymbols 
   if (toRemove != "---") {
@@ -467,13 +467,13 @@ FUNCTION_PARSER_LOG("FunctionParser::parseThis", "start-expression = " << expres
       typed_value_list_t symbolsToRemove;
       // determine what to remove
       for(typed_value_list_t::const_iterator s = usedSymbols.begin(); s != usedSymbols.end(); ++s) {
-	MSG_DEBUG("FunctionParser::removeFromTypedValues", "now comparing used symbol '" << (*s)->name() << "' with to be removed symbol '" << cur << "'");
+	FUNCTION_PARSER_LOG("FunctionParser::removeFromTypedValues", "now comparing used symbol '" << (*s)->name() << "' with to be removed symbol '" << cur << "'");
 	if((*s)->name() == cur) {
 	  symbolsToRemove.push_back(*s);
-	  MSG_DEBUG("FunctionParser::removeFromTypedValues", "will remove" << (*s)->name());
+	  FUNCTION_PARSER_LOG("FunctionParser::removeFromTypedValues", "will remove" << (*s)->name());
 	}
 	else
-	  MSG_DEBUG("FunctionParser::removeFromTypedValues", "will NOT remove" << (*s)->name());
+	  FUNCTION_PARSER_LOG("FunctionParser::removeFromTypedValues", "will NOT remove " << (*s)->name());
 	  
       }
       // remove all (or none if(symbolsToRemove.empty()) )

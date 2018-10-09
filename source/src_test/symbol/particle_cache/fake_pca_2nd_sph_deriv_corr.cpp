@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -29,65 +29,20 @@
  */
 
 
+#include "fake_pca_2nd_sph_deriv_corr.h"
 
-#include "general.h"
-
-#ifdef _OPENMP
-  #include "omp.h"
-#endif
-
-#include <iomanip>
-
-using namespace std;
-
-double global::R = 8.31441;
-
-/*!
- * make_filename takes the filename 's' and appends the number 'n'
- */
-string make_filename(string s, int n)
+FakePCa2ndSPHDerivCorr::FakePCa2ndSPHDerivCorr(Simulation* parent)
+  : PCa2ndSPHDerivCorr(parent)
 {
-  // if there is a dot, place the number n behind it (rfind searches from the end)
-  int p = s.rfind('.');
-  // otherwise put the number n at the end
-  if(p<0)
-    p = s.size();
-  stringstream h;
-  
-  h << setfill('0') << setw(5) << n;
-  
-  s.insert(p, "_"+h.str());
-  
-  return s;
 }
 
+//FakePCa2ndSPHDerivCorr::FakePCa2ndSPHDerivCorr
+//	(size_t colour, size_t offset, string symbolName)
+//	: PCa2ndSPHDerivCorr(colour, offset, symbolName)
+//{
+//}
 
-bool g_stringIsInPipeList(string s, string pipeStringList)
+FakePCa2ndSPHDerivCorr::~FakePCa2ndSPHDerivCorr()
 {
-
-  if (pipeStringList != "---") {
-    bool run = true;
-    string working = pipeStringList;
-    while(run) {
-      string cur;
-      size_t pos = working.find('|');
-
-      if (pos == string::npos) {
-      	run = false;
-      	cur = working;
-      }
-      else {
-      	cur = string(working, 0, pos);
-      	working = string(working, pos+1);
-      }
-
-      if(s == cur)
-      	return true; // should quit the while loop
-    }
-
-  }
-
-  return false;
 }
-
 

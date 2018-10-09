@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -117,17 +117,18 @@ DataFormat::attribute_t DataFormat::addAttribute
 
 string DataFormat::attribute_t::datatypeAsString() const {
 
-  /*static*/ DataFormat::attribute_t::datatypeAsString(this->datatype);
-
+  return /*static*/ DataFormat::attribute_t::datatypeAsString(this->datatype);
 }
 
 
-/*static*/ string DataFormat::attribute_t::datatypeAsString(const datatype_t& datatype) {
-  switch (datatype) {
+/*static*/ string DataFormat::attribute_t::datatypeAsString
+	(const datatype_t& datatype) {
+
+	switch (datatype) {
   case DataFormat::INT:
     return string("INT");
   case DataFormat::DOUBLE:
-    return string("DOUBLE");
+  	return string("DOUBLE");
   case DataFormat::POINT:
     return string("POINT");
   case DataFormat::TENSOR:
@@ -321,40 +322,48 @@ Data::Data(DataFormat *format): m_format(format)
 }
 
 
+#define	DATAFORMATCOPY_DEEP(a,data,finaltype)				\
+{ \
+  /* incRefCount: dirty hack to make memcpy possible */ \
+	reinterpret_cast<finaltype*>(((size_t) (data)) + a->offset)->incRefCount(); \
+	*reinterpret_cast<finaltype*>(((size_t) (data)) + a->offset) = \
+		reinterpret_cast<finaltype*>((size_t) copy_data.m_data + a->offset)->deepCopy();} NOOP
+
+#define	DATAFORMAT_DUMMY_OP(a, data, finaltype)	NOOP			\
+
+
 Data::Data(const Data &copy_data): m_format(NULL), m_data(NULL)
 {
 
-    if (copy_data.m_format) {
-    	// Copy pointer to data format, DataFormat instance is shared
-        m_format = copy_data.m_format;
+  if (copy_data.m_format) {
 
-        // Create new data storage space and copy old data,
-        // but do not assign smartpointers
-        m_data = m_format->alloc(false);
+  	// Copy pointer to data format, DataFormat instance is shared
+    m_format = copy_data.m_format;
+
+    // Create new data storage space and copy old data,
+    // but do not assign smartpointers
+    m_data = m_format->alloc(false);
         
-        if(m_format->size()) {
-	  memcpy((void*) m_data, (void*) copy_data.m_data, m_format->size());
-	  
-	  // Iterate over all attributes and deep copy smartpointers where necessary 
-	  size_t iend = (m_format->rows());
-	  for(size_t i = 0; i < iend; i++) {
-	    DataFormat::attribute_t a = m_format->attrByIndex(i);
-	    
-	    // incRefCount: dirty hack to make memcpy possible
-#define	DATAFORMATCOPY_DEEP(a,m_data,finaltype)				\
-            {reinterpret_cast<finaltype*>((size_t) m_data + a->offset)->incRefCount(); \
-	      *reinterpret_cast<finaltype*>((size_t) m_data + a->offset) = \
-		reinterpret_cast<finaltype*>((size_t) m_data + a->offset)->deepCopy();} NOOP 
-	    DATAFORMAT_CONTAINER_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
-	  } // for
-	} // if
-    } // if
+    if (m_format->size()) {
+    	memcpy((void*) m_data, (void*) copy_data.m_data, m_format->size());
+
+    	// Iterate over all attributes and deep copy smartpointers where necessary
+    	size_t iend = (m_format->rows());
+    	for (size_t i = 0; i < iend; i++) {
+
+    		DataFormat::attribute_t a = m_format->attrByIndex(i);
+
+    		DATAFORMAT_CONTAINER_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
+
+    	} // for
+    } // if (m_format->size())
+  } // if (copy_data.m_format)
+
 }
 
 
 Data::~Data()
-{
-    
+{    
     if (m_format)
         m_format->release(m_data);
 }
@@ -378,28 +387,28 @@ Data &Data::operator=(const Data &copy_data)
 
         // Iterate over all attributes and deep copy smartpointers where necessary 
         size_t iend = (m_format->rows());
+
         for(size_t i = 0; i < iend; i++) {
         	DataFormat::attribute_t a = m_format->attrByIndex(i);
-		DATAFORMAT_CONTAINER_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
-          ;} // for         
-    } //if
-        
+					DATAFORMAT_CONTAINER_SWITCH(&a, m_data, DATAFORMATCOPY_DEEP);
+        }
+                   
+    } // if (m_format)
+
     return *this;
 }
 
-
+#undef DATAFORMATCOPY_DEEP
 
 //---- Methods ----
 
 void Data::setFormatAndAlloc(DataFormat *format)
 {
-
     if (m_format)
         m_format->release(m_data);
 
     m_format = format;
     alloc();
-
 }
 
 

@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -215,6 +215,14 @@ public:
 #endif
 };
 
+
+/*!
+ * Helper function checking if string \a s is within list of strings
+ * \a pipeStringList . The string \a pipeStringList is assumed to have the form
+ * "string1|string2|...|stringN".
+ *
+ */
+bool g_stringIsInPipeList(string s, string pipeStringList);
 
 
 /*! make_filename takes the filename 's' and appends the number 'n'

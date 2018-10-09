@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -72,39 +72,42 @@ void ParticleCache::init()
 
 void ParticleCache::checkOutputSymbolExistence(size_t colour) {
 
-  if(Particle::s_tag_format[m_colour].attrExists(m_symbolName)) {
+  if(Particle::s_tag_format[colour].attrExists(m_symbolName)) {
     if(m_overwrite) {
-      m_offset = Particle::s_tag_format[m_colour].offsetByName(m_symbolName);
+      m_offset = Particle::s_tag_format[colour].offsetByName(m_symbolName);
       DataFormat::attribute_t tempAttr
-	= Particle::s_tag_format[m_colour].attrByName(m_symbolName);
-      if(m_datatype != tempAttr.datatype)
-	throw gError
-	  ("ParticleCache::setup for module " + className(),
-	   "Symbol '" + m_symbolName + "' already exists, "
-	   "but with different datatype '"
-	   + tempAttr.datatypeAsString() + "' to be used due to "
-	   "your choice of 'overwrite = \"yes\"', instead of your "
-	   "desired datatype '"
-	   + DataFormat::attribute_t::datatypeAsString(m_datatype)
-	   + "'. Aborting.");
+				= Particle::s_tag_format[colour].attrByName(m_symbolName);
+
+      if(m_datatype != tempAttr.datatype) {
+
+      	throw gError
+					("ParticleCache::setup for module " + className(),
+						"Symbol '" + m_symbolName + "' already exists, "
+						"but with different datatype '"
+						+ tempAttr.datatypeAsString() + "' to be used due to "
+						"your choice of 'overwrite = \"yes\"', instead of your "
+						"desired datatype '"
+						+ DataFormat::attribute_t::datatypeAsString(m_datatype)
+      			+ "'. Aborting.");
+      }
     }
     else
       throw gError
-	("ParticleCache::setup for module " + className(), "Symbol '"
-	 + m_symbolName + "' was already created by other module "
-	 "for species " + M_MANAGER->species(m_colour) + ", and you "
-	 "have chosen overwrite = 'no'.");
-  } // end of if(Particle::s_tag_format[m_colour].attrExists(..))
+				("ParticleCache::setup for module " + className(), "Symbol '"
+					+ m_symbolName + "' was already created by other module "
+					"for colour " + ObjToString(colour) + ", and you "
+					"have chosen overwrite = 'no'.");
+  } // end of if(Particle::s_tag_format[colour].attrExists(..))
   else {
     if(m_overwrite)
       throw gError
-	("ParticleCache::setup for module " + className(), "You have "
-	 "chosen 'overwrite = \"yes\"', but symbol '" + m_symbolName +
-	 "' does not yet exist. Aborting.");
+				("ParticleCache::setup for module " + className(), "You have "
+	 				"chosen 'overwrite = \"yes\"', but symbol '" + m_symbolName +
+	 				"' does not yet exist. Aborting.");
     else
-      m_offset = Particle::s_tag_format[m_colour].addAttribute
-	(m_symbolName, m_datatype, Symbol::s_persistency, m_symbolName).offset;
-  } // end else of if(Particle::s_tag_format[m_colour].attrExists(..))
+      m_offset = Particle::s_tag_format[colour].addAttribute
+				(m_symbolName, m_datatype, Symbol::s_persistency, m_symbolName).offset;
+  } // end else of if(Particle::s_tag_format[colour].attrExists(..))
   
 }
 
@@ -210,7 +213,6 @@ void ParticleCache::cleanSymbol(string& name) const
     // remove the last bracket; don't know why, but with these arguments it works
     name.erase(name.size()-1, name.size()-1);
   }
-  MSG_DEBUG("ValCalculator::cleanPairSymbol", className() << ": shortened name of symbol: " << name);
 }
 
 void ParticleCache::setupAfterParticleCreation()

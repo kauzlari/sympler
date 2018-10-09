@@ -29,37 +29,22 @@
  */
 
 
-#ifndef __SYMBOL_F_PARTICLE_SCALAR_TEST_H
-#define __SYMBOL_F_PARTICLE_SCALAR_TEST_H
+#ifndef __PCA_2ND_SPH_DERIV_CORR_TEST_H
+#define __PCA_2ND_SPH_DERIV_CORR_TEST_H
 
-#include "symbol_f_particle_scalar.h"
-
-#include "symbol_f_particle_arbitraryTest.h"
+#include "fake_pca_2nd_sph_deriv_corr.h"
+#include "particle_cacheTest.h"
 
 using namespace std;
 
 
-class SymbolFParticleScalarTest : public SymbolFParticleArbitraryTest
+class PCa2ndSPHDerivCorrTest : public ParticleCacheTest
 {
-  CPPUNIT_TEST_SUITE (SymbolFParticleScalarTest);
+  CPPUNIT_TEST_SUITE (PCa2ndSPHDerivCorrTest);
 
-  CPPUNIT_TEST (computeCacheForTest);
-  CPPUNIT_TEST (setupTest);
-  // next 5 defined in parent class only
-  // FIXME: Does CPPUNIT allow for a better solution? I don't like it
-  // that we do not see the definition of the tested functions in the
-  // child class SymbolFParticleScalar (which is in principle a good
-  // thing!), but we must(?) nonetheless
-  // activate the tests here and in all(!) other child classes,
-  // since the parent test class is an abstract class.
-  // -> SOLUTION: YES, CHECK how it is done for ParticleCacheTest and children
-  // FIXME: anyways you will have to connect this sub-hierarchy of test classes
-  // to class ParticleCacheTest
   CPPUNIT_TEST (initTest);
-  CPPUNIT_TEST (setupOffsetTest);
-  CPPUNIT_TEST (precomputeTest);
-  CPPUNIT_TEST (registerWithParticleTest);
-  CPPUNIT_TEST (setForceIndexToTest);
+  CPPUNIT_TEST (setupTest);
+  CPPUNIT_TEST (computeCacheForTest);
 
   CPPUNIT_TEST_SUITE_END ();
   
@@ -84,14 +69,28 @@ class SymbolFParticleScalarTest : public SymbolFParticleArbitraryTest
   virtual void initTest (void); 
 
   /*!
-   * Test \a SymbolFParticleScalar::setup()
-   * FIXME: This test only checks what can go wrong on the 
-   * \a SymbolFParticleScalar level and not responsibilities of parent classes.
-   * This is a good thing! So fix this by extending the test-hierarchy 
-   * to the parents and NOT by adding more test code here!
+   * Test \a PCa2ndSPHDerivCorr::setup()
    */
   void setupTest (void);
-  
+
+  /*!
+   * Helper to create and assign to \a m_particleCache the right
+   * \a ParticleCache to be tested
+   */
+  void setUpParticleCache (void);
+
+  /*!
+   * Helper for testing correctness of className in \a PropertyList of
+   * \a PCa2ndSPHDerivCorr
+   */
+  virtual void testPropClassName (void);
+
+  /*!
+   * Helper for testing correct initialisation of "species" attribute of
+   * \a PCa2ndSPHDerivCorr
+   */
+  virtual void testSpeciesAttr (void);
+
   
  private:
   

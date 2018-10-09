@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -212,16 +212,26 @@ void ParticleCreatorLatticeBCC::init()
   m_properties.setClassName("ParticleCreatorLatticeBCC");
 
   m_properties.setDescription(
-      "Generates particles sitting on a body-centred cubic lattice (bcc). This means TWO particles are created per lattice point at the relative positions a*(0.25, 0.25, 0.25) and a*(0.75, 0.75, 0.75), respectively. 'a' is the spacing of the lattice points and will be computed from the given data for 'density', 'distance' and/or 'nLatticeP*' (see below for a description). Note that not all"
-      " attributes can be set independently. "
+      "Generates particles sitting on a body-centred cubic lattice (bcc). This "
+  		"means TWO particles are created per lattice point at the relative "
+  		"positions a*(0.25, 0.25, 0.25) and a*(0.75, 0.75, 0.75), respectively. "
+  		"'a' is the spacing of the lattice points and will be computed from the "
+  		"given data for 'density', 'distance' and/or 'nLatticeP*' (see below for "
+  		"a description). Note that not all attributes can be set independently. "
       "For example giving a certain density fixes the distance.\n"
       "Note that the size of the simulation box can be modified by this"
-      " ParticleCreator. For example, giving "
-      "a density and a number of lattice points fixes the size. If this conflicts with the size "
-      "given in the Boundary, the Boundary is being resized to reflect the information given here.\n"
-      "The initial conditions of user-defined symbols can be set by taking the symbol as an attribute and defining a mathematical expression for it. For the expression, the same variables are allowed as, e.g., for the attribute 'u'. For non-scalars you have to add the following to the attribute name:\n"
-      "\"_x\", \"_y\" or \"_z\" for the respective components of a vector\n"
-      "\"_xx\", \"_xy\", \"_xz\", \"_yx\", \"_yy\", \"_yz\", \"_zx\", \"_zy\" and \"_zz\" for the respective components of a tensor."
+      " ParticleCreator. For example, giving a density and a number of lattice "
+  		"points fixes the size. If this conflicts with the size "
+      "given in the Boundary, the Boundary is being resized to reflect the "
+  		"information given here.\n"
+      "The initial conditions of user-defined symbols can be set by taking the "
+  		"symbol as an attribute and defining a mathematical expression for it. "
+  		"For the expression, the same variables are allowed as, e.g., for the "
+  		"attribute 'u'. For non-scalars you have to add the following to the "
+  		"attribute name:\n"
+      "\"__x\", \"__y\" or \"__z\" for the respective components of a vector\n"
+      "\"__xx\", \"__xy\", \"__xz\", \"__yx\", \"__yy\", \"__yz\", \"__zx\", "
+  		"\"__zy\" and \"__zz\" for the respective components of a tensor."
                              );
     
 }
