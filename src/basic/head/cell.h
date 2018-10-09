@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -368,10 +368,19 @@ protected:
    * @param neighbor The neighboring cell
    * @param where Neighbor index of the cell alignment
    * @param first Determines whether forces act on particles in the first cell
-   * @param second Determines whether forcee act on particle in the second cell (the one given by \a neighbor)
+   * @param second Determines whether forces act on particle in the 
+   * second cell (the one given by \a neighbor)
    */
   virtual void establishLink(Cell *neighbor, int where, bool first, bool second);
 
+  /*!
+   * Checks if new position of given Particle requires finding a new Cell
+   * Return value: valid iterator to next particle
+   * @param i Iterator of the current \a Particle in the list it belongs to
+   * @return Iterator pointing to the next particle
+   */
+  virtual list<Particle*>::iterator checkNewPosition(list<Particle*>::iterator i);
+  
 
 public:
 
@@ -379,9 +388,9 @@ public:
    * Check if the particle collides with a wall.
    * This solves the quadratic equation exactly.
    * @param p Check collision for this particle
- * @param r make possible changes in this position (may be != p->r)
- * @param v make possible changes in this position (may be != p->v)
- * @param force Force on this particle
+   * @param[out] r make possible changes in this position (may be != p->r)
+   * @param[out] v make possible changes in this velocity (may be != p->v)
+   * @param force Force on this particle
    */
   virtual void doCollision(Particle *p, point_t& r, point_t& v, const point_t &force, IntegratorPosition *integratorP);
 
@@ -495,9 +504,17 @@ public:
   /*!
    * Advance positions of the particle within this cell using
    * the Velocity-Verlet algorithm
-   * @param integrator Integrator to use for the update. Fixme!!! Only Velocity-Verlet supported.
+   * @param integrator Integrator to use for the update. 
+   * FIXME: Only Velocity-Verlet-like integration supported.
    */
   virtual void updatePositions(IntegratorPosition *integrator);
+
+  /*! 
+   * Check of position updates of all particles of the given \a colour
+   * not caused by \a Integrators .
+   * @param colour Colour of the particles to be checked
+   */
+  virtual void updatePositions(size_t colour);
 
   /*!
    * Add a particle to this cell.

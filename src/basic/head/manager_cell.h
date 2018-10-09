@@ -322,6 +322,13 @@ public:
   virtual void invalidatePositions(IntegratorPosition *integrator);
   
   /*!
+   * Notifies \a Cell s of changed \a Particle positions which are 
+   * not caused by an \a IntegratorPosition
+   * @param colour Colour of the \a Particle s with changed positions
+   */
+  virtual void invalidatePositions(size_t colour);
+  
+  /*!
    * Thread-number counter
    */
   static size_t thread_counter;

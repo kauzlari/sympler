@@ -108,19 +108,19 @@ void ValCalculatorArbitrary::init()
 
 void ValCalculatorArbitrary::setup()
 {
-  MSG_DEBUG("ValCalculatorArbitrary::setup", className() + ": START, cutoff = " << m_cutoff);    
+  MSG_DEBUG("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": START, cutoff = " << m_cutoff);    
     
   if(m_cutoff <= 0)
-    throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'cutoff' has no value > 0!");
+    throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Attribute 'cutoff' has no value > 0!");
      
   if(m_expression == "undefined")
-    throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'expression' has value \"undefined\"");
+    throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Attribute 'expression' has value \"undefined\"");
      
   if(m_symmetry != -1 && m_symmetry != 1)
-    throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'symmetry' may only be \"-1\" (antisymmetry) or \"1\" (symmetry).");
+    throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Attribute 'symmetry' may only be \"-1\" (antisymmetry) or \"1\" (symmetry).");
   
   if(m_phaseUser != 0 && m_phaseUser != 1 && m_phaseUser != 2)
-    throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'stage' is " + ObjToString(m_phaseUser) + ", which is none of the allowed values \"0\", \"1\", \"2\".");
+    throw gError("ValCalculatorArbitrary::setup", "Class name: " + className() + ", name: " + name() + ": Attribute 'stage' is " + ObjToString(m_phaseUser) + ", which is none of the allowed values \"0\", \"1\", \"2\".");
    
   if(m_allPairs)
   {
@@ -324,7 +324,7 @@ void ValCalculatorArbitrary::setup()
     if(m_species.first == "undefined")
       throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
     if(m_species.second == "undefined")
-      throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species1' has value \"undefined\" and 'allPairs' is disabled."); 
+      throw gError("ValCalculatorArbitrary::setup", className() + ": Attribute 'species2' has value \"undefined\" and 'allPairs' is disabled."); 
 
     ColourPair* cp = M_MANAGER->cp(M_MANAGER->getColour(m_species.first), M_MANAGER->getColour(m_species.second)/*m_species*/);
     

@@ -491,9 +491,16 @@ public:
 
   /*!
    * Advances the position (including collision detection)
-   * @param integrator Integrato to use for advancing positions
+   * @param integrator Integrator to use for advancing positions
    */
   void invalidatePositions(IntegratorPosition *integrator);
+
+  /*!
+   * Notifies sub-modules of changed \a Particle positions which are 
+   * not caused by an \a IntegratorPosition
+   * @param colour Colour of the \a Particle s with changed positions
+   */
+  void invalidatePositions(size_t colour);
 
   /*!
    * Tells phase that the velocities have been updated.

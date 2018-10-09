@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -29,30 +29,75 @@
  */
 
 
+#ifndef __SHIFT_PARTICLE_H
+#define __SHIFT_PARTICLE_H
 
-#ifndef EXAMPLETEST_H
-#define EXAMPLETEST_H
-
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+#include "thermostat.h"
 
 using namespace std;
 
-class ExampleTest : public CPPUNIT_NS :: TestFixture
+class Phase;
+class Simulation;
+
+/*!
+ * \a Callable shifting particles by a user-defined particle-specific 
+ * displacement vector
+ */
+class ShiftParticle : public Thermostat
 {
-  CPPUNIT_TEST_SUITE (ExampleTest);
-  CPPUNIT_TEST (functionTest);
-  CPPUNIT_TEST_SUITE_END ();
 
-  public:
-    void setUp (void);
-    void tearDown (void);
+ protected:
 
-  protected:
-    void functionTest (void);
+  /*!
+   * The colour, this \a Callable should act on
+   */
+  size_t m_colour;
+ 
+  /*!
+   * The species, this \a Callable should act on
+   */
+  string m_species;
 
-  private:
-//    Example *a, *b;
+  /*!
+   * Name of the vector symbol holding the shift for each particle
+   */
+  string m_shiftSymbolName;
+
+  /*!
+   * Memmory offset in \a Particle.tag where the particle shift vector
+   * is stored
+   */
+  size_t m_shiftOffset;
+  
+  /*!
+   * Initialize the property list
+   */
+  void init();
+
+  
+ public:
+  /*!
+   * Constructor
+   * @param sim Pointer to the main simulation object
+   */
+  ShiftParticle(Simulation* sim);
+
+  /*!
+   * Destructor
+   */
+  virtual ~ShiftParticle() {}
+
+  /*!
+   * The actual shifting operation
+   * FIXME: Generalise deprecated name
+   */
+  virtual void thermalize(Phase* p);
+
+  /*!
+   * Setup this module
+   */
+  virtual void setup();
 };
 
 #endif
+
