@@ -127,7 +127,7 @@ NOTE: stage = "2" since we recompute forces in stage 0 based on shifted particle
       wallSpecies = "wall"
       species1 = "fluid"
       species2 = "wall"
-      scalar = "temp"
+      variable = "temp"
       symbol = "tempBC"
       stage = "2"
       />

@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -142,6 +142,33 @@ void PropertyList::help(HelpNode *node) const
 //     new HelpNode(m, i->description + " (default:_" + i->toString() + ")");
   }
 }
+
+void PropertyList::setPropDescription(string name, string description) {
+
+ 	propByName(name).setDescription(description);
+
+	// FIXME: the following is necessary because we store the properties
+	// redundantly in \a m_prop_by_name and \a m_prop_by_index. Remove the
+	// redundancy!
+	vector<property_t>::iterator i;
+  for (i = m_prop_by_index.begin(); i != m_prop_by_index.end(); i++) {
+  	if (i -> name == name) {
+  		i -> description = description;
+  		// Multiple occurrences of name should have been prevented by
+  		// function PropertyList::addProperty
+  		break;
+  	}
+  }
+
+  if (i == m_prop_by_index.end()) {
+  	string s = string("PropertyList::setPropDescription") + "Requested property "
+  			"name '" + name + "' not found in indexed properties. Aborting. "
+				"Possible properties in the current context are: ";
+
+  	throwListIfUnknown(s);
+  }
+}
+
 
 string PropertyList::property_t::toString() const {
   stringstream str;

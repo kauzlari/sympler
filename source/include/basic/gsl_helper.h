@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -29,65 +29,25 @@
  */
 
 
+#ifndef __GSL_HELPER_H
+#define __GSL_HELPER_H
 
-#include "general.h"
+#include <gsl/gsl_linalg.h>
 
-#ifdef _OPENMP
-  #include "omp.h"
+// the following definitions are done because I do not know how to turn range-checking 
+// off for the GSL
+#ifndef GSL_VECTOR_SET
+#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
+#endif
+#ifndef GSL_VECTOR_GET
+#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
+#endif
+#ifndef GSL_MATRIX_SET
+#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
+#endif
+#ifndef GSL_MATRIX_GET
+#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
 #endif
 
-#include <iomanip>
 
-using namespace std;
-
-double global::R = 8.31441;
-
-/*!
- * make_filename takes the filename 's' and appends the number 'n'
- */
-string make_filename(string s, int n)
-{
-  // if there is a dot, place the number n behind it (rfind searches from the end)
-  int p = s.rfind('.');
-  // otherwise put the number n at the end
-  if(p<0)
-    p = s.size();
-  stringstream h;
-  
-  h << setfill('0') << setw(5) << n;
-  
-  s.insert(p, "_"+h.str());
-  
-  return s;
-}
-
-
-bool g_stringIsInPipeList(string s, string pipeStringList)
-{
-
-  if (pipeStringList != "---") {
-    bool run = true;
-    string working = pipeStringList;
-    while(run) {
-      string cur;
-      size_t pos = working.find('|');
-
-      if (pos == string::npos) {
-      	run = false;
-      	cur = working;
-      }
-      else {
-      	cur = string(working, 0, pos);
-      	working = string(working, pos+1);
-      }
-
-      if(s == cur)
-      	return true; // should quit the while loop
-    }
-
-  }
-
-  return false;
-}
-
-
+#endif

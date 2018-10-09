@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -30,64 +30,33 @@
 
 
 
-#include "general.h"
+#ifndef __CPPUNIT_HELPER_H
+#define __CPPUNIT_HELPER_H
 
-#ifdef _OPENMP
-  #include "omp.h"
-#endif
-
-#include <iomanip>
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
 using namespace std;
 
-double global::R = 8.31441;
 
-/*!
- * make_filename takes the filename 's' and appends the number 'n'
- */
-string make_filename(string s, int n)
-{
-  // if there is a dot, place the number n behind it (rfind searches from the end)
-  int p = s.rfind('.');
-  // otherwise put the number n at the end
-  if(p<0)
-    p = s.size();
-  stringstream h;
-  
-  h << setfill('0') << setw(5) << n;
-  
-  s.insert(p, "_"+h.str());
-  
-  return s;
-}
+class CppunitHelper {
 
+	public:
 
-bool g_stringIsInPipeList(string s, string pipeStringList)
-{
+		static void testPropAttr
+			(string name, string description, const Node* propHolder) {
 
-  if (pipeStringList != "---") {
-    bool run = true;
-    string working = pipeStringList;
-    while(run) {
-      string cur;
-      size_t pos = working.find('|');
+			const PropertyList& propList = propHolder -> returnProperties();
 
-      if (pos == string::npos) {
-      	run = false;
-      	cur = working;
-      }
-      else {
-      	cur = string(working, 0, pos);
-      	working = string(working, pos+1);
-      }
+			CPPUNIT_ASSERT_EQUAL
+				(true, propList.exists(name));
 
-      if(s == cur)
-      	return true; // should quit the while loop
-    }
+			CPPUNIT_ASSERT_EQUAL
+				(description, propList.propByName(name).description);
 
-  }
+		}
 
-  return false;
-}
+};
 
 
+#endif

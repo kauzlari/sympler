@@ -41,9 +41,7 @@
 #include <libxml/tree.h>
 
 #include "geometric_primitives.h"
-
-// #include "function_pair.h"
-// #include "function_fixed.h"
+#include "general.h"
 
 using namespace std;
 
@@ -110,6 +108,14 @@ public:
      * Description string for automatic help file generation
      */
     string description;
+
+    /*!
+     * Set the help string for this \a property_t
+     * @param description New help string
+     */
+    void setDescription(string newDescription) {
+    	description = newDescription;
+    }
 
     /*!
      * Read/Write an integer value
@@ -280,6 +286,8 @@ protected:
     
   /*!
    * A map for access by name
+   * FIXME: together with \a m_prop_by_index this generates redundant
+   * and to be synchronised information! Remove redundancy!
    */
   map<string, property_t> m_prop_by_name;
 
@@ -322,6 +330,16 @@ public:
    */
   property_t &propByName(const string &name) {
     return m_prop_by_name[name];
+  }
+
+  /*!
+   * Return property of name \a name. Const version.
+   * @param name Name of the property
+   */
+  const property_t &propByName(const string &name) const {
+  	// map-operator [] can not return a const reference, so we do not use it in
+  	// this const version of \a propByName
+    return m_prop_by_name.find(name) -> second;
   }
 
   /*!
@@ -379,7 +397,7 @@ public:
   }
 
   /*!
-   * Set the help string for this property
+   * Set the help string for this \a PropertyList
    * @param description New help string
    */
   void setDescription(string description) {
@@ -387,11 +405,19 @@ public:
   }
 
   /*!
-   * Return the help string of this property
+   * Return the help string of this \a PropertyList
    */
   const string &description() const {
     return m_description;
   }
+
+  /*!
+   * Set the help string for specified \a property_t
+   * @param[in] name Name of \a property_t in \a m_prop_by_name and 
+   * \a m_prop_by_index (FIXME: redundancy!)
+   * @param[in] description New help string
+   */
+  void setPropDescription(string name, string description);
 
   /*!
    * Call this to prevent unknown properties to raise an exception

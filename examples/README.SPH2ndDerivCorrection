@@ -1,0 +1,4 @@
+Illustration of the correction of the SPH-discretised 2nd derivative. The input 
+file is heavily commented. The geometry is based on the 
+SPHperiodicPoiseuille... examples. you can also check these examples for 
+further details. 

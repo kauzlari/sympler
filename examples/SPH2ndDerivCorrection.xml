@@ -1,0 +1,426 @@
+<!-- 
+
+Test of the SPH-correction matrix for the SPH-discretisation of the second 
+derivative. A quadratic function is imposed onto the particles, and the 2nd 
+derivative is computed. At the walls, Dirichlet boundary conditions are 
+implemented by using a linear extrapolation of fluid particle values onto wall 
+particles. See "sympler [minus][minus]help Symbols" for the documentation of 
+the modules DirichletBCVels/Scalar and further details. 
+
+The main results are stored as cross-sectional profiles in the files 
+grid/results*.dat. (You must have created the directory "grid"!)
+
+The linear extrapolation of the quadratic function leads to the observable 
+errors in the 2nd derivative for fluid particles close to the walls.
+
+Overall, one can see a reduction of the error compared to the standard SPH-
+discretisation by approximately one decimal place.
+
+-->
+
+<Simulation
+    simName = "Poiseuille"
+    inputFromResults = "1"
+    wtDistEps = "-1e-10"
+    >
+  
+  <!--M5-Spline implemented "by hand".-->
+  <InputWF
+      cutoff = "1"
+      interpolation = "(step(r)-step(r-0.2))*(1-(150/23)*r^2+(375/23)*r^4)+(step(r-0.2)-step(r-0.6))*(2/23)*(11-5*r*(-2+5*r*(6+5*r*(r-2))))+step(r-0.6)*(125/46)*(r-1)^4"
+      selfContribution = "2875/(256*pi)"
+      weight = "(15625/(1024*pi))*((step(r)-step(r-0.2))*48*(0.2-r^2)+(step(r-0.2)-step(r-0.6))*(19.2-0.64/r-48*r+32*r^2)+step(r-0.6)*(-8*(r-1)^3)/r)"
+      name = "M5"
+      />
+
+  <Controller
+      timesteps = "100"
+      dt = "0.005"
+      statusEvery = "100"
+      >
+
+<!-- Besides time-integration, Integrators also introduce a species. -->
+
+<!-- Since this test does not contain any forces, this Integrator only
+integrates positions according to the prescribed velocities (see the
+ParticleCreator below), and the velocities will stay constant in time
+-->
+  <IntegratorPosVelStep2
+        species="fluid"
+        />
+
+<!-- Since there are no fluxes of the following variables in this test, the
+only effect of these Integrators is to introduce the variables. Their initial
+and constant values are set below in the ParticleCreators -->
+    <IntegratorScalar
+        species = "fluid"
+        scalar = "temp"
+        symbol = "temp"
+        />
+             
+    <IntegratorScalar
+        species = "wall"
+        scalar = "temp"
+        symbol = "temp"
+        />
+             
+    <IntegratorScalar
+        species = "wall"
+        scalar = "volume"
+        symbol = "volume"
+        />
+             
+  </Controller>
+  
+  <!--
+      w = -W'(r)/r which gives us nablaW(r) = -w*[r]      
+  -->
+  <ValCalculatorNegDKernelDivr
+      species1="fluid"
+      species2="wall"
+      symbol = "w"
+      weightingFunction="M5"
+      stage = "1"
+      />
+  <ValCalculatorNegDKernelDivr
+      species1="fluid"
+      species2="fluid"
+      symbol = "w"
+      weightingFunction="M5"
+      stage = "1"
+      />
+
+  <!-- This provides the symbol with default name 'vBC' (usable as 'vBCij' in pair expressions), which allows to enforce no-slip boundary conditions (v=0) by replacing the velocity of the wall-particle with this one. For each pair of fluid and wall particles, 'vBC' is an extrapolation of the fluid-particle velocity onto the wall particle, such that the velocity at the intersection-point of the line connecting the two particles with the wall is equal to the velocity that we have set for the wall particles in ParticleCreatorWall (here: zero = no-slip).
+
+NOTE: vBC is currently NOT used in this test to compute a derivative, but only tempBC.
+-->
+  <DirichletBCVels
+      wallSpecies = "wall"
+      species1 = "fluid"
+      species2 = "wall"
+      stage = "1"
+      useOldFor = "v"
+      />
+
+<!-- Same procedure for temp = 0 boundary condition of scalar variable temp -->
+  <DirichletBCScalar
+      scalar = "temp"
+      symbol = "tempBC"
+      wallSpecies = "wall"
+      species1 = "fluid"
+      species2 = "wall"
+      stage = "1"
+      useOldFor = "temp"
+      />
+
+  <!-- As long as all masses = 1, this effectively computes the number density
+  around a particle and the inverse would give a volume
+  -->
+  <ValCalculatorRho
+      allPairs = "yes"
+      symbol = "numDens"
+      weightingFunction = "M5"
+      />
+      
+  <!-- START: 1st derivative correction -->
+
+  <PairParticleTensor
+      species1 = "fluid"
+      species2 = "wall"
+      expression = "wij*[rij]@[rij]"
+      particleFactor_i = "unitMat(volumej)"
+      particleFactor_j = "unitMat(0)"
+      symbol = "Binv"
+      cutoff = "1"
+      />
+
+  <PairParticleTensor
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "wij*[rij]@[rij]"
+      particleFactor_i = "unitMat(volumej)"
+      particleFactor_j = "unitMat(volumei)"
+      symbol = "Binv"
+      overwrite = "yes"
+      cutoff = "1"
+      />
+
+  <MatrixInverse
+      species = "fluid"
+      tensor = "Binv"
+      symbol = "B"
+      />
+  
+  <!-- END: 1st derivative correction -->
+
+
+  <!-- START: 2nd derivative with correction -->
+
+  <!--
+
+COMPLETE EXPRESSION:
+
+(nabla.(nabla u))_i = B2mat_i : Sum_j ( 2 * V_j * evec_ij @ (nabla W)_ij * C_ij )
+
+= B2mat_i : Amat_i
+
+with
+
+B2mat_i : correction matrix for second derivative: Eq. (40) of Ref. [1]
+
+and
+
+C_ij = FD_ij - D_ij
+
+with
+
+FD_ij = (u_i - u_j) / r_ij
+
+and
+
+D_ij = evec_ij . E_i
+
+with
+
+Ei = Sum_k ( V_k * (u_k - u_i) * B1mat_i . (nabla W)_ik )
+
+with
+
+B1mat_i : correction matrix for first derivative: Eq. (6) of Ref. [1]
+
+  -->
+  
+  <!-- START: Computation of E_i (see summary above) -->
+  <!-- Ei = Sum_k ( V_k * (u_k - u_i) * B1mat_i . (nabla W)_ik )
+       
+       = Sum_k ( V_k * (u_k - u_i) * B1mat_i . (-[rij] * wij) )
+       
+       with wij = -W'_ij / rij
+  -->
+
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "wall"
+      expression = "idVec(tempi-tempBCij)*wij"
+      particleFactor_i = "{Bi}:[rij]/numDensj"
+      particleFactor_j = "idVec(0)"
+      symbol = "E"
+      cutoff = "1"
+      />
+
+  <PairParticleVector
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "idVec(tempi-tempj)*wij"
+      particleFactor_i = "{Bi}:[rij]/numDensj"
+      particleFactor_j = "{Bj}:[rij]/numDensi"
+      symmetry = "1"
+      overwrite = "yes"
+      symbol = "E"
+      cutoff = "1"
+      />
+
+  
+  <!-- END: Computation of E_i (see summary above) -->
+  
+
+  <!-- START: Computation of
+       Sum_j (2 * V_j * evec_ij @ nablaW_ij
+       * ( (ui -uj) / rij - evec_ij . Evec_i ) )
+  -->
+
+  <PairParticleTensor
+      species1 = "fluid"
+      species2 = "wall"
+      expression = "2*[rij]@[rij]*wij/(rij*rij)"
+      particleFactor_i = "unitMat((tempBCij-tempi+[rij]:[Ei])/numDensj)"
+      particleFactor_j = "unitMat(0)"
+      symbol = "A"
+      cutoff = "1"
+      />
+
+  <PairParticleTensor
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "2*[rij]@[rij]*wij/(rij*rij)"
+      particleFactor_i = "unitMat(tempj-tempi+[rij]:[Ei])/numDensj"
+      particleFactor_j = "unitMat(tempj-tempi+[rij]:[Ej])/numDensi"
+      symbol = "A"
+      symmetry = "-1"
+      overwrite = "yes"
+      cutoff = "1"
+      />
+
+
+  <!-- END: Computation of
+       Sum_j (2 * V_j * evec_ij @ nablaW_ij
+       * ( (ui -uj) / rij - evec_ij . Evec_i ) )
+  -->
+
+  <!-- START: Compute 2nd derivative correction matrix B2 -->
+
+  <ParticleScalar
+      species = "fluid"
+      expression = "1/numDens"
+      symbol = "volume"
+  />
+    
+  <SPH2ndDerivCorr
+      species = "fluid"
+      weightingFunction = "M5"
+      volume = "volume"
+      SPH1stDerivCorr = "B"
+      symbol = "B2"
+      />
+  
+  <!-- END: Compute 2nd derivative correction matrix B2 -->
+
+  
+  <!-- START: the final correction -->
+
+  <ParticleScalar
+      species = "fluid"
+      expression = "{B2}:{A}"
+      symbol = "D2tempB"
+  />
+
+<!-- END: the final correction -->
+
+
+<!-- START: Conventional 2nd derivative for comparison -->
+
+<PairParticleScalar
+      species1 = "fluid"
+      species2 = "wall"
+      expression = "2*(tempBCij-tempi)*wij*[rij]:[rij]/(rij*rij)"
+      particleFactor_i = "volumej"
+      particleFactor_j = "volumei"
+      symbol = "D2temp"
+      cutoff = "1"
+/>
+
+<PairParticleScalar
+      species1 = "fluid"
+      species2 = "fluid"
+      expression = "2*(tempj-tempi)*wij*[rij]:[rij]/(rij*rij)"
+      particleFactor_i = "volumej"
+      particleFactor_j = "volumei"
+      symbol = "D2temp"
+      symmetry = "-1"
+      overwrite = "yes"
+      cutoff = "1"
+/>
+
+
+<!-- END: Conventional 2nd derivative for comparison -->
+
+
+  <!-- END: 2nd derivative with correction -->
+  
+  
+  <!-- /////////   END: stage = 1 //////////////// -->
+
+
+  
+  <Phase
+      smartCells = "0"
+      >
+    <LinkedListCreator/>
+    
+    <!-- We try 8 particles in the cross-section: The box-sizes result from that. In y-direction and in z-direction, they just result from the periodicity. In z-direction, we take the absolute minimum of >= 2 cutoffs such that the particles don't see their periodic image. In the laminar regime, all particles in z-direction should behave the same (periodic) way. In the simulation this is true as long as no instabilities occur.
+	 In x-direction, we additionally enforce, that the wall particles on the "left" and on the "right" have equal distance to the wall-boundary. This is currently a bit cumbersome since the wall particles are created (in a cubic lattice), by extending the bounding box by 1 cutoff beyond each wall and then starting with the first wall particle at 0.5*d from the "lower end" of the bounding box. Only for cutoffs which are multiples of 0.5*d, this does not require any manual adjustment. But here we have a nearest particle-distance in a cubic lattice of d = 1/2.6. Therefore, the TODO-list for the SYMPLER-code already contains a simplification of this issue.-->
+    <BoundaryCuboid
+        boxX = "3.3846153846153837"
+        boxY = "3.076923077"
+        boxZ = "2.3076923077"
+        periodicX = "no"
+        periodicY = "yes"
+        periodicZ = "yes"
+        >
+
+      <!-- Serves here as a dummy, since a reflector is always required by SYMPLER.-->
+      <ReflectorMirror/>
+
+      <!-- This creates the fluid particles on a simple-cubic lattice. The 'density' is 2.6^3=17.576 and is used for placing the particles with a lattice constant of d=1/2.6. Masses of the particles are m=1 in the used units. u, v, w are the initial velocities of all particles. Initial values for 'temp' are also set here. -->
+      <ParticleCreatorLattice
+          species = "fluid"
+          density = "17.576"
+          u = "0"
+          v = "-x*(x-3.3846153846153837)"
+          w = "0"
+          temp = "-x*(x-3.3846153846153837)"
+          />
+
+      <!-- Wall particles on a simple-cubic lattice outside the walls and within a range of 1cutoff to at least one wall segment.-->
+      <!-- The best we can do when using DirichletBCScalar/Vels, is to set v, temp to 0 which will lead to a linear extrapolation of the parabola used in this test case. (Of course we could also insert the known values of the parabola instead of tempBCij and vBCij above. But this is not a solution in general, for unknown profiles.)-->
+      <ParticleCreatorWall
+          density = "17.576"
+          species = "wall"
+          numDens = "17.5663"	  
+          temp = "0"
+          v = "0"
+	  volume = "1/17.5663"
+          />
+      
+    </BoundaryCuboid>
+    
+  </Phase>
+
+  <!-- This Meter measures quantities (defined by its sub-modules) averaged over the whole domain. This is especially useful for debugging, stability and convergence checks. -->
+  <MeterAverage
+     measureEvery = "1"
+     >
+
+    <!-- Modules for measuring specific variables -->
+    <Velocity species = "fluid"/>
+    <Scalar symbol = "D2temp" species = "fluid"/>
+    <Scalar symbol = "D2tempB" species = "fluid"/>
+
+    <!-- Write out what was measured. -->
+    <OutputFile nameOutputFile = "sim.dat" multipleFiles = "no"/>
+    
+  </MeterAverage>
+
+  <!-- This Meter can measure in sub-regions as defined by nX, nY, nZ. Here, we are interested in "slicing" the x-direction, i.e., the flow cross-section. Unfortunately, the whole bounding box is sliced, including the domain of 1cutoff beyond the walls with the wall particles. This produces some zeroes for the first and last slices (here 3+3) and makes the exact location, to which the measured values should be associated, more difficult to determine. This is especially true for the innermost non-zero value, since simple averaging by summation is perfomed, and since this specific slice is partially out of the walls.-->
+  <GridAveragerStructured
+     nX = "14"
+     nY = "1"
+     nZ = "1"
+     measureEvery = "10"
+     >    
+    <Velocity species = "fluid"/>
+
+    <Scalar symbol = "D2temp" species = "fluid"/>
+
+    <Scalar symbol = "D2tempB" species = "fluid"/>
+
+    <!-- The names of the columns of the measurements are auto-generated by the Meter. The "^1" stands for the moment, i.e., here the first, i.e., the average (can be changed in the sub-module 'Scalar'). -->
+    <OutputFile nameOutputFile = "grid/results.dat" multipleFiles = "yes"  columns = "fluid_velocity_mean|fluid_D2temp^1|fluid_D2tempB^1"/>
+
+   </GridAveragerStructured>
+
+   <!-- This Meter tries to write out as much information as possible, which is stored for each particle.-->
+   <MeterPosVel measureEvery = "10" species = "fluid" withFrozen = "no">
+
+     <!-- Generates a file which you can, e.g., view with Paraview -->
+     <OutputVTK nameOutputFile = "pos/pos.vtk" format = "ascii"/>
+
+   </MeterPosVel>
+   
+   <!-- Here we just want one snapshot of the frozen, i.e., never changing particles. Hence the huge 'measureEvery'. -->
+   <MeterPosVel measureEvery = "1000000000" species = "wall" withFrozen = "yes">
+     
+     <OutputVTK nameOutputFile = "posFrozen/pos.vtk" format = "ascii"/>
+     
+   </MeterPosVel>
+   
+
+ <!-- References:
+
+[1]: R. Fatehi, M. T. Manzari, Computers and Mathematics with Applications 61 (2011) 482–498
+
+ -->
+
+
+ </Simulation>
+

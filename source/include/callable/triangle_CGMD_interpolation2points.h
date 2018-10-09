@@ -39,20 +39,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_linalg.h>
 
-// the following definitions are done because I do not know how to turn range-checking 
-// off for the GSL
-#ifndef GSL_VECTOR_SET
-#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
-#endif
-#ifndef GSL_VECTOR_GET
-#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
-#endif
-#ifndef GSL_MATRIX_SET
-#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
-#endif
-#ifndef GSL_MATRIX_GET
-#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
-#endif
+#include "gsl_helper.h"
 
 using namespace std;
 

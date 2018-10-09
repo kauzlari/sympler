@@ -290,6 +290,7 @@ void sayHello() {
 #include "pc_wall_textured.h"
 
 // ParticleCaches
+#include "pca_2nd_sph_deriv_corr.h"
 #include "pca_eigensystem.h"
 #include "pca_density_0oc.h"
 #include "pca_iapws-if97_cp.h"
@@ -369,8 +370,8 @@ void sayHello() {
 #include "triplet_calc_central_part_scalar.h"
 #include "quintet_calc_curvature.h"
 #include "quintet_calc_curvature_f.h"
-// #include "val_calculator_dirichlet_BC_scalar.h"
 #include "val_calculator_dirichlet_BC_scalar.h"
+#include "val_calculator_dirichlet_BC_vector.h"
 #include "val_calculator_dirichlet_BC_vels.h"
 #include "val_calculator_kernel.h"
 #include "val_calculator_neg_dkernel_divr.h"
@@ -538,6 +539,8 @@ void link_all_properly()
   new ParticleScalar(NULL);
   new ParticleTensor(NULL);
   new ParticleVector(NULL);
+  new ParticleVels(NULL);
+  new PCa2ndSPHDerivCorr(NULL);
 #ifdef HAVE_FREESTEAM
   new PCacheIAPWSIF97Cp(NULL);
   new PCacheIAPWSIF97eta(NULL);
@@ -545,7 +548,6 @@ void link_all_properly()
   new PCacheIAPWSIF97p(NULL);
   new PCacheIAPWSIF97rho(NULL);
 #endif
-  new ParticleVels(NULL);
   new PCaEigensystem(NULL);
   new PCaMatrixInverse(NULL);
   new SymbolFParticleScalar(NULL);
@@ -624,17 +626,14 @@ void link_all_properly()
   new TripletCalcCentralPartScalar(NULL);
   new QuintetCalcCurvatureF(NULL);
   new QuintetCalcCurvature(NULL);
-//   new ValCalculatorDirichletBCScalar(NULL);
   new ValCalculatorDirichletBCScalar(NULL);
+  new ValCalculatorDirichletBCVector(NULL);
   new ValCalculatorDirichletBCVels(NULL);
   new ValCalculatorKernel(NULL);
   new ValCalculatorNegDKernelDivr(NULL);
   new ValCalculatorRi(NULL);
   new ValCalculatorRi6(NULL);
   new ValCalculatorRho(NULL);
-  // commented out because trying to get rid of it
-//   new ValCalculatorShear(NULL);
-//   new ValCalculatorShearX(NULL);
 // commented out because buggy
 //   new ValCalculatorSymmetryBCScalar(NULL);
   new ValCalculatorVolume(NULL);

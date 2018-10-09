@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -32,25 +32,11 @@
 #ifndef __PCA_MATRIX_INVERSE_H
 #define __PCA_MATRIX_INVERSE_H 
 
-#include "particle_cache.h"
-
 #include <gsl/gsl_math.h>
-#include <gsl/gsl_linalg.h>
 
-// the following definitions are done because I do not know how to turn range-checking 
-// off for the GSL
-#ifndef GSL_VECTOR_SET
-#define GSL_VECTOR_SET(v, i, x) (v)->data[i*(v)->stride] = x
-#endif
-#ifndef GSL_VECTOR_GET
-#define GSL_VECTOR_GET(v, i) (v)->data[i*(v)->stride]
-#endif
-#ifndef GSL_MATRIX_SET
-#define GSL_MATRIX_SET(m, i, j, x) (m)->data[i * (m)->tda + j] = x
-#endif
-#ifndef GSL_MATRIX_GET
-#define GSL_MATRIX_GET(m, i, j) (m)->data[i * (m)->tda + j]
-#endif
+#include "gsl_helper.h"
+
+#include "particle_cache.h"
 
 
 /*!
@@ -199,7 +185,6 @@ class PCaMatrixInverse: public ParticleCache
      * @param c Other calculator
    */
     virtual bool operator==(const ParticleCache &c) const {
-//       MSG_DEBUG("PCaEigensystem::==", "called");
       if (typeid(c) == typeid(*this)) {
         PCaMatrixInverse *cc = (PCaMatrixInverse*) &c;
 

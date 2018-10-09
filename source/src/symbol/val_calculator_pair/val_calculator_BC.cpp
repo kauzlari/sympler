@@ -131,7 +131,7 @@ void /*pair<size_t, size_t>*/ ValCalculatorBC::setSlot(ColourPair* cp, size_t& s
 {
   MSG_DEBUG("ValCalculatorBC::setSlot", "CALLED");
   m_slot = slot = cp->tagFormat().addAttribute
-    ("ValCalculator_" + myName() + "_" + cp->toString(), m_datatype/*DataFormat::POINT*/, false, m_symbolName).offset;
+    ("ValCalculator_" + myName() + "_" + cp->toString(), m_datatype, false, m_symbolName).offset;
 }
 
 // FIXME: inline ?

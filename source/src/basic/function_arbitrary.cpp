@@ -2,8 +2,8 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2013, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * Copyright 2002-2018, 
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -281,12 +281,11 @@ void FunctionArbitrary::addAllFromDataFormat(string base_name, DataFormat *forma
         break;
       default:
       // for everything else, nothing is added
-      // the throwing of an exception was commented out (2006/01/10)
-//       throw gError
-        MSG_DEBUG
-            ("Function::addAllFromDataFormat",
-             "Don't know how to handle data type " + ObjToString(attr.datatype) +
-                 " for entry '" + attr.name + "'");
+//        MSG_DEBUG
+//            ("Function::addAllFromDataFormat",
+//             "Don't know how to handle data type " + ObjToString(attr.datatype) +
+//                 " for entry '" + attr.name + "'");
+      	break;
     }
   }
 }

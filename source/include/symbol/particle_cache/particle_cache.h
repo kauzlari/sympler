@@ -3,7 +3,7 @@
  * https://github.com/kauzlari/sympler
  *
  * Copyright 2002-2018, 
- * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
+ * David Kauzlaric <david.kauzlaric@imtek.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
  *
@@ -74,38 +74,10 @@ class ParticleCache : public Symbol
   void init();
 
   /*!
-   * If it belongs to a Node structure, setup this instance of
-   * \a ParticleCache
-   * FIXME: This function was added pretty recently (2018-02-19), and 
-   * most of the children do not yet call it in their own setup()
-   */
-  virtual void setup();
-
-  /*!
    * Registers the instance of the subclass and possibly copies of it
    * for multiple colours
    */
   void registerCache();
-  
-  /*!
-   * Checks existence of output symbol given by \a m_symbolName and 
-   * reacts according to values for \a m_overwrite, etc.
-   * @param colour Particle colour to be checked
-   */
-  virtual void checkOutputSymbolExistence(size_t colour);
-
-  /*!
-   * Checks existence of input symbols required by this \a ParticleCache
-   * in a hard-coded fashion (i.e., not through runtime compiled 
-   * expressions).
-   * Default behaviour defined here: forcing implementation in subclass 
-   * @param colour Particle colour to be checked
-   */
-  virtual void checkInputSymbolExistences(size_t colour) {
-    
-    throw gError("ParticleCache::checkInputSymbolExistences for module " + className(), "Safety exception thrown: Somebody forgot to define this function for the given module. Contact the most recent programmer of " + className());
-
-  }
 
   /*!
    * Helper function which removes brackets from single terms in \a Function. 
@@ -140,6 +112,14 @@ class ParticleCache : public Symbol
   virtual ~ParticleCache();
 
   /*!
+   * If it belongs to a Node structure, setup this instance of
+   * \a ParticleCache
+   * FIXME: This function was added pretty recently (2018-02-19), and
+   * most of the children do not yet call it in their own setup()
+   */
+  virtual void setup();
+
+  /*!
    * Compute the cache for particle \a p
    * @param p The particle to compute values for
    */
@@ -157,14 +137,21 @@ class ParticleCache : public Symbol
   virtual bool operator==(const ParticleCache &c) const = 0;
 
   /*!
-   * Return the color this cache is for
+   * Return the color this \a ParticleCache is used for
    */
   size_t colour() const {
     return m_colour;
   }
 
   /*!
-   * Return the color this cache writes into. HEre, the default behaviour is implemented
+   * Return the species this \a ParticleCache is used for
+   */
+  string species() const {
+    return m_species;
+  }
+
+  /*!
+   * Return the color this cache writes into. Here, the default behaviour is implemented
    */
   virtual size_t writeColour() const {
     return m_colour;
@@ -183,6 +170,36 @@ class ParticleCache : public Symbol
    * Here we check \a m_registered .
    */
   virtual void setupAfterParticleCreation();
+
+  /*!
+   * Checks existence of output symbol given by \a m_symbolName and
+   * reacts according to values for \a m_overwrite, etc.
+   * @param colour Particle colour to be checked
+   */
+  virtual void checkOutputSymbolExistence(size_t colour);
+
+  /*!
+   * Checks existence of input symbols required by this \a ParticleCache
+   * in a hard-coded fashion (i.e., not through runtime compiled
+   * expressions).
+   * Default behaviour defined here: forcing implementation in subclass
+   * @param colour Particle colour to be checked
+   */
+  virtual void checkInputSymbolExistences(size_t colour) {
+
+    throw gError("ParticleCache::checkInputSymbolExistences for module "
+    		+ className(), "Safety exception thrown: Somebody forgot to define this "
+    				"function for the given module. Contact the most recent programmer "
+    				"of " + className());
+  }
+
+  /*!
+   * Public helper function for polymorphic copying
+   */
+  virtual ParticleCache* returnCopy() {
+    return this -> copyMySelf();
+  }
+
 
 };
 
