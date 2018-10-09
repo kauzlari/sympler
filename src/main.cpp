@@ -2,7 +2,7 @@
  * This file is part of the SYMPLER package.
  * https://github.com/kauzlari/sympler
  *
- * Copyright 2002-2017, 
+ * Copyright 2002-2018, 
  * David Kauzlaric <david.kauzlaric@frias.uni-freiburg.de>,
  * and others authors stated in the AUTHORS file in the top-level 
  * source directory.
@@ -215,6 +215,7 @@ void sayHello() {
 
 // Integrators
 #include "integrator_energy.h"
+#include "integrator_ISPH_const_rho_CERHS.h"
 #include "integrator_ISPH_const_rho_FDRHS.h"
 #include "integrator_lse.h"
 #include "integrator_omelyan.h"
@@ -445,6 +446,7 @@ void link_all_properly()
 
   // Integrators
   new IntegratorEnergy(NULL);
+  new IntegratorISPHconstRhoCERHS(NULL);
   new IntegratorISPHconstRhoFDRHS(NULL);
   new IntegratorOmelyan(NULL);
   new IntegratorOmelyanNR(NULL);
