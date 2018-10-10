@@ -236,6 +236,12 @@ $ make -j[1 to roughly the number of available cores]
 <h3>
 <a name="configuration-and-compilation-for-macos" class="anchor" href="#configuration-and-compilation-for-macos"><span class="octicon octicon-link"></span></a>Configuration and Compilation on MacOS</h3>
 
+		
+		
+<p>This section is currently being updated. In the meantime, please try to deduce the necessary steps from the Linux instructions. It is generally recommended to install all required libraries with the package manager brew and to remove all affected libraries previously installed in any other way. </p>
+
+<!--
+		
 <p>The following instructions were last successfully tested with Mac OS X 10.11.6 (based on older instructions by Andreas Greiner, Tobias Wondratsch, Oliver Grünert).  </p>
 
 <p>The libxml2 library comes already preinstalled by Apple but caused trouble during the SYMPLER installation. You may give the preinstalled libxml2 a try or immediately go and get an alternative version and the two remaining libraries by using one of the packaging-systems for Mac OS.</p>
@@ -303,6 +309,8 @@ $ make -j[1 to roughly the number of available cores]
 
 <p>mentioned above. </p>
 
+-->
+
 <h3>
 <a name="sympler-and-intel-compilers" class="anchor" href="#sympler-and-intel-compilers"><span class="octicon octicon-link"></span></a>SYMPLER and Intel compilers:</h3>
 
@@ -312,15 +320,16 @@ $ make -j[1 to roughly the number of available cores]
 <li>Set the environment variable LANG=C</li>
 <li>If using autoparallelization, set LD_LIBRARY_PATH to the lib directory of icc</li>
 <li>-ipo gave problems with linking</li>
-</ul><p>Otherwise, compilation worked fine. A good configure invocation might look like (adapt the paths to your needs):</p>
+</ul><p>Otherwise, compilation worked fine. A good cmake invocation might look like (adapt the paths to your needs; for the meaning of <code>$ $CODE-DIR</code> see above):</p>
 
 <pre><code>export LANG=C;
 export LD_LIBRARY_PATH=/simstorage/software/intel/cpp11/lib/intel64;
-../sympler/configure CXX=/simstorage/software/intel/cpp11/bin/intel64/icc \
+CXX=/simstorage/software/intel/cpp11/bin/intel64/icc \
 CC=/simstorage/software/intel/cpp11/bin/intel64/icc LDFLAGS='-lstdc++ -lz' \
 CXXFLAGS="-O3 -ip -parallel -funroll-loops -complex-limited-range \
 -IPF-fma -IPF-fltacc -IPF-fp-relaxed -fp-model=fast -no-debug -xSSE4.1 \
--mcmodel=medium -falign-functions -opt-calloc -unroll-aggressive" 
+-mcmodel=medium -falign-functions -opt-calloc -unroll-aggressive" \
+cmake $CODE-DIR
 </code></pre>
 
 <hr><p><a name="Running"></a></p>
