@@ -141,7 +141,7 @@ After successful compilation the executable "sympler" will be created in the dir
 ++ Configuration and Compilation on MacOS
 
 !!!NOTE!!!
-These instructions are currently outdated and will NOT work with the current distribution requiring CMAKE instead of the autotools. They should still work with older distributions which use the autotools. An update of the MacOS documentation is under construction.
+These instructions are currently outdated and will NOT work with the current distribution requiring CMAKE instead of the autotools. They should still work with older distributions which use the autotools. An update of the MacOS documentation is under construction. In the meantime, please try to deduce the necessary steps from the Linux instructions. It is generally recommended to install all required libraries with the package manager brew and to remove all affected libraries previously installed in any other way. 
 
 The following instructions were last successfully tested on Mac OS X 10.11.6 (based on older instructions by Andreas Greiner, Tobias Wondratsch, Oliver Grünert).
 
@@ -214,15 +214,16 @@ A few hints when using icc (the Intel C++ compiler) for SYMPLER:
 ++ If using autoparallelization, set LD_LIBRARY_PATH to the lib directory of icc
 ++ -ipo gave problems with linking
 
-Otherwise, compilation worked fine. A good configure invocation might look like (adapt the paths to your needs):
+Otherwise, compilation worked fine. A good cmake invocation might look like (adapt the paths to your needs; for the meaning of $CODE-DIR see above):
 
 export LANG=C;
 export LD_LIBRARY_PATH=/simstorage/software/intel/cpp11/lib/intel64;
-../sympler/configure CXX=/simstorage/software/intel/cpp11/bin/intel64/icc \
+CXX=/simstorage/software/intel/cpp11/bin/intel64/icc \
 CC=/simstorage/software/intel/cpp11/bin/intel64/icc LDFLAGS='-lstdc++ -lz' \
 CXXFLAGS="-O3 -ip -parallel -funroll-loops -complex-limited-range \
 -IPF-fma -IPF-fltacc -IPF-fp-relaxed -fp-model=fast -no-debug -xSSE4.1 \
--mcmodel=medium -falign-functions -opt-calloc -unroll-aggressive" 
+-mcmodel=medium -falign-functions -opt-calloc -unroll-aggressive" \
+cmake $CODE-DIR
 
 
 ______________________________________________________________________
