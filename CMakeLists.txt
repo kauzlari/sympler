@@ -193,7 +193,7 @@ else(${git_repository})
     # Get branch name using source directory name
     get_filename_component(directory_name ${CMAKE_CURRENT_LIST_DIR} NAME)
     string(FIND ${directory_name} "-" pos REVERSE)
-    MATH(EXPR pos "${pos}+1")
+    MATH(EXPR pos "0${pos}+1")
     if(pos)
       string(SUBSTRING ${directory_name} ${pos} -1 branch_name)
     endif(pos)
