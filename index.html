@@ -205,35 +205,37 @@
 <h3>
 <a name="configuration-and-compilation-for-standard-linux-systems" class="anchor" href="#configuration-and-compilation-for-standard-linux-systems"><span class="octicon octicon-link"></span></a>Configuration and Compilation for standard Linux-systems:</h3>
 
-<p>Assuming the complete path to the directory where you downloaded the SYMPLER source-code is given by $SOURCE-DIR, then the series of commands that usually works is:</p>
+<p>Assuming the complete path to the directory where you downloaded the SYMPLER source-code is given by $SOURCE-DIR.</p>
 
-<pre><code>$ cd $SOURCE-DIR
-$ autoreconf --install --force
-</code></pre>
-
-<p>Then, assuming the complete path to the directory where you want to compile SYMPLER is given by $BUILD-DIR (it might be the same as or different from $SOURCE-DIR)</p>
+<p>Then, assuming the complete path to the directory where you want to compile SYMPLER is given by $BUILD-DIR (it might be the same as or different
+from $SOURCE-DIR):</p>
 
 <pre><code>$ cd $BUILD-DIR
-$ $SOURCE-DIR/configure [options] CXXFLAGS="[cxxflags]"
-$ make -j[1 to roughly the number of available cores]
+$ CXXFLAGS="[cxxflags]" cmake [options] $SOURCE-DIR
+$ make -jNUM
 </code></pre>
+
+<p>where NUM can be 1 to roughly 1.5 times your available CPU-cores for faster parallel compilation. (NOT execution of sympler! See option -fopenmp below.)</p>
 
 <p>Useful [cxxflags] are (for more see the g++ documentation):</p>
 
 <ul>          
   <li>-O3: for optimised compilation with g++</li>
   <li>-fopenmp: For compilation with OpenMP parallelisation (currently still inefficient)</li>
+  <li>-O0 -g -Wall: for debugging.</li>
 </ul>          
           
 <p>and useful [options] are:</p>
 
 <ul>
-  <li>--with-tnt: use tnt library and jama libraries</li>
-  <li>--with-superlu: use superlu </li>
-  <li>--enable-all-static: for a statically linked stand alone executable not requiring any dynamical linking of libraries (except for the glibc used during linking after compilation of SYMPLER; and the runtime compiled expressions of course). NOTE the required library liblzma-dev (listed under optional libraries above). Also libicu should be installed, but this is usually the case by default (for example libicu-dev and libicu55 on Ubuntu 16.04). Further note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome.</li>
+  <li>-Dtnt=1: use tnt library and jama libraries</li>
+  <li>-DIntegratorStaticLSE=1: use superlu library to compile IntegratorStaticLSE module </li>
+  <li>-Dstatic=1: for a statically linked stand alone executable not requiring any dynamical linking of libraries
+(except for the glibc used during linking after compilation of SYMPLER; and the runtime compiled expressions of
+course). NOTE: the freesteam modules (using libfreesteam) and the MeterLive and MeterLiveColoured modules (using libsdl) can not be compiled statically and will hence be missing. NOTE: the libraries liblzma-dev and libz-dev (listed under optional libraries above) are required. Also libicu should be installed, but this is usually the case by default (for example libicu-dev and libicu55 on Ubuntu 16.04). Further note that on older linux-distributions (for example Ubuntu around 12, 13, 14), this option causes SYMPLER to crash very often. On newer distributions this issue has vanished. Further bug reports on this issue are welcome.</li>
 </ul>
 
-<p>After successful compilation the executable "sympler" will be created in the directory src/. </p>
+<p>After successful compilation the executable "sympler" will be created in the directory $BUILD-DIR. </p>
           
 <h3>
 <a name="configuration-and-compilation-for-macos" class="anchor" href="#configuration-and-compilation-for-macos"><span class="octicon octicon-link"></span></a>Configuration and Compilation on MacOS</h3>
