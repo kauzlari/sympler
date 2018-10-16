@@ -67,7 +67,7 @@ HELP_CLASS(PairCreator_Help, PairCreator_Factory, instantiate(NULL));
 
 void syntax()
 {
-    cout << "Usage: sympler input-file\n\nOr: sympler --help\nOr: sympler --help all\nOr: sympler --help workflow\nOr: sympler --help expressions\n";
+    cout << "Usage: sympler input-file\n\nOr: sympler --help\nOr: sympler --help all\nOr: sympler --help workflow\nOr: sympler --help expressions\nOr: sympler --version\n";
 }
 
 
@@ -80,6 +80,7 @@ string main_help_str
      "Help for all modules:         sympler --help all\n"
      "Workflow description:         sympler --help workflow\n"
      "Help on symbolic expressions: sympler --help expressions\n"
+     "Print out version number:     sympler --version\n"
      "\n"
      "The file given as INPUTFILE has to be of the following format: Objects are to be defined "
      "between the paranthesis '<' and '>' followed by attribute definitions.\n\n"
@@ -161,7 +162,8 @@ string main_help_str
      "Type 'sympler --help all', to get information on all modules at once.\n"
      "Type 'sympler --help expressions', for learning about accepted algebraic expressions "
      "to be runtime compiled.\n"
-     "Type 'sympler --help workflow', for more information about the order in which the main operations are performed.\n\n"
+     "Type 'sympler --help workflow', for more information about the order in which the main operations are performed.\n"
+     "Type 'sympler --version', to print out the version number based on last commit date.\n\n"
      );
 
 string flow_help_str
