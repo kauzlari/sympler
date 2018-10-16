@@ -166,7 +166,7 @@
 <a name="required-tools-for-configuration-and-compilation" class="anchor" href="#required-tools-for-configuration-and-compilation"><span class="octicon octicon-link"></span></a>Required tools for configuration and compilation:</h3>
 
 <ul>
-<li>the GNU autotools (aclocal, libtool, autoconf, automake, etc.)</li>
+<li>CMake (minimal version required: 2.8)</li>
 <li>a C++ compiler such as GNU g++</li>
 <li>a C compiler such as GNU gcc</li>
 </ul><h3>
@@ -175,22 +175,24 @@
 <ul>
 <li>GNU scientific library (GSL)</li>
 <li>libxml2</li>
-<li>CppUnit (provides unit tests; on Ubuntu: sudo apt install libcppunit-dev)</li>
 </ul><p>NOTE: You usually also have to install the libraries for development. They have names such as libgsl*-dev, libsdl*-dev, and so on.</p>
 
 <h3>
 <a name="optional-libraries" class="anchor" href="#optional-libraries"><span class="octicon octicon-link"></span></a>Optional libraries:</h3>
 
 <ul>
-<li>liblzma-dev: For the configure-option --enable-all-static (see below).</li>
-<li>libsdl: For simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found by the autotools and the modules will be compiled.</li>
+<li>libcppunit: Provides unit tests (on Ubuntu: sudo apt install libcppunit-dev).</li>
+<li>liblzma-dev & libz-dev: For the configure-option -Dstatic=1 (see below).</li>
+<li>libsdl (1.2.0 or newer but not 2.0 or newer): Gives simple runtime visualisation with the modules MeterLive and MeterLiveColoured. If the library is installed it will usually be found and the modules will be compiled. If libsdl is not found, you will have to modify some include and/or library paths by hand. Can not be used with the -Dstatic=1 option.</li>
+<li>libfreesteam: If found, provides modules, in which the freesteam library is used to compute thermodynamic variables based on the IAPWS-IF97 formulation. Consult http://freesteam.sourceforge.net/ for more information. Can not be used with the -Dstatic=1 option.</li>
 <li>OpenMP: For partial but still quite inefficient shared memory parallelisation. Use the option -fopenmp during configuration (CXXFLAGS="... -fopenmp").</li>
-<li>libtnt, libjama, libsuperlu: Use the options --with-superlu during configuration. This allows for: 
+<li>libtnt, libjama, libsuperlu: Use the options -Dtnt=1 -DIntegratorStaticLSE=1 during configuration. This provides: 
 
 <ul>
 <li>coupling of particles to a linear system of equations solver with module IntegratorLSE</li>
 <li>the module for velocity constraints VelConstraints</li>
 <li>the integrator IntegratorVelocityVerletPressure</li>
+<li>running successfully the testsuite (see also section "Contributing to SYMPLER" below)</li>
 </ul>
 </li>
 </ul><p><a name="Configure&amp;Compile"></a></p>
