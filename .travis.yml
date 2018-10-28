@@ -3,6 +3,7 @@ language: cpp
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y libgsl0-dev
+  - sudo apt-get install libcppunit-dev
   
 before_script:
   - mkdir build
