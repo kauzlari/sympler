@@ -1,0 +1,18 @@
+language: cpp
+
+os:
+  - linux
+  - osx
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libgsl0-dev; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install libcppunit-dev; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gsl; fi
+  
+before_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script: make
