@@ -13,6 +13,6 @@ before_install:
 before_script:
   - mkdir build
   - cd build
-  - cmake ..
+  - CXXFLAGS="-w" cmake ..
 
-script: make -w
+script: make
