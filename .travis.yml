@@ -14,6 +14,6 @@ before_install:
 before_script:
   - mkdir build
   - cd build
-  - CXXFLAGS="-w" cmake ..
+  - CXXFLAGS="-w -std=c++14" cmake ..
 
 script: make
