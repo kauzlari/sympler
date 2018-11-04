@@ -5,15 +5,13 @@ os:
   - osx
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libgsl0-dev; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install libcppunit-dev; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gsl; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cppunit; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y libgsl0-dev libcppunit-dev; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gsl cppunit; fi
   
 before_script:
   - mkdir build
   - cd build
-  - CXXFLAGS="-w -std=c++14" cmake ..
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then CXXFLAGS="-w" cmake ..; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then CXXFLAGS="-w -std=c++14" cmake ..; fi
 
 script: make
