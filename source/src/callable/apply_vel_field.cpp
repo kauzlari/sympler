@@ -62,7 +62,7 @@ void ApplyVelField::init()
   m_properties.setClassName("ApplyVelField");
 
   m_properties.setDescription(
-    "When called, this callable modifies the velocity-field of each particle according to user-defined expressions for the attributes 'u', 'v', 'w' described below. In the expressions you may use constants, functions (listed under sympler --help expressions) and the known variables 'x', 'y', 'z', 'u', 'v', 'w' (NOT those listed under sympler --help expressions!). \nNOTE: The velocity is SET and not incremented. If you want to increment, use the known variables 'u', 'v', 'w' containing the respective old values of the velocity components, e.g., by typing 'u = \"u + exp(x)\"', where the second part is your increment." 
+    "When called, this callable modifies the velocity-field of each particle according to user-defined expressions for the attributes 'u', 'v', 'w' described below. In the expressions you may use constants, functions (listed under sympler --help expressions) and the known variables 'x', 'y', 'z', 'u', 'v', 'w', 't' (NOT those listed under sympler --help expressions!), where 't' stands for time. \nNOTE: The velocity is SET and not incremented. If you want to increment, use the known variables 'u', 'v', 'w' containing the respective old values of the velocity components, e.g., by typing 'u = \"u + exp(x)\"', where the second part is your increment." 
   );
 
   FUNCTIONFIXEDPC(u, m_velX, 
@@ -97,6 +97,10 @@ void ApplyVelField::init()
   m_velZ.addVariable("u");
   m_velZ.addVariable("v");
   m_velZ.addVariable("w");
+
+  m_velX.addVariable("t");
+  m_velY.addVariable("t");
+  m_velZ.addVariable("t");
   
   m_velX.setExpression("u");
   m_velY.setExpression("v");
@@ -124,13 +128,13 @@ void ApplyVelField::setup()
 
 void ApplyVelField::thermalize(Phase* phase)
 {
-
+    double time = M_CONTROLLER->time();
     FOR_EACH_FREE_PARTICLE_C
       (phase,
        m_colour,
-       __iSLFE->v.x = m_velX(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z);
-       __iSLFE->v.y = m_velY(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z);
-       __iSLFE->v.z = m_velZ(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z);
+       __iSLFE->v.x = m_velX(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z, time);
+       __iSLFE->v.y = m_velY(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z, time);
+       __iSLFE->v.z = m_velZ(__iSLFE->r.x, __iSLFE->r.y, __iSLFE->r.z, __iSLFE->v.x, __iSLFE->v.y, __iSLFE->v.z, time);
     );
 
 }

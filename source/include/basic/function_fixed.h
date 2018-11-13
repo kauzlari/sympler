@@ -202,6 +202,24 @@ class FunctionFixed : public Function
     return result;
   }
 
+  /*!
+   * Call the compiled function (seven arguments)
+   * @param x First argument
+   * @param y Second argument
+   * @param z Third argument
+   * @param u Fourth argument
+   * @param v Fifth argument
+   * @param w Sixth argument
+   * @param t Seventh argument
+   */
+  double operator()(double x, double y, double z, double u, double v, double w, double t) const {
+    assert(m_vars.size() == 7);
+
+    double result;
+    m_compiler.fn()(&result, x, y, z, u, v, w, t);
+    return result;
+  }
+
 //  /*!
 //   * Has the function been compiled?
   //   */
