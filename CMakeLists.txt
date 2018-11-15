@@ -56,6 +56,7 @@ include_directories(${PROJECT_SOURCE_DIR}/source/include_test/tools)
 include_directories(${PROJECT_SOURCE_DIR}/source/include_test/weighting_function)
 include_directories(${SDKROOT}/usr/include/libxml2)
 include_directories(/usr/local/lib)
+include_directories(/usr/local/include)
 include_directories(${LIBXML2_INCLUDE_DIR})
 
 
@@ -68,6 +69,7 @@ set(link_lib
 -lm
 -pthread
 -L/usr/local/lib
+-I/usr/local/include
 )
 
 
