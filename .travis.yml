@@ -14,4 +14,4 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then CXXFLAGS="-w" cmake ..; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then CXXFLAGS="-w -std=c++14" cmake ..; fi
 
-script: make
+script: make -j8
