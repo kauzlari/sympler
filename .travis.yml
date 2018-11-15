@@ -11,7 +11,6 @@ before_install:
 before_script:
   - mkdir build
   - cd build
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then CXXFLAGS="-w" cmake ..; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then CXXFLAGS="-w -std=c++14" cmake ..; fi
+  - CXXFLAGS="-w" cmake ..
 
 script: make -j8

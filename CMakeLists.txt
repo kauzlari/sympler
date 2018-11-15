@@ -206,6 +206,10 @@ add_definitions(-D_VERSIONNUMBER="v${version_date}")
 # Add subdirectories to the build
 add_subdirectory(source/src)
 if(${CPPUNIT_FOUND})
+  # Set C++14 standard for Apple if CppUnit is found
+  if(APPLE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  endif(APPLE)
   add_subdirectory(source/src_test)
 endif(${CPPUNIT_FOUND})
 
